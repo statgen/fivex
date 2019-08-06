@@ -1,6 +1,7 @@
 """Helper functions"""
 
-def parse_position(chrom_pos):
+
+def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
 

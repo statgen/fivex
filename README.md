@@ -5,6 +5,7 @@
 Visualize and query eQTL data in various ways
 
 ## Development instructions
+This app can be installed and run on your local machine. It uses PySAM, and therefore may not install on Windows.
 
 ### Setup
 This code was written and tested against Python 3.6-3.7. We highly recommend developing in a virtual environment, 
@@ -32,3 +33,5 @@ Make sure to activate your virtualenv at the start of every new terminal session
 
 The following command will start a basic flask app server that reloads whenever code is changed:
 `$ python3 app.py`
+
+Then follow the instructions printed to the console to visit the app in your web browser.

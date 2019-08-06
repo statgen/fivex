@@ -1,6 +1,11 @@
 import typing as ty
 
-from fastnumbers import int, float
+try:
+    # Optional speedup features
+    from fastnumbers import int, float
+except ImportError:
+    pass
+
 from zorp import readers
 
 
@@ -59,7 +64,7 @@ def variant_parser(row: str) -> VariantContainer:
     return VariantContainer(*fields)
 
 
-def query_variant(chrom, pos,
+def query_variant(chrom: str, pos: int,
                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
     """
     The actual business of querying is isolated to this function. We could replace it with a database or anything else
@@ -83,7 +88,7 @@ def query_variant(chrom, pos,
     #   definition of intervals, and fetch(region=) is just not giving the results I'd expect). Ask peter/alan for a
     #   more elegant way. Until then, hack by overfetching, and filtering the results we don't want.
     #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
-    #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the interval,
-    #       but 20,000 is not."
+    #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
+    #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
