@@ -1,5 +1,6 @@
 import typing as ty
 
+from fastnumbers import int, float
 from zorp import readers
 
 
