@@ -16,11 +16,11 @@ class VariantContainer:
     This allows us to make changes to how the data is stored, but all our code can still access the fields it wants
     without being changed
     """
-    def __init__(self, chrom, pos, gene_id, ref, alt, build,
+    def __init__(self, gene_id, chrom, pos, ref, alt, build, # swapped gene_id field to the beginning of the row
                  tss_distance,
                  ma_samples, ma_count, maf,
                  pval_nominal, slope, slope_se,
-                 tissue):
+                 tissue, system):
         self.chrom = chrom
         self.pos = pos
         self.ref = ref
@@ -39,6 +39,7 @@ class VariantContainer:
         self.slope_se = slope_se
 
         self.tissue = tissue
+        self.system = system
 
     def to_dict(self):
         return vars(self)
@@ -53,13 +54,63 @@ def variant_parser(row: str) -> VariantContainer:
 
     The parser is the piece tied to file format, so this must change if the file format changes!
     """
+    groupDict = {"Adipose_Subcutaneous":"Connective Tissue",
+"Adipose_Visceral_Omentum":"Connective Tissue",
+"Adrenal_Gland":"Endocrine",
+"Artery_Aorta":"Circulatory",
+"Artery_Coronary":"Circulatory",
+"Artery_Tibial":"Circulatory",
+"Brain_Amygdala":"Nervous",
+"Brain_Anterior_cingulate_cortex_BA24":"Nervous",
+"Brain_Caudate_basal_ganglia":"Nervous",
+"Brain_Cerebellar_Hemisphere":"Nervous",
+"Brain_Cerebellum":"Nervous",
+"Brain_Cortex":"Nervous",
+"Brain_Frontal_Cortex_BA9":"Nervous",
+"Brain_Hippocampus":"Nervous",
+"Brain_Hypothalamus":"Nervous",
+"Brain_Nucleus_accumbens_basal_ganglia":"Nervous",
+"Brain_Putamen_basal_ganglia":"Nervous",
+"Brain_Spinal_cord_cervical_c-1":"Nervous",
+"Brain_Substantia_nigra":"Nervous",
+"Breast_Mammary_Tissue":"Connective Tissue",
+"Cells_Cultured_fibroblasts":"Cultured Cells",
+"Cells_EBV-transformed_lymphocytes":"Cultured Cells",
+"Colon_Sigmoid":"Digestive",
+"Colon_Transverse":"Digestive",
+"Esophagus_Gastroesophageal_Junction":"Digestive",
+"Esophagus_Mucosa":"Digestive",
+"Esophagus_Muscularis":"Digestive",
+"Heart_Atrial_Appendage":"Circulatory",
+"Heart_Left_Ventricle":"Circulatory",
+"Kidney_Cortex":"Renal",
+"Liver":"Digestive",
+"Lung":"Respiratory",
+"Minor_Salivary_Gland":"Digestive",
+"Muscle_Skeletal":"Muscular",
+"Nerve_Tibial":"Nervous",
+"Ovary":"Reproductive",
+"Pancreas":"Endocrine",
+"Pituitary":"Endocrine",
+"Prostate":"Reproductive",
+"Skin_Not_Sun_Exposed_Suprapubic":"Integumentary",
+"Skin_Sun_Exposed_Lower_leg":"Integumentary",
+"Small_Intestine_Terminal_Ileum":"Digestive",
+"Spleen":"Immune",
+"Stomach":"Digestive",
+"Testis":"Reproductive",
+"Thyroid":"Endocrine",
+"Uterus":"Reproductive",
+"Vagina":"Reproductive",
+"Whole_Blood":"Hematopoietic"}
 
     fields = row.split('\t')
     # For now we clean up three fields exactly.
     # if data format changes!
-    fields[0] = fields[0].replace('chr', '')  # chrom
-    fields[1] = int(fields[1])  # pos
+    fields[1] = fields[1].replace('chr', '')  # chrom
+    fields[2] = int(fields[2])  # pos
     fields[10] = float(fields[10])  # pvalue_nominal
+    fields.append(groupDict[fields[13]])
 
     return VariantContainer(*fields)
 
@@ -76,7 +127,11 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve!
-    source = 'data/All_tissues.allpairs.sorted.5k.txt.gz'
+    #source = 'data/All_tissues.allpairs.sorted.5k.txt.gz' # Original test file
+    #source = 'data/chr19.5m-8m.All_Tissues.sorted.txt.gz' # Trying out a different file 
+    source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz' # Faster retrieval for a single variant
+    #source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
+    # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
         reader.add_filter('tissue', tissue)
@@ -91,4 +146,4 @@ def query_variant(chrom: str, pos: int,
     #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
-    return reader.fetch(chrom, pos - 1, pos + 1)
+    return reader.fetch(chrom, pos - 1 , pos + 1)
