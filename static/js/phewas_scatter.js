@@ -34,16 +34,17 @@ function makePhewasPlot(chrom, pos, selector) {
                         base.fields = [
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
-                            '{{namespace[phewas]}}system',
+                            '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
                         base.color.field =  '{{namespace[phewas]}}system';
                         base.tooltip.html = `
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
+<strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>System:</strong> {{{{namespace[phewas]}}system}}<br>`;
+<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
@@ -116,14 +117,14 @@ function groupByThing(plot, thing) {
     var group_field, label_field;
     if (thing === 'tissue') {
      group_field = 'tissue';
-     label_field = 'gene_id';
+     label_field = 'symbol';
      } else {
-         if (thing === 'gene_id') {
-             group_field = 'gene_id';
+         if (thing === 'symbol') {
+             group_field = 'symbol';
              label_field = 'tissue';
          } else {
              group_field = 'system';
-             label_field = 'gene_id';
+             label_field = 'symbol';
          }
      }
 

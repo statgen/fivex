@@ -8,7 +8,6 @@ except ImportError:
 
 from zorp import readers
 
-
 class VariantContainer:
     """
     Represent the variant data in a standard manner that lets us access fields by name
@@ -20,7 +19,7 @@ class VariantContainer:
                  tss_distance,
                  ma_samples, ma_count, maf,
                  pval_nominal, slope, slope_se,
-                 tissue, system):
+                 tissue, symbol, system):
         self.chrom = chrom
         self.pos = pos
         self.ref = ref
@@ -39,7 +38,9 @@ class VariantContainer:
         self.slope_se = slope_se
 
         self.tissue = tissue
+        self.symbol = symbol
         self.system = system
+
 
     def to_dict(self):
         return vars(self)
@@ -110,7 +111,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[10] = float(fields[10])  # pvalue_nominal
-    fields.append(groupDict[fields[13]])
+    fields.append(groupDict[fields[13]]) # add system to the end as an additional field
 
     return VariantContainer(*fields)
 
@@ -127,8 +128,6 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve!
-    #source = 'data/All_tissues.allpairs.sorted.5k.txt.gz' # Original test file
-    #source = 'data/chr19.5m-8m.All_Tissues.sorted.txt.gz' # Trying out a different file 
     source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz' # Faster retrieval for a single variant
     #source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
     # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
