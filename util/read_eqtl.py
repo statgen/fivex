@@ -128,8 +128,7 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve!
-    source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz' # Faster retrieval for a single variant
-    #source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
+    source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz' # still hard-coded for now, will fix when I finish generating merged data
     # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
