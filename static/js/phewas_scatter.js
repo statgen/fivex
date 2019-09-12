@@ -62,56 +62,6 @@ function makePhewasPlot(chrom, pos, selector) {
     return [plot, dataSources];
 }
 
-// Older single-use functions - obsoleted by groupByThing
-/*
-function groupByGene(plot) {
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
-    scatter_config.x_axis.category_field = 'phewas:gene_id';
-    scatter_config.color.field =  'phewas:gene_id';
-    scatter_config.label.text = 'phewas:tissue';
-    
-    plot.applyState();
-    }
-
-function groupByTissue(plot) {
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
-    scatter_config.x_axis.category_field = 'phewas:tissue';
-    scatter_config.color.field =  'phewas:tissue';
-    scatter_config.label.text = 'phewas:gene_id';
-    
-    plot.applyState();
-    }
-
-function groupBySystem(plot) {
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
-    scatter_config.x_axis.category_field = 'phewas:system';
-    scatter_config.color.field =  'phewas:system';
-    scatter_config.label.text = 'phewas:gene_id';
-    
-    plot.applyState();
-    }
-*/
-
-// Test function for recoloring by group -- thanks Andy!
-/*
-function groupByThing(plot, tissue_or_gene_id) {
-    tissue_or_gene_id = tissue_or_gene_id || 'tissue';
-    const gene_or_tissue = tissue_or_gene_id === 'tissue' ? 'gene_id' : 'tissue';
-
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
-    scatter_config.x_axis.category_field = `phewas:${tissue_or_gene_id}`;
-    scatter_config.color.field =  `phewas:${tissue_or_gene_id}`;
-    scatter_config.label.text = `phewas:${gene_or_tissue}`;
-
-    //plot.clearPanelData(null, 'reset'); // Get rid of tooltips that no longer apply
-    plot.applyState();
-}
-*/
-
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
 function groupByThing(plot, thing) {
     var group_field, label_field;
