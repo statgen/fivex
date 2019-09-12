@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.9.1/dist/locuszoom.css" type="text/css"/>
-  <title>Alan should insert title here</title>
+  <title>PheGET - Single Variant View</title>
 </head>
 <body>
 
-  <h1>This is a PheWAS from eQTL data</h1>
-
+  <h1>eQTL for one variant in all tissues</h1>
+  <button onclick="groupByThing(plot,'tissue')">Group by Tissue</button>
+  <button onclick="groupByThing(plot,'system')">Group by System</button>
+  <button onclick="groupByThing(plot,'symbol')">Group by Gene</button>
   <div id="plot"></div>
 
 

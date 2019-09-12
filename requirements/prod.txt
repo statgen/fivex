@@ -1,0 +1,3 @@
+fastnumbers==2.2.1  # This can make parsing faster when you have a lot of rows
+flask==1.1.1
+git+git://github.com/abought/zorp.git@51f9f3f52083de20a6f671a076efa773eed69aa2

@@ -1,0 +1,23 @@
+{
+  "name": "pheget",
+  "version": "0.1.0",
+  "description": "GTEx EQTL browser",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^6.3.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abought/pheget.git"
+  },
+  "author": "University of Michigan Center for Statistical Genetics",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/abought/pheget/issues"
+  },
+  "homepage": "https://github.com/abought/pheget#readme"
+}
