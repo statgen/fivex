@@ -1,5 +1,6 @@
 """Helper functions"""
 
+
 def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
@@ -9,6 +10,3 @@ def parse_position(chrom_pos: str):
     """
     chrom, pos = chrom_pos.split('_')
     return chrom, int(pos)
-
-
-
