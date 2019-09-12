@@ -83,7 +83,7 @@ def variant_parser(row: str) -> VariantContainer:
 "Esophagus_Mucosa":"Esophagus",
 "Esophagus_Muscularis":"Esophagus",
 "Heart_Atrial_Appendage":"Heart",
-"Heart_Left_Ventricle":"Hearth",
+"Heart_Left_Ventricle":"Heart",
 "Kidney_Cortex":"Kidney - Cortex",
 "Liver":"Liver",
 "Lung":"Lung",
