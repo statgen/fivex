@@ -1,4 +1,5 @@
 import typing as ty
+import pickle
 
 try:
     # Optional speedup features
@@ -62,6 +63,8 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
+with open('util/gene.symbol.pickle','rb') as f:
+    SYMBOL_DICT = pickle.load(f)
 
 class VariantContainer:
     """
@@ -116,6 +119,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[10] = float(fields[10])  # pvalue_nominal
+    fields.append(SYMBOL_DICT[fields[0].split(".")[0]])
     fields.append(GROUP_DICT[fields[13]])  # read tissue --> add new field for "system"
 
     return VariantContainer(*fields)
@@ -133,8 +137,8 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve once Alan has finished generating data
-    source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz'
-    # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
+    source = 'data/' + chrom + '.All_Tissues.allpairs.txt.gz'
+    #source = 'data/chr19.6718376.All_Tissues.sorted.txt.gz' # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
         reader.add_filter('tissue', tissue)
@@ -150,3 +154,4 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
+
