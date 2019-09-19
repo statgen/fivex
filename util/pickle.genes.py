@@ -6,9 +6,9 @@ parser.add_argument('-i','--infile', type=str, required=True)
 args = parser.parse_args()
 dataDict = dict()
 
-with gzip.open(args.infile) as f:
+with gzip.open(args.infile,'rb') as f:
     for line in f:
-        (chrom,hav,temptype,begin,end,id1,strand,id2,infoFields) = line.rstrip('\n').split('\t')
+        (chrom,hav,temptype,begin,end,id1,strand,id2,infoFields) = line.decode('utf-8').rstrip('\n').split('\t')
         chrom = "chr" + chrom
         for field in infoFields.split(";"):
             (label,content) = field.split("=")
