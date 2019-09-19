@@ -31,7 +31,7 @@ temp = subprocess.call(["mkdir","-p",tempdir])
 
 with open("run.extract.Makefile","w") as w:
     outfileList = list()
-    for i in range(1,23) + ['X']:
+    for i in list(range(1,23)) + ['X']:
         chrom = 'chr' + str(i)
         outfileList.append(outdir + chrom + ".All_Tissues.sorted.txt.gz")
 
@@ -50,18 +50,18 @@ with open("run.extract.Makefile","w") as w:
 
     # Create sorted all tissues data file (all chromosomes) from sorted chromosome-specific, all-tissues temporary data files
     w.write(outall+":")
-    for i in range(1,23) + ["X"]:
+    for i in list(range(1,23)) + ["X"]:
         infile = outdir+"chr"+str(i)+".All_Tissues.sorted.txt.gz"
         w.write(" " + infile)
     infile = outdir+"chr1.All_Tissues.sorted.txt.gz"
     w.write("\n\t(zcat " + infile)
-    for i in range(2,23) + ["X"]:
+    for i in list(range(2,23)) + ["X"]:
         infile = outdir+"chr"+str(i)+".All_Tissues.sorted.txt.gz"
         w.write(" ; zcat " + infile + " | tail -n +2")
     w.write(") | bgzip -c > " + outall + "\n\trm " + tempdir + "*.sorted.txt.gz*\n\n")
 
     # Create sorted chromosome-specific, all-tissues temporary data files from chromosome-specific, tissue-specific data files
-    for i in range(1,23) + ["X"]:
+    for i in list(range(1,23)) + ["X"]:
         outfile = outdir + "chr" + str(i) + ".All_Tissues.sorted.txt.gz"
         infileList = list()
         for tissue in tissueList:
@@ -88,7 +88,7 @@ with open("run.extract.Makefile","w") as w:
     for tissue in tissueList:
         outfile = outdir+tissue+".sorted.txt.gz"
         infileList = list()
-        for i in range(1,23) + ['X']:
+        for i in list(range(1,23)) + ['X']:
             infileList.append(tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz")
         w.write(outfile + ":")
         for infile in infileList:
@@ -100,7 +100,7 @@ with open("run.extract.Makefile","w") as w:
     
     # Create sorted chromosome-specific, tissue-specific data files from sorted all-chromosomes, tissue-specific data files
     for tissue in tissueList:
-        for i in range(1,23) + ['X']:
+        for i in list(range(1,23)) + ['X']:
             outfile = tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz"
             infile = tempdir + tissue + ".allpairs.sorted.txt.gz"
             w.write(outfile + ": " + infile + ".tbi\n\ttabix -h " + infile + " chr" + str(i) + " | bgzip -c > " + outfile + "\n\n")
