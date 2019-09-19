@@ -7,13 +7,12 @@ Please use the following steps if you are setting up PheGET inside the Universit
 (1) Enter the data directory and symlink the ensembl Homo sapiens Build 38 genes file with the following commmand:
 ln -s /net/amd/amkwong/browseQTL/all_chr/ensembl/Homo_sapiens.GRCh38.97.chr.gff3.gz ./
 
-(2) While still in the data directory, symlink the full chromosome-specific, all-tissues data with the following commands:
-ln -s /net/amd/amkwong/browseQTL/all_chr/data/by_chromosome/chr*.All_Tissues.allpairs.txt.gz* ./
-ln -s /net/amd/amkwong/browseQTL/all_chr/data/all_chr.All_Tissues.allpairs.txt.gz* ./
+(2) While still in the data directory, symlink the fully-processed chromosome-specific, all-tissues data with the following commands:
+ln -s /net/amd/amkwong/browseQTL/all_chr/data/by_chromosome/chr*.All_Tissues.sorted.txt.gz* ./
 
-- If you wish to generate the data fresh from the original GTEx v8 data, use the following alternate step:
+- (Alternate method) If you wish to generate the data fresh from the original GTEx v8 data, use the following alternate step:
 - (2a) Enter the data/temp directory and symlink the full GTEx v8 fastqtl data with the following command:
-- ln -s /net/dumbo/home/xwen/ncbi/dbGaP-9060/gtex_v8_data/eqtl/fastqtl/*.allpairs.txt.gz ./
+ln -s /net/dumbo/home/xwen/ncbi/dbGaP-9060/gtex_v8_data/eqtl/fastqtl/*.allpairs.txt.gz ./
 
 (3) Enter the util directory.
 
