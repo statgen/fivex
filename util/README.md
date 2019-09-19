@@ -4,21 +4,25 @@ To set up the full database for PheGET, the user will need to download several f
 
 Please use the following steps if you are setting up PheGET inside the University of Michigan Statistical Genetics cluster:
 
-(1) Enter the data directory and symlink the ensembl Homo sapiens Build 38 genes file with the following commmand:
-ln -s /net/amd/amkwong/browseQTL/all_chr/ensembl/Homo_sapiens.GRCh38.97.chr.gff3.gz ./
+RECOMMENDED METHOD:
 
-(2) While still in the data directory, symlink the fully-processed chromosome-specific, all-tissues data with the following commands:
+(1) Enter the util directory. From there, run the script 'create.UM.statgen.links.sh'. This will symlink the data files and a gff3 file necessary for PheGET to function. If you do this, you are done with setting up the data and do not need to continue onto the next steps.
+
+Alternate method:
+
+(1) Enter the data directory and symlink (a) the ensembl Homo sapiens Build 38 genes file and (b) the procesed GTEx v8 data with the following commmands:
+ln -s /net/amd/amkwong/browseQTL/all_chr/ensembl/Homo_sapiens.GRCh38.97.chr.gff3.gz ./
 ln -s /net/amd/amkwong/browseQTL/all_chr/data/by_chromosome/chr*.All_Tissues.sorted.txt.gz* ./
 
-- (Alternate method) If you wish to generate the data fresh from the original GTEx v8 data, use the following alternate step:
+- (De novo method) If you wish to regenerate the data fresh from the original GTEx v8 data, use the following alternate step:
 - (2a) Enter the data/temp directory and symlink the full GTEx v8 fastqtl data with the following command:
 ln -s /net/dumbo/home/xwen/ncbi/dbGaP-9060/gtex_v8_data/eqtl/fastqtl/*.allpairs.txt.gz ./
 
-(3) Enter the util directory.
+(2) Enter the util directory.
 
-(4) Run "python generate.makefile.to.process.data.py". This creates a Makefile that can generate all necessary data files.
+(3) Run "python generate.makefile.to.process.data.py". This creates a Makefile that can generate all necessary data files.
 
-(5) Run the makefile "run.extract.Makefile". You can run multiple jobs to speed up data processing. For example, if you want to run 8 parallel jobs, run "make -k -j 8 -f run.extract.Makefile".
+(4) Run the makefile "run.extract.Makefile". You can run multiple jobs to speed up data processing. For example, if you want to run 8 parallel jobs, run "make -k -j 8 -f run.extract.Makefile".
 
 
 Please use the following steps if you are not within the University of Michigan Statistical Genetics cluster:
