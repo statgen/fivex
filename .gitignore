@@ -1,5 +1,6 @@
 .venv/
 venv/
-
+pheget/api/__pycache__/
+pheget/views/__pycache__/
 # The backend data may live in large tabix files that we don't want to commit to github
 data/

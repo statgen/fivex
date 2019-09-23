@@ -20,7 +20,7 @@ def query(chrom_pos):
 
     tissue = request.args.get('tissue', None)
     gene_id = request.args.get('gene_id', None)
-
+    
     data = [res.to_dict()
             for res in query_variant(chrom, pos, tissue=tissue, gene_id=gene_id)]
     for i, item in enumerate(data):

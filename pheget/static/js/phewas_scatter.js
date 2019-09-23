@@ -8,21 +8,43 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
+/*
+Data sources are specific javascript objects that are in charge of retrieving data from certain apis and 
+process them. Sometimes we want to customize some fields of the available objects to achieve our goal.
+*/ 
 
-function makePhewasPlot(chrom, pos, selector) {
+
+function makePhewasPlot(chrom, pos, selector, geneid=null) {// add a parameter geneid
     var dataSources= new LocusZoom.DataSources();
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
-    dataSources
-    .add("phewas", ['PheGET', {  // TODO: Override URL generation
+    if (geneid==null || geneid===false){
+        //console.log("No geneid");
+        dataSources
+        .add("phewas", ['PheGET', {  // TODO: Override URL generation
         url: `/api/variant/${chrom}_${pos}/`,
-    }]);
+        }]);
+        // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
+    }
+    else{
+        //console.log("There is geneid");
+        dataSources
+        .add("phewas", ['PheGET', {  // TODO: Override URL generation
+        url: `/api/variant/${chrom}_${pos}/`,
+        params:{gene_id: geneid}
+        }]);// what does dataSources look like inside? a list of dictionaries?
+    }
+    
 
     // Define the layout
+    /*
+    There are a lot of predefined layouts for plots, panels and data layers.
+    get function includes different level of group names
+    */
     var layout = LocusZoom.Layouts.get("plot", "standard_phewas", {
         responsive_resize: 'width_only',
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
-                unnamespaced: true,
+                unnamespaced: true,// what does this mean?
                 proportional_height: 1.0,
                 data_layers: [
                     // The data layer config is pretty sensitive to field names, so a bunch of stuff needs to be
@@ -35,16 +57,30 @@ function makePhewasPlot(chrom, pos, selector) {
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-                        ];
+                        ];// this looks like a jinja template but the key value is outside the curly bracket?
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
-                        base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
+                        base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';// what does middle slash do
                         base.color.field =  '{{namespace[phewas]}}system';
                         base.tooltip.html = `
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
+<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;// how can I find functions triggered by tooltip
+                        base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
+                        base.point_shape = [
+                            {
+                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                scale_function: 'if',
+                                parameters: {
+                                    field_value: true,
+                                    then: 'cross'
+                                }
+                            },
+                            'circle'
+                        ];
+                        // base.match.send='{{namespace[phewas]}}gene_id';
+                        // base.match.receive='{{namespace[phewas]}}gene_id';
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
@@ -58,7 +94,10 @@ function makePhewasPlot(chrom, pos, selector) {
     });
 
     // Generate the plot
-    var plot = LocusZoom.populate("#plot", dataSources, layout);
+    var plot = LocusZoom.populate(selector, dataSources, layout);
+    // plot.on("element_clicked", function(){
+    //     console.log("data requested for LocusZoom plot" + this.panels["phewas"].data_layers["phewaspvalues"].data[0]["phewas:gene_id"]);
+    //   });
     return [plot, dataSources];
 }
 
@@ -136,3 +175,35 @@ function groupByThing(plot, thing) {
 
     plot.applyState();
 }
+
+$(document).ready(function(){
+    const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
+    $('#tissue').click(function(event){
+        event.preventDefault();
+        groupByThing(plot,'tissue');
+    });
+    $('#system').click(function(event){
+        event.preventDefault();
+        groupByThing(plot,'system');
+    });
+    $('#symbol').click(function(event){
+        event.preventDefault();
+        groupByThing(plot,'symbol');
+    });
+    // $('#debug').click(function(event){
+    //     event.preventDefault();
+    //     for(p in plot) {
+    //         console.log (p, plot[p]);
+    //     }
+    // });
+    // $('#search').click(function(event){
+    //     event.preventDefault();
+    //     const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot', $('#gene').text());
+    // });
+    // $('#reset').click(function(event){
+    //     event.preventDefault();
+    //     const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
+    // });
+
+    window.plot=plot;
+});
