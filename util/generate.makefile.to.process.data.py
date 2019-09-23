@@ -76,7 +76,7 @@ with open("run.extract.Makefile","w") as w:
             w.write("zcat " + infile + " | tail -n +2 | awk -F, '{$$(NF+1)=" + '"' + tissue + '";}1' + "' OFS='\\t' -")
             if tissue != tissueList[-1]:
                 w.write(" ; ")
-        w.write(") | sort -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
+        w.write(") | sort -T " + tempdir + " -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
 
     # Tabix single-tissue, all-chromsomes data files
     for tissue in tissueList:
@@ -111,7 +111,7 @@ with open("run.extract.Makefile","w") as w:
     
     for infile in filelist:
         outfile = tempdir + infile.split("/")[-1].replace(".txt.gz",".sorted.txt.gz")
-        w.write(outfile + ": " + infile + "\n\t( zcat " + infile + " | head -n 1 | sed s/'variant_id'/'chr\\tpos\\tref\\talt\\tbuild'/ ; zcat " + infile + " | tail -n +2 | tr '_' '\\t' | sort -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
+        w.write(outfile + ": " + infile + "\n\t( zcat " + infile + " | head -n 1 | sed s/'variant_id'/'chr\\tpos\\tref\\talt\\tbuild'/ ; zcat " + infile + " | tail -n +2 | tr '_' '\\t' | sort -T " + tempdir + " -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
 
     # Create a pickled dictionary of gene names to gene symbols, to be used in translating gene names to symbols in read_eqtl.py
     w.write(pickl + ": " + gff3 + "\n\tpython " + scriptdir + "pickle.genes.py -i " + gff3 + "\n\n") 
@@ -123,4 +123,4 @@ with open("run.extract.Makefile","w") as w:
     w.write(gff3 + ".tbi: " + gff3 + "\n\ttabix -s 1 -b 4 -e 5 " + gff3 + "\n\n")
 
     # Subset and sort ensembl GFF3 file
-    w.write(gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep gene | grep -v exon | sort -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")
+    w.write(gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep gene | grep -v exon | sort -T " + tempdir + " -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")
