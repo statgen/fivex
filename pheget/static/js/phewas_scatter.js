@@ -118,7 +118,7 @@ function groupByThing(plot, thing) {
 }
 
 $(document).ready(function(){
-    const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
+    // const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
     $('#tissue').click(function(event){
         event.preventDefault();
         groupByThing(plot,'tissue');

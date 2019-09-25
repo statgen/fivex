@@ -13,15 +13,14 @@
   <button  id="symbol">Group by Gene Symbol</button>
   <div id="plot"></div>
 
-  <p id="chrom">{{chrom}}</p>:<p id="pos">{{pos}}</p>
   {# These files must be included to make a LocusZoom plot #}
   <script src="{{ url_for('static', filename='js/locuszoom.vendor.min.js') }}" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/locuszoom.app.min.js') }}" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/phewas_scatter.js') }}" type="application/javascript"></script>
-  <!-- <script type="application/javascript">
+  <script type="application/javascript">
     // Pass the
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
-  </script> -->
+  </script>
 </body>
 </html>
