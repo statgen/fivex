@@ -1,4 +1,4 @@
-.vscode
+.vscode/
 .venv/
 venv/
 pheget/api/__pycache__/
