@@ -14,26 +14,15 @@ process them. Sometimes we want to customize some fields of the available object
 */ 
 
 
-function makePhewasPlot(chrom, pos, selector, geneid=null) {// add a parameter geneid
+function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
     var dataSources= new LocusZoom.DataSources();
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
-    if (geneid==null || geneid===false){
-        //console.log("No geneid");
-        dataSources
-        .add("phewas", ['PheGET', {  // TODO: Override URL generation
-        url: `/api/variant/${chrom}_${pos}/`,
-        }]);
-        // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
-    }
-    else{
-        //console.log("There is geneid");
-        dataSources
-        .add("phewas", ['PheGET', {  // TODO: Override URL generation
-        url: `/api/variant/${chrom}_${pos}/`,
-        params:{gene_id: geneid}
-        }]);// what does dataSources look like inside? a list of dictionaries?
-    }
     
+    dataSources
+    .add("phewas", ['PheGET', {  // TODO: Override URL generation
+    url: `/api/variant/${chrom}_${pos}/`,
+    }]);
+    // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
     // Define the layout
     /*
