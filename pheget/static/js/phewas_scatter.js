@@ -58,6 +58,14 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;// how can I find functions triggered by tooltip
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
+                        base.color.unshift({
+                            field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                            scale_function: 'if',
+                            parameters: {
+                                field_value: true,
+                                then: '#FFf000'
+                            }
+                        });
                         base.point_shape = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
