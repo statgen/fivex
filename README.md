@@ -20,6 +20,10 @@ Then activate the virtual environment (which must be done in every command line/
 Install dependencies (within your virtual environment):
 `$ pip3 install -r requirements.txt`
 
+For a development instance, you may wish to install additional dependencies:
+`$ pip3 install -r requirements/dev.txt`
+`$ npm install --dev`
+
 ### Source data
 For the prototype, source data will live in the folder `data/`. Really large files should not be checked into github, 
     so you will need to download them separately for your environment.

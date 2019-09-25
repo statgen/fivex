@@ -1,0 +1,9 @@
+# Python application assets
+data/
+.venv/
+.env/
+venv/
+
+# Javascript / build assets
+node_modules/
+package.json
