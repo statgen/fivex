@@ -50,7 +50,25 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
                         ];// this looks like a jinja template but the key value is outside the curly bracket?
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';// what does middle slash do
-                        base.color.field =  '{{namespace[phewas]}}system';
+                        base.color = [
+                            {
+                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                scale_function: 'if',
+                                parameters: {
+                                    field_value: true,
+                                    then: '#FFf000'
+                                }, 
+                            },
+                            {
+                                field: '{{namespace[phewas]}}system',
+                                scale_function: "categorical_bin",
+                                parameters: {
+                                    categories: [],
+                                    values: [],
+                                    null_value: '#B8B8B8'
+                                }
+                            }
+                        ];
                         base.tooltip.html = `
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
@@ -58,14 +76,7 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;// how can I find functions triggered by tooltip
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
-                        base.color.unshift({
-                            field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
-                            scale_function: 'if',
-                            parameters: {
-                                field_value: true,
-                                then: '#FFf000'
-                            }
-                        });
+                        
                         base.point_shape = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -119,7 +130,9 @@ function groupByThing(plot, thing) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
 
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
-    scatter_config.color.field = `phewas:${group_field}`;
+    
+    scatter_config.color[1].field = `phewas:${group_field}`;
+    console.log(scatter_config.color[1]);
     scatter_config.label.text = `phewas:${label_field}`;
 
     plot.applyState();
