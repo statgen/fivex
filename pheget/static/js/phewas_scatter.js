@@ -56,7 +56,15 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
                                 scale_function: 'if',
                                 parameters: {
                                     field_value: true,
-                                    then: '#FFf000'
+                                    then: '#ED180A'
+                                }, 
+                            },
+                            {
+                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                scale_function: 'if',
+                                parameters: {
+                                    field_value: false,
+                                    then: '#EAE6E6'
                                 }, 
                             },
                             {
@@ -76,18 +84,6 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;// how can I find functions triggered by tooltip
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
-                        
-                        base.point_shape = [
-                            {
-                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
-                                scale_function: 'if',
-                                parameters: {
-                                    field_value: true,
-                                    then: 'cross'
-                                }
-                            },
-                            'circle'
-                        ];
                         // base.match.send='{{namespace[phewas]}}gene_id';
                         // base.match.receive='{{namespace[phewas]}}gene_id';
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
@@ -131,7 +127,7 @@ function groupByThing(plot, thing) {
 
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
     
-    scatter_config.color[1].field = `phewas:${group_field}`;
+    scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `phewas:${label_field}`;
 
     plot.applyState();
