@@ -132,7 +132,6 @@ function groupByThing(plot, thing) {
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
     
     scatter_config.color[1].field = `phewas:${group_field}`;
-    console.log(scatter_config.color[1]);
     scatter_config.label.text = `phewas:${label_field}`;
 
     plot.applyState();
