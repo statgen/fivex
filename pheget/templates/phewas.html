@@ -8,6 +8,12 @@
 <body>
 
   <h1>eQTL for one variant in all tissues</h1>
+  <div>
+   <input id="query-field" type="text" width="100" placeholder="chr19:6718376"> 
+   <button id='navigate-variant' class="btn btn-success">Go</button> <br>
+   <a href="/">Back to PheGET Homepage</a> 
+  </div>
+
   <button  id="tissue">Group by Tissue</button>
   <button  id="system">Group by System</button>
   <button  id="symbol">Group by Gene Symbol</button>
@@ -22,5 +28,22 @@
     // Pass the
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
   </script>
+<script>
+  // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
+  //  ask for a gibberish variant
+
+  // This code uses some es6 syntax and may not work in older browsers. But it's 7pm so Alan can fix that himself.
+  document.getElementById('navigate-variant').addEventListener('click', function() {
+      const variant = document.getElementById('query-field');
+
+      if (!variant) {
+          return;
+      }
+      const [chrom, pos] = variant.value.split(':');  // UI - user types `chrom:pos`
+
+      // Eventually the search box will be smarter than this. Hackety hack!
+      window.location = `/variant/${chrom}_${pos}`;
+  });
+</script>
 </body>
 </html>

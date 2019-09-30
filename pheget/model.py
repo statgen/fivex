@@ -1,11 +1,13 @@
 """pheget model (database) API."""
 import sqlite3
 import flask
+import os
 import pheget
 
 
-def locate_data():
-    return pheget.app.config['DATA_FILENAME']
+def locate_data(chrom):
+    #return pheget.app.config['DATA_FILENAME']
+    return 'data/' + chrom + '.All_Tissues.sorted.txt.gz'
 
 # def dict_factory(cursor, row):
 #     """

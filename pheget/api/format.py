@@ -1,4 +1,5 @@
 import typing as ty
+import pickle
 
 try:
     # Optional speedup features
@@ -9,6 +10,9 @@ except ImportError:
 from zorp import readers
 import pheget
 
+with open('util/gene.symbol.pickle','rb') as f:
+    SYMBOL_DICT = pickle.load(f)
+
 def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
@@ -18,9 +22,6 @@ def parse_position(chrom_pos: str):
     """
     chrom, pos = chrom_pos.split('_')
     return chrom, int(pos)
-
-
-
 
 # A convenient lookup used to group multiple tissue types into a smaller number of systems
 GROUP_DICT = {
@@ -129,8 +130,9 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[10] = float(fields[10])  # pvalue_nominal
+    fields.append(SYMBOL_DICT[fields[0].split(".")[0]])
     fields.append(GROUP_DICT[fields[13]])  # read tissue --> add new field for "system"
-
+    
     return VariantContainer(*fields)
 
 
@@ -146,7 +148,7 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve!
-    source = pheget.model.locate_data() # Faster retrieval for a single variant
+    source = pheget.model.locate_data(chrom) # Faster retrieval for a single variant
     #source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
     # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
