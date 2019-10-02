@@ -16,7 +16,7 @@ c.execute("CREATE TABLE IF NOT EXISTS genelookup(gene_id text PRIMARY KEY, symbo
 
 with gzip.open(args.infile) as f:
     for line in f:
-        (chrom,hav,temptype,begin,end,id1,strand,id2,infoFields) = line.rstrip('\n').split('\t')
+        (chrom,hav,temptype,begin,end,id1,strand,id2,infoFields) = line.decode('utf-8').rstrip('\n').split('\t')
         chrom = "chr" + chrom
         for field in infoFields.split(";"):
             (label,content) = field.split("=")
