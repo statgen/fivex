@@ -1,17 +1,19 @@
-import glob, subprocess
+import glob, subprocess, os
 
 #############################################
 # Specify input and output directories here #
 #############################################
-#filelist = glob.glob("/net/dumbo/home/xwen/ncbi/dbGaP-9060/gtex_v8_data/eqtl/fastqtl/*.allpairs.txt.gz") # Full data set from GTEx
-#filelist = glob.glob("/net/amd/amkwong/browseQTL/test/gtex_v8_small/*.allpairs.txt.gz")                  # Smaller test subset
-# The user will need to either download or symlink GTEx v8 from dbGaP to tempDir
-baseDir = "../"
+# If you are working from within the UM StatGen cluster, and you wish to fully process the data from the raw source,
+# you can use the following path to the full data set from GTEx v8
+#filelist = glob.glob("/net/dumbo/home/xwen/ncbi/dbGaP-9060/gtex_v8_data/eqtl/fastqtl/*.allpairs.txt.gz") 
+# In either case, to use the full data set, 
+# the user will need to either download or symlink the raw GTEx v8 eQTL data 
+# (found in the eqtl/fastqtl directory, from the full data download of GTEx v8 from dbGaP) to tempDir
+baseDir = os.path.dirname(os.path.realpath(__file__)) + "/../"
 filelist = glob.glob(baseDir + "data/temp/*.allpairs.txt.gz") 
 outdir = baseDir + "data/"
 scriptdir = baseDir + "util/"
 tempdir = baseDir + "data/temp/"
-#outall = outdir + "all_chr.All_Tissues.allpairs.with.symbols.txt.gz"
 outall = outdir + "all_chr.All_Tissues.sorted.txt.gz"
 sqlite = outdir + "gene.chrom.pos.lookup.sqlite3.db"
 gff3   = outdir + "ID.only.gff3.gz"
