@@ -25,7 +25,7 @@ with gzip.open(args.infile) as f:
                 (dataType,name) = content.split(":")
             elif label=="Name":
                 symbol = content
-            dataDict[name] = symbol
+                dataDict[name] = symbol # ID always comes before symbol
         c.execute("INSERT OR REPLACE INTO genelookup VALUES (?,?,?,?,?,?)",(name, symbol, chrom, begin, end, dataType))
 conn.commit()
 conn.close()
