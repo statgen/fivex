@@ -43,7 +43,7 @@ with open("run.extract.Makefile","w") as w:
     for tissue in tissueList:
         w.write(" " + outdir+tissue+".sorted.txt.gz.tbi")
 
-    w.write(" " + outall + '.tbi ' + " " + pickl + '\n\n')
+    w.write(" " + outall + '.tbi ' + " " + pickl + '\n.PHONY: all clean cleanup\n\n')
 
     # Tabix the finalized sorted data files (tissue-specific and all-tissues)
     for outfile in outfileList:
@@ -60,7 +60,7 @@ with open("run.extract.Makefile","w") as w:
     for i in list(range(2,23)) + ["X"]:
         infile = outdir+"chr"+str(i)+".All_Tissues.sorted.txt.gz"
         w.write(" ; zcat " + infile + " | tail -n +2")
-    w.write(") | bgzip -c > " + outall + "\n\trm " + tempdir + "*.sorted.txt.gz*\n\n")
+    w.write(") | bgzip -c > " + outall + "\n\n")
 
     # Create sorted chromosome-specific, all-tissues temporary data files from chromosome-specific, tissue-specific data files
     for i in list(range(1,23)) + ["X"]:
@@ -123,3 +123,9 @@ with open("run.extract.Makefile","w") as w:
 
     # Subset and sort ensembl GFF3 file
     w.write(gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep gene | grep -v exon | sort -T " + tempdir + " -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")
+
+    # Cleanup
+    w.write("cleanup:\n\trm " + tempdir + "*.sorted.txt.gz*\n\n")
+
+    # Clean
+    w.write("clean:\n\trm " + outdir + "*.sorted.txt.gz* " + outdir + "gene.chrom.pos.lookup.sqlite3.db " + outdir + "gene.symbol.pickle\n")
