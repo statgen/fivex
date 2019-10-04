@@ -11,13 +11,6 @@ import os
 APPLICATION_ROOT = '/'
 
 
-# File Upload to data/
-DATA_FILENAME = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-#    'data','chr19.6718376.All_Tissues.sorted.txt.gz'
-    'data','chr19.All_Tissues.sorted.txt.gz'
-)
-
 # Database file is data/, currently not using
 DATABASE_FILENAME = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),

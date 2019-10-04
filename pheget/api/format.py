@@ -10,7 +10,7 @@ except ImportError:
 from zorp import readers
 import pheget
 
-with open('util/gene.symbol.pickle','rb') as f:
+with open('data/gene.symbol.pickle','rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
 def parse_position(chrom_pos: str):

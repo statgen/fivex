@@ -72,7 +72,7 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-with open('util/gene.symbol.pickle','rb') as f:
+with open('data/gene.symbol.pickle','rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
 class VariantContainer:

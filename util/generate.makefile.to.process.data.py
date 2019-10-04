@@ -17,7 +17,7 @@ tempdir = baseDir + "data/temp/"
 outall = outdir + "all_chr.All_Tissues.sorted.txt.gz"
 sqlite = outdir + "gene.chrom.pos.lookup.sqlite3.db"
 gff3   = outdir + "ID.only.gff3.gz"
-pickl  = scriptdir + "gene.symbol.pickle"
+pickl  = outdir + "gene.symbol.pickle"
 # User will need to download the following file from ensembl and save it to their data directory:
 # ftp://ftp.ensembl.org/pub/release-97/gff3/homo_sapiens/Homo_sapiens.GRCh38.97.chr.gff3.gz
 ensemb = outdir + "Homo_sapiens.GRCh38.97.chr.gff3.gz"
@@ -115,11 +115,8 @@ with open("run.extract.Makefile","w") as w:
         outfile = tempdir + infile.split("/")[-1].replace(".txt.gz",".sorted.txt.gz")
         w.write(outfile + ": " + infile + "\n\t( zcat " + infile + " | head -n 1 | sed s/'variant_id'/'chr\\tpos\\tref\\talt\\tbuild'/ ; zcat " + infile + " | tail -n +2 | tr '_' '\\t' | sort -T " + tempdir + " -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
 
-    # Create a pickled dictionary of gene names to gene symbols, to be used in translating gene names to symbols in read_eqtl.py
-    w.write(pickl + ": " + gff3 + "\n\tpython " + scriptdir + "pickle.genes.py -i " + gff3 + "\n\n") 
-
-    # Create sqlite3 database using bgzipped, tabixed, subsetted GFF3 file
-    w.write(sqlite + ": " + gff3 + ".tbi\n\tpython " + scriptdir + "index.genes.into.sqlite3.py -i " + gff3 + " -o " + sqlite + "\n\n")
+    # Create sqlite3 database for convenient gene ranges/symbol/name lookups and a pickled Python dictionary for name -> symbol lookup only
+    w.write(pickl + ": " + gff3 + "\n\tpython " + scriptdir + "generate.databases.for.pheget.py -i " + gff3 + " -o " + sqlite + " -p " + pickl + "\n\n")
 
     # tabix subsetted file
     w.write(gff3 + ".tbi: " + gff3 + "\n\ttabix -s 1 -b 4 -e 5 " + gff3 + "\n\n")
