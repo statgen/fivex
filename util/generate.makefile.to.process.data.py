@@ -43,7 +43,7 @@ with open("run.extract.Makefile","w") as w:
     for tissue in tissueList:
         w.write(" " + outdir+tissue+".sorted.txt.gz.tbi")
 
-    w.write(" " + outall + '.tbi ' + sqlite + " " + pickl + '\n\n')
+    w.write(" " + outall + '.tbi ' + " " + pickl + '\n\n')
 
     # Tabix the finalized sorted data files (tissue-specific and all-tissues)
     for outfile in outfileList:
