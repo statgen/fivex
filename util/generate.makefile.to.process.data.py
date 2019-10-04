@@ -9,7 +9,7 @@ import glob, subprocess, os
 # In either case, to use the full data set, 
 # the user will need to either download or symlink the raw GTEx v8 eQTL data 
 # (found in the eqtl/fastqtl directory, from the full data download of GTEx v8 from dbGaP) to tempDir
-baseDir = '/' + os.path.dirname(os.path.realpath(__file__)).split("/")[:-1].join('/') + '/'
+baseDir = '/' + '/'.join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1]) + '/'
 filelist = glob.glob(baseDir + "data/temp/*.allpairs.txt.gz") 
 outdir = baseDir + "data/"
 scriptdir = baseDir + "util/"
