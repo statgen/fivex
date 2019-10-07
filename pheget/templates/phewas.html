@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.9.1/dist/locuszoom.css" type="text/css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
+        type="text/css"/>
   <title>PheGET - Single Variant View</title>
 </head>
 <body>
 
   <h1>eQTL for one variant in all tissues</h1>
   <div>
-   <input id="query-field" type="text" width="100" placeholder="chr19:6718376"> 
+   <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
    <button id='navigate-variant' class="btn btn-success">Go</button> <br>
-   <a href="/">Back to PheGET Homepage</a> 
+   <a href="/">Back to PheGET Homepage</a>
   </div>
 
   <button  id="tissue">Group by Tissue</button>
@@ -20,12 +21,15 @@
   <div id="plot"></div>
 
   {# These files must be included to make a LocusZoom plot #}
-  <script src="{{ url_for('static', filename='js/locuszoom.vendor.min.js') }}" type="application/javascript"></script>
-  <script src="{{ url_for('static', filename='js/locuszoom.app.min.js') }}" type="application/javascript"></script>
-  <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.vendor.min.js"
+          type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.app.min.js"
+          type="application/javascript"></script>
+
+  {#  FIXME: Remove dependence on jquery in favor of native functions #}
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/phewas_scatter.js') }}" type="application/javascript"></script>
   <script type="application/javascript">
-    // Pass the
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
   </script>
 <script>
