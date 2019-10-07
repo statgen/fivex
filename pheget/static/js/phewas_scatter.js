@@ -1,5 +1,5 @@
 // This section will define the code required for the plot
-/* global LocusZoom */
+/* global LocusZoom, $, plot */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL(state, chain, fields) {
@@ -9,20 +9,19 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
-/*
-Data sources are specific javascript objects that are in charge of retrieving data from certain apis and 
-process them. Sometimes we want to customize some fields of the available objects to achieve our goal.
-*/ 
+/**
+ Data sources are specific javascript objects that are in charge of retrieving data from certain apis and
+ process them. Sometimes we want to customize some fields of the available objects to achieve our goal.
+ */
 
 
-function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
-    var dataSources= new LocusZoom.DataSources();
-    const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
-    
+// eslint-disable-next-line no-unused-vars
+function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
+    var dataSources = new LocusZoom.DataSources();
     dataSources
-    .add("phewas", ['PheGET', {  // TODO: Override URL generation
-    url: `/api/variant/${chrom}_${pos}/`,
-    }]);
+        .add('phewas', ['PheGET', {
+            url: `/api/variant/${chrom}_${pos}/`,
+        }]);
     // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
     // Define the layout
@@ -30,7 +29,7 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
     There are a lot of predefined layouts for plots, panels and data layers.
     get function includes different level of group names
     */
-    var layout = LocusZoom.Layouts.get("plot", "standard_phewas", {
+    var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
@@ -57,7 +56,7 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
                                 parameters: {
                                     field_value: true,
                                     then: '#ED180A'
-                                }, 
+                                },
                             },
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -65,11 +64,11 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
                                 parameters: {
                                     field_value: false,
                                     then: '#EAE6E6'
-                                }, 
+                                },
                             },
                             {
                                 field: '{{namespace[phewas]}}system',
-                                scale_function: "categorical_bin",
+                                scale_function: 'categorical_bin',
                                 parameters: {
                                     categories: [],
                                     values: [],
@@ -126,41 +125,26 @@ function groupByThing(plot, thing) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
 
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
-    
+
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `phewas:${label_field}`;
 
     plot.applyState();
 }
 
-$(document).ready(function(){
+$(document).ready(function () {
     // const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
-    $('#tissue').click(function(event){
+    $('#tissue').click(function (event) {
         event.preventDefault();
-        groupByThing(plot,'tissue');
+        groupByThing(plot, 'tissue');
     });
-    $('#system').click(function(event){
+    $('#system').click(function (event) {
         event.preventDefault();
-        groupByThing(plot,'system');
+        groupByThing(plot, 'system');
     });
-    $('#symbol').click(function(event){
+    $('#symbol').click(function (event) {
         event.preventDefault();
-        groupByThing(plot,'symbol');
+        groupByThing(plot, 'symbol');
     });
-    // $('#debug').click(function(event){
-    //     event.preventDefault();
-    //     for(p in plot) {
-    //         console.log (p, plot[p]);
-    //     }
-    // });
-    // $('#search').click(function(event){
-    //     event.preventDefault();
-    //     const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot', $('#gene').text());
-    // });
-    // $('#reset').click(function(event){
-    //     event.preventDefault();
-    //     const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
-    // });
-
-    window.plot=plot;
+    window.plot = plot;
 });

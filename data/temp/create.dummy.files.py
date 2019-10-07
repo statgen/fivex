@@ -1,5 +1,6 @@
 import subprocess
 
+
 GROUP_DICT = {
     "Adipose_Subcutaneous": "Adipose Tissue",
     "Adipose_Visceral_Omentum": "Adipose Tissue",
@@ -54,4 +55,4 @@ GROUP_DICT = {
 
 for key in GROUP_DICT:
     outfile = key + ".allpairs.txt.gz"
-    temp = subprocess.call(["touch",outfile])
+    temp = subprocess.call(["touch", outfile])

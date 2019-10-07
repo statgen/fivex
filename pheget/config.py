@@ -1,8 +1,5 @@
 """
-Pheget Development
-
-Alan Kwong<awkwong@umich.edu>
-Mukai Wang<wangmk@umich.edu>
+Common configuration variables for the application
 """
 
 import os

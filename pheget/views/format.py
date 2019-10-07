@@ -10,6 +10,7 @@ except ImportError:
 from zorp import readers
 import pheget
 
+
 def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
@@ -18,6 +19,7 @@ def parse_position(chrom_pos: str):
     """
     chrom, pos = chrom_pos.split('_')
     return chrom, int(pos)
+
 
 # A convenient lookup used to group multiple tissue types into a smaller number of systems
 GROUP_DICT = {
@@ -72,8 +74,9 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-with open('data/gene.symbol.pickle','rb') as f:
+with open('data/gene.symbol.pickle', 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
+
 
 class VariantContainer:
     """
@@ -146,7 +149,7 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     # FIXME Hardcoded directory structure! Improve once Alan has finished generating data
-    source = pheget.model.locate_data(chrom) # Faster retrieval for a single variant
+    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
         reader.add_filter('tissue', tissue)
@@ -162,4 +165,3 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
-
