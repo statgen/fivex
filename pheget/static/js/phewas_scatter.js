@@ -1,5 +1,5 @@
 // This section will define the code required for the plot
-/* global LocusZoom, $, plot */
+/* global LocusZoom */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL(state, chain, fields) {
@@ -9,11 +9,6 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
-/**
- Data sources are specific javascript objects that are in charge of retrieving data from certain apis and
- process them. Sometimes we want to customize some fields of the available objects to achieve our goal.
- */
-
 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
@@ -22,13 +17,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }]);
-    // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
-    // Define the layout
-    /*
-    There are a lot of predefined layouts for plots, panels and data layers.
-    get function includes different level of group names
-    */
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
         panels: [
@@ -36,19 +25,15 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                 unnamespaced: true,// what does this mean?
                 proportional_height: 1.0,
                 data_layers: [
-                    // The data layer config is pretty sensitive to field names, so a bunch of stuff needs to be
-                    //  customized.
-                    // This kind of deep customization isn't well supported by LZ, to be honest, so we're just
-                    //  overriding individual keys, one. at. a. time. glamorous.
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
                         base.fields = [
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-                        ];// this looks like a jinja template but the key value is outside the curly bracket?
+                        ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
-                        base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';// what does middle slash do
+                        base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -81,10 +66,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;// how can I find functions triggered by tooltip
+<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
-                        // base.match.send='{{namespace[phewas]}}gene_id';
-                        // base.match.receive='{{namespace[phewas]}}gene_id';
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
@@ -99,9 +82,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
-    // plot.on("element_clicked", function(){
-    //     console.log("data requested for LocusZoom plot" + this.panels["phewas"].data_layers["phewaspvalues"].data[0]["phewas:gene_id"]);
-    //   });
     return [plot, dataSources];
 }
 
@@ -131,20 +111,3 @@ function groupByThing(plot, thing) {
 
     plot.applyState();
 }
-
-$(document).ready(function () {
-    // const [plot, datasources] = makePhewasPlot($('#chrom').text(), $('#pos').text(), '#plot');
-    $('#tissue').click(function (event) {
-        event.preventDefault();
-        groupByThing(plot, 'tissue');
-    });
-    $('#system').click(function (event) {
-        event.preventDefault();
-        groupByThing(plot, 'system');
-    });
-    $('#symbol').click(function (event) {
-        event.preventDefault();
-        groupByThing(plot, 'symbol');
-    });
-    window.plot = plot;
-});
