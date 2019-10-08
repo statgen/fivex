@@ -36,6 +36,6 @@ Currently, filenames are hardcoded; this was a quick hack! This should be improv
 Make sure to activate your virtualenv at the start of every new terminal session: `$ source venv/bin/activate` 
 
 The following command will start a basic flask app server that reloads whenever code is changed:
-`$ python3 app.py`
+`$ ./phegetrun`
 
 Then follow the instructions printed to the console to visit the app in your web browser.

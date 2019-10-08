@@ -1,8 +1,10 @@
+# Common python generated files
+__pycache__/
+
 # Common python venv folders
 .venv/
 venv/
 env/
-
 # JS / build assets
 node_modules/
 

@@ -1,0 +1,47 @@
+{
+  "data": [
+   {
+     "id": 1,
+     "trait_group": "Connective Tissue",
+     "trait_label": "Adipose_Subcutaneous",
+     "log_pvalue": 0.613877526693,
+     "gene_id": "ENSG00000227232.5",
+     "variant": "chr1_13550_G_A_b38",
+     "chromosome": "chr1",
+     "position": 13550,
+     "build": "GRCh38",
+     "ref_allele": "G",
+     "alt_allele": "A",
+     "tss_distance": -16003,
+     "ma_samples": 18,
+     "ma_count": 18,
+     "maf": 0.0158451,
+     "slope": 0.235547,
+     "slope_se": 0.201641
+   },
+   {
+     "id": 2,
+     "trait_group": "Connective Tissue",
+     "trait_label": "Adipose_Visceral_Omentum",
+     "log_pvalue": 1.94108832329,
+     "gene_id": "ENSG00000227232.5",
+     "variant": "chr1_13550_G_A_b38",
+     "chromosome": "chr1",
+     "position": 13550,
+     "build": "GRCh38",
+     "ref_allele": "G",
+     "alt_allele": "A",
+     "tss_distance": -16003,
+     "ma_samples": 11,
+     "ma_count": 11,
+     "maf": 0.0119826,
+     "slope": 0.557616,
+     "slope_se": 0.219505
+   } ],
+      "lastPage": null,
+      "meta": {
+        "build": [
+          "GRCh38"
+      ]
+    }
+  }
