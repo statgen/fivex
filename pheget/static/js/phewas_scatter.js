@@ -22,7 +22,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         responsive_resize: 'width_only',
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
-                unnamespaced: true,// what does this mean?
+                unnamespaced: true,
                 proportional_height: 1.0,
                 data_layers: [
                     function () {
