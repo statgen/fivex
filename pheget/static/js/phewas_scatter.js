@@ -18,11 +18,14 @@ process them. Sometimes we want to customize some fields of the available object
 function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
     var dataSources= new LocusZoom.DataSources();
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
-    
+    var pos_lower = Number(pos) - 100000;
+    var pos_higher = Number(pos) + 100000;
     dataSources
     .add("phewas", ['PheGET', {  // TODO: Override URL generation
     url: `/api/variant/${chrom}_${pos}/`,
-    }]);
+    }])
+    .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
+    .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }]);
     // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
     // Define the layout
@@ -32,6 +35,12 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
     */
     var layout = LocusZoom.Layouts.get("plot", "standard_phewas", {
         responsive_resize: 'width_only',
+        state: {
+            variant: `${chrom}:${pos}`,
+            start: pos_lower,
+            end: pos_higher,
+            chr: chrom
+        },
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,// what does this mean?
@@ -94,7 +103,27 @@ function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                 ],
             }),
-
+            LocusZoom.Layouts.get('panel', 'genes',{
+                unnamespaced: true,
+                proportional_width: 100,
+                data_layers: [
+                    function(){
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
+                        base.color = [
+                            {
+                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                scale_function: 'if',
+                                parameters: {
+                                    field_value: true,
+                                    then: '#ED180A'
+                                }, 
+                            },
+                        ];
+                        base.match = { send: '{{namespace[genes]}}gene_id', receive: '{{namespace[genes]}}gene_id' };
+                        return base;
+                    }()
+                ] 
+            })
         ]
     });
 
