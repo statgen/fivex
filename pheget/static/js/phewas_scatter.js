@@ -92,7 +92,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             }),
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
-                proportional_width: 100,
                 data_layers: [
                     function() {
                         const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
