@@ -13,13 +13,25 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
+    const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
+    var pos_lower = Number(pos) - 100000;
+    var pos_higher = Number(pos) + 100000;
     dataSources
-        .add('phewas', ['PheGET', {
+        .add('phewas', ['PheGET', {  // TODO: Override URL generation
             url: `/api/variant/${chrom}_${pos}/`,
-        }]);
+        }])
+        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
+        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
+    // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
+        state: {
+            variant: `${chrom}:${pos}`,
+            start: pos_lower,
+            end: pos_higher,
+            chr: chrom
+        },
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
@@ -78,7 +90,27 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                 ],
             }),
-
+            LocusZoom.Layouts.get('panel', 'genes',{
+                unnamespaced: true,
+                proportional_width: 100,
+                data_layers: [
+                    function() {
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
+                        base.color = [
+                            {
+                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                scale_function: 'if',
+                                parameters: {
+                                    field_value: true,
+                                    then: '#ED180A'
+                                },
+                            },
+                        ];
+                        base.match = { send: '{{namespace[genes]}}gene_id', receive: '{{namespace[genes]}}gene_id' };
+                        return base;
+                    }()
+                ]
+            })
         ]
     });
 
@@ -111,7 +143,7 @@ function groupByThing(plot, thing) {
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `{{phewas:${label_field}}}`;
     scatter_config.match.send = scatter_config.match.receive = `phewas:${label_field}`;
-    
+
     plot.applyState();
 }
 
@@ -123,14 +155,14 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
-        plot.layout.panels[0].data_layers[1].style = {"stroke": "#D3D3D3", "stroke-width": "3px", "stroke-dasharray": "10px 10px"};
+        plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
     }
     else if (yfield === 'slope') {
         scatter_config.y_axis.field = 'phewas:slope';
         scatter_config.y_axis.floor = undefined;
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
-        plot.layout.panels[0].data_layers[1].style = {"stroke": "gray", "stroke-width": "1px", "stroke-dasharray": "10px 0px"};
+        plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
     }
     plot.applyState();
 }
