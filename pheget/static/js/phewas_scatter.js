@@ -24,6 +24,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
         .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
 
+    
+
+
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
         state: {
