@@ -47,6 +47,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     
 
 
+    
+
+
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
         state: {
