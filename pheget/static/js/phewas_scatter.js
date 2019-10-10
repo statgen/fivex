@@ -20,8 +20,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('phewas', ['PheGET', {  // TODO: Override URL generation
             url: `/api/variant/${chrom}_${pos}/`,
         }])
-        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
-        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
+        .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
+        .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
+        .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
@@ -91,6 +92,15 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             }),
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
+                margin: { bottom: 40 },
+                axes: {
+                    x: {
+                        label: `Chromosome ${chrom} (Mb)`,
+                        label_offset: 32,
+                        tick_format: 'region',
+                        extent: 'state'
+                    }
+                },
                 data_layers: [
                     function() {
                         const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
@@ -106,7 +116,18 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
                         base.match = { send: '{{namespace[genes]}}gene_id', receive: '{{namespace[genes]}}gene_id' };
                         return base;
-                    }()
+                    }(),
+                    {
+                        id: "variant",
+                        type: "orthogonal_line",
+                        orientation: "vertical",
+                        offset: position,
+                        style: {
+                          "stroke": "#FF3333",
+                          "stroke-width": "2px",
+                          "stroke-dasharray": "4px 4px"
+                        }
+                    }
                 ]
             })
         ]
