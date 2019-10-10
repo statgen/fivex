@@ -20,6 +20,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
 >>>>>>> 65c2347... Adding gene tracks with highlighting features.
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
+    var position = +Number(pos);
     var pos_lower = Number(pos) - 100000;
     var pos_higher = Number(pos) + 100000;
     dataSources
@@ -38,13 +39,16 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }]);
 >>>>>>> 65c2347... Adding gene tracks with highlighting features.
 
+    
+
+
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
         state: {
             variant: `${chrom}:${pos}`,
             start: pos_lower,
             end: pos_higher,
-            chr: chrom
+            chr: +chrom
         },
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
