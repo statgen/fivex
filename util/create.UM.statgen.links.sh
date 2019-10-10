@@ -1,4 +1,3 @@
-rm ../data/Homo_sapiens.GRCh38.97.chr.gff3.gz
 rm ../data/chr*.All_Tissues.sorted.txt.gz*
 rm ../data/gene.symbol.pickle
 rm ../data/gene.chrom.pos.lookup.sqlite3.db
