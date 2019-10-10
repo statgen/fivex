@@ -36,8 +36,13 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
+<<<<<<< HEAD
         .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }]);
 >>>>>>> 65c2347... Adding gene tracks with highlighting features.
+=======
+        .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
+        .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
+>>>>>>> a66ac30... Adding horizontal axis for the gene track.
 
     
 
@@ -111,9 +116,21 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 proportional_width: 100,
 =======
 >>>>>>> 65c2347... Adding gene tracks with highlighting features.
+=======
+                margin: { bottom: 40 },
+                axes: {
+                    x: {
+                        label: `Chromosome ${chrom} (Mb)`,
+                        label_offset: 32,
+                        tick_format: 'region',
+                        extent: 'state'
+                    }
+                },
+>>>>>>> a66ac30... Adding horizontal axis for the gene track.
                 data_layers: [
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
@@ -129,7 +146,18 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
                         base.match = { send: '{{namespace[genes]}}gene_id', receive: '{{namespace[genes]}}gene_id' };
                         return base;
-                    }()
+                    }(),
+                    {
+                        id: "variant",
+                        type: "orthogonal_line",
+                        orientation: "vertical",
+                        offset: position,
+                        style: {
+                          "stroke": "#FF3333",
+                          "stroke-width": "2px",
+                          "stroke-dasharray": "4px 4px"
+                        }
+                    }
                 ] 
             })
         ]
