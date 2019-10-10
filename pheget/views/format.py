@@ -131,8 +131,16 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[10] = float(fields[10])  # pvalue_nominal
-    fields.append(SYMBOL_DICT[fields[0].split(".")[0]])
-    fields.append(GROUP_DICT[fields[13]])  # read tissue --> add new field for "system"
+    try:
+        newSymbol = SYMBOL_DICT[fields[0].split(".")[0]]
+    except:
+        newSymbol = "Unknown_Gene"
+    fields.append(newSymbol)
+    try:
+        newTissue = GROUP_DICT[fields[13]]
+    except:
+        newTissue = "Unknown_Tissue"
+    fields.append(newTissue)  # read tissue --> add new field for "system"
 
     return VariantContainer(*fields)
 

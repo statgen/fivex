@@ -133,7 +133,7 @@ with open("run.extract.Makefile", "w") as w:
 
     # Subset and sort ensembl GFF3 file
     w.write(
-        gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep gene | grep -v exon | sort -T " + tempdir + " -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")  # noqa
+        gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep 'ID=gene' | sort -T " + tempdir + " -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")  # noqa
 
     # Cleanup
     w.write("cleanup:\n\trm " + tempdir + "*.sorted.txt.gz*\n\n")
