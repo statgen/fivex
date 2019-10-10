@@ -22,7 +22,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
-    // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
