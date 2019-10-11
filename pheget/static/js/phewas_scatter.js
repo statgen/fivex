@@ -15,8 +15,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
     var position = +Number(pos);
-    var pos_lower = Number(pos) - 100000;
-    var pos_higher = Number(pos) + 100000;
+    var pos_lower = Number(pos) - 1000000;
+    var pos_higher = Number(pos) + 1000000;
     dataSources
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
@@ -83,8 +83,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
 <strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
-                        base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
-                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
+                        base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
+                        base.label.text = '{{{{namespace[phewas]}}gene_id}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
                     }(),
@@ -117,7 +117,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 }, 
                             },
                         ];
-                        base.match = { send: '{{namespace[genes]}}gene_id', receive: '{{namespace[genes]}}gene_id' };
+                        base.match = { send: '{{namespace[genes]}}gene_name', receive: '{{namespace[genes]}}gene_name' };
                         return base;
                     }(),
                     {
