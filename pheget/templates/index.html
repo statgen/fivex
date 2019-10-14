@@ -17,21 +17,14 @@
   Example: <a href="/variant/12_56007301/">chr12:56007301, many genes</a> <br>
 </div>
 
+<script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 <script>
-  // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
-  //  ask for a gibberish variant
-
-  // This code uses some es6 syntax and may not work in older browsers. But it's 7pm so Alan can fix that himself.
   document.getElementById('navigate-variant').addEventListener('click', function() {
-      const variant = document.getElementById('query-field');
-
-      if (!variant) {
-          return;
-      }
-      const [chrom, pos] = variant.value.split(':');  // UI - user types `chrom:pos`
-
-      // Eventually the search box will be smarter than this. Hackety hack!
-      window.location = `/variant/${chrom}_${pos}`;
+  const variant = document.getElementById('query-field');
+  if (!variant) {
+      return;
+  }
+  parseSearch(variant.value);
   });
 </script>
 

@@ -28,25 +28,23 @@
         type="application/javascript"></script>
 
 <script src="{{ url_for('static', filename='js/phewas_scatter.js') }}" type="application/javascript"></script>
+<script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
 </script>
+
 <script>
-    // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
-    //  ask for a gibberish variant
+  // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
+  //  ask for a gibberish variant
+  // Added a script to use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rs numbers
+  // (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
 
-    // This code uses some es6 syntax and may not work in older browsers.
-    // TODO: This box was added as a quick prototype, but should be improved for a real web page
-    document.getElementById('navigate-variant').addEventListener('click', function () {
-        const variant = document.getElementById('query-field');
-
-        if (!variant) {
-            return;
-        }
-        const [chrom, pos] = variant.value.split(':');  // UI - user types `chrom:pos`
-
-        // Eventually the search box will be smarter than this. Hackety hack!
-        window.location = `/variant/${chrom}_${pos}`;
+  document.getElementById('navigate-variant').addEventListener('click', function() {
+    const variant = document.getElementById('query-field');
+    if (!variant) {
+        return;
+    }
+    parseSearch(variant.value);
     });
 
     document.getElementById('group-tissue').addEventListener('click', function () {
