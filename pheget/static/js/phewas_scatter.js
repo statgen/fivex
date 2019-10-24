@@ -67,7 +67,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Beta:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
+<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
