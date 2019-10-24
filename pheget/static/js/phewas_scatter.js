@@ -31,6 +31,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
+                            '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
@@ -66,6 +67,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>P-value:</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
+<strong>Beta:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
@@ -109,5 +111,25 @@ function groupByThing(plot, thing) {
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `{{phewas:${label_field}}}`;
 
+    plot.applyState();
+}
+
+// Switches the displayed y-axis value between p-values and slopes (betas)
+// eslint-disable-next-line no-unused-vars
+function switchY(plot, yfield) {
+    const scatter_config = plot.layout.panels[0].data_layers[0];
+    if (yfield === 'pvalue') {
+        scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
+        scatter_config.y_axis.floor = 0;
+        plot.layout.panels[0].data_layers[1].offset = 7.301;
+        plot.layout.panels[0].data_layers[1].style = JSON.parse('{"stroke": "#D3D3D3", "stroke-width": "3px", "stroke-dasharray": "10px 10px"}');
+    }
+    else if (yfield === 'slope') {
+        scatter_config.y_axis.field = 'phewas:slope';
+        scatter_config.y_axis.floor = undefined;
+        plot.layout.panels[0].axes.y1['label'] = 'Effect size';
+        plot.layout.panels[0].data_layers[1].offset = 0;
+        plot.layout.panels[0].data_layers[1].style = JSON.parse('{"stroke": "gray", "stroke-width": "1px", "stroke-dasharray": "10px 0px"}');
+    }
     plot.applyState();
 }
