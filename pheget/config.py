@@ -7,6 +7,7 @@ import os
 # Root of this application, useful if it doesn't occupy an entire domain
 APPLICATION_ROOT = '/'
 
+DATA_DIR = 'data'
 
 # Database file is data/, currently not using
 DATABASE_FILENAME = os.path.join(
