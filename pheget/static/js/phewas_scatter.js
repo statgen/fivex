@@ -13,7 +13,7 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
-    const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
+    const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
     var position = +Number(pos);
     var pos_lower = Number(pos) - 1000000;
     var pos_higher = Number(pos) + 1000000;
@@ -21,9 +21,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
-        .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
-        .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
-        .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
+        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
+        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }])
+        .add('variant', ['StaticJSON', [{ 'x': position, 'y': 0 }, { 'x': position, 'y': 1 }]]);
 
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
@@ -84,7 +84,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
-                        base.label.text = '{{{{namespace[phewas]}}gene_id}}';
+                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
                     }(),
@@ -105,7 +105,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     }
                 },
                 data_layers: [
-                    function(){
+                    function() {
                         const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
                         base.color = [
                             {
@@ -114,24 +114,24 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 parameters: {
                                     field_value: true,
                                     then: '#ED180A'
-                                }, 
+                                },
                             },
                         ];
                         base.match = { send: '{{namespace[genes]}}gene_name', receive: '{{namespace[genes]}}gene_name' };
                         return base;
                     }(),
                     {
-                        id: "variant",
-                        type: "orthogonal_line",
-                        orientation: "vertical",
+                        id: 'variant',
+                        type: 'orthogonal_line',
+                        orientation: 'vertical',
                         offset: position,
                         style: {
-                          "stroke": "#FF3333",
-                          "stroke-width": "2px",
-                          "stroke-dasharray": "4px 4px"
+                            'stroke': '#FF3333',
+                            'stroke-width': '2px',
+                            'stroke-dasharray': '4px 4px'
                         }
                     }
-                ] 
+                ]
             })
         ]
     });
@@ -165,7 +165,7 @@ function groupByThing(plot, thing) {
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `{{phewas:${label_field}}}`;
     scatter_config.match.send = scatter_config.match.receive = `phewas:${label_field}`;
-    
+
     plot.applyState();
 }
 
@@ -177,14 +177,14 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
-        plot.layout.panels[0].data_layers[1].style = {"stroke": "#D3D3D3", "stroke-width": "3px", "stroke-dasharray": "10px 10px"};
+        plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
     }
     else if (yfield === 'slope') {
         scatter_config.y_axis.field = 'phewas:slope';
         scatter_config.y_axis.floor = undefined;
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
-        plot.layout.panels[0].data_layers[1].style = {"stroke": "gray", "stroke-width": "1px", "stroke-dasharray": "10px 0px"};
+        plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
     }
     plot.applyState();
 }
