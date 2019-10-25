@@ -10,7 +10,6 @@ except ImportError:
 from zorp import readers
 import pheget
 
-
 def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
@@ -74,7 +73,7 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-with open(pheget.app.config['DATA_DIR'] + "/gene.symbol.pickle", 'rb') as f:
+with open(pheget.app.config['DATA_DIR'] + '/gene.symbol.pickle', 'rb') as f:
 #with open('data/gene.symbol.pickle', 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
