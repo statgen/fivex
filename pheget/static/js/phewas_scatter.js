@@ -13,17 +13,16 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
-    const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
-    var position = +Number(pos);
-    var pos_lower = Number(pos) - 1000000;
-    var pos_higher = Number(pos) + 1000000;
+    const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
+    pos = +pos;
+    var pos_lower = pos - 1000000;
+    var pos_higher = pos + 1000000;
     dataSources
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
-        .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
-        .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
-        .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
+        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
+        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
@@ -119,14 +118,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         return base;
                     }(),
                     {
-                        id: "variant",
-                        type: "orthogonal_line",
-                        orientation: "vertical",
-                        offset: position,
+                        id: 'variant',
+                        type: 'orthogonal_line',
+                        orientation: 'vertical',
+                        offset: pos,
                         style: {
-                          "stroke": "#FF3333",
-                          "stroke-width": "2px",
-                          "stroke-dasharray": "4px 4px"
+                            'stroke': '#FF3333',
+                            'stroke-width': '2px',
+                            'stroke-dasharray': '4px 4px'
                         }
                     }
                 ]
