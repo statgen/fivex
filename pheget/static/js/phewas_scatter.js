@@ -2,7 +2,7 @@
 /* global LocusZoom */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL(state, chain, fields) {
+    getURL() {  // Removed state, chain, fields for now since we are not currently using them
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
         return this.url;
