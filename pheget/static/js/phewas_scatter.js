@@ -13,19 +13,17 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
-    const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
+    const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
+    var position = +Number(pos);
     var pos_lower = Number(pos) - 100000;
     var pos_higher = Number(pos) + 100000;
     dataSources
-        .add('phewas', ['PheGET', {  // TODO: Override URL generation
+        .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
         .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
         .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
-
-    
-
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
