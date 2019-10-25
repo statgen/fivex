@@ -125,11 +125,13 @@ def variant_parser(row: str) -> VariantContainer:
 
     The parser is the piece tied to file format, so this must change if the file format changes!
     """
+    # FIXME: This duplicates code from `api.format`, and we should de-duplicate
     fields = row.split('\t')
     # For now we clean up three fields exactly.
     # Revise if data format changes!
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
+    fields[6] = int(fields[6])  # tss_distance
     fields[10] = float(fields[10])  # pvalue_nominal
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
