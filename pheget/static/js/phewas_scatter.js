@@ -10,44 +10,20 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
 });
 
 
-<<<<<<< HEAD
-
-function makePhewasPlot(chrom, pos, selector) {// add a parameter geneid
-    var dataSources= new LocusZoom.DataSources();
-=======
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
->>>>>>> 65c2347... Adding gene tracks with highlighting features.
     const apiBase = "https://portaldev.sph.umich.edu/api/v1/";
     var position = +Number(pos);
     var pos_lower = Number(pos) - 100000;
     var pos_higher = Number(pos) + 100000;
     dataSources
-<<<<<<< HEAD
-    .add("phewas", ['PheGET', {  // TODO: Override URL generation
-    url: `/api/variant/${chrom}_${pos}/`,
-    }])
-    .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
-    .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }]);
-    // add function declare a namespace name, the type of datasource the namespace is and parameters that overwrites original data source category
-=======
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add("gene", ["GeneLZ", { url: apiBase + "annotation/genes/", params: { build: 'GRCh37' } }])
-<<<<<<< HEAD
-        .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }]);
->>>>>>> 65c2347... Adding gene tracks with highlighting features.
-=======
         .add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
         .add("variant", ["StaticJSON", [{ "x": position, "y": 0 }, { "x": position, "y": 1 }]]);
->>>>>>> a66ac30... Adding horizontal axis for the gene track.
-
-    
-
-
-    
 
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
@@ -118,12 +94,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             }),
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
-<<<<<<< HEAD
-<<<<<<< HEAD
                 proportional_width: 100,
-=======
->>>>>>> 65c2347... Adding gene tracks with highlighting features.
-=======
                 margin: { bottom: 40 },
                 axes: {
                     x: {
@@ -133,7 +104,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         extent: 'state'
                     }
                 },
->>>>>>> a66ac30... Adding horizontal axis for the gene track.
                 data_layers: [
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
