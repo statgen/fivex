@@ -70,7 +70,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}gene_id', receive: '{{namespace[phewas]}}gene_id' };
-                        base.label.text = '{{{{namespace[phewas]}}gene_id}}';
+                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
                     }(),
@@ -110,7 +110,8 @@ function groupByThing(plot, thing) {
 
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `{{phewas:${label_field}}}`;
-
+    scatter_config.match.send = scatter_config.match.receive = `phewas:${label_field}`;
+    
     plot.applyState();
 }
 
