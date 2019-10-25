@@ -122,14 +122,14 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
-        plot.layout.panels[0].data_layers[1].style = JSON.parse('{"stroke": "#D3D3D3", "stroke-width": "3px", "stroke-dasharray": "10px 10px"}');
+        plot.layout.panels[0].data_layers[1].style = {"stroke": "#D3D3D3", "stroke-width": "3px", "stroke-dasharray": "10px 10px"};
     }
     else if (yfield === 'slope') {
         scatter_config.y_axis.field = 'phewas:slope';
         scatter_config.y_axis.floor = undefined;
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
-        plot.layout.panels[0].data_layers[1].style = JSON.parse('{"stroke": "gray", "stroke-width": "1px", "stroke-dasharray": "10px 0px"}');
+        plot.layout.panels[0].data_layers[1].style = {"stroke": "gray", "stroke-width": "1px", "stroke-dasharray": "10px 0px"};
     }
     plot.applyState();
 }
