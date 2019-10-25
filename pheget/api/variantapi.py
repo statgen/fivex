@@ -1,13 +1,7 @@
 """
-Variant Api Page.
+API endpoints (return JSON, not html)
 """
-
-from flask import (
-    Flask,
-    jsonify,
-    render_template,
-    request,
-)
+from flask import jsonify, request
 
 import pheget
 from pheget.api.format import query_variant, parse_position
@@ -20,7 +14,6 @@ def query(chrom_pos):
 
     tissue = request.args.get('tissue', None)
     gene_id = request.args.get('gene_id', None)
-    
     data = [res.to_dict()
             for res in query_variant(chrom, pos, tissue=tissue, gene_id=gene_id)]
     for i, item in enumerate(data):

@@ -2,12 +2,7 @@
 Variant View Page.
 """
 
-from flask import (
-    Flask,
-    jsonify,
-    render_template,
-    request,
-)
+from flask import render_template
 
 import pheget
 from pheget.views.format import parse_position

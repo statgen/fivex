@@ -1,6 +1,11 @@
 .vscode/
+# Common python generated files
+__pycache__/
+
+# Common python venv folders
 .venv/
 venv/
+pheget/__pycache__/
 pheget/api/__pycache__/
 pheget/views/__pycache__/
 # Common python venv folders
