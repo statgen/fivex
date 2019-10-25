@@ -104,7 +104,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
-                        base.label.text = '{{{{namespace[phewas]}}gene_id}}';
+                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
                         return base;
                     }(),
