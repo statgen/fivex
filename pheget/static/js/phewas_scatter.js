@@ -9,6 +9,17 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
+LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
+    if (typeof input !== 'undefined') {
+        var slope = input['phewas:slope'];
+        var slope_se = input['phewas:slope_se'];
+        if (!isNaN(slope) && !isNaN(slope_se)) {
+            if (slope - 1.96 * slope_se > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
+            if (slope + 1.96 * slope_se < 0) { return parameters['-'] || null; }
+        }
+    }
+    return null;
+});
 
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
@@ -74,12 +85,23 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 }
                             }
                         ];
+                        base.point_shape = [
+                            {
+                                scale_function: 'effect_direction',
+                                parameters: {
+                                    '+': 'triangle-up',
+                                    '-': 'triangle-down'
+                                }
+                            },
+                            'circle'
+                        ];
+
                         base.tooltip.html = `
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}}<br>
+<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}gene_id}}';
