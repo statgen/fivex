@@ -46,7 +46,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
-                proportional_height: 1.0,
                 data_layers: [
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
@@ -115,6 +114,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
                 margin: { bottom: 40 },
+                min_height: 250,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
@@ -125,7 +125,13 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                 },
                 data_layers: [
                     function() {
-                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { 
+                            unnamespaced: true,
+                            exon_height: 8,
+                            bounding_box_padding: 5,
+                            track_vertical_spacing: 5,
+                            exon_label_spacing: 3
+                        });
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -195,15 +201,18 @@ function switchY(plot, yfield) {
     if (yfield === 'pvalue') {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+
     }
     else if (yfield === 'slope') {
+        delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:slope';
-        scatter_config.y_axis.floor = undefined;
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+        scatter_config.y_axis.lower_buffer = 0.15;
     }
     plot.applyState();
 }
