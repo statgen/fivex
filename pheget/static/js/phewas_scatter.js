@@ -32,7 +32,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
-        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
+        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
