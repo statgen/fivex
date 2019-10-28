@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
         type="text/css"/>
-  <title>PheGET - Single Variant View</title>
+  <title>PheGET - Single Variant Single Gene View</title>
 </head>
 <body>
 
-<h1>eQTL for one variant in all tissues</h1>
+<h1>eQTL for one variant for one gene with several tissues</h1>
 <div>
   <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
   <button id='navigate-variant' class="btn btn-success">Go</button>
@@ -16,16 +16,10 @@
   <a href="/">Back to PheGET Homepage</a>
 </div>
 
-<button id="group-tissue">Group by Tissue</button>
-<button id="group-system">Group by System</button>
-<button id="group-symbol">Group by Gene Symbol</button>
-<button id="show-pvalue">Show P-values</button>
-<button id="show-slope">Show effect sizes</button>
+<!-- <button id="show-pvalue">Show P-values</button>
+<button id="show-slope">Show effect sizes</button> -->
 
-<div>
-    Query a single tissue for a single gene: <br>
-    <a href="/single/ENSG00000125734.15/Lung/19_6718376/">chr19:6718376, single gene single tissue</a>
-</div>
+
 <div id="plot"></div>
 
 {# These files must be included to make a LocusZoom plot #}
@@ -34,35 +28,17 @@
 <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.app.min.js"
         type="application/javascript"></script>
 
-<script src="{{ url_for('static', filename='js/phewas_scatter.js') }}" type="application/javascript"></script>
-<script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
+<script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
-    const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
+    const [plot, datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
 </script>
 
-<script>
+<!-- <script>
   // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
   //  ask for a gibberish variant
   // Added a script to use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rs numbers
   // (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
 
-  document.getElementById('navigate-variant').addEventListener('click', function() {
-    const variant = document.getElementById('query-field');
-    if (!variant) {
-        return;
-    }
-    parseSearch(variant.value);
-    });
-
-    document.getElementById('group-tissue').addEventListener('click', function () {
-        groupByThing(plot, 'tissue');
-    });
-    document.getElementById('group-system').addEventListener('click', function () {
-        groupByThing(plot, 'system');
-    });
-    document.getElementById('group-symbol').addEventListener('click', function () {
-        groupByThing(plot, 'symbol');
-    });
     document.getElementById('show-pvalue').addEventListener('click', function() {
         switchY(plot, 'pvalue');
     });
@@ -70,6 +46,6 @@
         switchY(plot, 'slope');
     });
 
-</script>
+</script> -->
 </body>
 </html>
