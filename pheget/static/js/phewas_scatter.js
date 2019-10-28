@@ -43,6 +43,15 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             end: pos_higher,
             chr: chrom
         },
+        dashboard: {
+            components:[ 
+                {
+                color: 'gray',
+                position: 'right',
+                type: 'download'
+                }
+            ]
+        },
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
