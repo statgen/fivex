@@ -1,5 +1,6 @@
 // This section will define the code required for the plot
 /* global LocusZoom */
+/* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL() {  // Removed state, chain, fields for now since we are not currently using them
@@ -189,7 +190,32 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+    plot.subscribeToData(['phewas:pvalue','phewas:gene_id','phewas:tissue','phewas:system','phewas:symbol','phewas:slope','phewas:slope_se'], makeTable);
     return [plot, dataSources];
+}
+
+function makeTable(data) {
+    if (!window.asdf_table) {
+        var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(d + 1) : x.toExponential(1); };
+        var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
+        window.asdf_table = new Tabulator('#table', {
+            layout: 'fitColumns',
+            pagination: 'local',
+            paginationSize: 100,
+            columns: [
+                {title:'Gene', field:'phewas:symbol', headerFilter:true, formatter:function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
+                {title:'Tissue', field:'phewas:tissue', headerFilter:true},
+                {title:'System', field:'phewas:system', headerFilter:true},
+                {title:'P-value', field:'phewas:pvalue', formatter:two_digit_fmt2},
+                {title:'Effect Size', field:'phewas:slope', formatter:two_digit_fmt1},
+                {title:'Effect Size SE', field:'phewas:slope_se', formatter:two_digit_fmt1},
+            ],
+            data: data,
+            initialSort: [{column:'phewas:pvalue', dir:'asc'}],
+        });
+    } else {
+        window.asdf_table.setData(data);
+    }
 }
 
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
