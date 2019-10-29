@@ -200,8 +200,7 @@ function makeTable(data) {
         var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
         window.asdf_table = new Tabulator('#table', {
             layout: 'fitColumns',
-            pagination: 'local',
-            paginationSize: 100,
+            height: 800,
             columns: [
                 {title:'Gene', field:'phewas:symbol', headerFilter:true, formatter:function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
                 {title:'Tissue', field:'phewas:tissue', headerFilter:true},
