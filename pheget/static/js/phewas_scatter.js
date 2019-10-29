@@ -78,7 +78,11 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                             '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
-                            '{{namespace[phewas]}}pvalue_rank',
+                            '{{namespace[phewas]}}pvalue_rank', '{{namespace[phewas]}}chrom',
+                            '{{namespace[phewas]}}pos', '{{namespace[phewas]}}ref',
+                            '{{namespace[phewas]}}alt', '{{namespace[phewas]}}ma_samples',
+                            '{{namespace[phewas]}}ma_count', '{{namespace[phewas]}}maf',
+                            '{{namespace[phewas]}}sample_size',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
@@ -121,11 +125,13 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
 
                         base.tooltip.html = `
+<strong>Variant:</strong> {{{{namespace[phewas]}}chrom}}:{{{{namespace[phewas]}}pos}} {{{{namespace[phewas]}}ref}}/{{{{namespace[phewas]}}alt}}<br>
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
-<strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
+<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size}})<br>
+<strong>Minor allele frequency (count):</strong> {{{{namespace[phewas]}}maf}} ({{{{namespace[phewas]}}ma_count}})<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
+<strong>Effect size (SE)</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
