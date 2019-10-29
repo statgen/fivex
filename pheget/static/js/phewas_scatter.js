@@ -59,11 +59,11 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             chr: chrom
         },
         dashboard: {
-            components:[ 
+            components:[
                 {
-                color: 'gray',
-                position: 'right',
-                type: 'download'
+                    color: 'gray',
+                    position: 'right',
+                    type: 'download'
                 }
             ]
         },
@@ -151,7 +151,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                 },
                 data_layers: [
                     function() {
-                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { 
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes', {
                             unnamespaced: true,
                             exon_height: 8,
                             bounding_box_padding: 5,
