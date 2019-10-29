@@ -8,18 +8,18 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         return this.url;
     },
     annotateData(records, chain) {
-        // Make a shallow copy of `records`, sort by `pvalue`, and then add a field of the rank.
-        // The shallow copy means that when we modify the copy of the array (`sorted`), it also modifies the objects in `records`.
+        // Add a field `pvalue_rank`, where the strongest pvalue gets rank 1.
+        // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
+        // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
+        // Because it's a shallow copy, the record objects in the original array are changed too.
         var sort_field = 'pvalue';
-        var sorted = records.slice();
-        sorted.sort(function(a, b) {
+        var shallow_copy = records.slice();
+        shallow_copy.sort(function(a, b) {
             var av = a[sort_field];
             var bv = b[sort_field];
             return (av === bv) ? 0 : (av < bv ? -1 : 1);
         });
-        sorted.forEach(function(value, index) {
-            value['rank'] = 1 + index;
-        });
+        shallow_copy.forEach(function(value, index) { value['pvalue_rank'] = 1 + index; });
         return records;
     }
 });
@@ -78,7 +78,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                             '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
-                            '{{namespace[phewas]}}rank',
+                            '{{namespace[phewas]}}pvalue_rank',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
@@ -130,7 +130,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
-                        base.label.filters.push({ field: 'phewas:rank', operator: '<=', value: 5 });
+                        base.label.filters.push({ field: 'phewas:pvalue_rank', operator: '<=', value: 5 });
                         return base;
                     }(),
                     // TODO: Must decide on an appropriate significance threshold for this use case
