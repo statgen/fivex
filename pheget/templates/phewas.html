@@ -43,6 +43,22 @@
     </center>
     <h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
 
+    <div>
+        {% if nearest_genes|length == 1 %}
+        {% with gene = nearest_genes[0] %}
+        <p>{{"Overlapping" if gene.start <= pos <= gene.end else "Nearest"}} gene:
+          <i>{{gene.symbol}}</i> (<i>{{gene.ensg}}</i>) chr{{gene.chrom}}:{{"{:,}".format(gene.start)}}-{{"{:,}".format(gene.end)}}</p>
+        {% endwith %}
+        {% else %}
+        <p style="margin-bottom:0">Overlapping genes:</p>
+        <ul>
+        {% for gene in nearest_genes %}
+        <li>chr{{gene.chrom}}:{{"{:,}".format(gene.start)}}-{{"{:,}".format(gene.end)}} <i>{{gene.symbol}}</i> (<i>{{gene.ensg}}</i>)</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-primary">
