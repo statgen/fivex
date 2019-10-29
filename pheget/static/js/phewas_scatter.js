@@ -195,6 +195,18 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 }
 
 function makeTable(data) {
+    function tabulator_tooltip_maker(cell) {
+        // Only show tooltips when an ellipsis ('...') is hiding part of the data.
+        // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
+        // Unforunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+        // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
+        var e = cell.getElement();
+        if (e.clientWidth >= e.scrollWidth) {
+            return false; // all the text is shown, so there is no '...', so tooltip is unneeded
+        } else {
+            return e.innerText; //shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
+        }
+    }
     if (!window.asdf_table) {
         var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(d + 1) : x.toExponential(1); };
         var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
@@ -203,7 +215,7 @@ function makeTable(data) {
             height: 800,
             columns: [
                 {title:'Gene', field:'phewas:symbol', headerFilter:true, formatter:function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
-                {title:'Tissue', field:'phewas:tissue', headerFilter:true},
+                {title:'Tissue', field:'phewas:tissue', headerFilter:true, widthGrow:2},
                 {title:'System', field:'phewas:system', headerFilter:true},
                 {title:'P-value', field:'phewas:pvalue', formatter:two_digit_fmt2},
                 {title:'Effect Size', field:'phewas:slope', formatter:two_digit_fmt1},
@@ -211,6 +223,7 @@ function makeTable(data) {
             ],
             data: data,
             initialSort: [{column:'phewas:pvalue', dir:'asc'}],
+            tooltipGenerationMode:'hover',tooltips:tabulator_tooltip_maker,tooltipsHeader:true,
         });
     } else {
         window.asdf_table.setData(data);
