@@ -164,3 +164,28 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
+
+def query_range(chrom: str, start: int, end: int,
+                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+    """
+    The actual business of querying is isolated to this function. We could replace it with a database or anything else
+    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
+
+    This version optionally filters by ONE gene or ONE tissue if requested
+    """
+    if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
+        chrom = 'chr{}'.format(chrom)
+
+    # FIXME Hardcoded directory structure! Improve!
+    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
+    # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
+    reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
+    if tissue:
+        reader.add_filter('tissue', tissue)
+
+    if gene_id:
+        reader.add_filter('gene_id', gene_id)
+
+    # TODO: Check to see if the range is retrieving correctly
+    #reader.add_filter('pos', pos)
+    return reader.fetch(chrom, start, end + 1)
