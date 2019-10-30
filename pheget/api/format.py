@@ -78,7 +78,59 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
+SAMPLESIZE_DICT = {
+    "Adipose_Subcutaneous": 581,
+    "Adipose_Visceral_Omentum": 469,
+    "Adrenal_Gland": 233,
+    "Artery_Aorta": 387,
+    "Artery_Coronary": 213,
+    "Artery_Tibial": 584,
+    "Brain_Amygdala": 129,
+    "Brain_Anterior_cingulate_cortex_BA24": 147,
+    "Brain_Caudate_basal_ganglia": 194,
+    "Brain_Cerebellar_Hemisphere": 175,
+    "Brain_Cerebellum": 209,
+    "Brain_Cortex": 205,
+    "Brain_Frontal_Cortex_BA9": 175,
+    "Brain_Hippocampus": 165,
+    "Brain_Hypothalamus": 170,
+    "Brain_Nucleus_accumbens_basal_ganglia": 202,
+    "Brain_Putamen_basal_ganglia": 170,
+    "Brain_Spinal_cord_cervical_c-1": 126,
+    "Brain_Substantia_nigra": 114,
+    "Breast_Mammary_Tissue": 396,
+    "Cells_Cultured_fibroblasts": 483,
+    "Cells_EBV-transformed_lymphocytes": 147,
+    "Colon_Sigmoid": 318,
+    "Colon_Transverse": 368,
+    "Esophagus_Gastroesophageal_Junction": 330,
+    "Esophagus_Mucosa": 497,
+    "Esophagus_Muscularis": 465,
+    "Heart_Atrial_Appendage": 372,
+    "Heart_Left_Ventricle": 386,
+    "Kidney_Cortex": 73,
+    "Liver": 208,
+    "Lung": 515,
+    "Minor_Salivary_Gland": 144,
+    "Muscle_Skeletal": 706,
+    "Nerve_Tibial": 532,
+    "Ovary": 167,
+    "Pancreas": 305,
+    "Pituitary": 237,
+    "Prostate": 221,
+    "Skin_Not_Sun_Exposed_Suprapubic": 517,
+    "Skin_Sun_Exposed_Lower_leg": 605,
+    "Small_Intestine_Terminal_Ileum": 174,
+    "Spleen": 227,
+    "Stomach": 324,
+    "Testis": 322,
+    "Thyroid": 574,
+    "Uterus": 129,
+    "Vagina": 141,
+    "Whole_Blood": 670  
+}
 
+# Add tissue-specific sample sizes to VariantContainer
 class VariantContainer:
     """
     Represent the variant data in a standard manner that lets us access fields by name
@@ -91,7 +143,7 @@ class VariantContainer:
                  tss_distance,
                  ma_samples, ma_count, maf,
                  pval_nominal, slope, slope_se,
-                 tissue, symbol, system):
+                 tissue, symbol, system, sample_size):
         self.chrom = chrom
         self.pos = pos
         self.ref = ref
@@ -112,6 +164,7 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
+        self.sample_size = sample_size
 
     def to_dict(self):
         return vars(self)
@@ -136,6 +189,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields[12] = float(fields[12])  # slope_se
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
+    fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Samples with both genotype and expression data
     return VariantContainer(*fields)
 
 
@@ -150,9 +204,7 @@ def query_variant(chrom: str, pos: int,
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = 'chr{}'.format(chrom)
 
-    # FIXME Hardcoded directory structure! Improve!
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
-    # source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
     # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
@@ -169,3 +221,27 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
+
+def query_range(chrom: str, start: int, end: int,
+                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+    """
+    The actual business of querying is isolated to this function. We could replace it with a database or anything else
+    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
+
+    This version optionally filters by ONE gene or ONE tissue if requested
+    """
+    if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
+        chrom = 'chr{}'.format(chrom)
+
+    # FIXME Hardcoded directory structure! Improve!
+    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
+    reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
+    if tissue:
+        reader.add_filter('tissue', tissue)
+
+    if gene_id:
+        reader.add_filter('gene_id', gene_id)
+
+    # TODO: Check to see if the range is retrieving correctly
+    #reader.add_filter('pos', pos)
+    return reader.fetch(chrom, start - 1, end + 1)
