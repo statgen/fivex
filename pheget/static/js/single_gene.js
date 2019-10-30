@@ -1,20 +1,39 @@
 
+LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
+    getURL() {  // Removed state, chain, fields for now since we are not currently using them
+        // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
+        //      state.start, etc)
+        return this.url;
+    }
+});
+
 
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
+    const start = pos - 1000000;
+    const end = pos + 1000000;
     dataSources
-        .add("assoc", ["AssociationLZ", { url: apiBase + "statistic/single/", params: { source: 45, id_field: "variant" } }])
+        .add(`assoc_${tissue}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
         .add("ld", ["LDLZ2", { url: "https://portaldev.sph.umich.edu/ld/", params: { source: '1000G', population: 'ALL' } }])
         .add("catalog", ["GwasCatalogLZ", { url: apiBase + 'annotation/gwascatalog/results/' }])
-        .add("recomb", ["RecombLZ", { url: apiBase + "annotation/recomb/results/" }])
         .add("constraint", ["GeneConstraintLZ", { url: "//exac.broadinstitute.org/api/constraint" }]);
-    initialState = { chr: chrom, start: pos-1000000, end: pos+1000000 };
-    initialState.genome_build = 'GRCh37';
+    //initialState = { chr: chrom, start: pos-1000000, end: pos+1000000};
+    // initialState.genome_build = 'GRCh37';
     layout = LocusZoom.Layouts.get("plot", "association_catalog", {
-        state: initialState,
+        // state: initialState,
         panels:[
-            LocusZoom.Layouts.get('panel','association', { unnamespaced: true })
+            LocusZoom.Layouts.get('panel','association', { 
+                unnamespaced: true,
+                id: `panel_${tissue}`,
+                data_layers:[
+                    function(){
+                        const base = LocusZoom.Layouts.get('data_layer', 'associationpvaluescatalog', { unnamespaced: true });
+                        // TODO: redefine the data layer fields and values
+                    }(),
+                    LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true })
+                ] 
+            })
         ]
     });
     var plot = LocusZoom.populate(selector, dataSources, layout);

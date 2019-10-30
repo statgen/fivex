@@ -24,7 +24,13 @@
 
 <div>
     Query a single tissue for a single gene: <br>
-    <a href="/single/ENSG00000125734.15/Lung/19_6718376/">chr19:6718376, single gene single tissue</a>
+    <form action="/singlegene" method="get">
+        <input name="chrom" type="hidden" value="{{chrom}}">
+        <input name="pos" type="hidden" value="{{pos}}">
+        <input name="gene_id" type="text" placeholder="ENSG00000129946.10" value="ENSG00000129946.10">
+        <input name="tissue" type="text" placeholder="Adipose_Subcutaneous" value="Adipose_Subcutaneous">
+        <button type="submit">Search</button>
+     </form>
 </div>
 <div id="plot"></div>
 
