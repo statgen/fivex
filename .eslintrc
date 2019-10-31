@@ -3,6 +3,7 @@
     "parserOptions": { "ecmaVersion": 2015 },
     "rules": {
         "no-console": "off",
+        "comma-spacing": "error",
         "indent": [
             2,
             4,
@@ -19,6 +20,10 @@
                 "avoidEscape": true,
                 "allowTemplateLiterals": true
             }
+        ],
+        "key-spacing": [
+            2,
+            {"afterColon": true}
         ],
         "linebreak-style": [
             2,
