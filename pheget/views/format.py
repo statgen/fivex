@@ -1,5 +1,6 @@
-import typing as ty
+import os
 import pickle
+import typing as ty
 
 try:
     # Optional speedup features
@@ -8,8 +9,8 @@ except ImportError:
     pass
 
 from zorp import readers
-import pheget
 
+import pheget
 
 def parse_position(chrom_pos: str):
     """
@@ -74,7 +75,7 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-with open('data/gene.symbol.pickle', 'rb') as f:
+with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
 
@@ -149,7 +150,6 @@ def query_variant(chrom: str, pos: int,
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = 'chr{}'.format(chrom)
 
-    # FIXME Hardcoded directory structure! Improve once Alan has finished generating data
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
