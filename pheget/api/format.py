@@ -133,6 +133,8 @@ def variant_parser(row: str) -> VariantContainer:
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
     fields[10] = float(fields[10])  # pvalue_nominal
+    fields[11] = float(fields[11])  # slope
+    fields[12] = float(fields[12])  # slope_se
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
     return VariantContainer(*fields)
