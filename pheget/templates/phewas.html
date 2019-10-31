@@ -60,9 +60,11 @@
   });
   document.getElementById('show-pvalue').addEventListener('click', function() {
       switchY(plot, 'pvalue');
+      table.setSort("phewas:pvalue", "asc");
   });
   document.getElementById('show-beta').addEventListener('click', function() {
       switchY(plot, 'beta');
+      table.setSort("phewas:beta", "desc");
   });
 </script>
 </body>

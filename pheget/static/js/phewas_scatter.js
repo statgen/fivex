@@ -273,13 +273,14 @@ function makeTable(selector) {
 
     return new Tabulator(selector, {
         layout: 'fitColumns',
-        height: 800,
+        height: 600,
         columns: [
             {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
             {title: 'Tissue', field: 'phewas:tissue', headerFilter: true, widthGrow: 2},
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: 'P-value', field: 'phewas:pvalue', formatter: two_digit_fmt2},
-            {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1},
+            // A large effect size in either direction is good, so sort by abs value
+            {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
             {title: 'Effect Size SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
