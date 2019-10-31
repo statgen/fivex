@@ -24,7 +24,12 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
-LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', { // a new name would lose css
+/**
+ * A special modified datalayer, which sorts points in a unique way (descending), and allows tick marks to be defined
+ *   separate from how things are grouped. Eg, we can sort by tss_distance, but label by gene name
+ */
+LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
+    // Redefine the layout, in order to preserve CSS rules (which incorporate the name of the layer)
     _prepareData: function() {
         var xField = this.layout.x_axis.field || 'x';
         // The (namespaced) field from `this.data` that will be used to assign datapoints to a given category & color
@@ -33,27 +38,30 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', { // a new n
             throw new Error('Layout for ' + this.layout.id + ' must specify category_field');
         }
 
-        // If the layout defines a `category_sorting_field`, then sort the categories according to the negative numeric value of it.
-        // If two points have the same value of `category_field`, they MUST have the same value of `category_sorting_field`.
+        // Element labels don't have to match the sorting field used to create groups. However, we enforce a rule that
+        //  there must be a 1:1 correspondence
+        // If two points have the same value of `category_field`, they MUST have the same value of `category_label_field`.
         var sourceData;
-        var category_sorting_field = this.layout.x_axis.category_sorting_field;
-        if (category_sorting_field !== undefined) {
-            var sort_value_for_category = {};
-            // Assert that each category has only one value for the `category_sorting_field`
+        var category_order_field = this.layout.x_axis.category_order_field;
+        if (category_order_field) {
+            var unique_categories = {};
+            // Requirement: there must be a 1:1 correspondence between categories and their associated labels
             this.data.forEach(function(d) {
-                if (!Object.prototype.hasOwnProperty.call(sort_value_for_category, d[category_field])) {
-                    sort_value_for_category[d[category_field]] = d[category_sorting_field];
-                } else if (sort_value_for_category[d[category_field]] !== d[category_sorting_field]) {
-                    throw new Error('Unable to sort PheWAS plot categories by ' + category_sorting_field + ' because the category ' + d[category_field]
-                                    + ' can have either the value "' + sort_value_for_category[d[category_field]] + '" or "' + d[category_sorting_field] + '".');
+                var item_cat_label = d[category_field];
+                var item_cat_order = d[category_order_field];
+                if (!Object.prototype.hasOwnProperty.call(unique_categories, item_cat_label)) {
+                    unique_categories[item_cat_label] = item_cat_order;
+                } else if (unique_categories[item_cat_label] !== item_cat_order) {
+                    throw new Error('Unable to sort PheWAS plot categories by ' + category_field + ' because the category ' + item_cat_label
+                                    + ' can have either the value "' + unique_categories[item_cat_label] + '" or "' + item_cat_order + '".');
                 }
             });
 
             // Sort the data so that things in the same category are adjacent
             sourceData = this.data
                 .sort(function(a, b) {
-                    var av = -sort_value_for_category[a[category_field]]; // sort descending
-                    var bv = -sort_value_for_category[b[category_field]];
+                    var av = -a[category_field]; // sort descending
+                    var bv = -b[category_field];
                     return (av === bv) ? 0 : (av < bv ? -1 : 1);});
         } else {
             // Sort the data so that things in the same category are adjacent (case-insensitive by specified field)
@@ -248,33 +256,26 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
 // eslint-disable-next-line no-unused-vars
 function groupByThing(plot, thing) {
-    var group_field, label_field;
+    var group_field, point_label_field;
+    const scatter_config = plot.layout.panels[0].data_layers[0];
+    delete scatter_config.x_axis.category_order_field;
     if (thing === 'tissue') {
         group_field = 'tissue';
-        label_field = 'symbol';
+        point_label_field = 'symbol';
+    } else if (thing === 'symbol') {
+        group_field = 'symbol';  // label by gene name, but arrange those genes based on position
+        point_label_field = 'tissue';
+        scatter_config.x_axis.category_order_field = 'phewas:tss_distance';
+    } else if (thing === 'system') {
+        group_field = 'system';
+        point_label_field = 'symbol';
     } else {
-        if (thing === 'symbol') {
-            group_field = 'symbol';
-            label_field = 'tissue';
-        } else {
-            group_field = 'system';
-            label_field = 'symbol';
-        }
+        throw new Error('Unrecognized grouping field');
     }
-
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
-
     scatter_config.color[2].field = `phewas:${group_field}`;
-    scatter_config.label.text = `{{phewas:${label_field}}}`;
-    scatter_config.match.send = scatter_config.match.receive = `phewas:${label_field}`;
-
-    if (group_field === 'symbol') {
-        scatter_config.x_axis.category_sorting_field = 'phewas:tss_distance';
-    } else {
-        delete scatter_config.x_axis.category_sorting_field;
-    }
+    scatter_config.label.text = `{{phewas:${point_label_field}}}`;
+    scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
 
     plot.applyState();
 }
@@ -289,8 +290,7 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
-    }
-    else if (yfield === 'slope') {
+    } else if (yfield === 'slope') {
         delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:slope';
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
