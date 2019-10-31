@@ -1,5 +1,6 @@
-import typing as ty
+import os
 import pickle
+import typing as ty
 
 try:
     # Optional speedup features
@@ -8,8 +9,8 @@ except ImportError:
     pass
 
 from zorp import readers
-import pheget
 
+import pheget
 
 def parse_position(chrom_pos: str):
     """
@@ -74,7 +75,7 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-with open('data/gene.symbol.pickle', 'rb') as f:
+with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
 
@@ -89,7 +90,7 @@ class VariantContainer:
     def __init__(self, gene_id, chrom, pos, ref, alt, build,
                  tss_distance,
                  ma_samples, ma_count, maf,
-                 pval_nominal, slope, slope_se,
+                 pval_nominal, beta, stderr_beta,
                  tissue, symbol, system):
         self.chrom = chrom
         self.pos = pos
@@ -105,8 +106,8 @@ class VariantContainer:
         self.maf = maf
 
         self.pvalue = pval_nominal
-        self.slope = slope
-        self.slope_se = slope_se
+        self.beta = beta
+        self.stderr_beta = stderr_beta
 
         self.tissue = tissue
         self.symbol = symbol
@@ -125,11 +126,13 @@ def variant_parser(row: str) -> VariantContainer:
 
     The parser is the piece tied to file format, so this must change if the file format changes!
     """
+    # FIXME: This duplicates code from `api.format`, and we should de-duplicate
     fields = row.split('\t')
     # For now we clean up three fields exactly.
     # Revise if data format changes!
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
+    fields[6] = int(fields[6])  # tss_distance
     fields[10] = float(fields[10])  # pvalue_nominal
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
@@ -147,7 +150,6 @@ def query_variant(chrom: str, pos: int,
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = 'chr{}'.format(chrom)
 
-    # FIXME Hardcoded directory structure! Improve once Alan has finished generating data
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
