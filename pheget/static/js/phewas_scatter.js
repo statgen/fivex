@@ -324,13 +324,14 @@ function switchDisplayedY(plot) {
 }
 */
 
+// eslint-disable-next-line no-unused-vars
 function labelToggle(plot) {
     if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0; 
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0;
     } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 0) {
         plot.layout.panels[0].data_layers[0].label.filters[1].value = 50;
     } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 50) {
         plot.layout.panels[0].data_layers[0].label.filters[1].value = 5;
     }
-    plot.applyState()
+    plot.applyState();
 }
