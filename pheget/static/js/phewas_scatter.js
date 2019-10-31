@@ -302,9 +302,10 @@ function switchY(plot, yfield) {
     plot.applyState();
 }
 
+/* Toggle displaying p-values and betas - can be bound to one button instead of two to save space
 function switchDisplayedY(plot) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
-    if (scatter_config.y_axis.field === 'phewas:slope') {
+    if (scatter_config.y_axis.field === 'phewas:beta') {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
@@ -313,7 +314,7 @@ function switchDisplayedY(plot) {
     }
     else if (scatter_config.y_axis.field === 'phewas:pvalue|neglog10') {
         delete scatter_config.y_axis.floor;
-        scatter_config.y_axis.field = 'phewas:slope';
+        scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
@@ -321,6 +322,7 @@ function switchDisplayedY(plot) {
     }
     plot.applyState();
 }
+*/
 
 function labelToggle(plot) {
     if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
