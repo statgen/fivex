@@ -70,6 +70,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
+                min_height: 500,
                 data_layers: [
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
@@ -140,7 +141,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
                 margin: { bottom: 40 },
-                min_height: 250,
+                min_height: 300,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
@@ -241,4 +242,35 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.lower_buffer = 0.15;
     }
     plot.applyState();
+}
+
+function switchDisplayedY(plot) {
+    const scatter_config = plot.layout.panels[0].data_layers[0];
+    if (scatter_config.y_axis.field === 'phewas:slope') {
+        scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
+        scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.lower_buffer = 0;
+        plot.layout.panels[0].data_layers[1].offset = 7.301;
+        plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+    }
+    else if (scatter_config.y_axis.field === 'phewas:pvalue|neglog10') {
+        delete scatter_config.y_axis.floor;
+        scatter_config.y_axis.field = 'phewas:slope';
+        plot.layout.panels[0].axes.y1['label'] = 'Effect size';
+        plot.layout.panels[0].data_layers[1].offset = 0;
+        plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+        scatter_config.y_axis.lower_buffer = 0.15;
+    }
+    plot.applyState();
+}
+
+function labelToggle(plot) {
+    if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0; 
+    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 0) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 50;
+    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 50) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 5;
+    }
+    plot.applyState()
 }

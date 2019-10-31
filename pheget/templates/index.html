@@ -6,18 +6,20 @@
 </head>
 <body>
  <h1>PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues</h1>
+
 <div>
-  <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
-  <button id='navigate-variant' class="btn btn-success">Go</button>
+  <input id="query-field" type="text" width="100" placeholder="chr19:4425308">
+  <button id='navigate-variant' class="btn btn-success" type=button>Go</button>
 </div>
 
 <div>
-  Example: <a href="/variant/19_6718376/">chr19:6718376, many genes</a> <br>
-  Example: <a href="/variant/15_78570111/">chr15:78570111, many genes</a> <br>
-  Example: <a href="/variant/12_56007301/">chr12:56007301, many genes</a> <br>
-  Example: <a href="/variant/19_488506/">chr19:488506, many genes</a> <br>
-  Example: <a href="/variant/19_991063/">chr19:991063, many genes</a> <br>
-  Example: <a href="variant/19_4425308/">chr19:4425308, many genes</a> <br>
+  Examples:<br>
+  <a href="/variant/19_6718376/">chr19:6718376</a> <br>
+  <a href="/variant/15_78570111/">chr15:78570111</a> <br>
+  <a href="/variant/12_56007301/">chr12:56007301</a> <br>
+  <a href="/variant/19_488506/">chr19:488506</a> <br>
+  <a href="/variant/19_991063/">chr19:991063</a> <br>
+  <a href="variant/19_4425308/">chr19:4425308</a> <br>
 </div>
 
 <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
@@ -29,6 +31,11 @@
   }
   parseSearch(variant.value);
   });
+ document.getElementById('query-field').addEventListener("keyup", event => {
+   if (event.key == "Enter") { 
+     document.getElementById('navigate-variant').click(); 
+  }
+ });
 </script>
 
 </body>
