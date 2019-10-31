@@ -20,7 +20,7 @@
 <button id="group-system">Group by System</button>
 <button id="group-symbol">Group by Gene Symbol</button>
 <button id="show-pvalue">Show P-values</button>
-<button id="show-slope">Show effect sizes</button>
+<button id="show-beta">Show effect sizes</button>
 <div id="plot"></div>
 
 {# These files must be included to make a LocusZoom plot #}
@@ -61,8 +61,8 @@
     document.getElementById('show-pvalue').addEventListener('click', function() {
         switchY(plot, 'pvalue');
     });
-    document.getElementById('show-slope').addEventListener('click', function() {
-        switchY(plot, 'slope');
+    document.getElementById('show-beta').addEventListener('click', function() {
+        switchY(plot, 'beta');
     });
 
 </script>

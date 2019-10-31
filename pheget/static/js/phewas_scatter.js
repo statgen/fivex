@@ -24,13 +24,72 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     }
 });
 
+/**
+ * A special modified datalayer, which sorts points in a unique way (descending), and allows tick marks to be defined
+ *   separate from how things are grouped. Eg, we can sort by tss_distance, but label by gene name
+ */
+LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
+    // Redefine the layout, in order to preserve CSS rules (which incorporate the name of the layer)
+    _prepareData: function() {
+        var xField = this.layout.x_axis.field || 'x';
+        // The (namespaced) field from `this.data` that will be used to assign datapoints to a given category & color
+        var category_field = this.layout.x_axis.category_field;
+        if (!category_field) {
+            throw new Error('Layout for ' + this.layout.id + ' must specify category_field');
+        }
+
+        // Element labels don't have to match the sorting field used to create groups. However, we enforce a rule that
+        //  there must be a 1:1 correspondence
+        // If two points have the same value of `category_field`, they MUST have the same value of `category_label_field`.
+        var sourceData;
+        var category_order_field = this.layout.x_axis.category_order_field;
+        if (category_order_field) {
+            var unique_categories = {};
+            // Requirement: there must be a 1:1 correspondence between categories and their associated labels
+            this.data.forEach(function(d) {
+                var item_cat_label = d[category_field];
+                var item_cat_order = d[category_order_field];
+                if (!Object.prototype.hasOwnProperty.call(unique_categories, item_cat_label)) {
+                    unique_categories[item_cat_label] = item_cat_order;
+                } else if (unique_categories[item_cat_label] !== item_cat_order) {
+                    throw new Error('Unable to sort PheWAS plot categories by ' + category_field + ' because the category ' + item_cat_label
+                                    + ' can have either the value "' + unique_categories[item_cat_label] + '" or "' + item_cat_order + '".');
+                }
+            });
+
+            // Sort the data so that things in the same category are adjacent
+            sourceData = this.data
+                .sort(function(a, b) {
+                    var av = -a[category_field]; // sort descending
+                    var bv = -b[category_field];
+                    return (av === bv) ? 0 : (av < bv ? -1 : 1);});
+        } else {
+            // Sort the data so that things in the same category are adjacent (case-insensitive by specified field)
+            sourceData = this.data
+                .sort(function(a, b) {
+                    var ak = a[category_field];
+                    var bk = b[category_field];
+                    var av = ak.toString ? ak.toString().toLowerCase() : ak;
+                    var bv = bk.toString ? bk.toString().toLowerCase() : bk;
+                    return (av === bv) ? 0 : (av < bv ? -1 : 1);});
+        }
+
+        sourceData.forEach(function(d, i) {
+            // Implementation detail: Scatter plot requires specifying an x-axis value, and most datasources do not
+            //   specify plotting positions. If a point is missing this field, fill in a synthetic value.
+            d[xField] = d[xField] || i;
+        });
+        return sourceData;
+    }
+});
+
 LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
     if (typeof input !== 'undefined') {
-        var slope = input['phewas:slope'];
-        var slope_se = input['phewas:slope_se'];
-        if (!isNaN(slope) && !isNaN(slope_se)) {
-            if (slope - 1.96 * slope_se > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
-            if (slope + 1.96 * slope_se < 0) { return parameters['-'] || null; }
+        var beta = input['phewas:beta'];
+        var stderr_beta = input['phewas:stderr_beta'];
+        if (!isNaN(beta) && !isNaN(stderr_beta)) {
+            if (beta - 1.96 * stderr_beta > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
+            if (beta + 1.96 * stderr_beta < 0) { return parameters['-'] || null; }
         }
     }
     return null;
@@ -77,7 +136,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-                            '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
+                            '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
+                            '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}pvalue_rank',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
@@ -122,10 +182,11 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
                         base.tooltip.html = `
 <strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
+<strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
+<strong>Effect size:</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
@@ -195,32 +256,31 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
 // eslint-disable-next-line no-unused-vars
 function groupByThing(plot, thing) {
-    var group_field, label_field;
+    var group_field, point_label_field;
+    const scatter_config = plot.layout.panels[0].data_layers[0];
+    delete scatter_config.x_axis.category_order_field;
     if (thing === 'tissue') {
         group_field = 'tissue';
-        label_field = 'symbol';
+        point_label_field = 'symbol';
+    } else if (thing === 'symbol') {
+        group_field = 'symbol';  // label by gene name, but arrange those genes based on position
+        point_label_field = 'tissue';
+        scatter_config.x_axis.category_order_field = 'phewas:tss_distance';
+    } else if (thing === 'system') {
+        group_field = 'system';
+        point_label_field = 'symbol';
     } else {
-        if (thing === 'symbol') {
-            group_field = 'symbol';
-            label_field = 'tissue';
-        } else {
-            group_field = 'system';
-            label_field = 'symbol';
-        }
+        throw new Error('Unrecognized grouping field');
     }
-
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-
     scatter_config.x_axis.category_field = `phewas:${group_field}`;
-
     scatter_config.color[2].field = `phewas:${group_field}`;
-    scatter_config.label.text = `{{phewas:${label_field}}}`;
-    scatter_config.match.send = scatter_config.match.receive = `phewas:${label_field}`;
+    scatter_config.label.text = `{{phewas:${point_label_field}}}`;
+    scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
 
     plot.applyState();
 }
 
-// Switches the displayed y-axis value between p-values and slopes (betas)
+// Switches the displayed y-axis value between p-values and effect size
 // eslint-disable-next-line no-unused-vars
 function switchY(plot, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
@@ -230,11 +290,9 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
-
-    }
-    else if (yfield === 'slope') {
+    } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
-        scatter_config.y_axis.field = 'phewas:slope';
+        scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
