@@ -84,6 +84,7 @@
 </div>
 
    
+
 <div id="plot"></div>
 
 {# These files must be included to make a LocusZoom plot #}
@@ -129,8 +130,8 @@
     document.getElementById('show-pvalue').addEventListener('click', function() {
         switchY(plot, 'pvalue');
     });
-    document.getElementById('show-slope').addEventListener('click', function() {
-        switchY(plot, 'slope');
+    document.getElementById('show-beta').addEventListener('click', function() {
+        switchY(plot, 'beta');
     });
     document.getElementById('label-toggle').addEventListener('click', function() {
         labelToggle(plot);
