@@ -85,11 +85,11 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
 
 LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
     if (typeof input !== 'undefined') {
-        var slope = input['phewas:slope'];
-        var slope_se = input['phewas:slope_se'];
-        if (!isNaN(slope) && !isNaN(slope_se)) {
-            if (slope - 1.96 * slope_se > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
-            if (slope + 1.96 * slope_se < 0) { return parameters['-'] || null; }
+        var beta = input['phewas:beta'];
+        var stderr_beta = input['phewas:stderr_beta'];
+        if (!isNaN(beta) && !isNaN(stderr_beta)) {
+            if (beta - 1.96 * stderr_beta > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
+            if (beta + 1.96 * stderr_beta < 0) { return parameters['-'] || null; }
         }
     }
     return null;
@@ -136,7 +136,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-                            '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
+                            '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}pvalue_rank',
                         ];
@@ -186,7 +186,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size:</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
+<strong>Effect size:</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
@@ -280,7 +280,7 @@ function groupByThing(plot, thing) {
     plot.applyState();
 }
 
-// Switches the displayed y-axis value between p-values and slopes (betas)
+// Switches the displayed y-axis value between p-values and effect size
 // eslint-disable-next-line no-unused-vars
 function switchY(plot, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
@@ -290,9 +290,9 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
-    } else if (yfield === 'slope') {
+    } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
-        scatter_config.y_axis.field = 'phewas:slope';
+        scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};

@@ -89,7 +89,7 @@ class VariantContainer:
     def __init__(self, gene_id, chrom, pos, ref, alt, build,
                  tss_distance,
                  ma_samples, ma_count, maf,
-                 pval_nominal, slope, slope_se,
+                 pval_nominal, beta, stderr_beta,
                  tissue, symbol, system):
         self.chrom = chrom
         self.pos = pos
@@ -105,8 +105,8 @@ class VariantContainer:
         self.maf = maf
 
         self.pvalue = pval_nominal
-        self.slope = slope
-        self.slope_se = slope_se
+        self.beta = beta
+        self.stderr_beta = stderr_beta
 
         self.tissue = tissue
         self.symbol = symbol

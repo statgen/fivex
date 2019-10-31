@@ -90,7 +90,7 @@ class VariantContainer:
     def __init__(self, gene_id, chrom, pos, ref, alt, build,
                  tss_distance,
                  ma_samples, ma_count, maf,
-                 pval_nominal, slope, slope_se,
+                 pval_nominal, beta, stderr_beta,
                  tissue, symbol, system):
         self.chrom = chrom
         self.pos = pos
@@ -106,8 +106,8 @@ class VariantContainer:
         self.maf = maf
 
         self.pvalue = pval_nominal
-        self.slope = slope
-        self.slope_se = slope_se
+        self.beta = beta
+        self.stderr_beta = stderr_beta
 
         self.tissue = tissue
         self.symbol = symbol
@@ -133,8 +133,8 @@ def variant_parser(row: str) -> VariantContainer:
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
     fields[10] = float(fields[10])  # pvalue_nominal
-    fields[11] = float(fields[11])  # slope
-    fields[12] = float(fields[12])  # slope_se
+    fields[11] = float(fields[11])  # beta
+    fields[12] = float(fields[12])  # stderr_beta
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
     return VariantContainer(*fields)
