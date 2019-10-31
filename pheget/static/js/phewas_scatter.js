@@ -6,6 +6,21 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
         return this.url;
+    },
+    annotateData(records, chain) {
+        // Add a field `pvalue_rank`, where the strongest pvalue gets rank 1.
+        // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
+        // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
+        // Because it's a shallow copy, the record objects in the original array are changed too.
+        var sort_field = 'pvalue';
+        var shallow_copy = records.slice();
+        shallow_copy.sort(function(a, b) {
+            var av = a[sort_field];
+            var bv = b[sort_field];
+            return (av === bv) ? 0 : (av < bv ? -1 : 1);
+        });
+        shallow_copy.forEach(function(value, index) { value['pvalue_rank'] = 1 + index; });
+        return records;
     }
 });
 
@@ -32,7 +47,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
         }])
-        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh37' } }])
+        .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
 
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
@@ -43,10 +58,18 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             end: pos_higher,
             chr: chrom
         },
+        dashboard: {
+            components:[
+                {
+                    color: 'gray',
+                    position: 'right',
+                    type: 'download'
+                }
+            ]
+        },
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
-                proportional_height: 1.0,
                 data_layers: [
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
@@ -55,6 +78,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                             '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
+                            '{{namespace[phewas]}}pvalue_rank',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
@@ -106,6 +130,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
+                        base.label.filters.push({ field: 'phewas:pvalue_rank', operator: '<=', value: 5 });
                         return base;
                     }(),
                     // TODO: Must decide on an appropriate significance threshold for this use case
@@ -115,6 +140,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes',{
                 unnamespaced: true,
                 margin: { bottom: 40 },
+                min_height: 250,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
@@ -125,7 +151,13 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                 },
                 data_layers: [
                     function() {
-                        const base = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true });
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes', {
+                            unnamespaced: true,
+                            exon_height: 8,
+                            bounding_box_padding: 5,
+                            track_vertical_spacing: 5,
+                            exon_label_spacing: 3
+                        });
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -195,15 +227,18 @@ function switchY(plot, yfield) {
     if (yfield === 'pvalue') {
         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
         scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+
     }
     else if (yfield === 'slope') {
+        delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:slope';
-        scatter_config.y_axis.floor = undefined;
         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+        scatter_config.y_axis.lower_buffer = 0.15;
     }
     plot.applyState();
 }
