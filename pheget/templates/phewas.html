@@ -1,27 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/r/bs-3.3.5/jq-2.1.4,dt-1.10.8/datatables.min.css">
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
         type="text/css"/>
   <title>PheGET - Single Variant View</title>
 </head>
+
+<style>
+    .padtop {
+        padding-top: 20px;
+    }
+</style>
+            
 <body>
 
+
+<div class="padtop">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <div id="home-searchbox">
+                <div class="input-group">
+                    <input id="query-field" name="query-field" autocomplete="off" class="form-control" type="text" placeholder="Search for a variant" autofocus/>
+                    <span class="input-group-btn"> 
+                    <button id="navigate-variant" class="btn btn-primary" type="button">Search</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+<center>
+    <a href="/">Back to PheGET Homepage</a>
+</center>
 <h1>chr{{chrom}}:{{"{:,}".format(pos)}} for all tissues and genes</h1>
-<div>
+<!-- old searchbox
   <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
   <button id='navigate-variant' class="btn btn-success" type=button>Go</button>
   <br>
-  <a href="/">Back to PheGET Homepage</a>
+-->
+
+
 </div>
 
-<button id="group-tissue">Group by Tissue</button>
-<button id="group-system">Group by System</button>
-<button id="group-symbol">Group by Gene Symbol</button><br>
-<button id="show-pvalue">Show P-values</button>
-<button id="show-slope">Show effect sizes</button><br>
-<button id="label-toggle">Toggle labels</button><br>
+<div class = "container-fluid">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+<!-- old buttons
+       <p>
+        <button id="group-tissue" type="button" class="btn btn-primary">Group by Tissue</button>
+        <button id="group-system" type="button" class="btn btn-primary">Group by System</button>
+        <button id="group-symbol" type="button" class="btn btn-primary">Group by Gene Symbol</button><br>
+        <button id="show-pvalue" type="button" class="btn btn-secondary">Show P-values</button>
+        <button id="show-slope" type="button" class="btn btn-secondary">Show effect sizes</button><br>
+        <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button><br>
+    </p>
+-->
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-primary">
+            <input type="radio" name="group-options" autocomplete=off id="group-tissue" onclick="groupByThing(plot, 'tissue');"/> Tissue
+        </label>
+        <label class="btn btn-primary">
+            <input type="radio" name="group-options" autocomplete=off id="group-system" onclick="groupByThing(plot, 'system');" checked/> System
+        </label>
+        <label class="btn btn-primary"> 
+            <input type="radio" name="group-options" autocomplete=off id="group-symbol" onclick="groupByThing(plot, 'symbol');" /> Gene
+        </label>
+    </div>
+
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-success">
+            <input type="radio" name="y-options" autocomplete=off id="show-pvalue" onclick="switchY(plot, 'pvalue');" /> P-values
+        </label>
+        <label class="btn btn-success">
+            <input type="radio" name="y-options" autocomplete=off id="show-slopes" onclick="switchY(plot, 'slope');" /> Betas
+        </label>
+    </div>
+            
+    <button id="label-toggle" type="button" class="btn btn-info" onclick="labelToggle(plot);">Toggle labels</button><br>
+
+    </div>
+</div>
+
+   
 <div id="plot"></div>
 
 {# These files must be included to make a LocusZoom plot #}
@@ -43,17 +105,18 @@
   // (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
 
   document.getElementById('navigate-variant').addEventListener('click', function() {
-    const variant = document.getElementById('query-field');
-    if (!variant) {
-        return;
-    }
-    parseSearch(variant.value);
-    });
-  document.getElementById('query-field').addEventListener("keyup", event => {
-   if (event.key == "Enter") { 
-     document.getElementById('navigate-variant').click(); 
+  const variant = document.getElementById('query-field');
+  if (!variant) {
+    return;
   }
- });
+  parseSearch(variant.value);
+  });
+  document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+      document.getElementById('navigate-variant').click();
+    }
+  });     
+/* Old code
     document.getElementById('group-tissue').addEventListener('click', function () {
         groupByThing(plot, 'tissue');
     });
@@ -72,6 +135,7 @@
     document.getElementById('label-toggle').addEventListener('click', function() {
         labelToggle(plot);
     });
+*/
 </script>
 </body>
 </html>
