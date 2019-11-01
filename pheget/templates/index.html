@@ -1,34 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>PheGET: eQTL Browser</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>PheGET: eQTL Browser</title>
+
+    <style>
+        body {
+            height: 100%;
+        }
+    </style>
 </head>
+
 <body>
- <h1>PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues</h1>
-<div>
-  <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
-  <button id='navigate-variant' class="btn btn-success">Go</button>
+
+<div class="container d-flex vh-100">
+    <div class="row justify-content-center align-self-center">
+        <div class="col-xs-12">
+            <h2 class="text-center">
+                PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues
+            </h2>
+
+            <form id="variant-search" class="mb-3">
+                <div class="input-group">
+                    <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                           type="text"
+                           placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+
+                    <div class="input-group-append">
+                        <button type="submit" id="navigate-variant" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="text-center">
+            Examples:
+            <a href="{{ url_for('variant_view', chrom_pos='19_6718376') }}">chr19:6718376</a>
+            <a href="{{ url_for('variant_view', chrom_pos='15_78570111') }}">chr15:78570111</a>
+            <a href="{{ url_for('variant_view', chrom_pos='12_56007301') }}">chr12:56007301</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_488506') }}">chr19:488506</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_991063') }}">chr19:991063</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_4425308') }}">chr19:4425308</a><br>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<div>
-  Example: <a href="/variant/19_6718376/">chr19:6718376, many genes</a> <br>
-  Example: <a href="/variant/15_78570111/">chr15:78570111, many genes</a> <br>
-  Example: <a href="/variant/12_56007301/">chr12:56007301, many genes</a> <br>
-  Example: <a href="/variant/19_488506/">chr19:488506, many genes</a> <br>
-  Example: <a href="/variant/19_991063/">chr19:991063, many genes</a> <br>
-  Example: <a href="variant/19_4425308/">chr19:4425308, many genes</a> <br>
-</div>
 
 <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
+
 <script>
-  document.getElementById('navigate-variant').addEventListener('click', function() {
-  const variant = document.getElementById('query-field');
-  if (!variant) {
-      return;
-  }
-  parseSearch(variant.value);
-  });
+    document.getElementById('variant-search').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const variant = document.getElementById('query-field').value;
+        if (!variant) {
+            return;
+        }
+        parseSearch(variant);
+    });
 </script>
 
 </body>
