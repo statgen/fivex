@@ -80,10 +80,7 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
-<<<<<<< HEAD
-=======
 # Sample sizes from GTEx v8
->>>>>>> master
 SAMPLESIZE_DICT = {
     "Adipose_Subcutaneous": 581,
     "Adipose_Visceral_Omentum": 469,
@@ -133,14 +130,9 @@ SAMPLESIZE_DICT = {
     "Thyroid": 574,
     "Uterus": 129,
     "Vagina": 141,
-<<<<<<< HEAD
-    "Whole_Blood": 670  
-}
-=======
     "Whole_Blood": 670
 }
 
->>>>>>> master
 
 # Add tissue-specific sample sizes to VariantContainer
 class VariantContainer:
@@ -154,16 +146,12 @@ class VariantContainer:
     def __init__(self, gene_id, chrom, pos, ref, alt, build,
                  tss_distance,
                  ma_samples, ma_count, maf,
-<<<<<<< HEAD
-                 pval_nominal, slope, slope_se,
-=======
                  log_pvalue_nominal, beta, stderr_beta,
->>>>>>> master
                  tissue, symbol, system, sample_size):
-        self.chrom = chrom
-        self.pos = pos
-        self.ref = ref
-        self.alt = alt
+        self.chromosome = chrom
+        self.position = pos
+        self.refAllele = ref
+        self.altAllele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -180,9 +168,7 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
-        self.sample_size = sample_size
-<<<<<<< HEAD
-=======
+        self.samples = sample_size
 
     @property
     def pvalue(self):
@@ -193,7 +179,6 @@ class VariantContainer:
             return 0
         else:
             return 10 ** -self.log_pvalue
->>>>>>> master
 
     def to_dict(self):
         return vars(self)
@@ -219,11 +204,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields[12] = float(fields[12])  # stderr_beta
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
-<<<<<<< HEAD
-    fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Samples with both genotype and expression data
-=======
     fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Add sample sizes from GTEx v8
->>>>>>> master
     return VariantContainer(*fields)
 
 
@@ -239,10 +220,6 @@ def query_variant(chrom: str, pos: int,
         chrom = 'chr{}'.format(chrom)
 
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
-<<<<<<< HEAD
-    # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
-=======
->>>>>>> master
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
 
     # Filters for tissue and gene name
@@ -257,7 +234,7 @@ def query_variant(chrom: str, pos: int,
     #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
     #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
     #       interval, but 20,000 is not."
-    reader.add_filter('pos', pos)
+    reader.add_filter('position', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
 
 def query_range(chrom: str, start: int, end: int,

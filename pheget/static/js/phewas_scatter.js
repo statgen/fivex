@@ -138,22 +138,13 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-<<<<<<< HEAD
-                            '{{namespace[phewas]}}slope', '{{namespace[phewas]}}slope_se',
-                            '{{namespace[phewas]}}pvalue_rank', '{{namespace[phewas]}}chrom',
-                            '{{namespace[phewas]}}pos', '{{namespace[phewas]}}ref',
-                            '{{namespace[phewas]}}alt', '{{namespace[phewas]}}ma_samples',
-                            '{{namespace[phewas]}}ma_count', '{{namespace[phewas]}}maf',
-                            '{{namespace[phewas]}}sample_size',
-=======
                             '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}log_pvalue_rank',
-                            '{{namespace[phewas]}}chrom', '{{namespace[phewas]}}pos',
-                            '{{namespace[phewas]}}ref', '{{namespace[phewas]}}alt',
+                            '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
+                            '{{namespace[phewas]}}refAllele', '{{namespace[phewas]}}altAllele',
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
-                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}sample_size',
->>>>>>> master
+                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -196,24 +187,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
 
                         base.tooltip.html = `
-<<<<<<< HEAD
-<strong>Variant:</strong> {{{{namespace[phewas]}}chrom}}:{{{{namespace[phewas]}}pos}} {{{{namespace[phewas]}}ref}}/{{{{namespace[phewas]}}alt}}<br>
-<strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
-<strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
-<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size}})<br>
-<strong>Minor allele frequency (count):</strong> {{{{namespace[phewas]}}maf}} ({{{{namespace[phewas]}}ma_count}})<br>
-<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size (SE)</strong> {{{{namespace[phewas]}}slope|htmlescape}} ({{{{namespace[phewas]}}slope_se|htmlescape}})<br>
-=======
-<strong>Variant:</strong> {{{{namespace[phewas]}}chrom|htmlescape}}:{{{{namespace[phewas]}}pos|htmlescape}} {{{{namespace[phewas]}}ref|htmlescape}}/{{{{namespace[phewas]}}alt|htmlescape}}<br>
+<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}refAllele|htmlescape}}/{{{{namespace[phewas]}}altAllele|htmlescape}}<br>
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
 <strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
-<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
->>>>>>> master
+<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
