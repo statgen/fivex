@@ -332,7 +332,7 @@ function groupByThing(plot, thing) {
 
 // Switches the displayed y-axis value between p-values and effect size
 // eslint-disable-next-line no-unused-vars
-function switchY(plot, yfield) {
+function switchY(plot, table, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
     if (yfield === 'log_pvalue') {
         scatter_config.y_axis.field = 'phewas:log_pvalue';
@@ -340,6 +340,8 @@ function switchY(plot, yfield) {
         scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+
+        table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:beta';
@@ -347,6 +349,8 @@ function switchY(plot, yfield) {
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
         scatter_config.y_axis.lower_buffer = 0.15;
+
+        table.setSort('phewas:beta', 'desc');
     }
     plot.applyState();
 }
