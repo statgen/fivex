@@ -2,66 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>PheGET: eQTL Browser</title>
+
+    <style>
+        body {
+            height: 100%;
+        }
+    </style>
 </head>
 
-<link rel="stylesheet" type="text/css"
-      href="https://cdn.datatables.net/r/bs-3.3.5/jq-2.1.4,dt-1.10.8/datatables.min.css">
-
-<!-- Crude vertical centering code -->
-<style>
-    .center-vertically {
-        position: absolute;
-        top: 50%;
-        -ms-transform: translateY(-50%);
-        transform: translateY(-50%);
-    }
-</style>
-
 <body>
-<div class="center-vertically">
-    <div>
-        <h1>
-            <center>PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues</center>
-        </h1>
-        <br>
 
-        <div class="container-fluid">
+<div class="container d-flex vh-100">
+    <div class="row justify-content-center align-self-center">
+        <div class="col-xs-12">
+            <h2 class="text-center">
+                PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues
+            </h2>
 
-            <div class="row">
-                <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
-                    <div id="home-searchbox">
-                        <form id="variant-search">
-                            <div class="input-group">
+            <form id="variant-search" class="mb-3">
+                <div class="input-group">
+                    <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                           type="text"
+                           placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
 
-                                <input id="query-field" name="query-field" autocomplete="off" class="form-control"
-                                       type="text"
-                                       placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
-
-                                <span class="input-group-btn">
-                                    <button type="submit" id="navigate-variant" class="btn btn-primary">Search</button>
-                                </span>
-                            </div>
-                        </form>
+                    <div class="input-group-append">
+                        <button type="submit" id="navigate-variant" class="btn btn-primary">Search</button>
                     </div>
                 </div>
-            </div>
+            </form>
 
-            <br>
-            <div>
-                <center>
-                    Examples:
-                    <a href="{{ url_for('variant_view', chrom_pos='19_6718376') }}">chr19:6718376</a>
-                    <a href="{{ url_for('variant_view', chrom_pos='15_78570111') }}">chr15:78570111</a>
-                    <a href="{{ url_for('variant_view', chrom_pos='12_56007301') }}">chr12:56007301</a>
-                    <a href="{{ url_for('variant_view', chrom_pos='19_488506') }}">chr19:488506</a>
-                    <a href="{{ url_for('variant_view', chrom_pos='19_991063') }}">chr19:991063</a>
-                    <a href="{{ url_for('variant_view', chrom_pos='19_4425308') }}">chr19:4425308</a><br>
-                </center>
+            <div class="text-center">
+            Examples:
+            <a href="{{ url_for('variant_view', chrom_pos='19_6718376') }}">chr19:6718376</a>
+            <a href="{{ url_for('variant_view', chrom_pos='15_78570111') }}">chr15:78570111</a>
+            <a href="{{ url_for('variant_view', chrom_pos='12_56007301') }}">chr12:56007301</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_488506') }}">chr19:488506</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_991063') }}">chr19:991063</a>
+            <a href="{{ url_for('variant_view', chrom_pos='19_4425308') }}">chr19:4425308</a><br>
             </div>
         </div>
+
     </div>
 </div>
+
+
 <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 
 <script>
