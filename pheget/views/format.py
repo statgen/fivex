@@ -76,6 +76,59 @@ GROUP_DICT = {
     "Whole_Blood": "Whole Blood"
 }
 
+# Sample sizes from GTEx v8
+SAMPLESIZE_DICT = {
+    "Adipose_Subcutaneous": 581,
+    "Adipose_Visceral_Omentum": 469,
+    "Adrenal_Gland": 233,
+    "Artery_Aorta": 387,
+    "Artery_Coronary": 213,
+    "Artery_Tibial": 584,
+    "Brain_Amygdala": 129,
+    "Brain_Anterior_cingulate_cortex_BA24": 147,
+    "Brain_Caudate_basal_ganglia": 194,
+    "Brain_Cerebellar_Hemisphere": 175,
+    "Brain_Cerebellum": 209,
+    "Brain_Cortex": 205,
+    "Brain_Frontal_Cortex_BA9": 175,
+    "Brain_Hippocampus": 165,
+    "Brain_Hypothalamus": 170,
+    "Brain_Nucleus_accumbens_basal_ganglia": 202,
+    "Brain_Putamen_basal_ganglia": 170,
+    "Brain_Spinal_cord_cervical_c-1": 126,
+    "Brain_Substantia_nigra": 114,
+    "Breast_Mammary_Tissue": 396,
+    "Cells_Cultured_fibroblasts": 483,
+    "Cells_EBV-transformed_lymphocytes": 147,
+    "Colon_Sigmoid": 318,
+    "Colon_Transverse": 368,
+    "Esophagus_Gastroesophageal_Junction": 330,
+    "Esophagus_Mucosa": 497,
+    "Esophagus_Muscularis": 465,
+    "Heart_Atrial_Appendage": 372,
+    "Heart_Left_Ventricle": 386,
+    "Kidney_Cortex": 73,
+    "Liver": 208,
+    "Lung": 515,
+    "Minor_Salivary_Gland": 144,
+    "Muscle_Skeletal": 706,
+    "Nerve_Tibial": 532,
+    "Ovary": 167,
+    "Pancreas": 305,
+    "Pituitary": 237,
+    "Prostate": 221,
+    "Skin_Not_Sun_Exposed_Suprapubic": 517,
+    "Skin_Sun_Exposed_Lower_leg": 605,
+    "Small_Intestine_Terminal_Ileum": 174,
+    "Spleen": 227,
+    "Stomach": 324,
+    "Testis": 322,
+    "Thyroid": 574,
+    "Uterus": 129,
+    "Vagina": 141,
+    "Whole_Blood": 670
+}
+
 with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
@@ -92,7 +145,7 @@ class VariantContainer:
                  tss_distance,
                  ma_samples, ma_count, maf,
                  pval_nominal, beta, stderr_beta,
-                 tissue, symbol, system):
+                 tissue, symbol, system, sample_size):
         self.chrom = chrom
         self.pos = pos
         self.ref = ref
@@ -113,6 +166,7 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
+        self.sample_size = sample_size
 
     def to_dict(self):
         return vars(self)
@@ -136,7 +190,8 @@ def variant_parser(row: str) -> VariantContainer:
     fields[6] = int(fields[6])  # tss_distance
     fields[10] = float(fields[10])  # pvalue_nominal
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
-    fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
+    fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue systems from GTEx v8
+    fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Add sample sizes from GTEx v8
     return VariantContainer(*fields)
 
 

@@ -46,7 +46,7 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
         var category_order_field = this.layout.x_axis.category_order_field;
         if (category_order_field) {
             var unique_categories = {};
-            // Requirement: there must be a 1:1 correspondence between categories and their associated labels
+            // Requirement: there is (approximately) a 1:1 correspondence between categories and their associated labels
             this.data.forEach(function(d) {
                 var item_cat_label = d[category_field];
                 var item_cat_order = d[category_order_field];
@@ -130,6 +130,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         panels: [
             LocusZoom.Layouts.get('panel', 'phewas', {
                 unnamespaced: true,
+                min_height: 500,
                 data_layers: [
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
@@ -140,6 +141,10 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}pvalue_rank',
+                            '{{namespace[phewas]}}chrom', '{{namespace[phewas]}}pos',
+                            '{{namespace[phewas]}}ref', '{{namespace[phewas]}}alt',
+                            '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
+                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}sample_size',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
                         base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
@@ -182,12 +187,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
 
                         base.tooltip.html = `
-<strong>Gene:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
+<strong>Variant:</strong> {{{{namespace[phewas]}}chrom|htmlescape}}:{{{{namespace[phewas]}}pos|htmlescape}} {{{{namespace[phewas]}}ref|htmlescape}}/{{{{namespace[phewas]}}alt|htmlescape}}<br>
+<strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
+<strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
-<strong>Symbol:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
-<strong>Tissue:</strong> {{{{namespace[phewas]}}tissue|htmlescape}}<br>
+<strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
-<strong>Effect size:</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
+<strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
+<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
@@ -202,7 +209,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
                 margin: { bottom: 40 },
-                min_height: 250,
+                min_height: 300,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
@@ -261,7 +268,7 @@ function makeTable(selector) {
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
-        // Unforunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+        // Unfortunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
         // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
         var e = cell.getElement();
         if (e.clientWidth >= e.scrollWidth) {
@@ -340,6 +347,17 @@ function switchY(plot, yfield) {
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
         scatter_config.y_axis.lower_buffer = 0.15;
+    }
+    plot.applyState();
+}
+// eslint-disable-next-line no-unused-vars
+function labelToggle(plot) {
+    if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0;
+    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 0) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 50;
+    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 50) {
+        plot.layout.panels[0].data_layers[0].label.filters[1].value = 5;
     }
     plot.applyState();
 }
