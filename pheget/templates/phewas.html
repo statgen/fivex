@@ -25,42 +25,30 @@
         <div class="row">
             <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
                 <div id="home-searchbox">
-                    <div class="input-group">
-                        <input id="query-field" name="query-field" autocomplete="off" class="form-control" type="text"
-                               placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
-                        <span class="input-group-btn">
-                    <button id="navigate-variant" class="btn btn-primary" type="button">Search</button>
-                    </span>
-                    </div>
+                    <form id="variant-search">
+                        <div class="input-group">
+                            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                                   type="text"
+                                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+
+                            <span class="input-group-btn">
+                                <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    <center>
-        <a href="/">Back to PheGET Homepage</a>
-    </center>
-    <h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
-    <!-- old searchbox
-      <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
-      <button id='navigate-variant' class="btn btn-success" type=button>Go</button>
-      <br>
-    -->
-
-
+</div>
+<center>
+    <a href="/">Back to PheGET Homepage</a>
+</center>
+<h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
 </div>
 
 <div class="container-fluid">
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <!-- old buttons
-               <p>
-                <button id="group-tissue" type="button" class="btn btn-primary">Group by Tissue</button>
-                <button id="group-system" type="button" class="btn btn-primary">Group by System</button>
-                <button id="group-symbol" type="button" class="btn btn-primary">Group by Gene Symbol</button><br>
-                <button id="show-pvalue" type="button" class="btn btn-secondary">Show P-values</button>
-                <button id="show-slope" type="button" class="btn btn-secondary">Show effect sizes</button><br>
-                <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button><br>
-            </p>
-        -->
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-primary">
                 <input type="radio" name="group-options" autocomplete=off id="group-tissue"
@@ -87,8 +75,7 @@
             </label>
         </div>
 
-        <button id="label-toggle" type="button" class="btn btn-info" onclick="labelToggle(plot);">Toggle labels
-        </button>
+        <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button>
         <br>
 
     </div>
@@ -115,18 +102,16 @@
     plot.subscribeToData(['phewas:pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
 
     // Use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rsids
-    //  (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
-    document.getElementById('navigate-variant').addEventListener('click', function () {
-        const variant = document.getElementById('query-field');
+    document.getElementById('variant-search').addEventListener('submit', function () {
+        event.preventDefault();
+        const variant = document.getElementById('query-field').value;
         if (!variant) {
             return;
         }
-        parseSearch(variant.value);
+        parseSearch(variant);
     });
-    document.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            document.getElementById('navigate-variant').click();
-        }
+    document.getElementById('label-toggle').addEventListener('click', function() {
+        labelToggle(plot);
     });
 </script>
 </body>
