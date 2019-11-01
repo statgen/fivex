@@ -28,7 +28,7 @@ function parseSearch(searchText) {
     } else {
     // Use omnisearch - works especially well for rs numbers
         const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
-        getOmni(omniurl, function(err,omniJson) {
+        getOmni(omniurl, function(err, omniJson) {
             if (err !== null) {
                 alert('Error encountered: ' + err);
             } else {

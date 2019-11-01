@@ -12,6 +12,7 @@ from zorp import readers
 
 import pheget
 
+
 def parse_position(chrom_pos: str):
     """
     Convert a variant into chrom and position info
