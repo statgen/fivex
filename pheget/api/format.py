@@ -198,7 +198,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
-    fields[10] = parser_utils.parse_pval_to_log(fields[10], is_log=False)  # pvalue_nominal --> serialize as log
+    fields[10] = parser_utils.parse_pval_to_log(fields[10], is_neg_log=False)  # pvalue_nominal --> serialize as log
     fields[11] = float(fields[11])  # beta
     fields[12] = float(fields[12])  # stderr_beta
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
