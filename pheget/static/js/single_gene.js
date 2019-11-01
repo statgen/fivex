@@ -7,6 +7,19 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
     }
 });
 
+LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
+    if (typeof input !== 'undefined') {
+        var slope = input['phewas:slope'];
+        var slope_se = input['phewas:slope_se'];
+        if (!isNaN(slope) && !isNaN(slope_se)) {
+            if (slope - 1.96 * slope_se > 0) { return parameters['+'] || null; } // 1.96*se to find 95% confidence interval
+            if (slope + 1.96 * slope_se < 0) { return parameters['-'] || null; }
+        }
+    }
+    return null;
+});
+
+
 
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
@@ -18,10 +31,10 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
         .add("ld", ["LDLZ2", { url: "https://portaldev.sph.umich.edu/ld/", params: { source: '1000G', population: 'ALL' } }])
         .add("catalog", ["GwasCatalogLZ", { url: apiBase + 'annotation/gwascatalog/results/' }])
         .add("constraint", ["GeneConstraintLZ", { url: "//exac.broadinstitute.org/api/constraint" }]);
-    //initialState = { chr: chrom, start: pos-1000000, end: pos+1000000};
-    // initialState.genome_build = 'GRCh37';
+    initialState = { chr: chrom, start: pos-1000000, end: pos+1000000};
+    initialState.genome_build = 'GRCh37';
     layout = LocusZoom.Layouts.get("plot", "association_catalog", {
-        // state: initialState,
+        state: initialState,
         panels:[
             LocusZoom.Layouts.get('panel','association', { 
                 unnamespaced: true,
@@ -29,7 +42,20 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
                 data_layers:[
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'associationpvaluescatalog', { unnamespaced: true });
-                        // TODO: redefine the data layer fields and values
+                        base.fields = [
+                            `{{namespace[assoc_${tissue}]}}alt`, `{{namespace[assoc_${tissue}]}}build`,
+                            `{{namespace[assoc_${tissue}]}}chrom`, `{{namespace[assoc_${tissue}]}}gene_id`,
+                            `{{namespace[assoc_${tissue}]}}id`, `{{namespace[assoc_${tissue}]}}ma_count`,
+                            `{{namespace[assoc_${tissue}]}}ma_samples`, `{{namespace[assoc_${tissue}]}}maf`,
+                            `{{namespace[assoc_${tissue}]}}pos`, `{{namespace[assoc_${tissue}]}}pvalue`,
+                            `{{namespace[assoc_${tissue}]}}ref`, `{{namespace[assoc_${tissue}]}}sample_size`,
+                            `{{namespace[assoc_${tissue}]}}slope`, `{{namespace[assoc_${tissue}]}}slope_se`,
+                            `{{namespace[assoc_${tissue}]}}symbol`, `{{namespace[assoc_${tissue}]}}system`,
+                            `{{namespace[assoc_${tissue}]}}tissue`, `{{namespace[assoc_${tissue}]}}tss_distance`
+                        ];
+                        base.x_axis.field = `{{namespace[assoc_${tissue}]}}pos`;
+                        base.y_axis.field = `{{namespace[assoc_${tissue}]}}pvalue|neglog10`;
+                        return base;
                     }(),
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true })
                 ] 
