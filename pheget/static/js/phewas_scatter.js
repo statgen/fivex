@@ -13,14 +13,14 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
         // Because it's a shallow copy, the record objects in the original array are changed too.
-        var sort_field = 'pvalue';
+        var sort_field = 'log_pvalue';
         var shallow_copy = records.slice();
         shallow_copy.sort(function(a, b) {
             var av = a[sort_field];
             var bv = b[sort_field];
-            return (av === bv) ? 0 : (av < bv ? -1 : 1);
+            return (av === bv) ? 0 : (av < bv ? 1 : -1);  // log: descending order means most significant first
         });
-        shallow_copy.forEach(function(value, index) { value['pvalue_rank'] = 1 + index; });
+        shallow_copy.forEach(function(value, index) { value['log_pvalue_rank'] = 1 + index; });
         return records;
     }
 });
@@ -135,19 +135,19 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     function () {
                         const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
                         base.fields = [
-                            '{{namespace[phewas]}}id', '{{namespace[phewas]}}pvalue',
+                            '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
                             '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                             '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
-                            '{{namespace[phewas]}}pvalue_rank',
+                            '{{namespace[phewas]}}log_pvalue_rank',
                             '{{namespace[phewas]}}chrom', '{{namespace[phewas]}}pos',
                             '{{namespace[phewas]}}ref', '{{namespace[phewas]}}alt',
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}sample_size',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}system';
-                        base.y_axis.field = '{{namespace[phewas]}}pvalue|neglog10';
+                        base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -192,14 +192,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
-<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}pvalue|neglog10|htmlescape}}<br>
+<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
 <strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
-                        base.label.filters[0].field = '{{namespace[phewas]}}pvalue|neglog10';
-                        base.label.filters.push({ field: 'phewas:pvalue_rank', operator: '<=', value: 5 });
+                        base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
+                        base.label.filters.push({ field: 'phewas:log_pvalue_rank', operator: '<=', value: 5 });
                         return base;
                     }(),
                     // TODO: Must decide on an appropriate significance threshold for this use case
@@ -285,13 +285,13 @@ function makeTable(selector) {
             {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
             {title: 'Tissue', field: 'phewas:tissue', headerFilter: true, widthGrow: 2},
             {title: 'System', field: 'phewas:system', headerFilter: true},
-            {title: 'P-value', field: 'phewas:pvalue', formatter: two_digit_fmt2},
+            {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value
             {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
             {title: 'Effect Size SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
-        initialSort: [{column: 'phewas:pvalue', dir: 'asc'}],
+        initialSort: [{column: 'phewas:log_pvalue', dir: 'desc'}],
         tooltipGenerationMode: 'hover',
         tooltips: tabulator_tooltip_maker,
         tooltipsHeader: true,
@@ -332,14 +332,16 @@ function groupByThing(plot, thing) {
 
 // Switches the displayed y-axis value between p-values and effect size
 // eslint-disable-next-line no-unused-vars
-function switchY(plot, yfield) {
+function switchY(plot, table, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
-    if (yfield === 'pvalue') {
-        scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
+    if (yfield === 'log_pvalue') {
+        scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+
+        table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:beta';
@@ -347,6 +349,8 @@ function switchY(plot, yfield) {
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
         scatter_config.y_axis.lower_buffer = 0.15;
+
+        table.setSort('phewas:beta', 'desc');
     }
     plot.applyState();
 }

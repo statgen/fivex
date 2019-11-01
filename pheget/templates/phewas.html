@@ -66,11 +66,11 @@
 
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-success">
-                <input type="radio" name="y-options" autocomplete=off id="show-pvalue"
-                       onclick="switchY(plot, 'pvalue');"/> P-values
+                <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue"
+                       onclick="switchY(plot, table, 'log_pvalue');"/> P-values
             </label>
             <label class="btn btn-success">
-                <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, 'beta');"/>
+                <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, table, 'beta');"/>
                 Betas
             </label>
         </div>
@@ -99,7 +99,7 @@
 <script type="application/javascript">
     const table = makeTable('#table');
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
-    plot.subscribeToData(['phewas:pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
+    plot.subscribeToData(['phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
 
     // Use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rsids
     document.getElementById('variant-search').addEventListener('submit', function () {
