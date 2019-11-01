@@ -1,5 +1,6 @@
 // This section will define the code required for the plot
 /* global LocusZoom */
+/* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL() {  // Removed state, chain, fields for now since we are not currently using them
@@ -118,7 +119,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             chr: chrom
         },
         dashboard: {
-            components:[
+            components: [
                 {
                     color: 'gray',
                     position: 'right',
@@ -198,7 +199,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                 ],
             }),
-            LocusZoom.Layouts.get('panel', 'genes',{
+            LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
                 margin: { bottom: 40 },
                 min_height: 250,
@@ -251,6 +252,48 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
     return [plot, dataSources];
+}
+
+// eslint-disable-next-line no-unused-vars
+function makeTable(selector) {
+    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(d + 1) : x.toExponential(1); };
+    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
+    var tabulator_tooltip_maker = function (cell) {
+        // Only show tooltips when an ellipsis ('...') is hiding part of the data.
+        // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
+        // Unforunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+        // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
+        var e = cell.getElement();
+        if (e.clientWidth >= e.scrollWidth) {
+            return false; // all the text is shown, so there is no '...', so tooltip is unneeded
+        } else {
+            return e.innerText; //shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
+        }
+    };
+
+    return new Tabulator(selector, {
+        layout: 'fitColumns',
+        height: 600,
+        columns: [
+            {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
+            {title: 'Tissue', field: 'phewas:tissue', headerFilter: true, widthGrow: 2},
+            {title: 'System', field: 'phewas:system', headerFilter: true},
+            {title: 'P-value', field: 'phewas:pvalue', formatter: two_digit_fmt2},
+            // A large effect size in either direction is good, so sort by abs value
+            {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
+            {title: 'Effect Size SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
+        ],
+        placeholder: 'No data available',
+        initialSort: [{column: 'phewas:pvalue', dir: 'asc'}],
+        tooltipGenerationMode: 'hover',
+        tooltips: tabulator_tooltip_maker,
+        tooltipsHeader: true,
+    });
+}
+
+// eslint-disable-next-line no-unused-vars
+function updateTable(table, data) {
+    table.setData(data);
 }
 
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
