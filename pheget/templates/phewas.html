@@ -1,27 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
-        type="text/css"/>
-  <title>PheGET - Single Variant View</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
+          type="text/css"/>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/tabulator-tables@4.4.3/dist/css/bootstrap/tabulator_bootstrap4.min.css">
+    <title>PheGET - Single Variant View</title>
 </head>
+
+<style>
+    .padtop {
+        padding-top: 20px;
+    }
+</style>
+
 <body>
 
-<h1>chr{{chrom}}:{{"{:,}".format(pos)}} for all tissues and genes</h1>
-<div>
-  <input id="query-field" type="text" width="100" placeholder="chr19:6718376">
-  <button id='navigate-variant' class="btn btn-success">Go</button>
-  <br>
-  <a href="/">Back to PheGET Homepage</a>
+
+<div class="padtop">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-10">
+                <div id="home-searchbox">
+                    <form id="variant-search">
+                        <div class="input-group">
+                            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                                   type="text"
+                                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+
+                            <div class="input-group-append">
+                                <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<center>
+    <a href="/">Back to PheGET Homepage</a>
+</center>
+<h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
 </div>
 
-<button id="group-tissue">Group by Tissue</button>
-<button id="group-system">Group by System</button>
-<button id="group-symbol">Group by Gene Symbol</button>
-<button id="show-pvalue">Show P-values</button>
-<button id="show-slope">Show effect sizes</button>
+<div class="container-fluid">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-primary">
+                <input type="radio" name="group-options" autocomplete=off id="group-tissue"
+                       onclick="groupByThing(plot, 'tissue');"/> Tissue
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="group-options" autocomplete=off id="group-system"
+                       onclick="groupByThing(plot, 'system');" checked/> System
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="group-options" autocomplete=off id="group-symbol"
+                       onclick="groupByThing(plot, 'symbol');"/> Gene
+            </label>
+        </div>
+
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-success">
+                <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue"
+                       onclick="switchY(plot, table, 'log_pvalue');"/> P-values
+            </label>
+            <label class="btn btn-success">
+                <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, table, 'beta');"/>
+                Betas
+            </label>
+        </div>
+
+        <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button>
+        <br>
+
+    </div>
+</div>
+
+
 <div id="plot"></div>
+<div id="table" style="width:90%;margin:0 auto"></div>
 
 {# These files must be included to make a LocusZoom plot #}
 <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.vendor.min.js"
@@ -29,42 +91,28 @@
 <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.app.min.js"
         type="application/javascript"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@4.4.3/dist/js/tabulator.min.js"
+        type="text/javascript"></script>
+
 <script src="{{ url_for('static', filename='js/phewas_scatter.js') }}" type="application/javascript"></script>
 <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
+    const table = makeTable('#table');
     const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
-</script>
+    plot.subscribeToData(['phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
 
-<script>
-  // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
-  //  ask for a gibberish variant
-  // Added a script to use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rs numbers
-  // (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
-
-  document.getElementById('navigate-variant').addEventListener('click', function() {
-    const variant = document.getElementById('query-field');
-    if (!variant) {
-        return;
-    }
-    parseSearch(variant.value);
+    // Use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rsids
+    document.getElementById('variant-search').addEventListener('submit', function () {
+        event.preventDefault();
+        const variant = document.getElementById('query-field').value;
+        if (!variant) {
+            return;
+        }
+        parseSearch(variant);
     });
-
-    document.getElementById('group-tissue').addEventListener('click', function () {
-        groupByThing(plot, 'tissue');
+    document.getElementById('label-toggle').addEventListener('click', function() {
+        labelToggle(plot);
     });
-    document.getElementById('group-system').addEventListener('click', function () {
-        groupByThing(plot, 'system');
-    });
-    document.getElementById('group-symbol').addEventListener('click', function () {
-        groupByThing(plot, 'symbol');
-    });
-    document.getElementById('show-pvalue').addEventListener('click', function() {
-        switchY(plot, 'pvalue');
-    });
-    document.getElementById('show-slope').addEventListener('click', function() {
-        switchY(plot, 'slope');
-    });
-
 </script>
 </body>
 </html>

@@ -16,9 +16,7 @@ var getOmni = function (omniurl, callback) {
 // eslint-disable-next-line no-unused-vars
 function parseSearch(searchText) {
     const chromposPattern = /(chr)?([0-9][0-9]?|X|Y|MT):([0-9]+)/;
-    // const rsPattern = /[Rr][Ss][0-9]+/;
     const cMatch = searchText.match(chromposPattern);
-    // const rsMatch = searchText.match(rsPattern);
     // If input is in 'chrom:pos' format (with or without 'chr'), go directly to the single-variant page
     // TODO: Show closest variant if specific variant does not exist
     if (cMatch !== null && searchText === cMatch[0]) {
@@ -28,7 +26,7 @@ function parseSearch(searchText) {
     } else {
     // Use omnisearch - works especially well for rs numbers
         const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
-        getOmni(omniurl, function(err,omniJson) {
+        getOmni(omniurl, function(err, omniJson) {
             if (err !== null) {
                 alert('Error encountered: ' + err);
             } else {
