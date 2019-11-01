@@ -206,14 +206,12 @@ def query_variant(chrom: str, pos: int,
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = 'chr{}'.format(chrom)
 
-    # FIXME Hardcoded directory structure! Improve!
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
-    # source = 'data/chr19.6718376.ENSG00000031823.14.All_Tissues.sorted.txt.gz' # for single variant single tissue
-    # multiple genes in this region; variant of interest is chr19:6718376 (rs2230199)
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
+
+    # Filters for tissue and gene name
     if tissue:
         reader.add_filter('tissue', tissue)
-
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
