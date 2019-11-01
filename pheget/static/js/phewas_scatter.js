@@ -46,7 +46,7 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
         var category_order_field = this.layout.x_axis.category_order_field;
         if (category_order_field) {
             var unique_categories = {};
-            // Requirement: there must be a 1:1 correspondence between categories and their associated labels
+            // Requirement: there is (approximately) a 1:1 correspondence between categories and their associated labels
             this.data.forEach(function(d) {
                 var item_cat_label = d[category_field];
                 var item_cat_order = d[category_order_field];
@@ -268,7 +268,7 @@ function makeTable(selector) {
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
-        // Unforunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+        // Unfortunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
         // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
         var e = cell.getElement();
         if (e.clientWidth >= e.scrollWidth) {
@@ -350,29 +350,6 @@ function switchY(plot, yfield) {
     }
     plot.applyState();
 }
-
-/* Toggle displaying p-values and betas - can be bound to one button instead of two to save space
-function switchDisplayedY(plot) {
-    const scatter_config = plot.layout.panels[0].data_layers[0];
-    if (scatter_config.y_axis.field === 'phewas:beta') {
-        scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
-        scatter_config.y_axis.floor = 0;
-        scatter_config.y_axis.lower_buffer = 0;
-        plot.layout.panels[0].data_layers[1].offset = 7.301;
-        plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
-    }
-    else if (scatter_config.y_axis.field === 'phewas:pvalue|neglog10') {
-        delete scatter_config.y_axis.floor;
-        scatter_config.y_axis.field = 'phewas:beta';
-        plot.layout.panels[0].axes.y1['label'] = 'Effect size';
-        plot.layout.panels[0].data_layers[1].offset = 0;
-        plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
-        scatter_config.y_axis.lower_buffer = 0.15;
-    }
-    plot.applyState();
-}
-*/
-
 // eslint-disable-next-line no-unused-vars
 function labelToggle(plot) {
     if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {

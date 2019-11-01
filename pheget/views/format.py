@@ -22,6 +22,7 @@ def parse_position(chrom_pos: str):
     chrom, pos = chrom_pos.split('_')
     return chrom, int(pos)
 
+
 # A convenient lookup used to group multiple tissue types into a smaller number of systems
 GROUP_DICT = {
     "Adipose_Subcutaneous": "Adipose Tissue",

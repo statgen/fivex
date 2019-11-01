@@ -131,6 +131,7 @@ SAMPLESIZE_DICT = {
     "Whole_Blood": 670
 }
 
+
 class VariantContainer:
     """
     Represent the variant data in a standard manner that lets us access fields by name
