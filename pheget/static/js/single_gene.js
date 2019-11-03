@@ -16,7 +16,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     dataSources
         .add(`assoc`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
-    initialState = { chr: chrom, start: pos-10000, end: pos+10000};
+    initialState = { chr: chrom, start: +pos-10000, end: +pos+10000};
     // initialState.genome_build = 'GRCh37';
     layout = LocusZoom.Layouts.get("plot", "association_catalog", {
         state: initialState,
@@ -27,18 +27,19 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'association_pvalues_catalog', { unnamespaced: true });
                         base.fields = [
-                            `{{namespace[assoc]}}alt`, `{{namespace[assoc]}}beta`,
-                            `{{namespace[assoc]}}build`, `{{namespace[assoc]}}chrom`,
+                            `{{namespace[assoc]}}altAllele`, `{{namespace[assoc]}}beta`,
+                            `{{namespace[assoc]}}build`, `{{namespace[assoc]}}chromosome`,
                             `{{namespace[assoc]}}gene_id`, `{{namespace[assoc]}}id`,
                             `{{namespace[assoc]}}log_pvalue`, `{{namespace[assoc]}}ma_count`,
                             `{{namespace[assoc]}}ma_samples`, `{{namespace[assoc]}}maf`,
-                            `{{namespace[assoc]}}pos`, `{{namespace[assoc]}}ref`,
-                            `{{namespace[assoc]}}sample_size`, `{{namespace[assoc]}}stderr_beta`,
+                            `{{namespace[assoc]}}position`, `{{namespace[assoc]}}refAllele`,
+                            `{{namespace[assoc]}}samples`, `{{namespace[assoc]}}stderr_beta`,
                             `{{namespace[assoc]}}symbol`, `{{namespace[assoc]}}system`,
                             `{{namespace[assoc]}}tissue`, `{{namespace[assoc]}}tss_distance`
                         ];
-                        base.x_axis.field = `{{namespace[assoc]}}pos`;
+                        base.x_axis.field = `{{namespace[assoc]}}position`;
                         base.y_axis.field = `{{namespace[assoc]}}log_pvalue`;
+                        base.id_field = `{{namespace[assoc]}}id`;
                         return base;
                     }(),
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true })

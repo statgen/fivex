@@ -148,10 +148,10 @@ class VariantContainer:
                  ma_samples, ma_count, maf,
                  log_pvalue_nominal, beta, stderr_beta,
                  tissue, symbol, system, sample_size):
-        self.chrom = chrom
-        self.pos = pos
-        self.ref = ref
-        self.alt = alt
+        self.chromosome = chrom
+        self.position = pos
+        self.refAllele = ref
+        self.altAllele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -168,7 +168,7 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
-        self.sample_size = sample_size
+        self.samples = sample_size
 
     @property
     def pvalue(self):
@@ -234,7 +234,7 @@ def query_variant(chrom: str, pos: int,
     #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
     #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
     #       interval, but 20,000 is not."
-    reader.add_filter('pos', pos)
+    reader.add_filter('position', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
 
 def query_range(chrom: str, start: int, end: int,
