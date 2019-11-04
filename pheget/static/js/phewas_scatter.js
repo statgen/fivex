@@ -193,7 +193,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
-<strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
+<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
@@ -287,8 +287,8 @@ function makeTable(selector) {
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value
-            {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
-            {title: 'Effect Size SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
+            {title: 'NES', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
+            {title: 'NES SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
         initialSort: [{column: 'phewas:log_pvalue', dir: 'desc'}],
@@ -345,7 +345,7 @@ function switchY(plot, table, yfield) {
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:beta';
-        plot.layout.panels[0].axes.y1['label'] = 'Effect size';
+        plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
         scatter_config.y_axis.lower_buffer = 0.15;
