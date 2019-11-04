@@ -5,6 +5,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
         type="text/css"/>
   <title>PheGET - Single Variant Single Gene View</title>
+  <style>
+    li:not(:last-child) {
+    margin-bottom: 100px;
+    }
+  </style>
 </head>
 <body>
 
@@ -28,7 +33,15 @@
 <!-- <button id="show-pvalue">Show P-values</button>
 <button id="show-slope">Show effect sizes</button> -->
 
-<div id="plot"></div>
+<div>
+    <div style="display: inline-block;">
+      <ul id="buttonlist">
+          <li id="{{tissue}}"><button onClick="deletepanel(this.parentNode.id)">Delete</button></li>  
+      </ul>
+    </div>
+    <div id="plot" style="display: inline-block;"></div>
+</div>
+
 
 {# These files must be included to make a LocusZoom plot #}
 <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.vendor.min.js"

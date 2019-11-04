@@ -100,8 +100,19 @@ function addtissue(newtissue){
                     ] 
                 });
     singlegeneplot.addPanel(newpanel);
+    let newbutton = document.createElement("li");
+    newbutton.setAttribute('id',`${newtissue}`);
+    newbutton.innerHTML = `<button onClick="deletepanel(this.parentNode.id)">Delete</button>`;
+    document.getElementById('buttonlist').appendChild(newbutton);
 }
 
+
+// remove tissues
+function deletepanel(targetid){
+    let panelid = "assoc_" + targetid;
+    singlegeneplot.removePanel(panelid);
+    document.getElementById(targetid).remove();
+}
 
 // Switches the displayed y-axis value between p-values and slopes (betas)
 // eslint-disable-next-line no-unused-vars
