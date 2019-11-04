@@ -11,35 +11,41 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
-    const start = pos - 10000;
-    const end = pos + 10000;
+    const start = +pos - 10000;
+    const end = +pos + 10000;
     dataSources
-        .add(`assoc`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
-        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
-    initialState = { chr: chrom, start: +pos-10000, end: +pos+10000};
+        .add(`assoc_${tissue}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }]);
+    initialState = { chr: chrom, start: start, end: end};
     // initialState.genome_build = 'GRCh37';
     layout = LocusZoom.Layouts.get("plot", "association_catalog", {
         state: initialState,
         panels:[
             LocusZoom.Layouts.get('panel','association', { 
                 unnamespaced: true,
+                id: `assoc_${tissue}`,
+                title: {text: `${tissue}`,x: 400, y: 30},
                 data_layers:[
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'association_pvalues_catalog', { unnamespaced: true });
                         base.fields = [
-                            `{{namespace[assoc]}}altAllele`, `{{namespace[assoc]}}beta`,
-                            `{{namespace[assoc]}}build`, `{{namespace[assoc]}}chromosome`,
-                            `{{namespace[assoc]}}gene_id`, `{{namespace[assoc]}}id`,
-                            `{{namespace[assoc]}}log_pvalue`, `{{namespace[assoc]}}ma_count`,
-                            `{{namespace[assoc]}}ma_samples`, `{{namespace[assoc]}}maf`,
-                            `{{namespace[assoc]}}position`, `{{namespace[assoc]}}refAllele`,
-                            `{{namespace[assoc]}}samples`, `{{namespace[assoc]}}stderr_beta`,
-                            `{{namespace[assoc]}}symbol`, `{{namespace[assoc]}}system`,
-                            `{{namespace[assoc]}}tissue`, `{{namespace[assoc]}}tss_distance`
+                            `assoc_${tissue}:altAllele`, `assoc_${tissue}:beta`,
+                            `assoc_${tissue}:build`, `assoc_${tissue}:chromosome`,
+                            `assoc_${tissue}:gene_id`, `assoc_${tissue}:id`,
+                            `assoc_${tissue}:log_pvalue`, `assoc_${tissue}:ma_count`,
+                            `assoc_${tissue}:ma_samples`, `assoc_${tissue}:maf`,
+                            `assoc_${tissue}:position`, `assoc_${tissue}:refAllele`,
+                            `assoc_${tissue}:samples`, `assoc_${tissue}:stderr_beta`,
+                            `assoc_${tissue}:symbol`, `assoc_${tissue}:system`,
+                            `assoc_${tissue}:tissue`, `assoc_${tissue}:tss_distance`
                         ];
-                        base.x_axis.field = `{{namespace[assoc]}}position`;
-                        base.y_axis.field = `{{namespace[assoc]}}log_pvalue`;
-                        base.id_field = `{{namespace[assoc]}}id`;
+                        base.x_axis.field = `assoc_${tissue}:position`;
+                        base.y_axis.field = `assoc_${tissue}:log_pvalue`;
+                        base.id_field = `assoc_${tissue}:id`;
+                        base.tooltip.html = `
+                        <strong>Reference Allele</strong>: {{assoc_${tissue}:refAllele|htmlescape}} <strong> Alternate Allele</strong>: {{assoc_${tissue}:altAllele|htmlescape}}<br>
+                        <strong>-Log10(P-value):</strong> {{assoc_${tissue}:log_pvalue|htmlescape}}<br>
+                        <strong>Beta (SE):</strong> {{assoc_${tissue}:beta|htmlescape}} ({{assoc_${tissue}:stderr_beta|htmlescape}})<br>
+                        `;
                         return base;
                     }(),
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true })
@@ -47,10 +53,54 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
             })
         ]
     });
-    var plot = LocusZoom.populate(selector, dataSources, layout);
-    return [plot, dataSources];
+    // generate global variables including plot object, data source object and other metadata
+    window.singlegeneplot = LocusZoom.populate(selector, dataSources, layout);
+    window.globalvars = {chrom: chrom, start:start, end:end, gene_id: gene_id, tissues:[tissue]};
+    window.datasources = dataSources;
 }
 
+// add new tissues
+function addtissue(newtissue){
+    let chrom = globalvars['chrom'];
+    let start = globalvars['start'];
+    let end = globalvars['end'];
+    let gene_id = globalvars['gene_id'];
+    globalvars["tissues"].push(newtissue);
+    datasources
+        .add(`assoc_${newtissue}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${newtissue}` }]);
+    newpanel = LocusZoom.Layouts.get('panel','association', { 
+                    unnamespaced: true,
+                    id: `assoc_${newtissue}`,
+                    title: {text: `${newtissue}`,x: 400,y: 30},
+                    data_layers:[
+                        function(){
+                            const base = LocusZoom.Layouts.get('data_layer', 'association_pvalues_catalog', { unnamespaced: true });
+                            base.fields = [
+                                `assoc_${newtissue}:altAllele`, `assoc_${newtissue}:beta`,
+                                `assoc_${newtissue}:build`, `assoc_${newtissue}:chromosome`,
+                                `assoc_${newtissue}:gene_id`, `assoc_${newtissue}:id`,
+                                `assoc_${newtissue}:log_pvalue`, `assoc_${newtissue}:ma_count`,
+                                `assoc_${newtissue}:ma_samples`, `assoc_${newtissue}:maf`,
+                                `assoc_${newtissue}:position`, `assoc_${newtissue}:refAllele`,
+                                `assoc_${newtissue}:samples`, `assoc_${newtissue}:stderr_beta`,
+                                `assoc_${newtissue}:symbol`, `assoc_${newtissue}:system`,
+                                `assoc_${newtissue}:tissue`, `assoc_${newtissue}:tss_distance`
+                            ];
+                            base.x_axis.field = `assoc_${newtissue}:position`;
+                            base.y_axis.field = `assoc_${newtissue}:log_pvalue`;
+                            base.id_field = `assoc_${newtissue}:id`;
+                            base.tooltip.html = `
+                            <strong>Reference Allele</strong>: {{assoc_${newtissue}:refAllele|htmlescape}} <strong> Alternate Allele</strong>: {{assoc_${newtissue}:altAllele|htmlescape}}<br>
+                            <strong>-Log10(P-value):</strong> {{assoc_${newtissue}:log_pvalue|htmlescape}}<br>
+                            <strong>Beta (SE):</strong> {{assoc_${newtissue}:beta|htmlescape}} ({{assoc_${newtissue}:stderr_beta|htmlescape}})<br>
+                            `;
+                            return base;
+                        }(),
+                        LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true })
+                    ] 
+                });
+    singlegeneplot.addPanel(newpanel);
+}
 
 
 // Switches the displayed y-axis value between p-values and slopes (betas)

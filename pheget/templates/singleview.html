@@ -8,13 +8,23 @@
 </head>
 <body>
 
-<h1>eQTL for one variant for one gene with several tissues</h1>
+<h1>Association Between {{gene_id}} and Multiple tissues</h1>
 <div>
   <form>
     <input type="button" value="Back" onclick="history.back()">
   </form>
 </div>
 
+<h3>Search for Extra tissues here</h3>
+<div>
+    <select id="tissueselect">
+        <option value=""></option>
+        <option value="Prostate">Prostate</option>
+        <option value="Artery_Coronary">Artery Coronary</option>
+        <option value="Muscle_Skeletal">Muscle Skeletal</option>
+      </select>  
+  <button id="search">Search</button>
+</div>
 <!-- <button id="show-pvalue">Show P-values</button>
 <button id="show-slope">Show effect sizes</button> -->
 
@@ -28,22 +38,19 @@
 
 <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
-    const [plot, datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
+    makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
+    document.getElementById('search').addEventListener('click', function() {
+        let newtissue = document.getElementById("tissueselect").value;
+        if (newtissue.length == 0){
+          alert("No tissue input!");
+        } else if (globalvars["tissues"].includes(newtissue)){
+          alert("This tissue is already in the plot!");
+        } else{
+          addtissue(newtissue);
+        }
+    });
 </script>
 
-<!-- <script>
-  // This is an absolutely simplistic MVP. It contains no validation and doesn't even attempt to help the user if they
-  //  ask for a gibberish variant
-  // Added a script to use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rs numbers
-  // (Hastily copied from https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript)
 
-    document.getElementById('show-pvalue').addEventListener('click', function() {
-        switchY(plot, 'pvalue');
-    });
-    document.getElementById('show-slope').addEventListener('click', function() {
-        switchY(plot, 'slope');
-    });
-
-</script> -->
 </body>
 </html>
