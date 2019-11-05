@@ -57,6 +57,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     window.singlegeneplot = LocusZoom.populate(selector, dataSources, layout);
     window.globalvars = {chrom: chrom, start:start, end:end, gene_id: gene_id, tissues:[tissue]};
     window.datasources = dataSources;
+    window.yaxis = "logp";
 }
 
 // add new tissues
@@ -114,22 +115,32 @@ function deletepanel(targetid){
     document.getElementById(targetid).remove();
 }
 
-// Switches the displayed y-axis value between p-values and slopes (betas)
-// eslint-disable-next-line no-unused-vars
-// function switchY(plot, yfield) {
-//     const scatter_config = plot.layout.panels[0].data_layers[0];
-//     if (yfield === 'pvalue') {
-//         scatter_config.y_axis.field = 'phewas:pvalue|neglog10';
-//         scatter_config.y_axis.floor = 0;
-//         plot.layout.panels[0].data_layers[1].offset = 7.301;
-//         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
-//     }
-//     else if (yfield === 'slope') {
-//         scatter_config.y_axis.field = 'phewas:slope';
-//         scatter_config.y_axis.floor = undefined;
-//         plot.layout.panels[0].axes.y1['label'] = 'Effect size';
-//         plot.layout.panels[0].data_layers[1].offset = 0;
-//         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
-//     }
-//     plot.applyState();
-// }
+
+// switch Y axis 
+function switchY(){
+    if(yaxis==="logp"){
+        // switch to beta
+        singlegeneplot.layout.panels.forEach(function(indvpanel){
+            // I name the panel id to be the same as datasource namespace
+            delete indvpanel.data_layers[0].y_axis.floor;
+            indvpanel.data_layers[0].y_axis.field = indvpanel.id + ":beta";
+            indvpanel.axes.y1['label'] = 'Effect size';
+            indvpanel.data_layers[1].offset = 0; 
+            indvpanel.data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+            indvpanel.data_layers[0].y_axis.lower_buffer = 0.15;
+        });
+        yaxis = "beta";
+    } else{
+        // switch to logp
+        singlegeneplot.layout.panels.forEach(function(indvpanel){
+            indvpanel.axes.y1['label'] = '- Log 10 P Value';
+            indvpanel.data_layers[0].y_axis.field = indvpanel.id + ":log_pvalue";
+            indvpanel.data_layers[0].y_axis.floor = 0;
+            indvpanel.data_layers[0].y_axis.lower_buffer = 0;
+            indvpanel.data_layers[1].offset = 7.301;
+            indvpanel.data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+        });
+        yaxis = "logp";
+    }
+    singlegeneplot.applyState();
+}
