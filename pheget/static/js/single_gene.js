@@ -23,7 +23,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
             LocusZoom.Layouts.get('panel','association', { 
                 unnamespaced: true,
                 id: `assoc_${tissue}`,
-                title: {text: `${tissue}`,x: 400, y: 30},
+                title: {text: `${tissue}`,x: 250, y: 30},
                 data_layers:[
                     function(){
                         const base = LocusZoom.Layouts.get('data_layer', 'association_pvalues_catalog', { unnamespaced: true });
@@ -72,7 +72,7 @@ function addtissue(newtissue){
     newpanel = LocusZoom.Layouts.get('panel','association', { 
                     unnamespaced: true,
                     id: `assoc_${newtissue}`,
-                    title: {text: `${newtissue}`,x: 400,y: 30},
+                    title: {text: `${newtissue}`,x: 250,y: 30},
                     data_layers:[
                         function(){
                             const base = LocusZoom.Layouts.get('data_layer', 'association_pvalues_catalog', { unnamespaced: true });
@@ -89,6 +89,9 @@ function addtissue(newtissue){
                             ];
                             base.x_axis.field = `assoc_${newtissue}:position`;
                             base.y_axis.field = `assoc_${newtissue}:log_pvalue`;
+                            base.y_axis.floor = 0;
+                            base.y_axis.lower_buffer = 0;
+                            base.y_axis.min_extent = [0,10];
                             base.id_field = `assoc_${newtissue}:id`;
                             base.tooltip.html = `
                             <strong>Reference Allele</strong>: {{assoc_${newtissue}:refAllele|htmlescape}} <strong> Alternate Allele</strong>: {{assoc_${newtissue}:altAllele|htmlescape}}<br>
@@ -122,9 +125,13 @@ function switchY(){
         // switch to beta
         singlegeneplot.layout.panels.forEach(function(indvpanel){
             // I name the panel id to be the same as datasource namespace
-            delete indvpanel.data_layers[0].y_axis.floor;
             indvpanel.data_layers[0].y_axis.field = indvpanel.id + ":beta";
             indvpanel.axes.y1['label'] = 'Effect size';
+            indvpanel.data_layers[0].y_axis.floor = -2;
+            indvpanel.data_layers[0].y_axis.ceiling = 2;
+            indvpanel.data_layers[0].y_axis.lower_buffer = 0.25;
+            indvpanel.data_layers[0].y_axis.upper_buffer = 0.25;
+            indvpanel.data_layers[0].y_axis.min_extent = [-2, 2];
             indvpanel.data_layers[1].offset = 0; 
             indvpanel.data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
             indvpanel.data_layers[0].y_axis.lower_buffer = 0.15;
@@ -136,7 +143,10 @@ function switchY(){
             indvpanel.axes.y1['label'] = '- Log 10 P Value';
             indvpanel.data_layers[0].y_axis.field = indvpanel.id + ":log_pvalue";
             indvpanel.data_layers[0].y_axis.floor = 0;
+            delete indvpanel.data_layers[0].y_axis.ceiling;
             indvpanel.data_layers[0].y_axis.lower_buffer = 0;
+            indvpanel.data_layers[0].y_axis.upper_buffer = 0;
+            indvpanel.data_layers[0].y_axis.min_extent = [0, 10];
             indvpanel.data_layers[1].offset = 7.301;
             indvpanel.data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
         });

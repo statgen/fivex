@@ -2,26 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
         type="text/css"/>
   <title>PheGET - Single Variant Single Gene View</title>
   <style>
-    li:not(:last-child) {
-    margin-bottom: 100px;
+    body {
+        background-color: #FAFAFA;
+        margin: 0px 20px;
+    }
+    img {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    div.example > a > h6 {
+      margin-bottom: 0.5em;
+    }
+    div.example > a > img {
+      border: 1px solid #8A8A8A;
+      margin-bottom: 1.4em;
+    }
+    li{
+    margin-top: 100px;
+    margin-bottom: 200px;
     }
   </style>
 </head>
 <body>
-
-<h1>Association Between {{gene_id}} and Multiple tissues</h1>
-<div>
+<div class="container">
+<h1 style="margin-top: 1em;"><strong>{{gene_id}} and Multiple tissues</strong></h1>
+<div class="row">
   <form>
     <input type="button" value="Back" onclick="history.back()">
   </form>
 </div>
 
 <h3>Search for Extra tissues here</h3>
-<div>
+<div class="row">
     <select id="tissueselect">
         <option value=""></option>
         <option value="Prostate">Prostate</option>
@@ -34,15 +52,15 @@
 <!-- <button id="show-pvalue">Show P-values</button>
 <button id="show-slope">Show effect sizes</button> -->
 
-<div>
-    <div style="display: inline-block;">
+<div class="row">
+    <div class="two columns">
       <ul id="buttonlist">
           <li id="{{tissue}}"><button onClick="deletepanel(this.parentNode.id)">Delete</button></li>  
       </ul>
     </div>
-    <div id="plot" style="display: inline-block;"></div>
+    <div id="plot" class="ten columns"></div>
 </div>
-
+</div>
 
 {# These files must be included to make a LocusZoom plot #}
 <script src="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.vendor.min.js"
