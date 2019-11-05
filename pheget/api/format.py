@@ -182,6 +182,30 @@ class VariantContainer:
     def to_dict(self):
         return vars(self)
 
+class InfoContainer:
+    def __init__(self, chromosome, position, refAllele, altAllele, 
+                 ac, af, an, rsid, top_gene, top_tissue):
+        self.chromsome = chromosome
+        self.position = position
+        self.refAllele = refAllele
+        self.altAllele = altAllele
+
+        self.ac = ac
+        self.af = af
+        self.an = an
+
+        self.rsid = rsid
+        self.top_gene = top_gene
+        self.top_tissue = top_tissue
+
+    def to_dict(self):
+        return vars(self)
+
+
+def info_parser(row: str):
+    fields = row.split('\t')
+    return InfoContainer(*fields)
+
 
 def variant_parser(row: str) -> VariantContainer:
     """
@@ -235,3 +259,9 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('pos', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
+
+
+def get_variant_info(chrom: str, pos:str) -> ty.Iteratable[InfoContainer]:
+    infoDB = pheget.app.config['DATA_DIR'] + '/GTEx_v8.infoDB.txt.gz'
+    reader = readers.TabixReader(source, parser=info_parser, skip_rows=1)
+    return reader.fetch(chrom, pos, pos + 1)
