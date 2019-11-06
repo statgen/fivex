@@ -49,13 +49,15 @@
         <p>{{"Overlapping" if gene.start <= pos <= gene.end else "Nearest"}} gene:
           <i>{{gene.symbol}}</i> (<i>{{gene.ensg}}</i>) chr{{gene.chrom}}:{{"{:,}".format(gene.start)}}-{{"{:,}".format(gene.end)}}</p>
         {% endwith %}
-        {% else %}
+        {% elif nearest_genes|length <= 5 %}
         <p style="margin-bottom:0">Overlapping genes:</p>
         <ul>
         {% for gene in nearest_genes %}
         <li>chr{{gene.chrom}}:{{"{:,}".format(gene.start)}}-{{"{:,}".format(gene.end)}} <i>{{gene.symbol}}</i> (<i>{{gene.ensg}}</i>)</li>
         {% endfor %}
         </ul>
+        {% else %}
+        <p>Overlapping genes: {% for gene in nearest_genes %}<i>{{gene.symbol}}</i>{% if not loop.last %}, {% endif %}{% endfor %}</p>
         {% endif %}
     </div>
 
