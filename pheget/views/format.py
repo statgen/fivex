@@ -1,10 +1,9 @@
 try:
     # Optional speedup features
-    from fastnumbers import int, float
+    from fastnumbers import int
 except ImportError:
     pass
 
-import pheget
 
 def parse_position(chrom_pos: str):
     """
