@@ -20,34 +20,29 @@
 <body>
 
 
-<div class="padtop">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-10">
-                <div id="home-searchbox">
-                    <form id="variant-search">
-                        <div class="input-group">
-                            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
-                                   type="text"
-                                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+<div class="container-fluid">
+    <div class="row padtop">
+        <div class="col-sm-10">
+            <div id="home-searchbox">
+                <form id="variant-search">
+                    <div class="input-group">
+                        <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                               type="text"
+                               placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
 
-                            <div class="input-group-append">
-                                <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
-                            </div>
+                        <div class="input-group-append">
+                            <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
-<center>
-    <a href="/">Back to PheGET Homepage</a>
-</center>
-<h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
-</div>
+    <center>
+        <a href="/">Back to PheGET Homepage</a>
+    </center>
+    <h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
 
-<div class="container-fluid">
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-primary">
