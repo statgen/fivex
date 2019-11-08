@@ -147,7 +147,7 @@ class VariantContainer:
                  tss_distance,
                  ma_samples, ma_count, maf,
                  log_pvalue_nominal, beta, stderr_beta,
-                 tissue, symbol, system, sample_size):
+                 tissue, symbol, system, sample_size, id_field):
         self.chromosome = chrom
         self.position = pos
         self.refAllele = ref
@@ -169,6 +169,7 @@ class VariantContainer:
         self.symbol = symbol
         self.system = system
         self.samples = sample_size
+        self.id_field = id_field
 
     @property
     def pvalue(self):
@@ -205,6 +206,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
     fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Add sample sizes from GTEx v8
+    fields.append(fields[1] + ":" + str(fields[2]) + "_" + fields[3] + "/" + fields[4]) # chrom:pos_ref/alt
     return VariantContainer(*fields)
 
 
