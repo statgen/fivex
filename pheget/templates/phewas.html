@@ -72,68 +72,79 @@ dl.line-flex dd {
 }
 </style>
 
-<div class="card" style="width: 30rem;">
-    <div class="card-header">
-        <h5 class="card-title">Variant Information from Sequenced Genotype</h5>
-      </div>  
-  <div class="card-body">
-            <dl class="inline-flex">
-              <dt>Variant</dt>
-                <dd>chr{{ chrom }}:{{ pos }} {{ ref }}/{{ alt }}</dd>
-              <dt>Allele count</dt>
-                <dd>{{ ac }}</dd>
-              <dt>Allele frequency</dt>
-                <dd>{{ af }}</dd>
-              <dt>Total # of alleles</dt>
-                <dd>{{ an }}</dd>
-              <dt>Top gene</dt>
-                <dd>{{ top_gene }}</dd>
-              <dt>Top tissue</dt>
-                <dd>{{ top_tissue }}</dd>
-              <dt>External links</dt>
-                <dd>
-                  <a href="https://www.ncbi.nlm.nih.gov/snp/?term={{ chrom }}%5BChromosome%5D+AND+({{ pos }}%5BBase+Position%5D+)">dbSNP</a> <br>
-                  <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}">BRAVO</a> <br>
-                  <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38">GTEx Portal</a> <br>
-                  <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">UCSC</a>
-                </dd>
-          </dl>
-    </div>
-  </div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-4">
+      <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#variantInformation" aria-expanded="false" aria-controls="variantInformation">
+        Variant Information from Sequence Genotype
+      </button>
+      <div class="collapse" id="variantInformation">
+        <div class="card card-body">
+          <div class="card"> <!-- style="width: 30rem;"> -->
+            <div class="card-body">
+              <dl class="inline-flex">
+                <dt>Variant</dt>
+                  <dd>chr{{ chrom }}:{{ pos }} {{ ref }}/{{ alt }}</dd>
+                <dt>Allele count</dt>
+                  <dd>{{ ac }}</dd>
+                <dt>Allele frequency</dt>
+                  <dd>{{ af }}</dd>
+                <dt>Total # of alleles</dt>
+                  <dd>{{ an }}</dd>
+                <dt>Top gene</dt>
+                  <dd>{{ top_gene }}</dd>
+                <dt>Top tissue</dt>
+                  <dd>{{ top_tissue }}</dd>
+                <dt>External links</dt>
+                  <dd>
+                    <a href="https://www.ncbi.nlm.nih.gov/snp/?term={{ chrom }}%5BChromosome%5D+AND+({{ pos }}%5BBase+Position%5D+)">dbSNP</a> <br>
+                    <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}">BRAVO</a> <br>
+                    <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38">GTEx Portal</a> <br>
+                    <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">UCSC</a>
+                  </dd>
+                <dt>
+                    {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
+                </dt>
+                  <dd>
+                    {% for gene in nearest_genes %}
+                      <span class="text-with-definition" title="{{ gene.ensg }}">{{ gene.symbol }}</span>
+                      {%- if not loop.last -%},{% endif %}
+                    {% else %}
+                      (no genes found)
+                    {% endfor %}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<div class="card" style="width: 30rem;">  
-  <div class="card-footer text-muted"> 
-    <h6>
-      <small>
-      Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.
-    </small>
-    </h6>
+    <div class="col">
+      <div class="alert alert-dark alert-dismissible fade show" role="alert">
+        <h6> <small> 
+          Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>. <br>
+          <b>Label</b> switches between labeling the most significant 50, 5, and no points. Significance is based on P-values.
+
+        </small></h6>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
-<div>
-    <p>
-      {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
-      {% for gene in nearest_genes %}
-        <span class="text-with-definition" title="{{ gene.ensg }}">{{ gene.symbol }}</span>
-        {%- if not loop.last -%},{% endif %}
-      {% else %}
-        (no genes found)
-      {% endfor %}
-    </p>
-  </div>
 
 
 <div class="container-fluid">
    <form action="#" method="post" class="grouping" id="grouping-buttons">
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-secondary disabled">
-            <input type="radio"> Group by:
-        </label>
+        <button type="button" class="btn btn-secondary" disabled> Group by: </button>        
         <label class="btn btn-primary">
             <input type="radio" name="group-options" autocomplete=off id="group-tissue" value="tissue"> Tissue
         </label>
-        <label class="btn btn-primary focus active">
+        <label class="btn btn-primary active">
             <input type="radio" name="group-options" autocomplete=off id="group-system" value="system"> System
         </label>
         <label class="btn btn-primary">
@@ -146,14 +157,12 @@ dl.line-flex dd {
 <div class="container-fluid">
   <form action="#" method="post" class="yaxis-display" id="transform-y">
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-secondary disabled">
-          <input type="radio"> Show:
-        </label>
-        <label class="btn btn-success focus active">
+     <button type="button" class="btn btn-secondary" disabled> Show: </button>        
+        <label class="btn btn-success active">
             <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
         </label>
         <label class="btn btn-success">
-            <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> NES
+            <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
         </label>
    </div>
   </form>
