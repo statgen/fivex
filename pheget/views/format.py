@@ -44,6 +44,7 @@ def parse_position(chrom_pos: str):
 
 
 def get_variant_info(chrom: str, pos: int):
-    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'GTEx_v8.best.genes.tissues.allele.info.txt.gz')
+    #infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'GTEx_v8.best.genes.tissues.allele.info.txt.gz')
+    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.txt.gz')
     reader = readers.TabixReader(infoDB, parser=info_parser)
     return reader.fetch('chr' + chrom, pos - 1, pos + 1)
