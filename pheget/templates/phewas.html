@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
-          type="text/css"/>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.0-beta.1/dist/locuszoom.css"
+        type="text/css"/>
 
-<!-- Using these will allow us to properly display toggled buttons (show button being held down after a click)
-  but requires a rewrite of how to call the functions called by pressing buttons (using jquery). 
-  Will fix this later.
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>   -->
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/tabulator-tables@4.4.3/dist/css/bootstrap/tabulator_bootstrap4.min.css">
-    <title>PheGET - Single Variant View</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/tabulator-tables@4.4.3/dist/css/bootstrap/tabulator_bootstrap4.min.css">
+  <title>PheGET - Single Variant View</title>
 </head>
 
 <style>
-    .padtop {
-        padding-top: 20px;
-    }
+  .padtop {
+    padding-top: 20px;
+  }
+
+  .text-with-definition {
+    text-decoration: dotted underline;
+  }
 </style>
 
 <body>
@@ -37,25 +34,22 @@ and return ref, alt, AC, AF, AN, top gene, top tissue, and rsid;
 If given a range, it will return the most top gene and top tissue for the full range only
 -->
 
-<div class="padtop">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-10">
-                <div id="home-searchbox">
-                    <form id="variant-search">
-                        <div class="input-group">
-                            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
-                                   type="text"
-                                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+<div class="container-fluid">
+  <div class="row padtop">
+    <div class="col-sm-10">
+      <div id="home-searchbox">
+        <form id="variant-search">
+          <div class="input-group">
+            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                   type="text"
+                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
 
-                            <div class="input-group-append">
-                                <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <div class="input-group-append">
+              <button id="navigate-variant" class="btn btn-primary" type="submit">Search</button>
             </div>
-        </div>
+          </div>
+        </form>
+      </div>
     </div>
 </div>
 
@@ -67,22 +61,6 @@ If given a range, it will return the most top gene and top tissue for the full r
 </p>
 
 
-<!--  Allele count: {{ ac }} <br>
-  Allele frequency: {{ af }} <br>
-  Total number of alleles: {{ an }} <br>
-  Top gene: {{ top_gene }} <br>
-  Top tissue: {{ top_tissue }} <br>
--->
-
-<!--
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-4 col-md-6 col-sm-12">
-      <div class="panel panel-default" id="variant-summary">
-        <div class="panel-heading">Summary</div>
-          <div class="panel-body">
-            <dl class="dl-horizontal" style="margin-bottom: 0px;">
--->
 <style>
 dl.inline-flex {
   display: flex;
@@ -137,17 +115,22 @@ dl.line-flex dd {
                   <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">link</a>
                 </dd>
           </dl>
-              <!--
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  -->
+
   Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.
 </div>
 </div>
+
+<div>
+    <p>
+      {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
+      {% for gene in nearest_genes %}
+        <span class="text-with-definition" title="{{ gene.ensg }}">{{ gene.symbol }}</span>
+        {%- if not loop.last -%},{% endif %}
+      {% else %}
+        (no genes found)
+      {% endfor %}
+    </p>
+  </div>
 
 
 <div class="container-fluid">
@@ -190,7 +173,21 @@ dl.line-flex dd {
         <button type="button" class="btn btn-secondary" disabled>Label:</button>
         <button id="label-toggle" type="button" class="btn btn-info">Top 5</button><br>
 
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+      <label class="btn btn-success">
+        <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue"
+               onclick="switchY(plot, table, 'log_pvalue');"/> P-values
+      </label>
+      <label class="btn btn-success">
+        <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, table, 'beta');"/>
+        Betas
+      </label>
     </div>
+
+    <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button>
+    <br>
+
+  </div>
 </div>
 
 
@@ -222,20 +219,6 @@ dl.line-flex dd {
         }
         parseSearch(variant);
     });
-
-    /* These don't work when we are using Bootstrap
-    document.getElementById('group-tissue').addEventListener('click', function() {
-      groupByThing(plot, 'tissue');
-    });
-    document.getElementById('group-system').addEventListener('click', function() {
-        groupByThing(plot, 'system');
-    });
-    document.getElementById('group-symbol').addEventListener('click', function() {
-      groupByThing(plot, 'symbol');
-    });
-    */
-    
-    /* This works when we are using bootstrap  */
     var groupVar = document.forms['grouping-buttons'].elements['group-options'];
     for (var i=0, len=groupVar.length; i<len; i++) {
       groupVar[i].onchange = function() {

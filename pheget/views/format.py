@@ -1,6 +1,6 @@
 try:
     # Optional speedup features
-    from fastnumbers import int, float
+    from fastnumbers import int
 except ImportError:
     pass
 

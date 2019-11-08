@@ -61,8 +61,8 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
             // Sort the data so that things in the same category are adjacent
             sourceData = this.data
                 .sort(function(a, b) {
-                    var av = -unique_categories[a[category_field]]; // sort descending
-                    var bv = -unique_categories[b[category_field]];
+                    var av = -a[category_order_field]; // sort descending
+                    var bv = -b[category_order_field];
                     return (av === bv) ? 0 : (av < bv ? -1 : 1);});
         } else {
             // Sort the data so that things in the same category are adjacent (case-insensitive by specified field)
@@ -263,8 +263,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
 // eslint-disable-next-line no-unused-vars
 function makeTable(selector) {
-    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(d + 1) : x.toExponential(1); };
-    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
+    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(Math.max(d + 1, 0)) : x.toExponential(1); };
+    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(Math.max(d + 1, 0)) : x.toExponential(1); };
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
