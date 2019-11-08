@@ -24,16 +24,6 @@
 
 <body>
 
-<!-- Add variant information box with external links here
-  Example links to external sources:
-https://bravo.sph.umich.edu/freeze5/hg38/variant/19-488506-A-G
-https://gtexportal.org/home/snp/chr19_488506_A_G_b38
-https://www.ncbi.nlm.nih.gov/snp/rs10424907
-I am building a backend tabixable file that will take in chrom and pos, 
-and return ref, alt, AC, AF, AN, top gene, top tissue, and rsid;
-If given a range, it will return the most top gene and top tissue for the full range only
--->
-
 <div class="container-fluid">
   <div class="row padtop">
     <div class="col-sm-10">
@@ -60,7 +50,6 @@ If given a range, it will return the most top gene and top tissue for the full r
 <h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} for all tissues and genes</h1>
 </p>
 
-
 <style>
 dl.inline-flex {
   display: flex;
@@ -84,6 +73,9 @@ dl.line-flex dd {
 </style>
 
 <div class="card" style="width: 30rem;">
+    <div class="card-header">
+        <h5 class="card-title">Variant Information from Sequenced Genotype</h5>
+      </div>  
   <div class="card-body">
             <dl class="inline-flex">
               <dt>Variant</dt>
@@ -98,26 +90,25 @@ dl.line-flex dd {
                 <dd>{{ top_gene }}</dd>
               <dt>Top tissue</dt>
                 <dd>{{ top_tissue }}</dd>
-              <dt>dbSNP</dt>
+              <dt>External links</dt>
                 <dd>
-                  <a href="https://www.ncbi.nlm.nih.gov/snp/?term={{ chrom }}%5BChromosome%5D+AND+({{ pos }}%5BBase+Position%5D+)">link</a>
-                </dd>
-              <dt>BRAVO</dt>
-                <dd>
-                  <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}">link</a>
-                </dd>
-              <dt>GTEx Portal</dt>
-                <dd>
-                  <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38">link</a>
-                </dd>
-              <dt>UCSC</dt>
-                <dd>
-                  <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">link</a>
+                  <a href="https://www.ncbi.nlm.nih.gov/snp/?term={{ chrom }}%5BChromosome%5D+AND+({{ pos }}%5BBase+Position%5D+)">dbSNP</a> <br>
+                  <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}">BRAVO</a> <br>
+                  <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38">GTEx Portal</a> <br>
+                  <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">UCSC</a>
                 </dd>
           </dl>
+    </div>
+  </div>
 
-  Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.
-</div>
+<div class="card" style="width: 30rem;">  
+  <div class="card-footer text-muted"> 
+    <h6>
+      <small>
+      Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.
+    </small>
+    </h6>
+  </div>
 </div>
 
 <div>
@@ -170,26 +161,10 @@ dl.line-flex dd {
 
 <div class="container-fluid">
     <div class="btn-group" data-toggle="buttons">
-        <button type="button" class="btn btn-secondary" disabled>Label:</button>
-        <button id="label-toggle" type="button" class="btn btn-info">Top 5</button><br>
-
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-      <label class="btn btn-success">
-        <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue"
-               onclick="switchY(plot, table, 'log_pvalue');"/> P-values
-      </label>
-      <label class="btn btn-success">
-        <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, table, 'beta');"/>
-        Betas
-      </label>
-    </div>
-
-    <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button>
-    <br>
-
+      <button type="button" class="btn btn-secondary" disabled>Label:</button>
+      <button id="label-toggle" type="button" class="btn btn-info">Top 5</button><br>
   </div>
 </div>
-
 
 <div id="plot"></div>
 <div id="table" style="width:90%;margin:0 auto"></div>
