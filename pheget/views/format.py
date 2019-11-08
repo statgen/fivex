@@ -7,22 +7,22 @@ except ImportError:
 from zorp import parser_utils, readers
 
 import pheget
+import os
 
 class InfoContainer:
     def __init__(self, chromosome, position, refAllele, altAllele, 
-                 ac, af, an, rsid, top_gene, top_tissue):
+                  top_gene, top_tissue, ac, af, an):
         self.chromsome = chromosome
         self.position = position
         self.refAllele = refAllele
         self.altAllele = altAllele
 
+        self.top_gene = top_gene
+        self.top_tissue = top_tissue
+
         self.ac = ac
         self.af = af
         self.an = an
-
-        self.rsid = rsid
-        self.top_gene = top_gene
-        self.top_tissue = top_tissue
 
     def to_dict(self):
         return vars(self)
@@ -43,7 +43,7 @@ def parse_position(chrom_pos: str):
     return chrom, int(pos)
 
 
-def get_variant_info(chrom: str, pos:str) -> ty.Iteratable[InfoContainer]:
-    infoDB = pheget.app.config['DATA_DIR'] + '/GTEx_v8.infoDB.txt.gz'
-    reader = readers.TabixReader(source, parser=info_parser, skip_rows=1)
-    return reader.fetch(chrom, pos, pos + 1)
+def get_variant_info(chrom: str, pos: int):
+    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'GTEx_v8.best.genes.tissues.allele.info.txt.gz')
+    reader = readers.TabixReader(infoDB, parser=info_parser)
+    return reader.fetch('chr' + chrom, pos - 1, pos + 1)

@@ -58,50 +58,138 @@ If given a range, it will return the most top gene and top tissue for the full r
         </div>
     </div>
 </div>
+
+<p>
 <center>
     <a href="/">Back to PheGET Homepage</a>
 </center>
-<h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
-</div>
-<div>
-  <p>
-  <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. <br> More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.</div>
- </p>
-</div>
+<h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} for all tissues and genes</h1>
+</p>
 
+
+<!--  Allele count: {{ ac }} <br>
+  Allele frequency: {{ af }} <br>
+  Total number of alleles: {{ an }} <br>
+  Top gene: {{ top_gene }} <br>
+  Top tissue: {{ top_tissue }} <br>
+-->
+
+<!--
 <div class="container-fluid">
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-primary">
-                <input type="radio" name="group-options" autocomplete=off id="group-tissue"
-                       onclick="groupByThing(plot, 'tissue');"/> Tissue
-            </label>
-            <label class="btn btn-primary">
-                <input type="radio" name="group-options" autocomplete=off id="group-system"
-                       onclick="groupByThing(plot, 'system');" checked/> System
-            </label>
-            <label class="btn btn-primary">
-                <input type="radio" name="group-options" autocomplete=off id="group-symbol"
-                       onclick="groupByThing(plot, 'symbol');"/> Gene
-            </label>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-12">
+      <div class="panel panel-default" id="variant-summary">
+        <div class="panel-heading">Summary</div>
+          <div class="panel-body">
+            <dl class="dl-horizontal" style="margin-bottom: 0px;">
+-->
+<style>
+dl.inline-flex {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  width: 360px;
+  overflow: visible;
+}
+dl.inline-flex dt {
+  flex: 0 0 50%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+dl.line-flex dd { 
+  margin-left: auto;
+  text-align: left;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  flex: 0 0 50%
+}
+</style>
+
+<div class="card" style="width: 30rem;">
+  <div class="card-body">
+            <dl class="inline-flex">
+              <dt>Variant</dt>
+                <dd>chr{{ chrom }}:{{ pos }} {{ ref }}/{{ alt }}</dd>
+              <dt>Allele count</dt>
+                <dd>{{ ac }}</dd>
+              <dt>Allele frequency</dt>
+                <dd>{{ af }}</dd>
+              <dt>Total # of alleles</dt>
+                <dd>{{ an }}</dd>
+              <dt>Top gene</dt>
+                <dd>{{ top_gene }}</dd>
+              <dt>Top tissue</dt>
+                <dd>{{ top_tissue }}</dd>
+              <dt>dbSNP</dt>
+                <dd>
+                  <a href="https://www.ncbi.nlm.nih.gov/snp/?term={{ chrom }}%5BChromosome%5D+AND+({{ pos }}%5BBase+Position%5D+)">link</a>
+                </dd>
+              <dt>BRAVO</dt>
+                <dd>
+                  <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}">link</a>
+                </dd>
+              <dt>GTEx Portal</dt>
+                <dd>
+                  <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38">link</a>
+                </dd>
+              <dt>UCSC</dt>
+                <dd>
+                  <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38virtModeType=default&virtMode=0&nonVirtPosition=&position=chr{{ chrom }}}}%3A{{ pos }}-{{ pos }}">link</a>
+                </dd>
+          </dl>
+              <!--
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+  -->
+  Note: <b>Normalized Effect Size (NES)</b> is the effect of one additional alternate allele on the inverse normalized expression level of a gene, after adjusting for covariates. More details about analysis methods can be found at the <a href="https://www.gtexportal.org/home/documentationPage"><b>GTEx Portal website</a></b>.
+</div>
+</div>
+
+
+<div class="container-fluid">
+   <form action="#" method="post" class="grouping" id="grouping-buttons">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-secondary disabled">
+            <input type="radio"> Group by:
+        </label>
+        <label class="btn btn-primary">
+            <input type="radio" name="group-options" autocomplete=off id="group-tissue" value="tissue"> Tissue
+        </label>
+        <label class="btn btn-primary focus active">
+            <input type="radio" name="group-options" autocomplete=off id="group-system" value="system"> System
+        </label>
+        <label class="btn btn-primary">
+            <input type="radio" name="group-options" autocomplete=off id="group-symbol" value="symbol"> Gene
+        </label>
+    </div>
+  </form>
 </div>
 
 <div class="container-fluid">
+  <form action="#" method="post" class="yaxis-display" id="transform-y">
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-success">
-            <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue"
-                    onclick="switchY(plot, table, 'log_pvalue');"/> P-values
+        <label class="btn btn-secondary disabled">
+          <input type="radio"> Show:
+        </label>
+        <label class="btn btn-success focus active">
+            <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
         </label>
         <label class="btn btn-success">
-            <input type="radio" name="y-options" autocomplete=off id="show-beta" onclick="switchY(plot, table, 'beta');"/>
-            NES
+            <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> NES
         </label>
    </div>
+  </form>
 </div>
 
 <div class="container-fluid">
-    <div class="btn-toggle" data-toggle="buttons">
-      <button id="label-toggle" type="button" class="btn btn-info">Toggle labels</button><br>
+    <div class="btn-group" data-toggle="buttons">
+        <button type="button" class="btn btn-secondary" disabled>Label:</button>
+        <button id="label-toggle" type="button" class="btn btn-info">Top 5</button><br>
+
     </div>
 </div>
 
@@ -134,9 +222,51 @@ If given a range, it will return the most top gene and top tissue for the full r
         }
         parseSearch(variant);
     });
+
+    /* These don't work when we are using Bootstrap
+    document.getElementById('group-tissue').addEventListener('click', function() {
+      groupByThing(plot, 'tissue');
+    });
+    document.getElementById('group-system').addEventListener('click', function() {
+        groupByThing(plot, 'system');
+    });
+    document.getElementById('group-symbol').addEventListener('click', function() {
+      groupByThing(plot, 'symbol');
+    });
+    */
+    
+    /* This works when we are using bootstrap  */
+    var groupVar = document.forms['grouping-buttons'].elements['group-options'];
+    for (var i=0, len=groupVar.length; i<len; i++) {
+      groupVar[i].onchange = function() {
+        groupByThing(plot, this.value);
+      }
+    }
+
+    var yaxisVar = document.forms['transform-y'].elements['y-options'];
+    for (var j=0, len=yaxisVar.length; j<len; j++) {
+      yaxisVar[j].onchange = function() {
+        switchY(plot, table, this.value);
+      }
+    }
+    
     document.getElementById('label-toggle').addEventListener('click', function() {
         labelToggle(plot);
+        if (this.innerText ==='Top 5') {
+          this.innerText = 'Off';
+        } else if (this.innerText === 'Off') {
+          this.innerText = 'Top 50';
+        } else {
+          this.innerText = 'Top 5';
+        }
     });
 </script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
 </body>
 </html>
