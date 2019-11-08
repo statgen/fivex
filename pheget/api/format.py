@@ -257,6 +257,8 @@ def query_range(chrom: str, start: int, end: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
+    reader.add_filter(lambda result: result.maf != "0")
+    reader.add_filter('maf')
     # TODO: Check to see if the range is retrieving correctly
     #reader.add_filter('pos', pos)
     return reader.fetch(chrom, start - 1, end + 1)
