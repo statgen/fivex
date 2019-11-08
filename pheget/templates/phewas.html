@@ -16,6 +16,10 @@
   .padtop {
     padding-top: 20px;
   }
+
+  .text-with-definition {
+    text-decoration: dotted underline;
+  }
 </style>
 
 <body>
@@ -45,25 +49,15 @@
   <h1>chr{{ chrom }}:{{ "{:,}".format(pos) }} for all tissues and genes</h1>
 
   <div>
-    {% if nearest_genes|length == 1 %}
-      {% with gene = nearest_genes[0] %}
-        <p>{{ "Overlapping" if gene.start <= pos <= gene.end else "Nearest" }} gene:
-          <i>{{ gene.symbol }}</i> (<i>{{ gene.ensg }}</i>)
-          chr{{ gene.chrom }}:{{ "{:,}".format(gene.start) }}-{{ "{:,}".format(gene.end) }}</p>
-      {% endwith %}
-    {% elif nearest_genes|length <= 5 %}
-      <p style="margin-bottom:0">Overlapping genes:</p>
-      <ul>
-        {% for gene in nearest_genes %}
-          <li>chr{{ gene.chrom }}:{{ "{:,}".format(gene.start) }}-{{ "{:,}".format(gene.end) }} <i>{{ gene.symbol }}</i>
-            (<i>{{ gene.ensg }}</i>)
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>Overlapping genes: {% for gene in nearest_genes %}<i>{{ gene.symbol }}</i>{% if not loop.last %},
-      {% endif %}{% endfor %}</p>
-    {% endif %}
+    <p>
+      {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
+      {% for gene in nearest_genes %}
+        <span class="text-with-definition" title="{{ gene.ensg }}">{{ gene.symbol }}</span>
+        {%- if not loop.last -%},{% endif %}
+      {% else %}
+        (no genes found)
+      {% endfor %}
+    </p>
   </div>
 
   <div class="btn-group btn-group-toggle" data-toggle="buttons">
