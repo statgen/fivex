@@ -21,16 +21,23 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
     const start = +pos - 50000;
     const end = +pos + 50000;
+
+    // get rid of the parts beyond decimal point for the sake of naming
+    const gene_id_short = gene_id.substring(0, 15);
+
     dataSources
-        .add(`assoc_${tissue}_${gene_id}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
+        .add(`assoc_${tissue}_${gene_id_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
         .add(`ld`, ["LDLZ2", { url: "https://portaldev.sph.umich.edu/ld/", params: { source: '1000G', population: 'ALL', build:"GRCh38" } }])
         .add(`recomb`, ["RecombLZ", { url: apiBase + "annotation/recomb/results/", params: {build: "GRCh38"} }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
     initialState = { chr: chrom, start: start, end: end};
     initialState.genome_build = 'GRCh38';
+
+    
+    
     const namespace = {
-        assoc: `assoc_${tissue}_${gene_id}`
+        assoc: `assoc_${tissue}_${gene_id_short}`
     };
 
     const assoc_pval = LocusZoom.Layouts.get("data_layer", "association_pvalues", {
@@ -47,8 +54,8 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
         state: initialState,
         panels:[
             LocusZoom.Layouts.get('panel','association', { 
-                id: `assoc_${tissue}_${gene_id}`,
-                title: {text: `Association between ${tissue} and ${gene_id}`,x: 100, y: 30},
+                id: `assoc_${tissue}_${gene_id_short}`,
+                title: {text: `Association between ${tissue} and ${gene_id_short}`,x: 100, y: 30},
                 namespace,
                 data_layers: [
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -79,12 +86,13 @@ function addassoc(newinfo, istissue){
     } else {
         gene_id = newinfo;
     }
-
+    // get rid of the parts beyond decimal point for the sake of naming
+    const gene_id_short = gene_id.substring(0, 15);
     const namespace = {
-        assoc: `assoc_${tissue}_${gene_id}`
+        assoc: `assoc_${tissue}_${gene_id_short}`
     };
     datasources
-        .add(`assoc_${tissue}_${gene_id}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }]);
+        .add(`assoc_${tissue}_${gene_id_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }]);
     
     
     const assoc_pval = LocusZoom.Layouts.get("data_layer", "association_pvalues", {
@@ -97,8 +105,8 @@ function addassoc(newinfo, istissue){
         ]
     });
     newpanel = LocusZoom.Layouts.get('panel','association', {
-                    id: `assoc_${tissue}_${gene_id}`,
-                    title: {text: `Association between ${tissue} and ${gene_id}`,x: 100,y: 30},
+                    id: `assoc_${tissue}_${gene_id_short}`,
+                    title: {text: `Association between ${tissue} and ${gene_id_short}`,x: 100,y: 30},
                     namespace,
                     data_layers: [
                         LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -107,7 +115,11 @@ function addassoc(newinfo, istissue){
                     ]  
                 });
     singlegeneplot.removePanel('genes');
-    singlegeneplot.addPanel(newpanel);
+    try{
+        singlegeneplot.addPanel(newpanel);
+    } catch(error){
+        alert("The requested plot has already been generated!");
+    }
     singlegeneplot.addPanel(LocusZoom.Layouts.get('panel', 'genes'));
     // let newbutton = document.createElement("li");
     // newbutton.setAttribute('id',`${newtissue}`);
@@ -131,9 +143,10 @@ function addassoc(newinfo, istissue){
 
 // switch Y axis 
 function switchY(){
+    assco_panels = singlegeneplot.layout.panels.slice(0,-1);
     if(yaxis==="logp"){
         // switch to beta
-        singlegeneplot.layout.panels.forEach(function(indvpanel){
+        assco_panels.forEach(function(indvpanel){
             // I name the panel id to be the same as datasource namespace
             indvpanel.data_layers[2].y_axis.field = indvpanel.id + ":beta";
             indvpanel.axes.y1['label'] = 'Effect size';
@@ -149,7 +162,7 @@ function switchY(){
         yaxis = "beta";
     } else{
         // switch to logp
-        singlegeneplot.layout.panels.forEach(function(indvpanel){
+        assco_panels.forEach(function(indvpanel){
             indvpanel.axes.y1['label'] = '- Log 10 P Value';
             indvpanel.data_layers[2].y_axis.field = indvpanel.id + ":log_pvalue";
             indvpanel.data_layers[2].y_axis.floor = 0;
