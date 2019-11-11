@@ -150,7 +150,7 @@ class VariantContainer:
                  tissue, symbol, system, sample_size):
         self.chromosome = chrom
         self.position = pos
-        self.refAllele = ref
+        self.ref_allele = ref
         self.altAllele = alt
         self.gene_id = gene_id
 

@@ -42,23 +42,30 @@
 <div class="row">
     <select id="tissueselect">
         <option value=""></option>
-        <option value="Prostate">Prostate</option>
-        <option value="Artery_Coronary">Artery Coronary</option>
         <option value="Brain_Cortex">Brain Cortex</option>
         <option value="Muscle_Skeletal">Muscle Skeletal</option>
       </select>  
-  <button id="search">Search</button>
-  <button id="switchy" onClick="switchY()">Switch Axis</button>
+  <button id="tissuesearch">Add Tissue</button> 
 </div>
+<h3>Search for Extra Genes here</h3>
+<div class="row">
+  <select id="geneselect">
+      <option value=""></option>
+      <option value="ENSG00000169684.13">CHRNA5</option>
+      <option value="ENSG00000080644.15">CHRNA3</option>
+    </select>  
+  <button id="genesearch">Add Gene</button> 
+</div>
+<button id="switchy" onClick="switchY()">Switch Axis</button>
 <!-- <button id="show-pvalue">Show P-values</button>
 <button id="show-slope">Show effect sizes</button> -->
 
 <div class="row">
-    <div class="two columns">
+    <!-- <div class="two columns">
       <ul id="buttonlist">
           <li id="{{tissue}}"><button onClick="deletepanel(this.parentNode.id)">Delete</button></li>  
       </ul>
-    </div>
+    </div> -->
     <div id="plot" class="ten columns"></div>
 </div>
 </div>
@@ -72,14 +79,20 @@
 <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
     makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
-    document.getElementById('search').addEventListener('click', function() {
+    document.getElementById('tissuesearch').addEventListener('click', function() {
         let newtissue = document.getElementById("tissueselect").value;
         if (newtissue.length == 0){
           alert("No tissue input!");
-        } else if (globalvars["tissues"].includes(newtissue)){
-          alert("This tissue is already in the plot!");
         } else{
-          addtissue(newtissue);
+          addassoc(newtissue, true);
+        }
+    });
+    document.getElementById('genesearch').addEventListener('click', function() {
+        let newgene = document.getElementById("geneselect").value;
+        if (newgene.length == 0){
+          alert("No gene input!");
+        } else{
+          addassoc(newgene, false);
         }
     });
 </script>

@@ -142,7 +142,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}log_pvalue_rank',
                             '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
-                            '{{namespace[phewas]}}refAllele', '{{namespace[phewas]}}altAllele',
+                            '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}altAllele',
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                         ];
