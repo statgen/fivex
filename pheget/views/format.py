@@ -8,6 +8,8 @@ from zorp import parser_utils, readers
 
 import pheget
 import os
+import pickle
+import math
 
 class InfoContainer:
     def __init__(self, chromosome, position, refAllele, altAllele, 
@@ -42,9 +44,20 @@ def parse_position(chrom_pos: str):
     chrom, pos = chrom_pos.split('_')
     return chrom, int(pos)
 
+def afFormat(afText):
+    return(str(round(float(afText), math.floor(-math.log10(float(afText)))+4)))
 
 def get_variant_info(chrom: str, pos: int):
-    #infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'GTEx_v8.best.genes.tissues.allele.info.txt.gz')
+    with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
+        SYMBOL_DICT = pickle.load(f)
     infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.txt.gz')
     reader = readers.TabixReader(infoDB, parser=info_parser)
-    return reader.fetch('chr' + chrom, pos - 1, pos + 1)
+    data = [res.to_dict() for res in reader.fetch('chr' + chrom, pos - 1, pos + 1)][0]
+    ref = data['refAllele']
+    alt = data['altAllele']
+    top_gene = SYMBOL_DICT.get(data['top_gene'].split(".")[0], 'Unknown_Gene')
+    top_tissue = data['top_tissue']
+    ac = data['ac']
+    af = afFormat(data['af'])
+    an = data['an']
+    return ([ref, alt, top_gene, top_tissue, ac, af, an])

@@ -146,7 +146,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}sample_size',
                         ];
-                        base.x_axis.category_field = '{{namespace[phewas]}}system';
+                        base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                         base.color = [
                             {
@@ -196,8 +196,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
-                        base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
-                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
+                        base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
+                        base.label.text = '{{{{namespace[phewas]}}tissue}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
                         base.label.filters.push({ field: 'phewas:log_pvalue_rank', operator: '<=', value: 5 });
                         return base;
@@ -258,13 +258,18 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+
+    // Show sort-by-gene view by default
+    plot.layout.panels[0].data_layers[0].x_axis.category_order_field = 'phewas:tss_distance';
+    plot.layout.panels[0].data_layers[0].color[2].field = 'phewas:symbol';
+
     return [plot, dataSources];
 }
 
 // eslint-disable-next-line no-unused-vars
 function makeTable(selector) {
-    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(Math.max(d + 1, 0)) : x.toExponential(1); };
-    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(Math.max(d + 1, 0)) : x.toExponential(1); };
+    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1); };
+    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1); };
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
@@ -287,8 +292,8 @@ function makeTable(selector) {
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value
-            {title: 'NES', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
-            {title: 'NES SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
+            {title: 'Normalized Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return a-b; }},
+            {title: 'SE (Normalized Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
         initialSort: [{column: 'phewas:log_pvalue', dir: 'desc'}],
@@ -354,14 +359,10 @@ function switchY(plot, table, yfield) {
     }
     plot.applyState();
 }
+
+// Changes the number of top variants which are labeled on the plot
 // eslint-disable-next-line no-unused-vars
-function labelToggle(plot) {
-    if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0;
-    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 0) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 50;
-    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 50) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 5;
-    }
+function labelTopVariants(plot, topVariantsToShow) {
+    plot.layout.panels[0].data_layers[0].label.filters[1].value = topVariantsToShow;
     plot.applyState();
 }
