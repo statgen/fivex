@@ -147,11 +147,11 @@ class VariantContainer:
                  tss_distance,
                  ma_samples, ma_count, maf,
                  log_pvalue_nominal, beta, stderr_beta,
-                 tissue, symbol, system, sample_size):
-        self.chrom = chrom
-        self.pos = pos
-        self.ref = ref
-        self.alt = alt
+                 tissue, symbol, system, sample_size, id_field):
+        self.chromosome = chrom
+        self.position = pos
+        self.refAllele = ref
+        self.altAllele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -168,7 +168,8 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
-        self.sample_size = sample_size
+        self.samples = sample_size
+        self.id_field = id_field
 
     @property
     def pvalue(self):
@@ -205,6 +206,7 @@ def variant_parser(row: str) -> VariantContainer:
     fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
     fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
     fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Add sample sizes from GTEx v8
+    fields.append(fields[1] + ":" + str(fields[2]) + "_" + fields[3] + "/" + fields[4])  # chrom:pos_ref/alt
     return VariantContainer(*fields)
 
 
@@ -234,5 +236,28 @@ def query_variant(chrom: str, pos: int,
     #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
     #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
     #       interval, but 20,000 is not."
-    reader.add_filter('pos', pos)
+    reader.add_filter('position', pos)
     return reader.fetch(chrom, pos - 1, pos + 1)
+
+def query_range(chrom: str, start: int, end: int,
+                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+    """
+    The actual business of querying is isolated to this function. We could replace it with a database or anything else
+    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
+    This version optionally filters by ONE gene or ONE tissue if requested
+    """
+    if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
+        chrom = 'chr{}'.format(chrom)
+
+    # FIXME Hardcoded directory structure! Improve!
+    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
+    reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
+    if tissue:
+        reader.add_filter('tissue', tissue)
+
+    if gene_id:
+        reader.add_filter('gene_id', gene_id)
+
+    # TODO: Check to see if the range is retrieving correctly
+    #reader.add_filter('pos', pos)
+    return reader.fetch(chrom, start - 1, end + 1)

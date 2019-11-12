@@ -19,10 +19,13 @@ def variant_view(chrom_pos):
 
     (chrom, pos) = pheget.views.format.parse_position(chrom_pos)
 
+    rangeStart = str(int(pos) - 25)
+    rangeEnd = str(int(pos) + 25)
+
     try:
-        (ref, alt, top_gene, top_tissue, ac, af, an) = pheget.views.format.get_variant_info(chrom, pos)
+        (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = pheget.views.format.get_variant_info(chrom, pos)
     except FileNotFoundError:
-        (ref, alt, top_gene, top_tissue, ac, af, an) = ("Unknown","Unknown","Unknown","Unknown","Unknown","Unknown","Unknown")
+        (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = ("Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unkonwn")
 
     try:
         nearest_genes = gl.at(chrom, pos)
@@ -35,5 +38,5 @@ def variant_view(chrom_pos):
                       (len(nearest_genes) == 1 and nearest_genes[0]['start'] <= pos <= nearest_genes[0]['end']))
 
     return render_template('phewas.html', 
-           chrom=chrom, pos=pos, ref=ref, alt=alt, top_gene=top_gene, top_tissue=top_tissue, ac=ac, af=af, an=an,
+           chrom=chrom, pos=pos, ref=ref, alt=alt, top_gene=top_gene, top_tissue=top_tissue, ac=ac, af=af, an=an, rsid=rsid, rangeStart=rangeStart, rangeEnd=rangeEnd,
            nearest_genes=nearest_genes, is_inside_gene=is_inside_gene)

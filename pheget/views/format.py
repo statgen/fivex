@@ -13,7 +13,7 @@ import math
 
 class InfoContainer:
     def __init__(self, chromosome, position, refAllele, altAllele, 
-                  top_gene, top_tissue, ac, af, an):
+                  top_gene, top_tissue, ac, af, an, rsid):
         self.chromsome = chromosome
         self.position = position
         self.refAllele = refAllele
@@ -25,6 +25,7 @@ class InfoContainer:
         self.ac = ac
         self.af = af
         self.an = an
+        self.rsid = rsid
 
     def to_dict(self):
         return vars(self)
@@ -50,7 +51,7 @@ def afFormat(afText):
 def get_variant_info(chrom: str, pos: int):
     with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
         SYMBOL_DICT = pickle.load(f)
-    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.txt.gz')
+    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.rsnum.txt.gz')
     reader = readers.TabixReader(infoDB, parser=info_parser)
     data = [res.to_dict() for res in reader.fetch('chr' + chrom, pos - 1, pos + 1)][0]
     ref = data['refAllele']
@@ -60,4 +61,5 @@ def get_variant_info(chrom: str, pos: int):
     ac = data['ac']
     af = afFormat(data['af'])
     an = data['an']
-    return ([ref, alt, top_gene, top_tissue, ac, af, an])
+    rsid = data['rsid']
+    return ([ref, alt, top_gene, top_tissue, ac, af, an, rsid])

@@ -141,10 +141,10 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}log_pvalue_rank',
-                            '{{namespace[phewas]}}chrom', '{{namespace[phewas]}}pos',
-                            '{{namespace[phewas]}}ref', '{{namespace[phewas]}}alt',
+                            '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
+                            '{{namespace[phewas]}}refAllele', '{{namespace[phewas]}}altAllele',
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
-                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}sample_size',
+                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -187,14 +187,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
 
                         base.tooltip.html = `
-<strong>Variant:</strong> {{{{namespace[phewas]}}chrom|htmlescape}}:{{{{namespace[phewas]}}pos|htmlescape}} {{{{namespace[phewas]}}ref|htmlescape}}/{{{{namespace[phewas]}}alt|htmlescape}}<br>
+<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}refAllele|htmlescape}}/{{{{namespace[phewas]}}altAllele|htmlescape}}<br>
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
 <strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
-<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}sample_size|htmlescape}})<br>
+<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
                         base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
                         base.label.text = '{{{{namespace[phewas]}}tissue}}';
