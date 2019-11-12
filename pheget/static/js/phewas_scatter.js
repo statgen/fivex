@@ -401,11 +401,12 @@ function makeTable(selector) {
     };
 
     return new Tabulator(selector, {
-        layout: 'fitColumns',
+        pagination:"local",
+        layout: "fitData",
         height: 600,
         columns: [
             {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
-            {title: 'Tissue', field: 'phewas:tissue', headerFilter: true, widthGrow: 2},
+            {title: 'Tissue', field: 'phewas:tissue', headerFilter: true},
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value

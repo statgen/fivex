@@ -56,6 +56,7 @@
 <h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} for all tissues and genes</h1>
 </p>
 
+<!-- Formats dt/dd to display on the same line -->
 <style>
 dl.inline-flex {
   display: flex;
@@ -85,7 +86,9 @@ dl.line-flex dd {
         Variant Information from Sequence Genotype <span class="fa fa-caret-down"></span>
       </button>
       <div class="collapse show" id="variantInformation">
+
         <div class="card-group">
+
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
@@ -96,6 +99,7 @@ dl.line-flex dd {
                 </dl>
             </div>
           </div>
+
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
@@ -106,6 +110,7 @@ dl.line-flex dd {
               </dl>
             </div>
           </div>
+
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
@@ -129,37 +134,52 @@ dl.line-flex dd {
               </dl>
             </div>
           </div>
+
         </div>
+
         <div class="card-group row">
+
           <div class="col-7">
             <div class="card">
               <div class="card-body">
-                <button class="btn btn-sm btn-secondary" disabled data-toggle="tooltip" data-placement="top" title="External links for more information about this variant"><span class="fa fa-info-circle"></span>  Variant information </button>
-                <a href="https://www.ncbi.nlm.nih.gov/snp/{{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> dbSNP</a>
-                <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> BRAVO</a>
-                <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> GTEx Portal</a>
-                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ rangeStart }}-{{ rangeEnd }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> UCSC</a>
-                <a href="https://gnomad.broadinstitute.org/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}?dataset=gnomad_r2_1" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> gnomAD</a>
-                <a href="http://pheweb.sph.umich.edu/go?query={{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-external-link"></span> PheWeb</a>
-            </div>
-            </div>
-          </div>
-          <div class="col-5">
-            <div class="card">
-              <div class="card-body">
-                  <button class="btn btn-sm btn-secondary" disabled data-toggle="tooltip" data-placement="top" title="Other supporting information about the GTEx v8 data set"><span class="fa fa-info-circle"></span> Other information</button>
-                <a href="https://www.gtexportal.org/home/documentationPage" class="btn btn-info btn-sm"><span class="fa fa-external-link"></span> Definition of NES</a> 
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="External links for more information about this variant">
+                  <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span class="fa fa-info-circle"></span> Variant information </button>
+                </span>
+                <a href="https://www.ncbi.nlm.nih.gov/snp/{{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"><span class="fa fa-external-link"></span> dbSNP</a>
+                <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" data-html=true title="A browser for variants in NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>"><span class="fa fa-external-link"></span> BRAVO</a>
+                <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis"><span class="fa fa-external-link"></span> GTEx Portal</a>
+                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ rangeStart }}-{{ rangeEnd }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="The UC Santa Cruz Genome Browser"><span class="fa fa-external-link"></span> UCSC</a>
+                <a href="https://gnomad.broadinstitute.org/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}?dataset=gnomad_r3" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes"><span class="fa fa-external-link"></span> gnomAD</a>
+                <a href="http://pheweb.sph.umich.edu/go?query={{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Contains 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative"><span class="fa fa-external-link"></span> PheWeb</a>
               </div>
             </div>
           </div>
+
+          <div class="col-5">
+            <div class="card">
+              <div class="card-body">
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Other supporting information about the GTEx v8 data set">
+                  <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span class="fa fa-info-circle"></span> Other information</button>
+                </span>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
+                  <button class="btn btn-sm btn-info" style="pointer-events: none;"><span class="fa fa-question"></span> Red dotted line </button>
+                </span>
+                <a href="https://www.gtexportal.org/home/documentationPage" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="top" title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal."><span class="fa fa-external-link"></span> Definition of NES</a> 
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <br>
+
 <div class="container-fluid">
   <div class="row justify-content-start">
+
     <div class="col-sm">
       <form action="#" method="post" class="grouping" id="grouping-buttons">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -182,7 +202,7 @@ dl.line-flex dd {
     <div class="col-sm">
       <form action="#" method="post" class="yaxis-display" id="transform-y">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Switches the variable plotted on the y-axis between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES).">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES).">
             <button type="button" class="btn btn-secondary" style="pointer-events: none;" disabled> Show: </button>
           </span>
           <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true" title="Display -log<sub>10</sub>(P-values) on the Y-axis">
