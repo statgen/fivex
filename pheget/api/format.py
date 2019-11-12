@@ -237,7 +237,12 @@ def query_variant(chrom: str, pos: int,
     #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
     #       interval, but 20,000 is not."
     reader.add_filter('position', pos)
+
+    reader.add_filter(lambda result: result.maf != "0")
+    reader.add_filter('maf')
+    
     return reader.fetch(chrom, pos - 1, pos + 1)
+
 
 def query_range(chrom: str, start: int, end: int,
                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
@@ -258,6 +263,8 @@ def query_range(chrom: str, start: int, end: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
+    reader.add_filter(lambda result: result.maf != "0")
+    reader.add_filter('maf')
     # TODO: Check to see if the range is retrieving correctly
     #reader.add_filter('pos', pos)
     return reader.fetch(chrom, start - 1, end + 1)
