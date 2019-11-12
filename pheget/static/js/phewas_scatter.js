@@ -207,6 +207,7 @@ LocusZoom.DataLayers.add('orthogonal_line_varpos', function(layout) {
                 .attr('d', this.line)
                 .style(this.layout.style);
         }
+        selection.exit().remove();
     };
 
     return this;
