@@ -402,6 +402,7 @@ function makeTable(selector) {
 
     return new Tabulator(selector, {
         pagination:"local",
+        paginationSize:9,
         layout: "fitData",
         height: 600,
         columns: [
