@@ -27,4 +27,3 @@ def range_query():  # fields to get: chrom, start, end, gene_id, tissue
 
     results = {'data': data}
     return jsonify(results) 
-    
