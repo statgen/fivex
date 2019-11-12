@@ -8,7 +8,7 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         //      state.start, etc)
         return this.url;
     },
-    annotateData(records, chain) {
+    annotateData(records) {  // Removed chain for now since we are not currently using it
         // Add a field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
