@@ -50,11 +50,10 @@
 <br>
 
 
-
-
 <p>
 <h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} for all tissues and genes</h1>
 </p>
+
 
 <!-- Formats dt/dd to display on the same line -->
 <style>
@@ -92,21 +91,32 @@ dl.line-flex dd {
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
-                <dt>Allele count / total</dt>
-                  <dd>{{ ac }} / {{ an }}</dd>
+                {%if ac != "Unknown" and an != "Unknown" %}
+                    <dt>Allele count / total</dt>
+                    <dd>{{ ac }} / {{ an }}</dd>
+                {% else %}
+                    <dt>Note:</dt>
+                    <dd>Allele information not found</dd>
+                {% endif %}                  
+                {%if af != "Unknown" %}
                 <dt>Allele frequency</dt>
                   <dd>{{ af }}</dd>
                 </dl>
+                {% endif %}
             </div>
           </div>
 
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
+                {%if top_gene != "Unknown" %}
                 <dt>Top gene</dt>
                   <dd>{{ top_gene }}</dd>
+                {% endif %}
+                {%if top_tissue != "Unknown" %}
                 <dt>Top tissue</dt>
                   <dd>{{ top_tissue }}</dd>
+                {% endif %}
               </dl>
             </div>
           </div>
@@ -114,12 +124,14 @@ dl.line-flex dd {
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
+                {%if rsid != "Unknown" %}
                 <dt>
                  rsid
                 </dt>
                 <dd>
                  {{ rsid }}
                 </dd>
+                {% endif %}
                 <dt>
                  {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
                 </dt>
@@ -138,8 +150,7 @@ dl.line-flex dd {
         </div>
 
         <div class="card-group row">
-
-
+            {% if rsid != "Unknown" %}
             <div class="card">
               <div class="card-body">
                 <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="External links for more information about this variant">
@@ -148,14 +159,12 @@ dl.line-flex dd {
                 <a href="https://www.ncbi.nlm.nih.gov/snp/{{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP <span class="fa fa-external-link"></span> </a>
                 <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" data-html=true title="A browser for variants in NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>"> BRAVO <span class="fa fa-external-link"></span> </a>
                 <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis"> GTEx Portal <span class="fa fa-external-link"></span> </a>
-                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ rangeStart }}-{{ rangeEnd }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="The UC Santa Cruz Genome Browser"> UCSC <span class="fa fa-external-link"></span></a>
+                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ pos - 25 }}-{{ pos + 25 }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="The UC Santa Cruz Genome Browser"> UCSC <span class="fa fa-external-link"></span></a>
                 <a href="https://gnomad.broadinstitute.org/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}?dataset=gnomad_r3" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes"> gnomAD <span class="fa fa-external-link"></span></a>
                 <a href="http://pheweb.sph.umich.edu/go?query={{ rsid }}" class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top" title="Contains 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative"> PheWeb <span class="fa fa-external-link"></span></a>
               </div>
             </div>
-
-
-
+            {% endif %}
             <div class="card">
               <div class="card-body">
                 <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Miscellaneous information about this project">
@@ -172,7 +181,6 @@ dl.line-flex dd {
 
               </div>
             </div>
-
 
         </div>
       </div>
