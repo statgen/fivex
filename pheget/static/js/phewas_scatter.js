@@ -214,6 +214,7 @@ LocusZoom.DataLayers.add('orthogonal_line_varpos', function(layout) {
 
 });
 
+
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
