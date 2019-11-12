@@ -96,6 +96,24 @@ LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
     return null;
 });
 
+// Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
+// Delete this once LocusZoom allows configuring the text via the layout.
+LocusZoom.Dashboard.Components.set('resize_to_data', function(layout) {
+    LocusZoom.Dashboard.Component.apply(this, arguments);
+    this.update = function() {
+        if (this.button) { return this; }
+        this.button = new LocusZoom.Dashboard.Component.Button(this)
+            .setColor(layout.color).setHtml('Show All Genes')
+            .setTitle('Automatically resize this panel to fit the data its currently showing')
+            .setOnclick(function() {
+                this.parent_panel.scaleHeightToData();
+                this.update();
+            }.bind(this));
+        this.button.show();
+        return this;
+    };
+});
+
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
@@ -209,7 +227,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
                 margin: { bottom: 40 },
-                min_height: 300,
+                min_height: 150,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
