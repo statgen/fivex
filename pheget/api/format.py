@@ -200,6 +200,9 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
+    fields[7] = int(fields[7])  # ma_samples
+    fields[8] = int(fields[8])  # ma_count
+    fields[9] = float(fields[9])  # maf
     fields[10] = parser_utils.parse_pval_to_log(fields[10], is_neg_log=False)  # pvalue_nominal --> serialize as log
     fields[11] = float(fields[11])  # beta
     fields[12] = float(fields[12])  # stderr_beta
@@ -238,7 +241,7 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('position', pos)
 
-    reader.add_filter(lambda result: result.maf != "0")
+    reader.add_filter(lambda result: result.maf > 0.0)
     reader.add_filter('maf')
     
     return reader.fetch(chrom, pos - 1, pos + 1)
@@ -263,7 +266,7 @@ def query_range(chrom: str, start: int, end: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
-    reader.add_filter(lambda result: result.maf != "0")
+    reader.add_filter(lambda result: result.maf > 0.0)
     reader.add_filter('maf')
     # TODO: Check to see if the range is retrieving correctly
     #reader.add_filter('pos', pos)
