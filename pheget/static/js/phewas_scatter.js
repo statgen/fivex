@@ -220,8 +220,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
     pos = +pos;
-    var pos_lower = pos - 1000000;
-    var pos_higher = pos + 1000000;
+    var pos_lower = pos - 500000;
+    var pos_higher = pos + 500000;
     dataSources
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
@@ -408,7 +408,7 @@ function makeTable(selector) {
         layout: "fitData",
         height: 600,
         columns: [
-            {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
+            {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return '<i>' + cell.getValue() + ' (' + cell.getData()['phewas:gene_id'] + '</i>)';}},
             {title: 'Tissue', field: 'phewas:tissue', headerFilter: true},
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
