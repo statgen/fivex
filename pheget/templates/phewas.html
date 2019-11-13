@@ -49,11 +49,9 @@
 </div>
 <br>
 
-
 <p>
 <h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} ({{ rsid }})</h1>
 </p>
-
 
 <!-- Formats dt/dd to display on the same line -->
 <style>
@@ -148,10 +146,8 @@ dl.line-flex dd {
               </dl>
             </div>
           </div>
-
         </div>
 
-        
             {% if rsid != "Unknown" %}
             <div class="card">
               <div class="card-body">
@@ -169,7 +165,6 @@ dl.line-flex dd {
               </div>
             </div>
             {% endif %}
-
         
       </div>
     </div>
@@ -238,8 +233,8 @@ dl.line-flex dd {
   </div>
 </div>
 
-
 <div id="plot"></div>
+
 <div id="table" style="width:90%;margin:0 auto"></div>
 
 {# These files must be included to make a LocusZoom plot #}
@@ -274,6 +269,8 @@ dl.line-flex dd {
         }
         parseSearch(variant);
     });
+
+    // On hitting toggle buttons, run JavaScript to update plot views
     var groupVar = document.forms['grouping-buttons'].elements['group-options'];
     for (var i=0, len=groupVar.length; i<len; i++) {
       groupVar[i].onchange = function() {
@@ -297,10 +294,10 @@ dl.line-flex dd {
 
 </script>
 
+<!-- Minimum code to include Bootstrap 4 functionality -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
 
 <script>
 // Activates Bootstrap tooltips
@@ -308,7 +305,8 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 </script>
-    
+
+<!-- Supporting information about this project -->
     <div class="card">
         <div class="card-body">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
@@ -322,7 +320,6 @@ $(function () {
 
         </div>
       </div>
-
 
 </body>
 </html>

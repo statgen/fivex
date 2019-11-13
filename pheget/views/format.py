@@ -52,14 +52,25 @@ def get_variant_info(chrom: str, pos: int):
         SYMBOL_DICT = pickle.load(f)
     infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.rsnum.txt.gz')
     reader = readers.TabixReader(infoDB, parser=info_parser)
-    data = next(reader.fetch('chr' + chrom, pos - 1, pos + 1))
-    ref = data.refAllele
-    alt = data.altAllele
-    top_gene = SYMBOL_DICT.get(data.top_gene.split('.')[0], 'Unknown_Gene')
-    top_tissue = data.top_tissue
-    ac = data.ac
-    af = afFormat(data.af)
-    an = data.an
-    rsid = data.rsid
+    reader.add_filter('position', pos)
+    try:
+        data = next(reader.fetch('chr' + chrom, pos - 1, pos + 1))
+        ref = data.refAllele
+        alt = data.altAllele
+        top_gene = SYMBOL_DICT.get(data.top_gene.split('.')[0], 'Unknown_Gene')
+        top_tissue = data.top_tissue
+        ac = data.ac
+        af = afFormat(data.af)
+        an = data.an
+        rsid = data.rsid
+    except StopIteration:
+        ref = "Unknown"
+        alt = "Unknown"
+        top_gene = "Unknown_gene"
+        top_tissue = "Unknown_tissue"
+        ac = -1
+        af = -1
+        an = -1
+        rsid = "Unknown"
 
     return ([ref, alt, top_gene, top_tissue, ac, af, an, rsid])
