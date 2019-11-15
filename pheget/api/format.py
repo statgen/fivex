@@ -241,9 +241,9 @@ def query_variant(chrom: str, pos: int,
     #       interval, but 20,000 is not."
     reader.add_filter('position', pos)
 
-    reader.add_filter(lambda result: result.maf > 0.0)
     reader.add_filter('maf')
-    
+    reader.add_filter(lambda result: result.maf > 0.0)
+
     return reader.fetch(chrom, pos - 1, pos + 1)
 
 
@@ -257,7 +257,6 @@ def query_range(chrom: str, start: int, end: int,
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = 'chr{}'.format(chrom)
 
-    # FIXME Hardcoded directory structure! Improve!
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
     if tissue:
@@ -266,8 +265,9 @@ def query_range(chrom: str, start: int, end: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
-    reader.add_filter(lambda result: result.maf > 0.0)
     reader.add_filter('maf')
+    reader.add_filter(lambda result: result.maf > 0.0)
+
     # TODO: Check to see if the range is retrieving correctly
     #reader.add_filter('pos', pos)
     return reader.fetch(chrom, start - 1, end + 1)
