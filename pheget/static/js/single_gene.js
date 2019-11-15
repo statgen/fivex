@@ -15,10 +15,12 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
 });
 
 
-var newscattertooltip = LocusZoom.Layouts.get("data_layer", "association_pvalues").tooltip;
+var newscattertooltip = LocusZoom.Layouts.get("data_layer", "association_pvalues", {unnamespaced:true}).tooltip;
 newscattertooltip.html = newscattertooltip.html + 
                 `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
 
+// var newgenetooltip = LocusZoom.Layouts.get("data_layer", "genes").tooltip;
+// newgenetooltip.html = newgenetooltip + `<input type="button" value="Add this Gene" class="linkbutton" onclick="history.back()">`;
 
 
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
