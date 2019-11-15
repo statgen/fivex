@@ -267,6 +267,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
+                        base.x_axis.category_order_field = 'phewas:tss_distance';
+
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -285,7 +287,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 },
                             },
                             {
-                                field: '{{namespace[phewas]}}system',
+                                field: '{{namespace[phewas]}}symbol',
                                 scale_function: 'categorical_bin',
                                 parameters: {
                                     categories: [],
@@ -377,10 +379,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
-
-    // Show sort-by-gene view by default
-    plot.layout.panels[0].data_layers[0].x_axis.category_order_field = 'phewas:tss_distance';
-    plot.layout.panels[0].data_layers[0].color[2].field = 'phewas:symbol';
 
     return [plot, dataSources];
 }
