@@ -1,4 +1,5 @@
 // This section will define the code required for the plot
+/* global d3 */
 /* global LocusZoom */
 /* global Tabulator */
 
@@ -8,8 +9,8 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         //      state.start, etc)
         return this.url;
     },
-    annotateData(records) {  // Removed chain for now since we are not currently using it
-        // Add a field `pvalue_rank`, where the strongest pvalue gets rank 1.
+    annotateData(records) {
+        // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
         // Because it's a shallow copy, the record objects in the original array are changed too.
@@ -138,7 +139,7 @@ LocusZoom.DataLayers.add('orthogonal_line_varpos', function(layout) {
     layout = LocusZoom.Layouts.merge(layout, this.DefaultLayout);
 
     // Require that orientation be "horizontal" or "vertical" only
-    if (['horizontal','vertical'].indexOf(layout.orientation) === -1) {
+    if (['horizontal', 'vertical'].indexOf(layout.orientation) === -1) {
         layout.orientation = 'vertical';
     }
 
@@ -183,7 +184,7 @@ LocusZoom.DataLayers.add('orthogonal_line_varpos', function(layout) {
         panel[y_range][0] = panel.layout.height;  // Forcibly extract the height of this panel and set it as the height of this line (see below)
 
         // Generate the line
-        this.line = d3.svg.line()  // eslint-disable-line no-undef
+        this.line = d3.svg.line()
             .x(function(d, i) {
                 var x = parseFloat(panel[x_scale](d['x']));
                 return isNaN(x) ? panel[x_range][i] : x;
@@ -401,10 +402,9 @@ function makeTable(selector) {
     };
 
     return new Tabulator(selector, {
-        pagination:"local",
-        paginationSize:9,
-        layout: "fitData",
-        height: 600,
+        pagination: 'local',
+        paginationSize: 20,
+        layout: 'fitData',
         columns: [
             {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return '<i>' + cell.getValue() + ' (' + cell.getData()['phewas:gene_id'] + '</i>)';}},
             {title: 'Tissue', field: 'phewas:tissue', headerFilter: true},

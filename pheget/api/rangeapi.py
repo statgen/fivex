@@ -11,7 +11,7 @@ from pheget.api.format import query_range
 def range_query():  # fields to get: chrom, start, end, gene_id, tissue
     """An API endpoint that returns data in nicely formatted JSON. Fetching data as JSON allows a single HTML file
     to update interactively without reloading (with appropriate supporting page code)."""
-    #chrom, pos = parse_position(chrom_pos)
+    # chrom, pos = parse_position(chrom_pos)
     chrom = request.args.get('chrom', None)
     start = int(request.args.get('start', None))
     end = int(request.args.get('end', None))
@@ -26,4 +26,4 @@ def range_query():  # fields to get: chrom, start, end, gene_id, tissue
         item['id'] = i
 
     results = {'data': data}
-    return jsonify(results) 
+    return jsonify(results)
