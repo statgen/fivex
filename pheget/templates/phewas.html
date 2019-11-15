@@ -215,16 +215,16 @@ dl.line-flex dd {
     <div class="col-sm">
       <form action="#" method="post" class="label-display" id="toggle-labels">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true" title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. Will only label variants more significant than 10<sup>-20</sup>.">
+          <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true" title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
           </span>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
             <input type="radio" name="label-options" autocomplete=off id="label-none" value="0"> None
           </label>
-          <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" title="Add labels to the 5 eQTLs with the most significant P-values">
+          <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" data-html="true" title="Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>">
             <input type="radio" name="label-options" autocomplete=off id="label-5" value="5"> Top 5
           </label>
-          <label class="btn btn-info"  data-toggle="tooltip" data-placement="top" title="Add labels to the 50 eQTLs with the most significant P-values">
+          <label class="btn btn-info"  data-toggle="tooltip" data-placement="top" data-html="true" title="Add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>">
             <input type="radio" name="label-options" autocomplete=off id="label-50" value="50"> Top 50
           </label>
         </div>
