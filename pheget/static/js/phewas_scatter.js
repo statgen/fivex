@@ -405,9 +405,8 @@ function makeTable(selector) {
 
     return new Tabulator(selector, {
         pagination: 'local',
-        paginationSize: 10,
+        paginationSize: 20,
         layout: 'fitData',
-        height: 600,
         columns: [
             {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return '<i>' + cell.getValue() + ' (' + cell.getData()['phewas:gene_id'] + '</i>)';}},
             {title: 'Tissue', field: 'phewas:tissue', headerFilter: true},
