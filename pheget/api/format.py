@@ -215,13 +215,10 @@ def variant_parser(row: str) -> VariantContainer:
     return VariantContainer(*fields)
 
 
-def query_variant(chrom: str, pos: int,
-                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+def query_variants(chrom: str, start: int, end: int = None,
+                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
     """
-    The actual business of querying is isolated to this function. We could replace it with a database or anything else
-    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
-
-    This version optionally filters by ONE gene or ONE tissue if requested
+    Fetch GTEX data for one or more variants, and apply optional filters
     """
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
         chrom = f'chr{chrom}'
@@ -235,41 +232,17 @@ def query_variant(chrom: str, pos: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
-    # TODO: This is a hack for the fact that a direct single-variant query fails in pysam (fetch start/end has a weird
-    #   definition of intervals, and fetch(region=) is just not giving the results I'd expect). Ask peter/alan for a
-    #   more elegant way. Until then, hack by overfetching, and filtering the results we don't want.
-    #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
-    #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
-    #       interval, but 20,000 is not."
-    reader.add_filter('position', pos)
+    if end is None:
+        # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open
+        # intervals. Filter out extraneous information
+        reader.add_filter('position', start)
 
     reader.add_filter('maf')
     reader.add_filter(lambda result: result.maf > 0.0)
 
-    return reader.fetch(chrom, pos - 1, pos + 1)
-
-
-def query_range(chrom: str, start: int, end: int,
-                tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
-    """
-    The actual business of querying is isolated to this function. We could replace it with a database or anything else
-    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
-    This version optionally filters by ONE gene or ONE tissue if requested
-    """
-    if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
-        chrom = 'chr{}'.format(chrom)
-
-    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
-    reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
-    if tissue:
-        reader.add_filter('tissue', tissue)
-
-    if gene_id:
-        reader.add_filter('gene_id', gene_id)
-
-    reader.add_filter('maf')
-    reader.add_filter(lambda result: result.maf > 0.0)
-
-    # TODO: Check to see if the range is retrieving correctly
-    # reader.add_filter('pos', pos)
-    return reader.fetch(chrom, start - 1, end + 1)
+    if end is None:
+        # Single variant query
+        return reader.fetch(chrom, start - 1, start + 1)
+    else:
+        # Region query
+        return reader.fetch(chrom, start - 1, end + 1)
