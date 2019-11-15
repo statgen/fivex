@@ -5,11 +5,11 @@ import os
 
 try:
     # Optional speedup features
-    from fastnumbers import int, float
+    from fastnumbers import int, float  # type: ignore
 except ImportError:
     pass
 
-from zorp import parser_utils, readers
+from zorp import parser_utils, readers  # type: ignore
 
 import pheget
 
@@ -132,7 +132,7 @@ SAMPLESIZE_DICT = {
     "Uterus": 129,
     "Vagina": 141,
     "Whole_Blood": 670
-}
+}  # type: ty.Dict[str, int]
 
 
 class VariantContainer:

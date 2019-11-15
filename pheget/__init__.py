@@ -4,7 +4,7 @@ Defines the PheGET web application
 import flask
 
 # app is a single object used by all the code modules in this package
-app = flask.Flask(__name__)
+app = flask.Flask(__name__)  # type: flask.Flask
 
 # Read settings from config module (pheget/config.py)
 app.config.from_object('pheget.config')

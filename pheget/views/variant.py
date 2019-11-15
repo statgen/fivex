@@ -3,8 +3,8 @@ Variant View Page.
 """
 
 from flask import render_template
-from genelocator import exception as gene_exc
-from genelocator import get_genelocator
+from genelocator import exception as gene_exc  # type: ignore
+from genelocator import get_genelocator  # type: ignore
 
 import pheget
 import pheget.views.format

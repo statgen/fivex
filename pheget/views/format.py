@@ -4,11 +4,11 @@ import pickle
 
 try:
     # Optional speedup features
-    from fastnumbers import int
+    from fastnumbers import int  # type: ignore
 except ImportError:
     pass
 
-from zorp import readers
+from zorp import readers  # type: ignore
 
 import pheget
 
