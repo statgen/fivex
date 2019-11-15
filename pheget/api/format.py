@@ -153,7 +153,7 @@ class VariantContainer:
         self.position = pos
 
         self.ref_allele = ref
-        self.altAllele = alt
+        self.alt_allele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -174,7 +174,7 @@ class VariantContainer:
 
     @property
     def id_field(self):
-        return f'{self.chromosome}:{self.position}_{self.refAllele}/{self.altAllele}'
+        return f'{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}'
         
     @property
     def pvalue(self):

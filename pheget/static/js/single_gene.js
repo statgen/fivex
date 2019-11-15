@@ -7,7 +7,7 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
     },
     annotateData(data) {
         data.forEach(item => {
-            item.variant = `${item.chromosome}:${item.position}_${item.ref_allele}/${item.altAllele}`;
+            item.variant = `${item.chromosome}:${item.position}_${item.ref_allele}/${item.alt_allele}`;
             item.beta = item.beta;
         });
         return data;

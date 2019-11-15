@@ -262,7 +262,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}tss_distance',
                             '{{namespace[phewas]}}log_pvalue_rank',
                             '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
-                            '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}altAllele',
+                            '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
 
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
@@ -310,7 +310,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         ];
 
                         base.tooltip.html = `
-<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}refAllele|htmlescape}}/{{{{namespace[phewas]}}altAllele|htmlescape}}<br>
+<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}<br>
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
