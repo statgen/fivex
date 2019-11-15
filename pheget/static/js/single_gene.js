@@ -15,6 +15,11 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
 });
 
 
+var newscattertooltip = LocusZoom.Layouts.get("data_layer", "association_pvalues").tooltip;
+newscattertooltip.html = newscattertooltip.html + 
+                `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
+
+
 
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
@@ -33,9 +38,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
     initialState = { chr: chrom, start: start, end: end};
     initialState.genome_build = 'GRCh38';
-
-    
-    
+   
     const namespace = {
         assoc: `assoc_${tissue}_${gene_id_short}`
     };
@@ -46,8 +49,10 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}position',
             '{{namespace[assoc]}}ref_allele', '{{namespace[assoc]}}variant',
             '{{namespace[assoc]}}beta', '{{namespace[assoc]}}log_pvalue|logtoscinotation',
-            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar'
-        ]
+            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
+            '{{namespace[assoc]}}chromosome'
+        ],
+        tooltip: newscattertooltip
     });
 
     layout = LocusZoom.Layouts.get("plot", "association_catalog", {
@@ -60,7 +65,29 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
                 data_layers: [
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                     LocusZoom.Layouts.get('data_layer', 'recomb_rate', { unnamespaced: true }),
-                    assoc_pval
+                    assoc_pval,
+                    {
+                        id: 'start',
+                        type: 'orthogonal_line',
+                        orientation: 'vertical',
+                        offset: start,
+                        style: {
+                            'stroke': '#FF3333',
+                            'stroke-width': '2px',
+                            'stroke-dasharray': '4px 4px'
+                        }
+                    },
+                    {
+                        id: 'end',
+                        type: 'orthogonal_line',
+                        orientation: 'vertical',
+                        offset: end,
+                        style: {
+                            'stroke': '#FF3333',
+                            'stroke-width': '2px',
+                            'stroke-dasharray': '4px 4px'
+                        }
+                    }
                 ] 
             }),
             LocusZoom.Layouts.get('panel', 'genes')
@@ -101,8 +128,10 @@ function addassoc(newinfo, istissue){
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}position',
             '{{namespace[assoc]}}ref_allele', '{{namespace[assoc]}}variant',
             '{{namespace[assoc]}}beta', '{{namespace[assoc]}}log_pvalue|logtoscinotation',
-            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar'
-        ]
+            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
+            '{{namespace[assoc]}}chromosome'
+        ],
+        tooltip: newscattertooltip
     });
     newpanel = LocusZoom.Layouts.get('panel','association', {
                     id: `assoc_${tissue}_${gene_id_short}`,
@@ -111,7 +140,29 @@ function addassoc(newinfo, istissue){
                     data_layers: [
                         LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                         LocusZoom.Layouts.get('data_layer', 'recomb_rate', { unnamespaced: true }),
-                        assoc_pval
+                        assoc_pval,
+                        {
+                            id: 'start',
+                            type: 'orthogonal_line',
+                            orientation: 'vertical',
+                            offset: start,
+                            style: {
+                                'stroke': '#FF3333',
+                                'stroke-width': '2px',
+                                'stroke-dasharray': '4px 4px'
+                            }
+                        },
+                        {
+                            id: 'end',
+                            type: 'orthogonal_line',
+                            orientation: 'vertical',
+                            offset: end,
+                            style: {
+                                'stroke': '#FF3333',
+                                'stroke-width': '2px',
+                                'stroke-dasharray': '4px 4px'
+                            }
+                        }
                     ]  
                 });
     singlegeneplot.removePanel('genes');

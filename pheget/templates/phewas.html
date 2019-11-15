@@ -15,6 +15,13 @@
     .padtop {
         padding-top: 20px;
     }
+    .linkButton { 
+     background: none;
+     border: none;
+     color: #0066ff;
+     text-decoration: underline;
+     cursor: pointer; 
+    }
 </style>
 
 <body>
@@ -83,16 +90,6 @@
 
 <div id="plot"></div>
 
-<div>
-    Query a single tissue for a single gene: <br>
-    <form action="/singlegene" method="get">
-        <input name="chrom" type="hidden" value="{{chrom}}">
-        <input name="pos" type="hidden" value="{{pos}}">
-        <input name="gene_id" type="text" placeholder="ENSG00000169684.13" value="ENSG00000169684.13">
-        <input name="tissue" type="text" placeholder="Brain_Cortex" value="Brain_Cortex">
-        <button type="submit">Search</button>
-     </form>
-</div>
 
 <div id="table" style="width:90%;margin:0 auto"></div>
 

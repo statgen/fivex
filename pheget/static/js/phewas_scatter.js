@@ -195,7 +195,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
 <strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
-<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>`;
+<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
+<form action="/singlegene" method="get">
+    <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
+    <input name="pos" type="hidden" value='{{{{namespace[phewas]}}position}}'>
+    <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
+    <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
+    <input type="submit" class="linkButton" value="Search this gene"/>
+</form>`;
                         base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
                         base.label.text = '{{{{namespace[phewas]}}symbol}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
