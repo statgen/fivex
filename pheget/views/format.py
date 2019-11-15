@@ -46,7 +46,8 @@ def parse_position(chrom_pos: str):
 
 
 def afFormat(af):
-    return (str(round(af, math.floor(-math.log10(float(af))) + 4)))
+    """Format allele frequency. Use scientific notation for anything below 1e-4, else display as decimal"""
+    return str(round(af, math.floor(-math.log10(float(af))) + 4))
 
 
 def get_variant_info(chrom: str, pos: int):
@@ -70,4 +71,4 @@ def get_variant_info(chrom: str, pos: int):
             None, None, None, None, None, None, None, None
         )
 
-    return ([ref, alt, top_gene, top_tissue, ac, af, an, rsid])
+    return [ref, alt, top_gene, top_tissue, ac, af, an, rsid]
