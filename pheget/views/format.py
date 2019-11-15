@@ -1,19 +1,21 @@
+import math
+import os
+import pickle
+
 try:
     # Optional speedup features
     from fastnumbers import int
 except ImportError:
     pass
 
-from zorp import parser_utils, readers
+from zorp import readers
 
 import pheget
-import os
-import pickle
-import math
+
 
 class InfoContainer:
-    def __init__(self, chromosome, position, refAllele, altAllele, 
-                  top_gene, top_tissue, ac, af, an, rsid):
+    def __init__(self, chromosome, position, refAllele, altAllele,
+                 top_gene, top_tissue, ac, af, an, rsid):
         self.chromsome = chromosome
         self.position = int(position)
         self.refAllele = refAllele
@@ -44,7 +46,7 @@ def parse_position(chrom_pos: str):
 
 
 def afFormat(af):
-    return(str(round(af, math.floor(-math.log10(float(af)))+4)))
+    return (str(round(af, math.floor(-math.log10(float(af))) + 4)))
 
 
 def get_variant_info(chrom: str, pos: int):

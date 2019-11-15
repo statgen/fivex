@@ -250,7 +250,7 @@ def query_variant(chrom: str, pos: int,
 
 
 def query_range(chrom: str, start: int, end: int,
-                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+                tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
     """
     The actual business of querying is isolated to this function. We could replace it with a database or anything else
     later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
@@ -271,5 +271,5 @@ def query_range(chrom: str, start: int, end: int,
     reader.add_filter(lambda result: result.maf > 0.0)
 
     # TODO: Check to see if the range is retrieving correctly
-    #reader.add_filter('pos', pos)
+    # reader.add_filter('pos', pos)
     return reader.fetch(chrom, start - 1, end + 1)
