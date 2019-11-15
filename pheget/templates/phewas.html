@@ -89,14 +89,15 @@ dl.line-flex dd {
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
-                {%if ac != "Unknown" and an != "Unknown" %}
+                {% if ac is defined and an is defined %}
                     <dt>Allele count / total</dt>
                     <dd>{{ ac }} / {{ an }}</dd>
                 {% else %}
                     <dt>Note:</dt>
                     <dd>Allele information not found</dd>
                 {% endif %}                  
-                {%if af != "Unknown" %}
+
+                {% if af is defined %}
                 <dt>Allele frequency</dt>
                   <dd>{{ af }}</dd>
                 </dl>
@@ -107,11 +108,11 @@ dl.line-flex dd {
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
-                {%if top_gene != "Unknown" %}
+                {% if top_gene is defined %}
                 <dt>Top gene</dt>
                   <dd><i>{{ top_gene }}</i></dd>
                 {% endif %}
-                {%if top_tissue != "Unknown" %}
+                {% if top_tissue is defined %}
                 <dt>Top tissue</dt>
                   <dd>{{ top_tissue }}</dd>
                 {% endif %}
@@ -122,7 +123,7 @@ dl.line-flex dd {
           <div class="card">
             <div class="card-body">
               <dl class="inline-flex">
-                {%if rsid != "Unknown" %}
+                {% if rsid is defined %}
                 <dt>
                  rsid
                 </dt>
@@ -148,7 +149,7 @@ dl.line-flex dd {
           </div>
         </div>
 
-            {% if rsid != "Unknown" %}
+            {% if rsid is defined %}
             <div class="card">
               <div class="card-body">
                 <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="External links for more information about this variant">
