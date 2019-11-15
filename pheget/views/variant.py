@@ -19,12 +19,7 @@ def variant_view(chrom_pos):
 
     (chrom, pos) = pheget.views.format.parse_position(chrom_pos)
 
-    try:
-        (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = pheget.views.format.get_variant_info(chrom, pos)
-    except FileNotFoundError:
-        (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = (
-            "Unknown", "Unknown", "Unknown_gene", "Unknown_tissue", -1, -1, -1, "Unknown"
-        )
+    (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = pheget.views.format.get_variant_info(chrom, pos)
 
     try:
         nearest_genes = gl.at(chrom, pos)
