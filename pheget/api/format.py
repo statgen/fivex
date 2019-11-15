@@ -1,6 +1,7 @@
 import math
 import typing as ty
 import pickle
+import os
 
 try:
     # Optional speedup features
@@ -12,7 +13,7 @@ from zorp import parser_utils, readers
 
 import pheget
 
-with open(pheget.app.config['DATA_DIR'] + '/gene.symbol.pickle', 'rb') as f:
+with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
     SYMBOL_DICT = pickle.load(f)
 
 
@@ -147,10 +148,10 @@ class VariantContainer:
                  ma_samples, ma_count, maf,
                  log_pvalue_nominal, beta, stderr_beta,
                  tissue, symbol, system, sample_size):
-        self.chrom = chrom
-        self.pos = pos
-        self.ref = ref
-        self.alt = alt
+        self.chromosome = chrom
+        self.position = pos
+        self.refAllele = ref
+        self.altAllele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -167,7 +168,11 @@ class VariantContainer:
         self.tissue = tissue
         self.symbol = symbol
         self.system = system
-        self.sample_size = sample_size
+        self.samples = sample_size
+
+    @property
+    def id_field(self):
+        return f'{self.chromosome}:{self.position}_{self.refAllele}/{self.altAllele}'
 
     @property
     def pvalue(self):
@@ -198,6 +203,9 @@ def variant_parser(row: str) -> VariantContainer:
     fields[1] = fields[1].replace('chr', '')  # chrom
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
+    fields[7] = int(fields[7])  # ma_samples
+    fields[8] = int(fields[8])  # ma_count
+    fields[9] = float(fields[9])  # maf
     fields[10] = parser_utils.parse_pval_to_log(fields[10], is_neg_log=False)  # pvalue_nominal --> serialize as log
     fields[11] = float(fields[11])  # beta
     fields[12] = float(fields[12])  # stderr_beta
@@ -207,16 +215,13 @@ def variant_parser(row: str) -> VariantContainer:
     return VariantContainer(*fields)
 
 
-def query_variant(chrom: str, pos: int,
-                  tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+def query_variants(chrom: str, start: int, end: int = None,
+                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
     """
-    The actual business of querying is isolated to this function. We could replace it with a database or anything else
-    later, and as long as it returned a list of objects (with fields accessible by name), it wouldn't matter
-
-    This version optionally filters by ONE gene or ONE tissue if requested
+    Fetch GTEX data for one or more variants, and apply optional filters
     """
     if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
-        chrom = 'chr{}'.format(chrom)
+        chrom = f'chr{chrom}'
 
     source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
@@ -227,11 +232,17 @@ def query_variant(chrom: str, pos: int,
     if gene_id:
         reader.add_filter('gene_id', gene_id)
 
-    # TODO: This is a hack for the fact that a direct single-variant query fails in pysam (fetch start/end has a weird
-    #   definition of intervals, and fetch(region=) is just not giving the results I'd expect). Ask peter/alan for a
-    #   more elegant way. Until then, hack by overfetching, and filtering the results we don't want.
-    #   How TabixFile.fetch(chrom, start, end) works: https://pysam.readthedocs.io/en/latest/glossary.html#term-region
-    #       "Within pysam, coordinates are 0-based, half-open intervals, i.e., the position 10,000 is part of the
-    #       interval, but 20,000 is not."
-    reader.add_filter('pos', pos)
-    return reader.fetch(chrom, pos - 1, pos + 1)
+    if end is None:
+        # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open
+        # intervals. Filter out extraneous information
+        reader.add_filter('position', start)
+
+    reader.add_filter('maf')
+    reader.add_filter(lambda result: result.maf > 0.0)
+
+    if end is None:
+        # Single variant query
+        return reader.fetch(chrom, start - 1, start + 1)
+    else:
+        # Region query
+        return reader.fetch(chrom, start - 1, end + 1)
