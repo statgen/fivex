@@ -411,7 +411,7 @@ function makeTable(selector) {
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value
-            {title: 'Normalized Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return a-b; }},
+            {title: 'Normalized Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number'},
             {title: 'SE (Normalized Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
