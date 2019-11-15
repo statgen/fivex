@@ -1,4 +1,5 @@
 // This section will define the code required for the plot
+/* global d3 */
 /* global LocusZoom */
 /* global Tabulator */
 
@@ -8,8 +9,8 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         //      state.start, etc)
         return this.url;
     },
-    annotateData(records, chain) {
-        // Add a field `pvalue_rank`, where the strongest pvalue gets rank 1.
+    annotateData(records) {
+        // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
         // Because it's a shallow copy, the record objects in the original array are changed too.
@@ -61,8 +62,8 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
             // Sort the data so that things in the same category are adjacent
             sourceData = this.data
                 .sort(function(a, b) {
-                    var av = -unique_categories[a[category_field]]; // sort descending
-                    var bv = -unique_categories[b[category_field]];
+                    var av = -a[category_order_field]; // sort descending
+                    var bv = -b[category_order_field];
                     return (av === bv) ? 0 : (av < bv ? -1 : 1);});
         } else {
             // Sort the data so that things in the same category are adjacent (case-insensitive by specified field)
@@ -96,13 +97,132 @@ LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
     return null;
 });
 
+// Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
+// Delete this once LocusZoom allows configuring the text via the layout.
+LocusZoom.Dashboard.Components.set('resize_to_data', function(layout) {
+    LocusZoom.Dashboard.Component.apply(this, arguments);
+    this.update = function() {
+        if (this.button) { return this; }
+        this.button = new LocusZoom.Dashboard.Component.Button(this)
+            .setColor(layout.color).setHtml('Show All Genes')
+            .setTitle('Automatically resize this panel to fit the data its currently showing')
+            .setOnclick(function() {
+                this.parent_panel.scaleHeightToData();
+                this.update();
+            }.bind(this));
+        this.button.show();
+        return this;
+    };
+});
+
+
+// Redefine the orthogonal line element from locuszoom/assets/js/app/DataLayers/line.js so we can make it draw all the way down
+LocusZoom.DataLayers.add('orthogonal_line_varpos', function(layout) {
+    // Define a default layout for this DataLayer type and merge it with the passed argument
+    this.DefaultLayout = {
+        style: {
+            'stroke': '#FF3333',
+            'stroke-width': '2px',
+            'stroke-dasharray': '4px 4px'
+        },
+        orientation: 'vertical',
+        x_axis: {
+            axis: 1,
+            decoupled: true
+        },
+        y_axis: {
+            axis: 1,
+            decoupled: true
+        },
+        offset: 0
+    };
+    layout = LocusZoom.Layouts.merge(layout, this.DefaultLayout);
+
+    // Require that orientation be "horizontal" or "vertical" only
+    if (['horizontal', 'vertical'].indexOf(layout.orientation) === -1) {
+        layout.orientation = 'vertical';
+    }
+
+    // Vars for storing the data generated line
+    /** @member {Array} */
+    this.data = [];
+    /** @member {d3.svg.line} */
+    this.line = null;
+
+    // Apply the arguments to set LocusZoom.DataLayer as the prototype
+    LocusZoom.DataLayer.apply(this, arguments);
+
+    /**
+     * Implement the main render function
+     */
+    this.render = function() {
+
+        // Several vars needed to be in scope
+        var panel = this.parent;
+        var x_scale = 'x_scale';
+        var y_scale = 'y' + this.layout.y_axis.axis + '_scale';
+        var y_extent = 'y' + this.layout.y_axis.axis + '_extent';
+        var x_range = 'x_range';
+        var y_range = 'y' + this.layout.y_axis.axis + '_range';
+
+        // Generate data using extents - use two points, but with NaNs in the y-axis
+        this.data = [
+            { x: this.layout.offset, y: panel[y_extent][0] },  // panel[y1_extent][0] = NaN
+            { x: this.layout.offset, y: panel[y_extent][1] }   // panel[y1_extent][1] = NaN
+        ];
+
+        // Join data to the line selection
+        var selection = this.svg.group
+            .selectAll('path.lz-data_layer-line')
+            .data([this.data]);
+
+        // Create path element, apply class
+        this.path = selection.enter()
+            .append('path')
+            .attr('class', 'lz-data_layer-line');
+
+        panel[y_range][0] = panel.layout.height;  // Forcibly extract the height of this panel and set it as the height of this line (see below)
+
+        // Generate the line
+        this.line = d3.svg.line()
+            .x(function(d, i) {
+                var x = parseFloat(panel[x_scale](d['x']));
+                return isNaN(x) ? panel[x_range][i] : x;
+            })
+            .y(function(d, i) {
+                var y = parseFloat(panel[y_scale](d['y']));
+                return isNaN(y) ? panel[y_range][i] : y;  // This will use the forcibly-changed height value
+            })
+            .interpolate('linear');
+
+        // Apply line and style
+        if (this.canTransition()) {
+            selection
+                .transition()
+                .duration(this.layout.transition.duration || 0)
+                .ease(this.layout.transition.ease || 'cubic-in-out')
+                .attr('d', this.line)
+                .style(this.layout.style);
+        } else {
+            selection
+                .attr('d', this.line)
+                .style(this.layout.style);
+        }
+        selection.exit().remove();
+    };
+
+    return this;
+
+});
+
+
 // eslint-disable-next-line no-unused-vars
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
     pos = +pos;
-    var pos_lower = pos - 1000000;
-    var pos_higher = pos + 1000000;
+    var pos_lower = pos - 500000;
+    var pos_higher = pos + 500000;
     dataSources
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
@@ -143,11 +263,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}log_pvalue_rank',
                             '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                             '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}altAllele',
+
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                         ];
-                        base.x_axis.category_field = '{{namespace[phewas]}}system';
+                        base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
+                        base.x_axis.category_order_field = 'phewas:tss_distance';
+
                         base.color = [
                             {
                                 field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
@@ -166,7 +289,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 },
                             },
                             {
-                                field: '{{namespace[phewas]}}system',
+                                field: '{{namespace[phewas]}}symbol',
                                 scale_function: 'categorical_bin',
                                 parameters: {
                                     categories: [],
@@ -193,7 +316,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
-<strong>Beta (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
+
+<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
 <form action="/singlegene" method="get">
@@ -203,8 +327,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
     <input type="submit" class="linkButton" value="Search this gene"/>
 </form>`;
-                        base.match = { send: '{{namespace[phewas]}}symbol', receive: '{{namespace[phewas]}}symbol' };
-                        base.label.text = '{{{{namespace[phewas]}}symbol}}';
+                        base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
+                        base.label.text = '{{{{namespace[phewas]}}tissue}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
                         base.label.filters.push({ field: 'phewas:log_pvalue_rank', operator: '<=', value: 5 });
                         return base;
@@ -216,7 +340,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
                 margin: { bottom: 40 },
-                min_height: 300,
+                min_height: 150,
                 axes: {
                     x: {
                         label: `Chromosome ${chrom} (Mb)`,
@@ -249,7 +373,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     }(),
                     {
                         id: 'variant',
-                        type: 'orthogonal_line',
+                        type: 'orthogonal_line_varpos',
                         orientation: 'vertical',
                         offset: pos,
                         style: {
@@ -265,13 +389,14 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+
     return [plot, dataSources];
 }
 
 // eslint-disable-next-line no-unused-vars
 function makeTable(selector) {
-    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(d + 1) : x.toExponential(1); };
-    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(d + 1) : x.toExponential(1); };
+    var two_digit_fmt1 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 6) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1); };
+    var two_digit_fmt2 = function(cell) { var x = cell.getValue(); var d = -Math.floor(Math.log10(Math.abs(x))); return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1); };
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
@@ -286,16 +411,17 @@ function makeTable(selector) {
     };
 
     return new Tabulator(selector, {
-        layout: 'fitColumns',
-        height: 600,
+        pagination: 'local',
+        paginationSize: 20,
+        layout: 'fitData',
         columns: [
-            {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return cell.getValue() + ' (<i>' + cell.getData()['phewas:gene_id'] + '</i>)';}},
-            {title: 'Tissue', field: 'phewas:tissue', headerFilter: true, widthGrow: 2},
+            {title: 'Gene', field: 'phewas:symbol', headerFilter: true, formatter: function(cell) {return '<i>' + cell.getValue() + ' (' + cell.getData()['phewas:gene_id'] + '</i>)';}},
+            {title: 'Tissue', field: 'phewas:tissue', headerFilter: true},
             {title: 'System', field: 'phewas:system', headerFilter: true},
             {title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number'},
             // A large effect size in either direction is good, so sort by abs value
-            {title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: function(a, b) { return Math.abs(a) - Math.abs(b); }},
-            {title: 'Effect Size SE', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
+            {title: 'Normalized Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number'},
+            {title: 'SE (Normalized Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1},
         ],
         placeholder: 'No data available',
         initialSort: [{column: 'phewas:log_pvalue', dir: 'desc'}],
@@ -352,7 +478,7 @@ function switchY(plot, table, yfield) {
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
         scatter_config.y_axis.field = 'phewas:beta';
-        plot.layout.panels[0].axes.y1['label'] = 'Effect size';
+        plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
         plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
         scatter_config.y_axis.lower_buffer = 0.15;
@@ -361,14 +487,10 @@ function switchY(plot, table, yfield) {
     }
     plot.applyState();
 }
+
+// Changes the number of top variants which are labeled on the plot
 // eslint-disable-next-line no-unused-vars
-function labelToggle(plot) {
-    if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 5) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 0;
-    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 0) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 50;
-    } else if (plot.layout.panels[0].data_layers[0].label.filters[1].value === 50) {
-        plot.layout.panels[0].data_layers[0].label.filters[1].value = 5;
-    }
+function labelTopVariants(plot, topVariantsToShow) {
+    plot.layout.panels[0].data_layers[0].label.filters[1].value = topVariantsToShow;
     plot.applyState();
 }
