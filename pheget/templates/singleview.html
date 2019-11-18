@@ -76,8 +76,8 @@
     </button>
     <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
     <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
-      <button class="dropdown-item" type="button" value="Brain_Cortex">Brain Cortex</button>
-      <button class="dropdown-item" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
+      <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
+      <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
     </div>
   </div>
 </div>
@@ -161,7 +161,7 @@
     });
 
     // Bootstrap dropdown selector for adding a new tissue
-    var tissueElements = document.getElementsByClassName('dropdown-item');
+    var tissueElements = document.getElementsByClassName('tissueselect-class');
     Array.from(tissueElements).forEach((selectedTissue) => {
       selectedTissue.addEventListener('click', (event) => {
           addassoc(event.target.value, true);
