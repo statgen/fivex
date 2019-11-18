@@ -32,8 +32,8 @@ const gene_track = LocusZoom.Layouts.get("data_layer", "genes",{
 function makeSinglePlot(chrom, pos, symbol, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
-    const start = +pos - 50000;
-    const end = +pos + 50000;
+    const start = +pos - 80000;
+    const end = +pos + 80000;
 
     // get rid of the decimal points for the sake of naming
     const symbol_short = symbol.split('.').join("");
@@ -218,8 +218,8 @@ function switchY(){
             indvpanel.axes.y1['label'] = 'Effect size';
             indvpanel.data_layers[2].y_axis.floor = -2;
             indvpanel.data_layers[2].y_axis.ceiling = 2;
-            indvpanel.data_layers[2].y_axis.lower_buffer = 0.25;
-            indvpanel.data_layers[2].y_axis.upper_buffer = 0.25;
+            indvpanel.data_layers[2].y_axis.lower_buffer = 0.15;
+            indvpanel.data_layers[2].y_axis.upper_buffer = 0.15;
             indvpanel.data_layers[2].y_axis.min_extent = [-2, 2];
             indvpanel.data_layers[0].offset = 0; 
             indvpanel.data_layers[0].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
@@ -233,8 +233,8 @@ function switchY(){
             indvpanel.data_layers[2].y_axis.field = indvpanel.id + ":log_pvalue";
             indvpanel.data_layers[2].y_axis.floor = 0;
             delete indvpanel.data_layers[2].y_axis.ceiling;
-            indvpanel.data_layers[2].y_axis.lower_buffer = 0;
-            indvpanel.data_layers[2].y_axis.upper_buffer = 0;
+            indvpanel.data_layers[2].y_axis.lower_buffer = 0.15;
+            indvpanel.data_layers[2].y_axis.upper_buffer = 0.15;
             indvpanel.data_layers[2].y_axis.min_extent = [0, 10];
             indvpanel.data_layers[0].offset = 7.301;
             indvpanel.data_layers[0].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
