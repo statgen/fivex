@@ -195,38 +195,63 @@ function addassoc(newinfo, istissue){
 
 
 // switch Y axis 
-function switchY(){
+function switchY_single(yfield){  // yfield = log_pvalue or beta
     assco_panels = singlegeneplot.layout.panels.slice(0,-1);
-    if(yaxis==="logp"){
+    //if(yaxis==="logp"){
+    if (yfield == 'beta') {
         // switch to beta
         assco_panels.forEach(function(indvpanel){
             // I name the panel id to be the same as datasource namespace
-            indvpanel.data_layers[2].y_axis.field = indvpanel.id + ":beta";
-            indvpanel.axes.y1['label'] = 'Effect size';
-            indvpanel.data_layers[2].y_axis.floor = -2;
-            indvpanel.data_layers[2].y_axis.ceiling = 2;
-            indvpanel.data_layers[2].y_axis.lower_buffer = 0.25;
-            indvpanel.data_layers[2].y_axis.upper_buffer = 0.25;
-            indvpanel.data_layers[2].y_axis.min_extent = [-2, 2];
+            panel_base_y = indvpanel.data_layers[2].y_axis;
+            indvpanel.axes.y1['label'] = 'Normalized Effect Size';
             indvpanel.data_layers[0].offset = 0; 
             indvpanel.data_layers[0].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
-            indvpanel.data_layers[2].y_axis.lower_buffer = 0.15;
+            panel_base_y.field = indvpanel.id + ":beta";
+            delete panel_base_y.floor;
+            delete panel_base_y.ceiling;
+            panel_base_y.lower_buffer = 0.25;
+            panel_base_y.upper_buffer = 0.25;
+            panel_base_y.min_extent = [-2, 2];
+            panel_base_y.lower_buffer = 0.15;
         });
         yaxis = "beta";
-    } else{
+    } else { // yfield == 'log_pvalue'
         // switch to logp
         assco_panels.forEach(function(indvpanel){
-            indvpanel.axes.y1['label'] = '- Log 10 P Value';
-            indvpanel.data_layers[2].y_axis.field = indvpanel.id + ":log_pvalue";
-            indvpanel.data_layers[2].y_axis.floor = 0;
+            panel_base_y = indvpanel.data_layers[2].y_axis;
             delete indvpanel.data_layers[2].y_axis.ceiling;
-            indvpanel.data_layers[2].y_axis.lower_buffer = 0;
-            indvpanel.data_layers[2].y_axis.upper_buffer = 0;
-            indvpanel.data_layers[2].y_axis.min_extent = [0, 10];
+            indvpanel.axes.y1['label'] = '-Log10 P-Value';
             indvpanel.data_layers[0].offset = 7.301;
             indvpanel.data_layers[0].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+            panel_base_y.field = indvpanel.id + ":log_pvalue";
+            panel_base_y.floor = 0;
+            panel_base_y.lower_buffer = 0;
+            panel_base_y.upper_buffer = 0;
+            panel_base_y.min_extent = [0, 10];
         });
         yaxis = "logp";
     }
     singlegeneplot.applyState();
 }
+
+function switchY_old(plot, yfield) {
+    const scatter_config = plot.layout.panels[0].data_layers[0];
+    if (yfield === 'log_pvalue') {
+        scatter_config.y_axis.field = 'phewas:log_pvalue';
+        scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.lower_buffer = 0;
+        plot.layout.panels[0].data_layers[1].offset = 7.301;
+        plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+
+    } else if (yfield === 'beta') {
+        delete scatter_config.y_axis.floor;
+        scatter_config.y_axis.field = 'phewas:beta';
+        plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
+        plot.layout.panels[0].data_layers[1].offset = 0;
+        plot.layout.panels[0].data_layers[1].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+        scatter_config.y_axis.lower_buffer = 0.15;
+
+    }
+    plot.applyState();
+}
+
