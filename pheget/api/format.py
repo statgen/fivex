@@ -242,7 +242,13 @@ def query_variants(chrom: str, start: int, end: int = None,
 
     if end is None:
         # Single variant query
-        return reader.fetch(chrom, start - 1, start + 1)
+        try:
+            return reader.fetch(chrom, start - 1, start + 1)
+        except FileNotFoundError:
+            return []
     else:
         # Region query
-        return reader.fetch(chrom, start - 1, end + 1)
+        try:
+            return reader.fetch(chrom, start - 1, end + 1)
+        except FileNotFoundError:
+            return []

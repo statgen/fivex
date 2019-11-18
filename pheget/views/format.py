@@ -66,7 +66,7 @@ def get_variant_info(chrom: str, pos: int):
         af = afFormat(data.af)
         an = data.an
         rsid = data.rsid
-    except (StopIteration, OSError):
+    except (StopIteration, OSError, ValueError):
         (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = (
             None, None, None, None, None, None, None, None
         )
