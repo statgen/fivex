@@ -22,15 +22,22 @@
     text-decoration: dotted underline;
   }
 
+  .variant-information-grouped-card {
+    /* Make the cards in the card-group wrap onto separate rows on narrow screens to avoid text overflow off the right.
+       Boostrap sets `min-width:0` for cards, but we set it back to `auto` so that it will consider the width of its contents. */
+    min-width: auto;
+  }
+
   /* Formats dt/dd to display on the same line */
-  dl.inline-flex {
+  dl.variant-information-dl {
     display: flex;
     flex-flow: row;
     flex-wrap: wrap;
     width: 360px;
     overflow: visible;
+    margin-bottom: 0; /* Cards already have 20px padding, so adding margin for the lone <dl> is excessive. */
   }
-  dl.inline-flex dt {
+  dl.variant-information-dl dt {
     flex: 0 0 50%;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -80,9 +87,9 @@
 
         <div class="card-group">
 
-          <div class="card">
+          <div class="card variant-information-grouped-card">
             <div class="card-body">
-              <dl class="inline-flex">
+              <dl class="variant-information-dl">
                 {% if ac is not none and an is not none %}
                     <dt>Allele count / total</dt>
                     <dd>{{ ac }} / {{ an }}</dd>
@@ -99,9 +106,9 @@
             </div>
           </div>
 
-          <div class="card">
+          <div class="card variant-information-grouped-card">
             <div class="card-body">
-              <dl class="inline-flex">
+              <dl class="variant-information-dl">
                 {% if top_gene is not none %}
                 <dt>Top gene</dt>
                   <dd><i>{{ top_gene }}</i></dd>
@@ -114,9 +121,9 @@
             </div>
           </div>
 
-          <div class="card">
+          <div class="card variant-information-grouped-card">
             <div class="card-body">
-              <dl class="inline-flex">
+              <dl class="variant-information-dl">
                 {% if rsid is not none %}
                 <dt>
                  rsid
@@ -126,7 +133,7 @@
                 </dd>
                 {% endif %}
                 <dt>
-                 {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s):
+                 {{ "Overlapping" if is_inside_gene else "Nearest" }} gene(s)
                 </dt>
                 <dd>
                   <i>
