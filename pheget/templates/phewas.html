@@ -12,9 +12,8 @@
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@4.4.3/dist/css/bootstrap/tabulator_bootstrap4.min.css">
   <title>PheGET - Single Variant View</title>
-</head>
 
-<style>
+  <style>
   .padtop {
     padding-top: 20px;
   }
@@ -22,8 +21,30 @@
   .text-with-definition {
     text-decoration: dotted underline;
   }
-</style>
 
+  /* Formats dt/dd to display on the same line */
+  dl.inline-flex {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    width: 360px;
+    overflow: visible;
+  }
+  dl.inline-flex dt {
+    flex: 0 0 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  dl.line-flex dd {
+    margin-left: auto;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex: 0 0 50%
+  }
+  </style>
+
+</head>
 <body>
 
 <div class="container-fluid">
@@ -46,37 +67,10 @@
   <center>
   <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back to PheGET Homepage</a>
   </center>
-</div>
-<br>
+  <br>
 
-<p>
-<h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} ({{ rsid }})</h1>
-</p>
+  <h1>Variant: chr{{ chrom }}:{{ "{:,}".format(pos) }} {{ ref }}/{{ alt }} ({{ rsid }})</h1>
 
-<!-- Formats dt/dd to display on the same line -->
-<style>
-dl.inline-flex {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: wrap;
-  width: 360px;
-  overflow: visible;
-}
-dl.inline-flex dt {
-  flex: 0 0 50%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-dl.line-flex dd {
-  margin-left: auto;
-  text-align: left;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  flex: 0 0 50%
-}
-</style>
-
-<div class="container-fluid">
   <div class="row">
     <div class="col">
       <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#variantInformation" aria-expanded="true" aria-controls="variantInformation">
@@ -238,10 +232,12 @@ dl.line-flex dd {
 
 <div id="plot"></div>
 
-<div class="row justify-content-center">
-<span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
-  <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-question"></span> Red dotted line </span>
-</span>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
+      <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-question"></span> Red dotted line </span>
+    </span>
+  </div>
 </div>
 
 <div id="table" style="width:90%;margin:0 auto"></div>
