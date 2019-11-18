@@ -42,12 +42,33 @@
     text-overflow: ellipsis;
     overflow: hidden;
   }
-  dl.line-flex dd {
+  dl.variant-information-dl dd {
     margin-left: auto;
     text-align: left;
     text-overflow: ellipsis;
     overflow: hidden;
-    flex: 0 0 50%
+    flex: 0 0 50%;
+  }
+  /* Middle information box needs slightly different formatting to display longer tissues correctly */
+  dl.variant-info-middle {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    width: 360px;
+    overflow: visible;
+    margin-bottom: 0;     
+  }
+  dl.variant-info-middle dt {
+    flex: 0 0 30%;  /* Reduce the width for the dt text */
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  dl.variant-info-middle dd {
+    margin-left: auto;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex: 0 0 70%;  /* Increase the width available for the dd text */
   }
   </style>
 
@@ -108,7 +129,7 @@
 
           <div class="card variant-information-grouped-card">
             <div class="card-body">
-              <dl class="variant-information-dl">
+              <dl class="variant-info-middle">
                 {% if top_gene is not none %}
                 <dt>Top gene</dt>
                   <dd><i>{{ top_gene }}</i></dd>
