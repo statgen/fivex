@@ -19,21 +19,27 @@ var newscattertooltip = LocusZoom.Layouts.get("data_layer", "association_pvalues
 newscattertooltip.html = newscattertooltip.html + 
                 `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
 
-// var newgenetooltip = LocusZoom.Layouts.get("data_layer", "genes").tooltip;
-// newgenetooltip.html = newgenetooltip + `<input type="button" value="Add this Gene" class="linkbutton" onclick="history.back()">`;
 
 
-function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
+var newgenestooltip = LocusZoom.Layouts.get("data_layer", "genes", {unnamespaced:true}).tooltip;
+newgenestooltip.html = newgenestooltip.html + `<br> <a onclick="addassoc('{{gene_name}}', false)" href="javascript:void(0);">Add this gene</a>`;
+
+const gene_track = LocusZoom.Layouts.get("data_layer", "genes",{
+    unnamespaced:true,
+    tooltip: newgenestooltip
+});
+
+function makeSinglePlot(chrom, pos, symbol, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
     const start = +pos - 50000;
     const end = +pos + 50000;
 
-    // get rid of the parts beyond decimal point for the sake of naming
-    const gene_id_short = gene_id.substring(0, 15);
+    // get rid of the decimal points for the sake of naming
+    const symbol_short = symbol.split('.').join("");
 
     dataSources
-        .add(`assoc_${tissue}_${gene_id_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }])
+        .add(`assoc_${tissue}_${symbol_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&symbol=${symbol}&tissue=${tissue}` }])
         .add(`ld`, ["LDLZ2", { url: "https://portaldev.sph.umich.edu/ld/", params: { source: '1000G', population: 'ALL', build:"GRCh38" } }])
         .add(`recomb`, ["RecombLZ", { url: apiBase + "annotation/recomb/results/", params: {build: "GRCh38"} }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
@@ -42,7 +48,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     initialState.genome_build = 'GRCh38';
    
     const namespace = {
-        assoc: `assoc_${tissue}_${gene_id_short}`
+        assoc: `assoc_${tissue}_${symbol_short}`
     };
 
     const assoc_pval = LocusZoom.Layouts.get("data_layer", "association_pvalues", {
@@ -51,6 +57,7 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}position',
             '{{namespace[assoc]}}ref_allele', '{{namespace[assoc]}}variant',
             '{{namespace[assoc]}}beta', '{{namespace[assoc]}}log_pvalue|logtoscinotation',
+            '{{namespace[assoc]}}symbol',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}chromosome'
         ],
@@ -61,8 +68,8 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
         state: initialState,
         panels:[
             LocusZoom.Layouts.get('panel','association', { 
-                id: `assoc_${tissue}_${gene_id_short}`,
-                title: {text: `Association between ${tissue} and ${gene_id_short}`,x: 100, y: 30},
+                id: `assoc_${tissue}_${symbol_short}`,
+                title: {text: `Association between ${tissue} and ${symbol}`,x: 100, y: 30},
                 namespace,
                 data_layers: [
                     LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -92,12 +99,14 @@ function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
                     }
                 ] 
             }),
-            LocusZoom.Layouts.get('panel', 'genes')
+            LocusZoom.Layouts.get('panel', 'genes',{
+                data_layers:[gene_track]
+            })
         ]
     });
     // generate global variables including plot object, data source object and other metadata
     window.singlegeneplot = LocusZoom.populate(selector, dataSources, layout);
-    window.globalvars = {chrom: chrom, start:start, end:end, gene_id: gene_id, tissue: tissue};
+    window.globalvars = {chrom: chrom, start:start, end:end, symbol: symbol, tissue: tissue};
     window.datasources = dataSources;
     window.yaxis = "logp";
 }
@@ -107,21 +116,21 @@ function addassoc(newinfo, istissue){
     let chrom = globalvars['chrom'];
     let start = globalvars['start'];
     let end = globalvars['end'];
-    let gene_id = globalvars['gene_id']; // anchor gene_id
+    let symbol = globalvars['symbol']; // anchor gene name
     let tissue = globalvars['tissue']; // anchor tissue
 
     if (istissue){
         tissue = newinfo;
     } else {
-        gene_id = newinfo;
+        symbol = newinfo;
     }
     // get rid of the parts beyond decimal point for the sake of naming
-    const gene_id_short = gene_id.substring(0, 15);
+    const symbol_short = symbol.split('.').join("");
     const namespace = {
-        assoc: `assoc_${tissue}_${gene_id_short}`
+        assoc: `assoc_${tissue}_${symbol_short}`
     };
     datasources
-        .add(`assoc_${tissue}_${gene_id_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&gene_id=${gene_id}&tissue=${tissue}` }]);
+        .add(`assoc_${tissue}_${symbol_short}`, ["assocGET", { url: `/api/range?chrom=${chrom}&start=${start}&end=${end}&symbol=${symbol}&tissue=${tissue}` }]);
     
     
     const assoc_pval = LocusZoom.Layouts.get("data_layer", "association_pvalues", {
@@ -130,14 +139,16 @@ function addassoc(newinfo, istissue){
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}position',
             '{{namespace[assoc]}}ref_allele', '{{namespace[assoc]}}variant',
             '{{namespace[assoc]}}beta', '{{namespace[assoc]}}log_pvalue|logtoscinotation',
+            '{{namespace[assoc]}}symbol',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}chromosome'
         ],
         tooltip: newscattertooltip
     });
+
     newpanel = LocusZoom.Layouts.get('panel','association', {
-                    id: `assoc_${tissue}_${gene_id_short}`,
-                    title: {text: `Association between ${tissue} and ${gene_id_short}`,x: 100,y: 30},
+                    id: `assoc_${tissue}_${symbol_short}`,
+                    title: {text: `Association between ${tissue} and ${symbol}`,x: 100,y: 30},
                     namespace,
                     data_layers: [
                         LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -173,7 +184,9 @@ function addassoc(newinfo, istissue){
     } catch(error){
         alert("The requested plot has already been generated!");
     }
-    singlegeneplot.addPanel(LocusZoom.Layouts.get('panel', 'genes'));
+    singlegeneplot.addPanel(LocusZoom.Layouts.get('panel', 'genes', {
+        data_layers:[gene_track]
+    }));
     // let newbutton = document.createElement("li");
     // newbutton.setAttribute('id',`${newtissue}`);
     // newbutton.innerHTML = `<button onClick="deletepanel(this.parentNode.id)">Delete</button>`;

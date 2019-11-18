@@ -58,8 +58,8 @@
 <div class="row">
   <select id="geneselect">
       <option value=""></option>
-      <option value="ENSG00000169684.13">CHRNA5</option>
-      <option value="ENSG00000080644.15">CHRNA3</option>
+      <option value="CHRNA5">CHRNA5</option>
+      <option value="CHRNA3">CHRNA3</option>
     </select>  
   <button id="genesearch">Add Gene</button> 
 </div>
@@ -85,7 +85,7 @@
 
 <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 <script type="application/javascript">
-    makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
+    makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{symbol|tojson}}, {{tissue|tojson}}, '#plot');
     document.getElementById('tissuesearch').addEventListener('click', function() {
         let newtissue = document.getElementById("tissueselect").value;
         if (newtissue.length == 0){

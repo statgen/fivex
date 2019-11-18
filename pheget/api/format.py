@@ -218,7 +218,7 @@ def variant_parser(row: str) -> VariantContainer:
 
 
 def query_variants(chrom: str, start: int, end: int = None,
-                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+                   tissue: str = None, gene_id: str = None, symbol: str=None) -> ty.Iterable[VariantContainer]:
     """
     Fetch GTEX data for one or more variants, and apply optional filters
     """
@@ -233,6 +233,8 @@ def query_variants(chrom: str, start: int, end: int = None,
         reader.add_filter('tissue', tissue)
     if gene_id:
         reader.add_filter('gene_id', gene_id)
+    if symbol:
+        reader.add_filter('symbol', symbol)
 
 
     if end is None:

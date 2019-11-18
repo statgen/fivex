@@ -23,9 +23,10 @@ def range_query():  # fields to get: chrom, start, end, gene_id, tissue
 
     tissue = request.args.get('tissue', None)
     gene_id = request.args.get('gene_id', None)
+    symbol = request.args.get('symbol', None)
 
     data = [res.to_dict()
-            for res in query_variants(chrom=chrom, start=start, end=end, tissue=tissue, gene_id=gene_id)]
+            for res in query_variants(chrom=chrom, start=start, end=end, tissue=tissue, gene_id=gene_id, symbol=symbol)]
     for i, item in enumerate(data):
         # FIXME: Ugly hack: add a synthetic ID, just so that locuszoom can tell the difference between any
         #   two given items on the plot

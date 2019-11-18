@@ -16,4 +16,5 @@ def single_view():
     pos = request.args.get('pos', None)
     gene_id = request.args.get('gene_id', None)
     tissue = request.args.get('tissue', None)
-    return render_template('singleview.html', chrom=chrom, pos=pos, gene_id=gene_id, tissue=tissue)
+    symbol = request.args.get('symbol', None)
+    return render_template('singleview.html', chrom=chrom, pos=pos, gene_id=gene_id, tissue=tissue, symbol=symbol)
