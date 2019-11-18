@@ -232,9 +232,11 @@ def query_variants(chrom: str, start: int, end: int = None,
     if tissue:
         reader.add_filter('tissue', tissue)
     if gene_id:
-        reader.add_filter('gene_id', gene_id)
-
-
+        if '.' in gene_id:
+            reader.add_filter('gene_id', gene_id)
+        else:
+            reader.add_filter('gene_id')
+            reader.add_filter(lambda result: result.gene_id.split('.')[0] == gene_id)
     if end is None:
         # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open
         # intervals. Filter out extraneous information
