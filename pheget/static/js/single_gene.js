@@ -214,7 +214,7 @@ function switchY_single(yfield){  // yfield = log_pvalue or beta
             panel_base_y.min_extent = [-2, 2];
             panel_base_y.lower_buffer = 0.15;
         });
-        yaxis = "beta";
+        // yaxis = "beta";
     } else { // yfield == 'log_pvalue'
         // switch to logp
         assco_panels.forEach(function(indvpanel){
@@ -229,7 +229,7 @@ function switchY_single(yfield){  // yfield = log_pvalue or beta
             panel_base_y.upper_buffer = 0;
             panel_base_y.min_extent = [0, 10];
         });
-        yaxis = "logp";
+        // yaxis = "logp";
     }
     singlegeneplot.applyState();
 }

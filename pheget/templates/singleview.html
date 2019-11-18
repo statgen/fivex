@@ -66,50 +66,31 @@
 </head>
 <body>
 <div class="container">
-<h1 style="margin-top: 1em;"><strong>Association Between Individual Genes and Tissues</strong></h1>
+<h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ pos }}</strong></h1>
 
-<h3>Search for Extra tissues here</h3>
-<div class="row">
-    <select id="tissueselect">
-        <option value=""></option>
-        <option value="Brain_Cortex">Brain Cortex</option>
-        <option value="Muscle_Skeletal">Muscle Skeletal</option>
-      </select>  
-  <button id="tissuesearch">Add Tissue</button> 
-</div>
-
-
-<!--
-  <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown-tissueselect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Tissue
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdown-tissueselect">
-      <button class="tissue-dropdown" type="button" value="Brain_Cortex">Brain Cortex</button>
-      <button class="tissue-dropdown" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
-    </div>
-  </div>
-  -->
-  
+<!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
+<div class="fluid-container">
   <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Tissue
+      Add Tissue
     </button>
+    <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
     <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
       <button class="dropdown-item" type="button" value="Brain_Cortex">Brain Cortex</button>
       <button class="dropdown-item" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
     </div>
   </div>
-  
+</div>
 
-<h3>Search for Extra Genes here</h3>
-<div class="row">
-  <select id="geneselect">
-      <option value=""></option>
-      <option value="ENSG00000169684.13">CHRNA5</option>
-      <option value="ENSG00000080644.15">CHRNA3</option>
-    </select>  
-  <button id="genesearch">Add Gene</button> 
+<div class="fluid-container">
+  <div class="row">
+    <select id="geneselect">
+        <option value=""></option>
+        <option value="ENSG00000169684.13">CHRNA5</option>
+        <option value="ENSG00000080644.15">CHRNA3</option>
+      </select>  
+    <button id="genesearch">Add Gene</button> 
+  </div>
 </div>
 
 <div class="container-fluid">
@@ -135,11 +116,6 @@
 </div>
 
 <div class="row">
-    <!-- <div class="two columns">
-      <ul id="buttonlist">
-          <li id="{{tissue}}"><button onClick="deletepanel(this.parentNode.id)">Delete</button></li>  
-      </ul>
-    </div> -->
   <div id="plot" class="ten columns">
   </div>
 </div>
@@ -155,6 +131,7 @@
 <script type="application/javascript">
     makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
 
+/*
     document.getElementById('tissuesearch').addEventListener('click', function() {
         let newtissue = document.getElementById("tissueselect").value;
         if (newtissue.length == 0){
@@ -163,17 +140,7 @@
           addassoc(newtissue, true);
         }
     });
-
-    document.getElementById('dropdown_tissueselect').addEventListener('click', function() {
-      let newtissue = document.getElementById('dropdown_tissueselect').value;
-      this.innerText = newtissue;
-      if (newtissue.length == 0){
-          alert("No tissue input!");
-        } else{
-          addassoc(newtissue, true);
-        }
-    });
-
+*/
     document.getElementById('genesearch').addEventListener('click', function() {
         let newgene = document.getElementById("geneselect").value;
         if (newgene.length == 0){
@@ -193,9 +160,17 @@
         parseSearch(variant);
     });
 
+    // Bootstrap dropdown selector for adding a new tissue
+    var tissueElements = document.getElementsByClassName('dropdown-item');
+    Array.from(tissueElements).forEach((selectedTissue) => {
+      selectedTissue.addEventListener('click', (event) => {
+          addassoc(event.target.value, true);
+      });
+    });
+
     var yaxisVar = document.forms['transform-y'].elements['y-options'];
     for (var j=0, len=yaxisVar.length; j<len; j++) {
-      yaxisVar[j].onchange = function() {
+      yaxisVar[j].onclick = function() {
         switchY_single(this.value);
       }
     }
@@ -212,6 +187,8 @@
     $('[data-toggle="tooltip"]').tooltip()
   })
   
+
+
 </script>
 
 </body>
