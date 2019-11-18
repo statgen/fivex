@@ -1,7 +1,7 @@
 """
 API endpoints (return JSON, not html)
 """
-from flask import jsonify, request
+from flask import jsonify, request, abort
 
 import pheget
 
@@ -14,9 +14,13 @@ def range_query():  # fields to get: chrom, start, end, gene_id, tissue
     """An API endpoint that returns data in nicely formatted JSON. Fetching data as JSON allows a single HTML file
     to update interactively without reloading (with appropriate supporting page code)."""
 
-    chrom = request.args.get('chrom', None)
-    start = int(request.args.get('start', None))
-    end = int(request.args.get('end', None))
+    try:
+        chrom = request.args.get('chrom', None)
+        start = int(request.args.get('start', None))
+        end = int(request.args.get('end', None))
+    except (KeyError, ValueError):
+        abort(404)
+
     tissue = request.args.get('tissue', None)
     gene_id = request.args.get('gene_id', None)
 

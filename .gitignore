@@ -1,5 +1,7 @@
 # Common python generated files
 __pycache__/
+.mypy_cache/
+.pytype/
 
 # Common python venv folders
 .venv/
