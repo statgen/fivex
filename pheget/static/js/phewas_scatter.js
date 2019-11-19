@@ -274,6 +274,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                         base.x_axis.category_order_field = 'phewas:tss_distance';
+                        base.y_axis.min_extent = [0, 8]
 
                         base.color = [
                             {
@@ -467,6 +468,7 @@ function switchY(plot, table, yfield) {
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
+        scatter_config.y_axis.min_extent = [0, 8];
         plot.layout.panels[0].axes.y1['label'] = '-log 10 p-value';
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
@@ -474,6 +476,7 @@ function switchY(plot, table, yfield) {
         table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
+        delete scatter_config.y_axis.min_extent;
         scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
