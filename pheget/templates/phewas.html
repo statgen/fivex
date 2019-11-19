@@ -70,6 +70,14 @@
     overflow: hidden;
     flex: 0 0 70%;  /* Increase the width available for the dd text */
   }
+
+  /* At some window sizes the text on the tss distance filtering buttons wraps, increasing the button group's height.
+     When that happens, we want all text vertically centered within the buttons.  */
+  #tss-upper-range .btn-group > .btn,
+  #tss-lower-range .btn-group > .btn {
+    display: flex;
+    align-items: center;
+  }
   </style>
 
 </head>
@@ -201,7 +209,7 @@
 <div class="container-fluid">
   <div class="row justify-content-start">
 
-    <div class="col">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="grouping" id="grouping-buttons">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Reorder the x-axis by one of these listed categories" data-placement="top">
@@ -220,7 +228,7 @@
       </form>
     </div>
 
-    <div class="col-sm">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="yaxis-display" id="transform-y">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
@@ -236,7 +244,7 @@
       </form>
     </div>
 
-    <div class="col-sm">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="label-display" id="toggle-labels">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true" title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
@@ -256,10 +264,10 @@
     </div>
 
   </div>
-<br>
+
   <div class="row justify-content-center">
 
-    <div class="col-5">
+    <div class="col-12 col-lg-6" style="margin-bottom:0.8em">
       <form action="#" method="post" class="tss-range" id="tss-upper-range">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Show only eQTLs within a given distance upstream (5') of the current variant. Distance is calculated between the current variant and the affected gene's TSS site.">
@@ -290,7 +298,7 @@
       </form>
     </div>
 
-    <div class="col-5">
+    <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
       <form action="#" method="post" class="tss-range" id="tss-lower-range">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Show only eQTLs within a given distance downstream (3') of the current variant. Distance is calculated between the current variant and the affected gene's TSS site.">
