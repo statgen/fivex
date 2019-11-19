@@ -10,6 +10,9 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         return this.url;
     },
     annotateData(records) {
+        records = records.filter(function(record) {
+            return record.tss_distance <= plot.state.maximum_tss_distance && record.tss_distance >= plot.state.minimum_tss_distance
+         });
         // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
@@ -236,7 +239,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             variant: `${chrom}:${pos}`,
             start: pos_lower,
             end: pos_higher,
-            chr: chrom
+            chr: chrom,
+            minimum_tss_distance: -1000000,
+            maximum_tss_distance: 1000000,
         },
         dashboard: {
             components: [
