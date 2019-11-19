@@ -216,13 +216,13 @@
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Group by: </button>
           </span>
           <label class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Group eQTLs by tissues, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete=off id="group-tissue" value="tissue"> Tissue
+            <input type="radio" name="group-options" autocomplete=off id="group-tissue" value="tissue"> Tissue
           </label>
           <label class="btn btn-primary"  data-toggle="tooltip" data-placement="top" title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete=off id="group-system" value="system"> System
+            <input type="radio" name="group-options" autocomplete=off id="group-system" value="system"> System
           </label>
           <label class="btn btn-primary active" data-toggle="tooltip" data-placement="top" title="Group eQTLs by gene, sorted by the position of the genes' translation start sites">
-              <input type="radio" name="group-options" autocomplete=off id="group-symbol" value="symbol"> Gene
+            <input type="radio" name="group-options" autocomplete=off id="group-symbol" value="symbol"> Gene
           </label>
         </div>
       </form>
@@ -248,7 +248,7 @@
       <form action="#" method="post" class="label-display" id="toggle-labels">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true" title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
-           <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
           </span>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
             <input type="radio" name="label-options" autocomplete=off id="label-none" value="0"> None
@@ -262,11 +262,9 @@
         </div>
       </form>
     </div>
-
   </div>
 
   <div class="row justify-content-center">
-
     <div class="col-12 col-lg-6" style="margin-bottom:0.8em">
       <form action="#" method="post" class="tss-range" id="tss-upper-range">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -274,26 +272,23 @@
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Upstream TSS Range: </button>
           </span>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Maximum distance is 1mb 5' of the current position">
-              <input type="radio" name="downstream-options" autocomplete=off id="downstream-1mb" value="1000000"> +1m
-            </label>
-            <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Default: 500kb">
-                <input type="radio" name="downstream-options" autocomplete=off id="downstream-500kb" value="500000"> +500k
-              </label>
-              <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="200kb">
-                  <input type="radio" name="downstream-options" autocomplete=off id="downstream-200kb" value="200000"> +200k
-                </label>
-            
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-1mb" value="1000000"> +1m
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Default: 500kb">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-500kb" value="500000"> +500k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="200kb">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-200kb" value="200000"> +200k
+          </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="100kb">
             <input type="radio" name="downstream-options" autocomplete=off id="downstream-100kb" value="100000"> +100k
           </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="50kb">
-              <input type="radio" name="downstream-options" autocomplete=off id="downstream-50kb" value="50000"> +50k
-            </label>
-  
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-50kb" value="50000"> +50k
+          </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="20kb">
-              <input type="radio" name="downstream-options" autocomplete=off id="downstream-20kb" value="20000"> +20k
-            </label>              
-  
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-20kb" value="20000"> +20k
+          </label>
         </div>
       </form>
     </div>
@@ -305,31 +300,26 @@
             <button type="button" class="btn btn-secondary" style="pointer-events: none;">Downstream TSS Range: </button>
           </span>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-20kb">
-              <input type="radio" name="upstream-options" autocomplete=off id="upstream-20kb" value="-20000"> -20k
-            </label>
-            <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-50kb">
-                <input type="radio" name="upstream-options" autocomplete=off id="upstream-50kb" value="-50000"> -50k
-              </label>
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-20kb" value="-20000"> -20k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-50kb">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-50kb" value="-50000"> -50k
+          </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-100kb">
             <input type="radio" name="upstream-options" autocomplete=off id="upstream-100kb" value="-100000"> -100k
           </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-200kb">
-              <input type="radio" name="upstream-options" autocomplete=off id="upstream-200kb" value="-200000"> -200k
-            </label>
-            
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-200kb" value="-200000"> -200k
+          </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Default: -500kb">
-              <input type="radio" name="upstream-options" autocomplete=off id="upstream-500kb" value="-500000"> -500k
-            </label>
-  
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-500kb" value="-500000"> -500k
+          </label>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Maximum distance is 1mb">
-              <input type="radio" name="upstream-options" autocomplete=off id="upstream-1mb" value="-1000000"> -1m
-            </label>
-  
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-1mb" value="-1000000"> -1m
+          </label>
         </div>
       </form>
     </div>
-
-
   </div>
 </div>
 

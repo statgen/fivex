@@ -2,6 +2,7 @@
 /* global d3 */
 /* global LocusZoom */
 /* global Tabulator */
+/* global plot */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL() {  // Removed state, chain, fields for now since we are not currently using them
@@ -11,8 +12,8 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
     },
     annotateData(records) {
         records = records.filter(function(record) {
-            return record.tss_distance <= plot.state.maximum_tss_distance && record.tss_distance >= plot.state.minimum_tss_distance
-         });
+            return record.tss_distance <= plot.state.maximum_tss_distance && record.tss_distance >= plot.state.minimum_tss_distance;
+        });
         // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
@@ -274,7 +275,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                         base.x_axis.category_order_field = 'phewas:tss_distance';
-                        base.y_axis.min_extent = [0, 8]
+                        base.y_axis.min_extent = [0, 8];
 
                         base.color = [
                             {
