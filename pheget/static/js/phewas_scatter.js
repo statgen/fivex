@@ -100,17 +100,17 @@ LocusZoom.ScaleFunctions.add('effect_direction', function(parameters, input) {
     return null;
 });
 
-// Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
-// Delete this once LocusZoom allows configuring the text via the layout.
+// Redefine the `resize_to_data` button to resize only for the genes datalayer (and not the variant vertical line)
 LocusZoom.Dashboard.Components.set('resize_to_data', function(layout) {
     LocusZoom.Dashboard.Component.apply(this, arguments);
     this.update = function() {
         if (this.button) { return this; }
         this.button = new LocusZoom.Dashboard.Component.Button(this)
             .setColor(layout.color).setHtml('Show All Genes')
-            .setTitle('Automatically resize this panel to fit the data its currently showing')
+            .setTitle('Automatically resize this panel to show all the genes')
             .setOnclick(function() {
-                this.parent_panel.scaleHeightToData();
+                const genes_datalayer_height = this.parent_panel.data_layers.genes.getAbsoluteDataHeight();
+                this.parent_panel.scaleHeightToData(genes_datalayer_height);
                 this.update();
             }.bind(this));
         this.button.show();
