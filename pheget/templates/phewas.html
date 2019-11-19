@@ -369,44 +369,37 @@
     });
 
     // On hitting toggle buttons, run JavaScript to update plot views
-    var groupVar = document.forms['grouping-buttons'].elements['group-options'];
-    for (var i=0, len=groupVar.length; i<len; i++) {
-      groupVar[i].onchange = function() {
+    document.forms['grouping-buttons'].elements['group-options'].forEach(function(form) {
+      form.onchange = function() {
         groupByThing(plot, this.value);
-      }
-    }
+      };
+    });
 
-    var yaxisVar = document.forms['transform-y'].elements['y-options'];
-    for (var j=0, len=yaxisVar.length; j<len; j++) {
-      yaxisVar[j].onchange = function() {
+    document.forms['transform-y'].elements['y-options'].forEach(function(form) {
+      form.onchange = function() {
         switchY(plot, table, this.value);
-      }
-    }
+      };
+    });
 
-    var labelVar = document.forms['toggle-labels'].elements['label-options'];
-    for (var k=0, len=labelVar.length; k<len; k++) {
-      labelVar[k].onchange = function() {
+    document.forms['toggle-labels'].elements['label-options'].forEach(function(form) {
+      form.onchange = function() {
         labelTopVariants(plot, this.value);
-      }
-    }
+      };
+    });
 
-    var lowerRange = document.forms['tss-lower-range'].elements['upstream-options'];
-    for (var l=0, len=lowerRange.length; l<len; l++) {
-      lowerRange[l].onchange = function() {
-        tssLower = parseInt(this.value)
-        plot.state.minimum_tss_distance = tssLower;
+    document.forms['tss-lower-range'].elements['upstream-options'].forEach(function(form) {
+      form.onchange = function() {
+        plot.state.minimum_tss_distance = parseInt(this.value);
         plot.applyState();
-      }
-    }
+      };
+    });
 
-    var upperRange = document.forms['tss-upper-range'].elements['downstream-options'];
-    for (var m=0, len=upperRange.length; m<len; m++) {
-      upperRange[m].onchange = function() {
-        tssUpper = parseInt(this.value)
-        plot.state.maximum_tss_distance = tssUpper;
+    document.forms['tss-upper-range'].elements['downstream-options'].forEach(function(form) {
+      form.onchange = function() {
+        plot.state.maximum_tss_distance = parseInt(this.value);
         plot.applyState();
-      }
-    }
+      };
+    });
 
 </script>
 
