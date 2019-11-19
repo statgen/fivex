@@ -2,17 +2,18 @@
 /* global d3 */
 /* global LocusZoom */
 /* global Tabulator */
-/* global plot */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL() {  // Removed state, chain, fields for now since we are not currently using them
+    getURL(state, chain, fields) {
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
+        chain.header.maximum_tss_distance = state.maximum_tss_distance;
+        chain.header.minimum_tss_distance = state.minimum_tss_distance;
         return this.url;
     },
-    annotateData(records) {
+    annotateData(records, chain) {
         records = records.filter(function(record) {
-            return record.tss_distance <= plot.state.maximum_tss_distance && record.tss_distance >= plot.state.minimum_tss_distance;
+            return record.tss_distance <= chain.header.maximum_tss_distance && record.tss_distance >= chain.header.minimum_tss_distance;
         });
         // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
