@@ -268,26 +268,26 @@
     <div class="col-12 col-lg-6" style="margin-bottom:0.8em">
       <form action="#" method="post" class="tss-range" id="tss-upper-range">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Show only eQTLs within a given distance upstream (5') of the current variant. Distance is calculated between the current variant and the affected gene's TSS site.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Upstream TSS Range: </button>
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html=true title="Display eQTLs for genes which have Transcription Start Site (TSS) positions smaller than the current variant (< chr{{chrom}}:{{ '{:,}'.format(pos) }}) <b>only</b> if their TSS's are within the selected distance.">
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"><span class="fa fa-angle-double-left"></span> 3' TSS Range </button>
           </span>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Maximum distance is 1mb 5' of the current position">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-1mb" value="1000000"> +1m
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-1000000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-1mb" value="1000000"> -1m
           </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Default: 500kb">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-500kb" value="500000"> +500k
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-500000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-500kb" value="500000"> -500k
           </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="200kb">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-200kb" value="200000"> +200k
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-200000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-200kb" value="200000"> -200k
           </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="100kb">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-100kb" value="100000"> +100k
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-100000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-100kb" value="100000"> -100k
           </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="50kb">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-50kb" value="50000"> +50k
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-50000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-50kb" value="50000"> -50k
           </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="20kb">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-20kb" value="20000"> +20k
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-20000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
+            <input type="radio" name="downstream-options" autocomplete=off id="downstream-20kb" value="20000"> -20k
           </label>
         </div>
       </form>
@@ -296,27 +296,27 @@
     <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
       <form action="#" method="post" class="tss-range" id="tss-lower-range">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Show only eQTLs within a given distance downstream (3') of the current variant. Distance is calculated between the current variant and the affected gene's TSS site.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;">Downstream TSS Range: </button>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+20000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-20kb" value="-20000"> +20k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+50000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-50kb" value="-50000"> +50k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+100000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-100kb" value="-100000"> +100k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+200000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-200kb" value="-200000"> +200k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+500000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-500kb" value="-500000"> +500k
+          </label>
+          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+1000000) }}">
+            <input type="radio" name="upstream-options" autocomplete=off id="upstream-1mb" value="-1000000"> +1m
+          </label>
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Display eQTLs for genes which have Transcription Start Site (TSS) positions greater than the current variant (> chr{{chrom}}:{{ '{:,}'.format(pos) }}) <b>only</b> if their TSS's are within the selected distance.">
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;">5' TSS Range <span class="fa fa-angle-double-right"></span> </button>
           </span>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-20kb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-20kb" value="-20000"> -20k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-50kb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-50kb" value="-50000"> -50k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-100kb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-100kb" value="-100000"> -100k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="-200kb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-200kb" value="-200000"> -200k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Default: -500kb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-500kb" value="-500000"> -500k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Maximum distance is 1mb">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-1mb" value="-1000000"> -1m
-          </label>
         </div>
       </form>
     </div>
