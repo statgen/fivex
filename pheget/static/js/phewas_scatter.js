@@ -323,7 +323,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <form action="/singlegene" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
     <input name="pos" type="hidden" value='{{{{namespace[phewas]}}position}}'>
-    <input name="symbol" type="hidden" value='{{{{namespace[phewas]}}symbol}}'>
+    <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
     <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
     <input type="submit" class="linkButton" value="Search this gene"/>
 </form>`;
