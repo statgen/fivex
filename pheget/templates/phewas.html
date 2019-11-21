@@ -262,64 +262,38 @@
         </div>
       </form>
     </div>
+
   </div>
+</div>
 
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-6" style="margin-bottom:0.8em">
-      <form action="#" method="post" class="tss-range" id="tss-upper-range">
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html=true title="Display eQTLs for genes which have Transcription Start Site (TSS) positions smaller than the current variant (< chr{{chrom}}:{{ '{:,}'.format(pos) }}) <b>only</b> if their TSS's are within the selected distance.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"><span class="fa fa-angle-double-left"></span> 3' TSS Range </button>
-          </span>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-1000000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-1mb" value="1000000"> -1m
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-500000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-500kb" value="500000"> -500k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-200000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-200kb" value="200000"> -200k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-100000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-100kb" value="100000"> -100k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-50000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-50kb" value="50000"> -50k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format([pos-20000, 1] | max) }}-{{ '{:,}'.format(pos) }}">
-            <input type="radio" name="downstream-options" autocomplete=off id="downstream-20kb" value="20000"> -20k
-          </label>
-        </div>
-      </form>
-    </div>
+<div class="container-fluid">
+  <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
+    <form action="#" method="post" class="tss-range" id="tss-both-range">
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance of this variant.">
+          <button type="button" class="btn btn-secondary" style="pointer-events: none;"><span class="fa fa-arrows-h"></span> Filter by TSS Distance </button>
+        </span>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 20000, 1] | max) }}-{{ '{:,}'.format(pos+20000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-20kb" value="20000"> ±20kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 50000, 1] | max) }}-{{ '{:,}'.format(pos+50000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-50kb" value="50000"> ±50kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 100000, 1] | max) }}-{{ '{:,}'.format(pos+100000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-100kb" value="100000"> ±100kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 200000, 1] | max) }}-{{ '{:,}'.format(pos+200000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-200kb" value="200000"> ±200kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 500000, 1] | max) }}-{{ '{:,}'.format(pos+500000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-500kb" value="500000"> ±500kb
+        </label>
+        <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 1000000, 1] | max) }}-{{ '{:,}'.format(pos+1000000) }}">
+          <input type="radio" name="tss-options" autocomplete=off id="tss-1mb" value="1000000"> ±1mb
+        </label>
 
-    <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
-      <form action="#" method="post" class="tss-range" id="tss-lower-range">
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+20000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-20kb" value="-20000"> +20k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+50000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-50kb" value="-50000"> +50k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+100000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-100kb" value="-100000"> +100k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+200000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-200kb" value="-200000"> +200k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+500000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-500kb" value="-500000"> +500k
-          </label>
-          <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS positions between chr{{chrom}}:{{ '{:,}'.format(pos) }}-{{ '{:,}'.format(pos+1000000) }}">
-            <input type="radio" name="upstream-options" autocomplete=off id="upstream-1mb" value="-1000000"> +1m
-          </label>
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Display eQTLs for genes which have Transcription Start Site (TSS) positions greater than the current variant (> chr{{chrom}}:{{ '{:,}'.format(pos) }}) <b>only</b> if their TSS's are within the selected distance.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;">5' TSS Range <span class="fa fa-angle-double-right"></span> </button>
-          </span>
-        </div>
-      </form>
-    </div>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -387,21 +361,17 @@
       };
     });
 
-    document.forms['tss-lower-range'].elements['upstream-options'].forEach(function(form) {
+    // Filters displayed points only if they are within +/- the given distance to the current variant
+    // The position of this variant does not change, and is stored at plot.state.position
+    document.forms['tss-both-range'].elements['tss-options'].forEach(function(form) {
       form.onchange = function() {
-        plot.state.minimum_tss_distance = parseInt(this.value);
-        plot.layout.state.end = plot.state.position - parseInt(this.value); // Resize the gene track dynamically
-        plot.applyState();
+        buttonValue = +this.value;
+        plot.layout.state.start = Math.max(plot.state.position - buttonValue, 1)
+        plot.layout.state.end = plot.state.position + buttonValue;
+        plot.applyState({maximum_tss_distance: buttonValue,
+                         minimum_tss_distance: -buttonValue});
       };
-    });
-
-    document.forms['tss-upper-range'].elements['downstream-options'].forEach(function(form) {
-      form.onchange = function() {
-        plot.state.maximum_tss_distance = parseInt(this.value);
-        plot.layout.state.start = Math.max( (plot.state.position - parseInt(this.value)), 1);  // Resize the gene track dynamically
-        plot.applyState();
-      };
-    });
+    }); 
 
 </script>
 
@@ -418,16 +388,16 @@ $(function () {
 </script>
 
 <!-- Supporting information about this project -->
-    <div class="card">
-        <div class="card-body">
-          <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data"> <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link"></span> </a>
-          <a href="https://www.gtexportal.org/home/documentationPage" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal."> Definition of NES <span class="fa fa-external-link"></span> </a>
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang">
-            <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-lightbulb-o"></span> Credits </span>
-          </span>
+<div class="card">
+    <div class="card-body">
+      <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data"> <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link"></span> </a>
+      <a href="https://www.gtexportal.org/home/documentationPage" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal."> Definition of NES <span class="fa fa-external-link"></span> </a>
+      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang">
+        <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-lightbulb-o"></span> Credits </span>
+      </span>
 
-        </div>
-      </div>
+    </div>
+  </div>
 
 </body>
 </html>
