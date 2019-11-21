@@ -389,6 +389,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
 
+    // Attach the current position as a state variable - used for resizing the gene track dynamically
+    plot.state.position = pos;
     return [plot, dataSources];
 }
 

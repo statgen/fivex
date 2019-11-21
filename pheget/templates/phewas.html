@@ -390,6 +390,7 @@
     document.forms['tss-lower-range'].elements['upstream-options'].forEach(function(form) {
       form.onchange = function() {
         plot.state.minimum_tss_distance = parseInt(this.value);
+        plot.layout.state.end = plot.state.position - parseInt(this.value); // Resize the gene track dynamically
         plot.applyState();
       };
     });
@@ -397,6 +398,7 @@
     document.forms['tss-upper-range'].elements['downstream-options'].forEach(function(form) {
       form.onchange = function() {
         plot.state.maximum_tss_distance = parseInt(this.value);
+        plot.layout.state.start = Math.max( (plot.state.position - parseInt(this.value)), 1);  // Resize the gene track dynamically
         plot.applyState();
       };
     });
