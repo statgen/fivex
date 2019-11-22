@@ -87,6 +87,62 @@
   </div>
 </div>
 -->
+<div class="row">
+<div class="col">
+  <div class="dropdown bootstrap-select">
+    <label for="addtissue">Add a new tissue:</label>
+    <select class="form-control" tabindex="-98" id="addtissue">
+      <option disabled selected value="">Please select a tissue</option>
+      <option value="Muscle_Skeletal">Muscle Skeletal</option>
+      <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
+      <option value="Nerve_Tibial">Nerve Tibial</option>
+      <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
+      <option value="Whole_Blood">Whole Blood</option>
+      <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
+    </select>
+  </div>
+</div> 
+<div class="col">
+  <div class="dropdown bootstrap-select">
+      <label for="addgene">Add a new gene:</label>
+      <select class="form-control" tabindex="-98" id="addgene">
+        <option disabled selected value="">Please select a gene</option>
+        <option value="CHRNA5">CHRNA5</option>
+        <option value="CHRNA3">CHRNA3</option>
+        <option value="AC022748.2">AC022748.2</option>
+        <option value="AC027228.2">AC027228.2</option>
+        <option value="PSMA4">PSMA4</option>
+      </select>
+  </div>
+</div>
+<div class="col">
+  <div class="dropdown bootstrap-select">
+      <label for="changetissue">Change anchor tissue:</label>
+      <select class="form-control" tabindex="-98" id="changetissue" >
+        <option disabled selected value="">Please select a tissue</option>
+        <option value="Muscle_Skeletal">Muscle Skeletal</option>
+        <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
+        <option value="Nerve_Tibial">Nerve Tibial</option>
+        <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
+        <option value="Whole_Blood">Whole Blood</option>
+        <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
+      </select>
+    </div>
+</div>
+<div class="col">
+  <div class="dropdown bootstrap-select">
+      <label for="addgene">Change anchor gene:</label>
+      <select class="form-control" tabindex="-98" id="changegene">
+        <option disabled selected value="">Please select a gene</option>
+        <option value="CHRNA5">CHRNA5</option>
+        <option value="CHRNA3">CHRNA3</option>
+        <option value="AC022748.2">AC022748.2</option>
+        <option value="AC027228.2">AC027228.2</option>
+        <option value="PSMA4">PSMA4</option>
+      </select>
+  </div>
+</div>
+</div>
 
 <div class="container-fluid">
   <div class="row justify-content-start">
@@ -187,6 +243,21 @@
         switchY_single(this.value);
       }
     }
+
+    document.getElementById('addtissue').addEventListener('change', function(event){
+        addassoc(event.target.value, true);
+    });
+    document.getElementById('addgene').addEventListener('change', function(event){
+        addassoc(event.target.value, false);
+    });
+    document.getElementById('changetissue').addEventListener('change', function(event){
+        globalvars.tissue = event.target.value;
+        alert(`The anchor tissue has changed to ${event.target.value}.`);
+    });
+    document.getElementById('changegene').addEventListener('change', function(event){
+        globalvars.symbol = event.target.value;
+        alert(`The anchor gene has changed to ${event.target.value}.`);
+    });
 
 </script>
 
