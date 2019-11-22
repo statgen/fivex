@@ -244,6 +244,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             chr: chrom,
             minimum_tss_distance: -1000000,
             maximum_tss_distance: 1000000,
+            position: pos,
         },
         dashboard: {
             components: [
@@ -390,7 +391,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var plot = LocusZoom.populate(selector, dataSources, layout);
 
     // Attach the current position as a state variable - used for resizing the gene track dynamically
-    plot.state.position = pos;
     return [plot, dataSources];
 }
 

@@ -202,11 +202,7 @@
       </div>
     </div>
   </div>
-</div>
-
 <br>
-
-<div class="container-fluid">
   <div class="row justify-content-start">
 
     <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
@@ -264,10 +260,10 @@
     </div>
 
   </div>
-</div>
+
 
 <!-- Filters all points by TSS. Applies a region filter which is symmetric around the current point -->
-<div class="container-fluid">
+<div class="row justify-content-start">
   <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
     <form action="#" method="post" class="tss-range" id="tss-both-range">
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -368,11 +364,11 @@
       form.onchange = function() {
         buttonValue = +this.value;
         // Change overall start and end state to update displayed gene track range
-        plot.layout.state.start = Math.max(plot.state.position - buttonValue, 1);
-        plot.layout.state.end = plot.state.position + buttonValue;
-        // Update the stored tss distance fields
+        // And update the stored tss distance fields
         plot.applyState({maximum_tss_distance: buttonValue,
-                         minimum_tss_distance: -buttonValue});
+                         minimum_tss_distance: -buttonValue,
+                         start: Math.max(plot.state.position - buttonValue, 1),
+                         end: plot.state.position + buttonValue});
       };
     }); 
 
