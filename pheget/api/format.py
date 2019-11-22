@@ -135,7 +135,6 @@ SAMPLESIZE_DICT = {
 }  # type: ty.Dict[str, int]
 
 
-# Add tissue-specific sample sizes to VariantContainer
 class VariantContainer:
     """
     Represent the variant data in a standard manner that lets us access fields by name
@@ -175,7 +174,7 @@ class VariantContainer:
     @property
     def id_field(self):
         return f'{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}'
-        
+
     @property
     def pvalue(self):
         if self.log_pvalue is None:
@@ -218,7 +217,7 @@ def variant_parser(row: str) -> VariantContainer:
 
 
 def query_variants(chrom: str, start: int, end: int = None,
-                   tissue: str = None, gene_id: str = None, symbol: str=None) -> ty.Iterable[VariantContainer]:
+                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
     """
     Fetch GTEX data for one or more variants, and apply optional filters
     """
@@ -235,8 +234,11 @@ def query_variants(chrom: str, start: int, end: int = None,
         if '.' in gene_id:
             reader.add_filter('gene_id', gene_id)
         else:
+            # The internal data storage includes gene version (id.version). But the user-driven query may not.
+            #   Ensure that the search works with how data is represented internally.
             reader.add_filter('gene_id')
             reader.add_filter(lambda result: result.gene_id.split('.')[0] == gene_id)
+
     if end is None:
         # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open
         # intervals. Filter out extraneous information

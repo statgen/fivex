@@ -9,6 +9,3 @@ venv/
 env/
 # JS / build assets
 node_modules/
-
-# Ignore the local configuration
-localconfig.py

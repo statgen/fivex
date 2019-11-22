@@ -14,7 +14,10 @@
   <link rel="stylesheet" href = "{{ url_for('static', filename='css/pheget.css') }}">
 
   <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
+  <title>PheGET - Single Variant Single Gene View</title>
 
+</head>
+<body>
 <div class="container-fluid">
   <div class="row padtop">
     <div class="col-sm-10">
@@ -33,14 +36,11 @@
     </div>
   </div>
   <center>
-  <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back to PheGET Homepage</a>
+    <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back to PheGET Homepage</a>
   </center>
   <br>
-        
-  <title>PheGET - Single Variant Single Gene View</title>
+</div>
 
-</head>
-<body>
 <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ pos }}</strong></h1>
 
 <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
@@ -75,18 +75,6 @@
     </div>
   </div>
 
-<!-- Previous dropdown box for adding genes
-<div class="fluid-container">
-  <div class="row">
-    <select id="geneselect">
-        <option value=""></option>
-        <option value="ENSG00000169684.13">CHRNA5</option>
-        <option value="ENSG00000080644.15">CHRNA3</option>
-      </select>  
-    <button id="genesearch">Add Gene</button> 
-  </div>
-</div>
--->
 <div class="row">
 <div class="col">
   <div class="dropdown bootstrap-select">
@@ -101,7 +89,7 @@
       <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
     </select>
   </div>
-</div> 
+</div>
 <div class="col">
   <div class="dropdown bootstrap-select">
       <label for="addgene">Add a new gene:</label>
@@ -183,30 +171,9 @@
 <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 
 <script type="application/javascript">
-    makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
+    [window.singlegeneplot, window.data_sources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
 
-/*
-    document.getElementById('tissuesearch').addEventListener('click', function() {
-        let newtissue = document.getElementById("tissueselect").value;
-        if (newtissue.length == 0){
-          alert("No tissue input!");
-        } else{
-          addassoc(newtissue, true);
-        }
-    });
-    document.getElementById('addgene').addEventListener('change', function(event){
-        addassoc(event.target.value, false);
-    });
-    document.getElementById('changetissue').addEventListener('change', function(event){
-        globalvars.tissue = event.target.value;
-        alert(`The anchor tissue has changed to ${event.target.value}.`);
-    });
-    document.getElementById('changegene').addEventListener('change', function(event){
-        globalvars.symbol = event.target.value;
-        alert(`The anchor gene has changed to ${event.target.value}.`);
-    });
-*/
-    // Use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rsids
+    // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse rsids
     document.getElementById('variant-search').addEventListener('submit', function () {
         event.preventDefault();
         const variant = document.getElementById('query-field').value;
@@ -219,21 +186,20 @@
     document.getElementById('gene-search').addEventListener('submit', function() {
       event.preventDefault();
       const geneName = document.getElementById('gene-query-field').value;
-      const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + geneName + '&build=GRCh38';
+      const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
       getOmni(omniurl, function(err, omniJson) {
         var geneID = omniJson.data[0].gene_id;
-        if (geneID !== undefined) {
-          addassoc(geneID, false);
+        if (geneID) {
+          addassoc(window.plot, window.datasources, geneID, false);
         }
       });
     });
-  
 
     // Bootstrap dropdown selector for adding a new tissue
     var tissueElements = document.getElementsByClassName('tissueselect-class');
     Array.from(tissueElements).forEach((selectedTissue) => {
       selectedTissue.addEventListener('click', (event) => {
-          addassoc(event.target.value, true);
+          addassoc(window.plot, window.datasources, event.target.value, true);
       });
     });
 
@@ -245,10 +211,10 @@
     }
 
     document.getElementById('addtissue').addEventListener('change', function(event){
-        addassoc(event.target.value, true);
+        addassoc(window.plot, window.datasources, event.target.value, true);
     });
     document.getElementById('addgene').addEventListener('change', function(event){
-        addassoc(event.target.value, false);
+        addassoc(window.plot, window.datasources, event.target.value, false);
     });
     document.getElementById('changetissue').addEventListener('change', function(event){
         globalvars.tissue = event.target.value;
@@ -270,7 +236,6 @@
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
   })
-  
 
 
 </script>
