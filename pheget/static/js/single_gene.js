@@ -32,8 +32,8 @@ const gene_track = LocusZoom.Layouts.get("data_layer", "genes",{
 function makeSinglePlot(chrom, pos, gene_id, tissue, selector){
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
-    const start = +pos - 500;  // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
-    const end = +pos + 500;
+    const start = +pos - 80000;  // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
+    const end = +pos + 80000;
 
     // get rid of the decimal points for the sake of naming
     const geneid_short = gene_id.split('.')[0];
