@@ -137,68 +137,96 @@
       </div>
     </div>
   </div>
-</div>
-
 <br>
-
-<div class="container-fluid">
   <div class="row justify-content-start">
 
-    <div class="col">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="grouping" id="grouping-buttons">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Reorder the x-axis by one of these listed categories" data-placement="top">
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Group by: </button>
           </span>
           <label class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Group eQTLs by tissues, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete=off id="group-tissue" value="tissue"> Tissue
+            <input type="radio" name="group-options" autocomplete=off value="tissue"> Tissue
           </label>
           <label class="btn btn-primary"  data-toggle="tooltip" data-placement="top" title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete=off id="group-system" value="system"> System
+            <input type="radio" name="group-options" autocomplete=off value="system"> System
           </label>
           <label class="btn btn-primary active" data-toggle="tooltip" data-placement="top" title="Group eQTLs by gene, sorted by the position of the genes' translation start sites">
-              <input type="radio" name="group-options" autocomplete=off id="group-symbol" value="symbol"> Gene
+            <input type="radio" name="group-options" autocomplete=off value="symbol"> Gene
           </label>
         </div>
       </form>
     </div>
 
-    <div class="col-sm">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="yaxis-display" id="transform-y">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Show: </button>
           </span>
           <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true" title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-            <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
+            <input type="radio" name="y-options" autocomplete=off value="log_pvalue"> P-values
           </label>
           <label class="btn btn-success" data-toggle="tooltip" data-placement="top" data-html="true" title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-            <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
+            <input type="radio" name="y-options" autocomplete=off value="beta"> Effect Size (NES)
           </label>
         </div>
       </form>
     </div>
 
-    <div class="col-sm">
+    <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
       <form action="#" method="post" class="label-display" id="toggle-labels">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true" title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
-           <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
           </span>
           <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
-            <input type="radio" name="label-options" autocomplete=off id="label-none" value="0"> None
+            <input type="radio" name="label-options" autocomplete=off value="0"> None
           </label>
           <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" data-html="true" title="Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>">
-            <input type="radio" name="label-options" autocomplete=off id="label-5" value="5"> Top 5
+            <input type="radio" name="label-options" autocomplete=off value="5"> Top 5
           </label>
           <label class="btn btn-info"  data-toggle="tooltip" data-placement="top" data-html="true" title="Add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>">
-            <input type="radio" name="label-options" autocomplete=off id="label-50" value="50"> Top 50
+            <input type="radio" name="label-options" autocomplete=off value="50"> Top 50
           </label>
         </div>
       </form>
     </div>
 
 
+  </div>
+
+
+<!-- Filters all points by TSS. Applies a region filter which is symmetric around the current point -->
+<div class="row justify-content-start">
+  <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
+    <form action="#" method="post" class="tss-range" id="tss-both-range">
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance of this variant.">
+          <button type="button" class="btn btn-secondary" style="pointer-events: none;"><span class="fa fa-arrows-h"></span> Filter by TSS Distance </button>
+        </span>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 20000, 1] | max) }}-{{ '{:,}'.format(pos+20000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="20000"> ±20kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 50000, 1] | max) }}-{{ '{:,}'.format(pos+50000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="50000"> ±50kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 100000, 1] | max) }}-{{ '{:,}'.format(pos+100000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="100000"> ±100kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 200000, 1] | max) }}-{{ '{:,}'.format(pos+200000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="200000"> ±200kb
+        </label>
+        <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 500000, 1] | max) }}-{{ '{:,}'.format(pos+500000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="500000"> ±500kb
+        </label>
+        <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" title="Show eQTLs for genes with TSS in the range chr{{chrom}}:{{ '{:,}'.format([pos - 1000000, 1] | max) }}-{{ '{:,}'.format(pos+1000000) }}">
+          <input type="radio" name="tss-options" autocomplete=off value="1000000"> ±1mb
+        </label>
+
+      </div>
+    </form>
   </div>
 </div>
 
@@ -248,26 +276,37 @@
     });
 
     // On hitting toggle buttons, run JavaScript to update plot views
-    var groupVar = document.forms['grouping-buttons'].elements['group-options'];
-    for (var i=0, len=groupVar.length; i<len; i++) {
-      groupVar[i].onchange = function() {
+    document.forms['grouping-buttons'].elements['group-options'].forEach(function(form) {
+      form.onchange = function() {
         groupByThing(plot, this.value);
-      }
-    }
+      };
+    });
 
-    var yaxisVar = document.forms['transform-y'].elements['y-options'];
-    for (var j=0, len=yaxisVar.length; j<len; j++) {
-      yaxisVar[j].onchange = function() {
+    document.forms['transform-y'].elements['y-options'].forEach(function(form) {
+      form.onchange = function() {
         switchY(plot, table, this.value);
-      }
-    }
+      };
+    });
 
-    var labelVar = document.forms['toggle-labels'].elements['label-options'];
-    for (var k=0, len=labelVar.length; k<len; k++) {
-      labelVar[k].onchange = function() {
+    document.forms['toggle-labels'].elements['label-options'].forEach(function(form) {
+      form.onchange = function() {
         labelTopVariants(plot, this.value);
-      }
-    }
+      };
+    });
+
+    // Filters displayed points only if they are within +/- the given distance to the current variant
+    // The position of this variant does not change, and is stored at plot.state.position
+    document.forms['tss-both-range'].elements['tss-options'].forEach(function(form) {
+      form.onchange = function() {
+        buttonValue = +this.value;
+        // Change overall start and end state to update displayed gene track range
+        // And update the stored tss distance fields
+        plot.applyState({maximum_tss_distance: buttonValue,
+                         minimum_tss_distance: -buttonValue,
+                         start: Math.max(plot.state.position - buttonValue, 1),
+                         end: plot.state.position + buttonValue});
+      };
+    }); 
 
 </script>
 
@@ -284,16 +323,16 @@ $(function () {
 </script>
 
 <!-- Supporting information about this project -->
-    <div class="card">
-        <div class="card-body">
-          <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data"> <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link"></span> </a>
-          <a href="https://www.gtexportal.org/home/documentationPage" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal."> Definition of NES <span class="fa fa-external-link"></span> </a>
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang">
-            <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-lightbulb-o"></span> Credits </span>
-          </span>
+<div class="card">
+    <div class="card-body">
+      <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data"> <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link"></span> </a>
+      <a href="https://www.gtexportal.org/home/documentationPage" class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal."> Definition of NES <span class="fa fa-external-link"></span> </a>
+      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang">
+        <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-lightbulb-o"></span> Credits </span>
+      </span>
 
-        </div>
-      </div>
+    </div>
+  </div>
 
 </body>
 </html>

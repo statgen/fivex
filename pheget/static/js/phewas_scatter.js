@@ -4,12 +4,17 @@
 /* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL() {  // Removed state, chain, fields for now since we are not currently using them
+    getURL(state, chain, fields) {
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
+        chain.header.maximum_tss_distance = state.maximum_tss_distance;
+        chain.header.minimum_tss_distance = state.minimum_tss_distance;
         return this.url;
     },
-    annotateData(records) {
+    annotateData(records, chain) {
+        records = records.filter(function(record) {
+            return record.tss_distance <= chain.header.maximum_tss_distance && record.tss_distance >= chain.header.minimum_tss_distance;
+        });
         // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
         // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
         // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
@@ -236,7 +241,10 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             variant: `${chrom}:${pos}`,
             start: pos_lower,
             end: pos_higher,
-            chr: chrom
+            chr: chrom,
+            minimum_tss_distance: -1000000,
+            maximum_tss_distance: 1000000,
+            position: pos,
         },
         dashboard: {
             components: [
@@ -270,6 +278,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                         base.x_axis.category_order_field = 'phewas:tss_distance';
+                        base.y_axis.min_extent = [0, 8];
 
                         base.color = [
                             {
@@ -390,6 +399,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
 
+    // Attach the current position as a state variable - used for resizing the gene track dynamically
     return [plot, dataSources];
 }
 
@@ -471,12 +481,15 @@ function switchY(plot, table, yfield) {
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
+        scatter_config.y_axis.min_extent = [0, 8];
+        plot.layout.panels[0].axes.y1['label'] = '-log 10 p-value';
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
 
         table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
+        delete scatter_config.y_axis.min_extent;
         scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
