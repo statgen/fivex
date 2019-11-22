@@ -39,9 +39,9 @@ function getTrackSources(gene_id, tissue) {
 function getTrackLayout(gene_id, tissue, state) {
     const geneid_short = gene_id.split('.')[0];
 
-    const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {unnamespaced: true }).tooltip;
+    const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = newscattertooltip.html +
-                `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
+        `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
@@ -63,7 +63,7 @@ function getTrackLayout(gene_id, tissue, state) {
     return [
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
-            title: {text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30},
+            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -83,7 +83,7 @@ function getTrackLayout(gene_id, tissue, state) {
  * @returns {Object}
  */
 function getBasicLayout(initial_state = {}, track_panels = []) {
-    const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', {unnamespaced: true}).tooltip;
+    const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true }).tooltip;
     newgenestooltip.html = newgenestooltip.html + `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
     const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true, tooltip: newgenestooltip });
 
@@ -106,8 +106,11 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
 function getBasicSources(track_sources = []) {
     return [
         ...track_sources,
-        ['ld', ['LDLZ2', { url: 'https://portaldev.sph.umich.edu/ld/', params: { source: '1000G', population: 'ALL', build: 'GRCh38' } }]],
-        ['recomb', ['RecombLZ', { url: API_BASE + 'annotation/recomb/results/', params: {build: 'GRCh38'} }]],
+        ['ld', ['LDLZ2', {
+            url: 'https://portaldev.sph.umich.edu/ld/',
+            params: { source: '1000G', population: 'ALL', build: 'GRCh38' }
+        }]],
+        ['recomb', ['RecombLZ', { url: API_BASE + 'annotation/recomb/results/', params: { build: 'GRCh38' } }]],
         ['gene', ['GeneLZ', { url: API_BASE + 'annotation/genes/', params: { build: 'GRCh38' } }]],
         ['constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]],
     ];
@@ -140,7 +143,7 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @returns {[LocusZoom.Plot, LocusZoom.DataSources]}
  */
 // eslint-disable-next-line no-unused-vars
-function makeSinglePlot (chrom, center, gene_id, tissue, selector) {
+function makeSinglePlot(chrom, center, gene_id, tissue, selector) {
     const each_side = MAX_EXTENT / 2;
     const start = Math.max(+center - each_side, 1);
     const end = +center + each_side;
@@ -181,23 +184,27 @@ function addTrack(plot, datasources, gene_id, tissue) {
 function switchY(plot, yfield) {
     let assoc_panels = plot.layout.panels.slice(0, -1);
     if (yfield === 'beta') {
-        assoc_panels.forEach(function(panel) {
+        assoc_panels.forEach(function (panel) {
             let scatter_layout = panel.data_layers[4];
             let panel_base_y = scatter_layout.y_axis;
             panel.axes.y1.label = 'Normalized Effect Size (NES)';
             panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-            panel.data_layers[0].style = {'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px'};
+            panel.data_layers[0].style = { 'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px' };
             panel_base_y.field = panel.id + ':beta';
             delete panel_base_y.floor;
             panel_base_y.min_extent = [-1, 1];
         });
     } else if (yfield === 'log_pvalue') {
-        assoc_panels.forEach(function(panel) {
+        assoc_panels.forEach(function (panel) {
             let scatter_layout = panel.data_layers[4];
             let panel_base_y = scatter_layout.y_axis;
             panel.axes.y1.label = '-log 10 p-value';
             panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-            panel.data_layers[0].style = {'stroke': '#D3D3D3', 'stroke-width': '3px', 'stroke-dasharray': '10px 10px'};
+            panel.data_layers[0].style = {
+                'stroke': '#D3D3D3',
+                'stroke-width': '3px',
+                'stroke-dasharray': '10px 10px'
+            };
             panel_base_y.field = panel.id + ':log_pvalue';
             // Set minimum y value to zero when looking at -log10 p-values
             panel_base_y.floor = 0;

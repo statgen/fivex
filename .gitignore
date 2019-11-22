@@ -9,3 +9,6 @@ venv/
 env/
 # JS / build assets
 node_modules/
+
+# Developer-specific settings
+localsettings.py

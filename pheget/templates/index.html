@@ -1,23 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" 
-      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <title>PheGET: eQTL Browser</title>
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
 
-    <style>
-        body {
-            height: 100%;
-        }
-    </style>
-</head>
+{% block css %}
+<style>
+  body {
+    height: 100%;
+  }
+</style>
+{% endblock %}
 
-<body>
-
-<div class="container d-flex vh-100">
+{% block content %}
+  <div class="container d-flex vh-100">
     <div class="row justify-content-center align-self-center">
         <div class="col-xs-12">
             <h2 class="text-center">
@@ -51,8 +44,10 @@
 
     </div>
 </div>
+{% endblock %}
 
 
+{% block javascript %}
 <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 
 <script>
@@ -65,6 +60,4 @@
         parseSearch(variant);
     });
 </script>
-
-</body>
-</html>
+{% endblock %}
