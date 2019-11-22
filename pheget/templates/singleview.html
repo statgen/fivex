@@ -105,8 +105,8 @@
 </div>
 <div class="col">
   <div class="dropdown bootstrap-select">
-      <label for="changetissue">Change anchor tissue:</label>
-      <select class="form-control" tabindex="-98" id="changetissue" >
+      <label for="anchor-tissue">Change anchor tissue:</label>
+      <select class="form-control" tabindex="-98" id="anchor-tissue" >
         <option disabled selected value="">Please select a tissue</option>
         <option value="Muscle_Skeletal">Muscle Skeletal</option>
         <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
@@ -120,7 +120,7 @@
 <div class="col">
   <div class="dropdown bootstrap-select">
       <label for="addgene">Change anchor gene:</label>
-      <select class="form-control" tabindex="-98" id="changegene">
+      <select class="form-control" tabindex="-98" id="anchor-gene">
         <option disabled selected value="">Please select a gene</option>
         <option value="CHRNA5">CHRNA5</option>
         <option value="CHRNA3">CHRNA3</option>
@@ -131,7 +131,7 @@
   </div>
 </div>
 </div>
-
+</div>
 <div class="container-fluid">
   <div class="row justify-content-start">
 
@@ -171,26 +171,31 @@
 <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 
 <script type="application/javascript">
-    [window.singlegeneplot, window.data_sources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, {{gene_id|tojson}}, {{tissue|tojson}}, '#plot');
+    'use strict';
+    let ANCHOR_GENE = {{gene_id|tojson}};
+    let ANCHOR_TISSUE = {{tissue|tojson}};
 
-    // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse rsids
-    document.getElementById('variant-search').addEventListener('submit', function () {
+    [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#plot');
+
+    // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
+    document.getElementById('variant-search').addEventListener('submit', function (event) {
         event.preventDefault();
         const variant = document.getElementById('query-field').value;
         if (!variant) {
+            // TODO: If no search result was found, perhaps we can show error messaging instead of failing silently?
             return;
         }
         parseSearch(variant);
     });
 
-    document.getElementById('gene-search').addEventListener('submit', function() {
+    document.getElementById('gene-search').addEventListener('submit', function(event) {
       event.preventDefault();
       const geneName = document.getElementById('gene-query-field').value;
       const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
       getOmni(omniurl, function(err, omniJson) {
         var geneID = omniJson.data[0].gene_id;
         if (geneID) {
-          addassoc(window.plot, window.datasources, geneID, false);
+          addTrack(window.plot, window.datasources, geneID, ANCHOR_TISSUE);
         }
       });
     });
@@ -199,32 +204,29 @@
     var tissueElements = document.getElementsByClassName('tissueselect-class');
     Array.from(tissueElements).forEach((selectedTissue) => {
       selectedTissue.addEventListener('click', (event) => {
-          addassoc(window.plot, window.datasources, event.target.value, true);
+          addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
       });
     });
 
-    var yaxisVar = document.forms['transform-y'].elements['y-options'];
-    for (var j=0, len=yaxisVar.length; j<len; j++) {
-      yaxisVar[j].onchange = function() {
-        switchY_single(this.value);
+    var y_axis_options = document.forms['transform-y'].elements['y-options'];
+    for (var j=0, len=y_axis_options.length; j<len; j++) {
+      y_axis_options[j].onchange = function() {
+        switchY(window.plot, this.value);
       }
     }
 
-    document.getElementById('addtissue').addEventListener('change', function(event){
-        addassoc(window.plot, window.datasources, event.target.value, true);
+    document.getElementById('addtissue').addEventListener('change', function(event) {
+        addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
     });
-    document.getElementById('addgene').addEventListener('change', function(event){
-        addassoc(window.plot, window.datasources, event.target.value, false);
+    document.getElementById('addgene').addEventListener('change', function(event) {
+        addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
     });
-    document.getElementById('changetissue').addEventListener('change', function(event){
-        globalvars.tissue = event.target.value;
-        alert(`The anchor tissue has changed to ${event.target.value}.`);
+    document.getElementById('anchor-tissue').addEventListener('change', function(event) {
+        ANCHOR_TISSUE = event.target.value;
     });
-    document.getElementById('changegene').addEventListener('change', function(event){
-        globalvars.symbol = event.target.value;
-        alert(`The anchor gene has changed to ${event.target.value}.`);
+    document.getElementById('anchor-gene').addEventListener('change', function(event) {
+        ANCHOR_GENE = event.target.value;
     });
-
 </script>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -236,8 +238,6 @@
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
   })
-
-
 </script>
 
 </body>

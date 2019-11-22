@@ -7,7 +7,7 @@ from flask import abort, render_template, request
 import pheget
 
 
-@pheget.app.route('/singlegene', methods=['GET'])
+@pheget.app.route('/singlegene/', methods=['GET'])
 def single_view():
     # All params always required
     chrom = request.args.get('chrom', None)
