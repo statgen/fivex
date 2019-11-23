@@ -4,223 +4,223 @@
 
 {% block css %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.css"
-      type="text/css"/>
+        type="text/css"/>
 {% endblock %}
 
 
 {% block content %}
-<div class="container-fluid">
-  <div class="row padtop">
-    <div class="col-sm-10">
-      <div id="home-searchbox">
-        <form id="variant-search">
-          <div class="input-group">
-            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
-                   type="text"
-                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
-            <div class="input-group-append">
-              <button id="navigate-variant" class="btn btn-primary" type="submit">Search <span
-                  class="fa fa-search"></span></button>
+  <div class="container-fluid">
+    <div class="row padtop">
+      <div class="col-sm-10">
+        <div id="home-searchbox">
+          <form id="variant-search">
+            <div class="input-group">
+              <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                     type="text"
+                     placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+              <div class="input-group-append">
+                <button id="navigate-variant" class="btn btn-primary" type="submit">Search <span
+                    class="fa fa-search"></span></button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
+      </div>
+    </div>
+    <center>
+      <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back
+        to PheGET Homepage</a>
+    </center>
+    <br>
+  </div>
+
+  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ pos }}</strong></h1>
+
+  <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
+  <div class="container-fluid">
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        Add Tissue
+      </button>
+      <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
+      <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
+        <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
+        <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
       </div>
     </div>
   </div>
-  <center>
-    <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back
-      to PheGET Homepage</a>
-  </center>
-  <br>
-</div>
-
-<h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ pos }}</strong></h1>
-
-<!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
-<div class="container-fluid">
-  <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
-      Add Tissue
-    </button>
-    <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
-    <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
-      <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
-      <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
-    </div>
-  </div>
-</div>
-<div class="container-fluid">
-  <div class="row padtop">
-    <div class="col-sm-10">
-      <div id="gene-searchbox">
-        <form id="gene-search">
-          <div class="input-group">
-            <input id="gene-query-field" name="gene-query-field" autocomplete="off" class="form-control"
-                   type="text"
-                   placeholder="Add a gene"/>
-            <div class="input-group-append">
-              <button id="searchbox-gene" class="btn btn-primary" type="submit">Add Gene <span
-                  class="fa fa-search"></span></button>
+  <div class="container-fluid">
+    <div class="row padtop">
+      <div class="col-sm-10">
+        <div id="gene-searchbox">
+          <form id="gene-search">
+            <div class="input-group">
+              <input id="gene-query-field" name="gene-query-field" autocomplete="off" class="form-control"
+                     type="text"
+                     placeholder="Add a gene"/>
+              <div class="input-group-append">
+                <button id="searchbox-gene" class="btn btn-primary" type="submit">Add Gene <span
+                    class="fa fa-search"></span></button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <div class="dropdown bootstrap-select">
-        <label for="addtissue">Add a new tissue:</label>
-        <select class="form-control" tabindex="-98" id="addtissue">
-          <option disabled selected value="">Please select a tissue</option>
-          <option value="Muscle_Skeletal">Muscle Skeletal</option>
-          <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-          <option value="Nerve_Tibial">Nerve Tibial</option>
-          <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-          <option value="Whole_Blood">Whole Blood</option>
-          <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-        </select>
+    <div class="row">
+      <div class="col">
+        <div class="dropdown bootstrap-select">
+          <label for="addtissue">Add a new tissue:</label>
+          <select class="form-control" tabindex="-98" id="addtissue">
+            <option disabled selected value="">Please select a tissue</option>
+            <option value="Muscle_Skeletal">Muscle Skeletal</option>
+            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
+            <option value="Nerve_Tibial">Nerve Tibial</option>
+            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
+            <option value="Whole_Blood">Whole Blood</option>
+            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="col">
-      <div class="dropdown bootstrap-select">
-        <label for="addgene">Add a new gene:</label>
-        <select class="form-control" tabindex="-98" id="addgene">
-          <option disabled selected value="">Please select a gene</option>
-          <option value="CHRNA5">CHRNA5</option>
-          <option value="CHRNA3">CHRNA3</option>
-          <option value="AC022748.2">AC022748.2</option>
-          <option value="AC027228.2">AC027228.2</option>
-          <option value="PSMA4">PSMA4</option>
-        </select>
+      <div class="col">
+        <div class="dropdown bootstrap-select">
+          <label for="addgene">Add a new gene:</label>
+          <select class="form-control" tabindex="-98" id="addgene">
+            <option disabled selected value="">Please select a gene</option>
+            <option value="CHRNA5">CHRNA5</option>
+            <option value="CHRNA3">CHRNA3</option>
+            <option value="AC022748.2">AC022748.2</option>
+            <option value="AC027228.2">AC027228.2</option>
+            <option value="PSMA4">PSMA4</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="col">
-      <div class="dropdown bootstrap-select">
-        <label for="anchor-tissue">Change anchor tissue:</label>
-        <select class="form-control" tabindex="-98" id="anchor-tissue">
-          <option disabled selected value="">Please select a tissue</option>
-          <option value="Muscle_Skeletal">Muscle Skeletal</option>
-          <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-          <option value="Nerve_Tibial">Nerve Tibial</option>
-          <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-          <option value="Whole_Blood">Whole Blood</option>
-          <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-        </select>
+      <div class="col">
+        <div class="dropdown bootstrap-select">
+          <label for="anchor-tissue">Change anchor tissue:</label>
+          <select class="form-control" tabindex="-98" id="anchor-tissue">
+            <option disabled selected value="">Please select a tissue</option>
+            <option value="Muscle_Skeletal">Muscle Skeletal</option>
+            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
+            <option value="Nerve_Tibial">Nerve Tibial</option>
+            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
+            <option value="Whole_Blood">Whole Blood</option>
+            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="col">
-      <div class="dropdown bootstrap-select">
-        <label for="addgene">Change anchor gene:</label>
-        <select class="form-control" tabindex="-98" id="anchor-gene">
-          <option disabled selected value="">Please select a gene</option>
-          <option value="CHRNA5">CHRNA5</option>
-          <option value="CHRNA3">CHRNA3</option>
-          <option value="AC022748.2">AC022748.2</option>
-          <option value="AC027228.2">AC027228.2</option>
-          <option value="PSMA4">PSMA4</option>
-        </select>
+      <div class="col">
+        <div class="dropdown bootstrap-select">
+          <label for="addgene">Change anchor gene:</label>
+          <select class="form-control" tabindex="-98" id="anchor-gene">
+            <option disabled selected value="">Please select a gene</option>
+            <option value="CHRNA5">CHRNA5</option>
+            <option value="CHRNA3">CHRNA3</option>
+            <option value="AC022748.2">AC022748.2</option>
+            <option value="AC027228.2">AC027228.2</option>
+            <option value="PSMA4">PSMA4</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
-</div>
-<div class="container-fluid">
-  <div class="row justify-content-start">
-    <div class="col-sm">
-      <form action="#" method="post" class="yaxis-display" id="transform-y">
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+  <div class="container-fluid">
+    <div class="row justify-content-start">
+      <div class="col-sm">
+        <form action="#" method="post" class="yaxis-display" id="transform-y">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Show: </button>
           </span>
-          <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true"
-                 title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-            <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
-          </label>
-          <label class="btn btn-success" data-toggle="tooltip" data-placement="top" data-html="true"
-                 title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-            <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
-          </label>
-        </div>
-      </form>
+            <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true"
+                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+              <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
+            </label>
+            <label class="btn btn-success" data-toggle="tooltip" data-placement="top" data-html="true"
+                   title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
+              <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
+            </label>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <div id="lz-plot" class="ten columns"></div>
     </div>
   </div>
-
-  <div class="row">
-    <div id="lz-plot" class="ten columns"></div>
-  </div>
-</div>
 {% endblock %}
 
 {% block javascript %}
-<script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
+  <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 
-{# These files must be included to make a LocusZoom plot #}
-<script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.vendor.min.js"
-        type="application/javascript"></script>
-<script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.app.min.js"
-        type="application/javascript"></script>
+  {# These files must be included to make a LocusZoom plot #}
+  <script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.vendor.min.js"
+          type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.app.min.js"
+          type="application/javascript"></script>
 
-<script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
+  <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
 
-<script type="application/javascript">
-    'use strict';
-    let ANCHOR_GENE = {{gene_id|tojson}};
-    let ANCHOR_TISSUE = {{tissue|tojson}};
+  <script type="application/javascript">
+      'use strict';
+      let ANCHOR_GENE = {{gene_id|tojson}};
+      let ANCHOR_TISSUE = {{tissue|tojson}};
 
-    [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
+      [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
-    // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
-    document.getElementById('variant-search').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const variant = document.getElementById('query-field').value;
-        if (!variant) {
-            // TODO: If no search result was found, perhaps we can show error messaging instead of failing silently?
-            return;
-        }
-        parseSearch(variant);
-    });
+      // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
+      document.getElementById('variant-search').addEventListener('submit', function (event) {
+          event.preventDefault();
+          const variant = document.getElementById('query-field').value;
+          if (!variant) {
+              // TODO: If no search result was found, perhaps we can show error messaging instead of failing silently?
+              return;
+          }
+          parseSearch(variant);
+      });
 
-    document.getElementById('gene-search').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const geneName = document.getElementById('gene-query-field').value;
-        const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
-        getOmni(omniurl, function (err, omniJson) {
-            var geneID = omniJson.data[0].gene_id;
-            if (geneID) {
-                addTrack(window.plot, window.datasources, geneID, ANCHOR_TISSUE);
-            }
-        });
-    });
+      document.getElementById('gene-search').addEventListener('submit', function (event) {
+          event.preventDefault();
+          const geneName = document.getElementById('gene-query-field').value;
+          const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
+          getOmni(omniurl, function (err, omniJson) {
+              var geneID = omniJson.data[0].gene_id;
+              if (geneID) {
+                  addTrack(window.plot, window.datasources, geneID, ANCHOR_TISSUE);
+              }
+          });
+      });
 
-    // Bootstrap dropdown selector for adding a new tissue
-    var tissueElements = document.getElementsByClassName('tissueselect-class');
-    Array.from(tissueElements).forEach((selectedTissue) => {
-        selectedTissue.addEventListener('click', (event) => {
-            addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
-        });
-    });
+      // Bootstrap dropdown selector for adding a new tissue
+      var tissueElements = document.getElementsByClassName('tissueselect-class');
+      Array.from(tissueElements).forEach((selectedTissue) => {
+          selectedTissue.addEventListener('click', (event) => {
+              addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+          });
+      });
 
-    var y_axis_options = document.forms['transform-y'].elements['y-options'];
-    for (var j = 0, len = y_axis_options.length; j < len; j++) {
-        y_axis_options[j].onchange = function () {
-            switchY(window.plot, this.value);
-        }
-    }
+      var y_axis_options = document.forms['transform-y'].elements['y-options'];
+      for (var j = 0, len = y_axis_options.length; j < len; j++) {
+          y_axis_options[j].onchange = function () {
+              switchY(window.plot, this.value);
+          }
+      }
 
-    document.getElementById('addtissue').addEventListener('change', function (event) {
-        addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
-    });
-    document.getElementById('addgene').addEventListener('change', function (event) {
-        addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
-    });
-    document.getElementById('anchor-tissue').addEventListener('change', function (event) {
-        ANCHOR_TISSUE = event.target.value;
-    });
-    document.getElementById('anchor-gene').addEventListener('change', function (event) {
-        ANCHOR_GENE = event.target.value;
-    });
-</script>
+      document.getElementById('addtissue').addEventListener('change', function (event) {
+          addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
+      });
+      document.getElementById('addgene').addEventListener('change', function (event) {
+          addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+      });
+      document.getElementById('anchor-tissue').addEventListener('change', function (event) {
+          ANCHOR_TISSUE = event.target.value;
+      });
+      document.getElementById('anchor-gene').addEventListener('change', function (event) {
+          ANCHOR_GENE = event.target.value;
+      });
+  </script>
 {% endblock %}
