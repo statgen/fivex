@@ -19,7 +19,7 @@ Then activate the virtual environment (which must be done in every command line/
 
 Install dependencies (within your virtual environment), and activate pre-commit hooks for easier development:
 ```bash
-$ pip3 install -r requirements.txt`
+$ pip3 install -r requirements/dev.txt
 $ pre-commit install
 $ pre-commit install-hooks
 ```
