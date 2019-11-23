@@ -17,8 +17,12 @@ Then activate the virtual environment (which must be done in every command line/
 `$ source venv/bin/activate/`
 
 
-Install dependencies (within your virtual environment):
-`$ pip3 install -r requirements.txt`
+Install dependencies (within your virtual environment), and activate pre-commit hooks for easier development:
+```bash
+$ pip3 install -r requirements.txt`
+$ pre-commit install
+$ pre-commit install-hooks
+```
 
 For a development instance, you may wish to install additional dependencies:
 `$ pip3 install -r requirements/dev.txt`
@@ -27,10 +31,6 @@ For a development instance, you may wish to install additional dependencies:
 ### Source data
 For the prototype, source data will live in the folder `data/`. Really large files should not be checked into github, 
     so you will need to download them separately for your environment.
-    
-Currently, filenames are hardcoded; this was a quick hack! This should be improved because it would be silly if each 
-    person had to edit the source code for their own computer.
-
 
 ### Running the development server
 Make sure to activate your virtualenv at the start of every new terminal session: `$ source venv/bin/activate` 
@@ -39,3 +39,18 @@ The following command will start a basic flask app server that reloads whenever 
 `$ ./phegetrun`
 
 Then follow the instructions printed to the console to visit the app in your web browser.
+
+### Testing and code quality
+Before any commit, please run the following commands. (a sample pre-commit hook is provided that will do this for you,
+ automatically)
+ 
+These commands will perform static analysis to catch common bugs, and auto-format your code in a way intended to 
+ reduce merge conflicts due to formatting issues. (so that you won't have to satisfy the linter manually)
+
+```bash
+$ fourmat fix
+$ eslint . --fix
+$ mypy .
+```
+
+(This is roughly equivalent to `pre-commit run --all-files`)

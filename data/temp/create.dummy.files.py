@@ -1,6 +1,5 @@
 import subprocess
 
-
 GROUP_DICT = {
     "Adipose_Subcutaneous": "Adipose Tissue",
     "Adipose_Visceral_Omentum": "Adipose Tissue",
@@ -50,7 +49,7 @@ GROUP_DICT = {
     "Thyroid": "Thyroid",
     "Uterus": "Uterus",
     "Vagina": "Vagina",
-    "Whole_Blood": "Whole Blood"
+    "Whole_Blood": "Whole Blood",
 }
 
 for key in GROUP_DICT:

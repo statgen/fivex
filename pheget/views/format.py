@@ -2,20 +2,31 @@ import math
 import os
 import pickle
 
+from zorp import readers  # type: ignore
+
+import pheget
+
 try:
     # Optional speedup features
     from fastnumbers import int  # type: ignore
 except ImportError:
     pass
 
-from zorp import readers  # type: ignore
-
-import pheget
-
 
 class InfoContainer:
-    def __init__(self, chromosome, position, ref_allele, alt_allele,
-                 top_gene, top_tissue, ac, af, an, rsid):
+    def __init__(
+        self,
+        chromosome,
+        position,
+        ref_allele,
+        alt_allele,
+        top_gene,
+        top_tissue,
+        ac,
+        af,
+        an,
+        rsid,
+    ):
         self.chromsome = chromosome
         self.position = int(position)
         self.ref_allele = ref_allele
@@ -31,7 +42,7 @@ class InfoContainer:
 
 
 def info_parser(row: str):
-    fields = row.split('\t')
+    fields = row.split("\t")
     return InfoContainer(*fields)
 
 
@@ -41,7 +52,7 @@ def parse_position(chrom_pos: str):
     Most urls in the app will specify the variant in some way- for now, we'll do the simplest thing and expect
     `chrom, pos`.
     """
-    chrom, pos = chrom_pos.split('_')
+    chrom, pos = chrom_pos.split("_")
     return chrom, int(pos)
 
 
@@ -51,16 +62,21 @@ def afFormat(af):
 
 
 def get_variant_info(chrom: str, pos: int):
-    with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
+    with open(
+        os.path.join(pheget.app.config["DATA_DIR"], "gene.symbol.pickle"), "rb"
+    ) as f:
         SYMBOL_DICT = pickle.load(f)
-    infoDB = os.path.join(pheget.app.config['DATA_DIR'], 'best.genes.tissues.allele.info.rsnum.txt.gz')
+    infoDB = os.path.join(
+        pheget.app.config["DATA_DIR"],
+        "best.genes.tissues.allele.info.rsnum.txt.gz",
+    )
     reader = readers.TabixReader(infoDB, parser=info_parser)
-    reader.add_filter('position', pos)
+    reader.add_filter("position", pos)
     try:
-        data = next(reader.fetch('chr' + chrom, pos - 1, pos + 1))
+        data = next(reader.fetch("chr" + chrom, pos - 1, pos + 1))
         ref = data.ref_allele
         alt = data.alt_allele
-        top_gene = SYMBOL_DICT.get(data.top_gene.split('.')[0], 'Unknown_Gene')
+        top_gene = SYMBOL_DICT.get(data.top_gene.split(".")[0], "Unknown_Gene")
         top_tissue = data.top_tissue
         ac = data.ac
         af = afFormat(data.af)
@@ -68,7 +84,14 @@ def get_variant_info(chrom: str, pos: int):
         rsid = data.rsid
     except (StopIteration, OSError, ValueError):
         (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = (
-            None, None, None, None, None, None, None, None
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
 
     return [ref, alt, top_gene, top_tissue, ac, af, an, rsid]

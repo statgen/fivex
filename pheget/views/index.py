@@ -7,6 +7,6 @@ from flask import render_template
 import pheget
 
 
-@pheget.app.route('/')
+@pheget.app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")

@@ -2,7 +2,6 @@ import glob
 import os
 import subprocess
 
-
 #############################################
 # Specify input and output directories here #
 #############################################
@@ -12,7 +11,9 @@ import subprocess
 # In either case, to use the full data set,
 # the user will need to either download or symlink the raw GTEx v8 eQTL data
 # (found in the eqtl/fastqtl directory, from the full data download of GTEx v8 from dbGaP) to tempDir
-baseDir = '/'.join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1]) + '/'
+baseDir = (
+    "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1]) + "/"
+)
 filelist = glob.glob(baseDir + "data/temp/*.allpairs.txt.gz")
 outdir = baseDir + "data/"
 scriptdir = baseDir + "util/"
@@ -36,8 +37,8 @@ temp = subprocess.call(["mkdir", "-p", tempdir])
 
 with open("run.extract.Makefile", "w") as w:
     outfileList = list()
-    for i in list(range(1, 23)) + ['X']:
-        chrom = 'chr' + str(i)
+    for i in list(range(1, 23)) + ["X"]:  # type: ignore
+        chrom = "chr" + str(i)
         outfileList.append(outdir + chrom + ".All_Tissues.sorted.txt.gz")
 
     w.write(".DELETE_ON_ERROR:\n\nall:")
@@ -46,27 +47,48 @@ with open("run.extract.Makefile", "w") as w:
     for tissue in tissueList:
         w.write(" " + outdir + tissue + ".sorted.txt.gz.tbi")
 
-    w.write(" " + outall + '.tbi ' + " " + pickl + '\n.PHONY: all clean cleanup\n\n')
+    w.write(
+        " "
+        + outall
+        + ".tbi "
+        + " "
+        + pickl
+        + "\n.PHONY: all clean cleanup\n\n"
+    )
 
     # Tabix the finalized sorted data files (tissue-specific and all-tissues)
     for outfile in outfileList:
-        w.write(outfile + ".tbi: " + outfile + "\n\ttabix -c g -s 2 -b 3 -e 3 " + outfile + "\n\n")
-    w.write(outall + ".tbi: " + outall + "\n\ttabix -c g -s 2 -b 3 -e 3 " + outall + "\n\n")
+        w.write(
+            outfile
+            + ".tbi: "
+            + outfile
+            + "\n\ttabix -c g -s 2 -b 3 -e 3 "
+            + outfile
+            + "\n\n"
+        )
+    w.write(
+        outall
+        + ".tbi: "
+        + outall
+        + "\n\ttabix -c g -s 2 -b 3 -e 3 "
+        + outall
+        + "\n\n"
+    )
 
     # Create sorted all tissues data file (all chromosomes) from sorted chromosome-specific, all-tissues tmp data files
     w.write(outall + ":")
-    for i in list(range(1, 23)) + ["X"]:
+    for i in list(range(1, 23)) + ["X"]:  # type: ignore
         infile = outdir + "chr" + str(i) + ".All_Tissues.sorted.txt.gz"
         w.write(" " + infile)
     infile = outdir + "chr1.All_Tissues.sorted.txt.gz"
     w.write("\n\t(zcat " + infile)
-    for i in list(range(2, 23)) + ["X"]:
+    for i in list(range(2, 23)) + ["X"]:  # type: ignore
         infile = outdir + "chr" + str(i) + ".All_Tissues.sorted.txt.gz"
         w.write(" ; zcat " + infile + " | tail -n +2")
     w.write(") | bgzip -c > " + outall + "\n\n")
 
     # Create sorted chromosome-specific, all-tissues tmp files from chromosome-specific, tissue-specific data files
-    for i in list(range(1, 23)) + ["X"]:
+    for i in list(range(1, 23)) + ["X"]:  # type: ignore
         outfile = outdir + "chr" + str(i) + ".All_Tissues.sorted.txt.gz"
         infileList = list()
         for tissue in tissueList:
@@ -76,27 +98,55 @@ with open("run.extract.Makefile", "w") as w:
         for infile in infileList:
             w.write(" " + infile)
         w.write(
-            "\n\t(zcat " + infileList[0] + " | head -n 1 | awk -F, '{$$(NF+1)=" + '"tissue";}1' + "' OFS='\\t' - ; (")
+            "\n\t(zcat "
+            + infileList[0]
+            + " | head -n 1 | awk -F, '{$$(NF+1)="
+            + '"tissue";}1'
+            + "' OFS='\\t' - ; ("
+        )
         for tissue in tissueList:
             infile = tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz"
-            w.write("zcat " + infile + " | tail -n +2 | awk -F, '{$$(NF+1)=" + '"' + tissue + '";}1' + "' OFS='\\t' -")
+            w.write(
+                "zcat "
+                + infile
+                + " | tail -n +2 | awk -F, '{$$(NF+1)="
+                + '"'
+                + tissue
+                + '";}1'
+                + "' OFS='\\t' -"
+            )
             if tissue != tissueList[-1]:
                 w.write(" ; ")
-        w.write(") | sort -T " + tempdir + " -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")
+        w.write(
+            ") | sort -T "
+            + tempdir
+            + " -k2,2V -k3,3n ) | bgzip -c > "
+            + outfile
+            + "\n\n"
+        )
 
     # Tabix single-tissue, all-chromsomes data files
     for tissue in tissueList:
         infile = outdir + tissue + ".sorted.txt.gz"
         outfile = infile + ".tbi"
-        w.write(outfile + ": " + infile + "\n\ttabix -c g -s 2 -b 3 -e 3 " + infile + "\n\n")
+        w.write(
+            outfile
+            + ": "
+            + infile
+            + "\n\ttabix -c g -s 2 -b 3 -e 3 "
+            + infile
+            + "\n\n"
+        )
 
     # Create sorted data files (single tissue, all chromosomes) from sorted chromosome-specific,
     #   tissue-specific data files
     for tissue in tissueList:
         outfile = outdir + tissue + ".sorted.txt.gz"
         infileList = list()
-        for i in list(range(1, 23)) + ['X']:
-            infileList.append(tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz")
+        for i in list(range(1, 23)) + ["X"]:  # type: ignore
+            infileList.append(
+                tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz"
+            )
         w.write(outfile + ":")
         for infile in infileList:
             w.write(" " + infile)
@@ -108,36 +158,100 @@ with open("run.extract.Makefile", "w") as w:
     # Create sorted chromosome-specific, tissue-specific data files from sorted all-chromosomes,
     #   tissue-specific data files
     for tissue in tissueList:
-        for i in list(range(1, 23)) + ['X']:
-            outfile = tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz"
+        for i in list(range(1, 23)) + ["X"]:  # type: ignore
+            outfile = (
+                tempdir + "chr" + str(i) + "." + tissue + ".sorted.txt.gz"
+            )
             infile = tempdir + tissue + ".allpairs.sorted.txt.gz"
-            w.write(outfile + ": " + infile + ".tbi\n\ttabix -h " + infile + " chr" + str(
-                i) + " | bgzip -c > " + outfile + "\n\n")
+            w.write(
+                outfile
+                + ": "
+                + infile
+                + ".tbi\n\ttabix -h "
+                + infile
+                + " chr"
+                + str(i)
+                + " | bgzip -c > "
+                + outfile
+                + "\n\n"
+            )
 
     for tissue in tissueList:
         infile = tempdir + tissue + ".allpairs.sorted.txt.gz"
-        w.write(infile + ".tbi: " + infile + "\n\ttabix -c g -s 2 -b 3 -e 3 " + infile + "\n\n")
+        w.write(
+            infile
+            + ".tbi: "
+            + infile
+            + "\n\ttabix -c g -s 2 -b 3 -e 3 "
+            + infile
+            + "\n\n"
+        )
 
     for infile in filelist:
-        outfile = tempdir + infile.split("/")[-1].replace(".txt.gz", ".sorted.txt.gz")
+        outfile = tempdir + infile.split("/")[-1].replace(
+            ".txt.gz", ".sorted.txt.gz"
+        )
         w.write(
-            outfile + ": " + infile + "\n\t( zcat " + infile + " | head -n 1 | sed s/'variant_id'/'chr\\tpos\\tref\\talt\\tbuild'/ ; zcat " + infile + " | tail -n +2 | tr '_' '\\t' | sort -T " + tempdir + " -k2,2V -k3,3n ) | bgzip -c > " + outfile + "\n\n")  # noqa
+            outfile
+            + ": "
+            + infile
+            + "\n\t( zcat "
+            + infile
+            + " | head -n 1 | sed s/'variant_id'/'chr\\tpos\\tref\\talt\\tbuild'/ ; zcat "
+            + infile
+            + " | tail -n +2 | tr '_' '\\t' | sort -T "
+            + tempdir
+            + " -k2,2V -k3,3n ) | bgzip -c > "
+            + outfile
+            + "\n\n"
+        )  # noqa
 
     # Create sqlite3 database for convenient gene ranges/symbol/name lookups and a pickled Python dictionary for
     #   name -> symbol lookup only
     w.write(
-        pickl + ": " + gff3 + "\n\tpython " + scriptdir + "generate.databases.for.pheget.py -i " + gff3 + " -o " + sqlite + " -p " + pickl + "\n\n")  # noqa
+        pickl
+        + ": "
+        + gff3
+        + "\n\tpython "
+        + scriptdir
+        + "generate.databases.for.pheget.py -i "
+        + gff3
+        + " -o "
+        + sqlite
+        + " -p "
+        + pickl
+        + "\n\n"
+    )  # noqa
 
     # tabix subsetted file
-    w.write(gff3 + ".tbi: " + gff3 + "\n\ttabix -s 1 -b 4 -e 5 " + gff3 + "\n\n")
+    w.write(
+        gff3 + ".tbi: " + gff3 + "\n\ttabix -s 1 -b 4 -e 5 " + gff3 + "\n\n"
+    )
 
     # Subset and sort ensembl GFF3 file
     w.write(
-        gff3 + ": " + ensemb + "\n\tzgrep -v ^# " + ensemb + " | grep 'ID=gene' | sort -T " + tempdir + " -k1,1V -k4,4n -k5,5n | bgzip -c > " + gff3 + "\n\n")  # noqa
+        gff3
+        + ": "
+        + ensemb
+        + "\n\tzgrep -v ^# "
+        + ensemb
+        + " | grep 'ID=gene' | sort -T "
+        + tempdir
+        + " -k1,1V -k4,4n -k5,5n | bgzip -c > "
+        + gff3
+        + "\n\n"
+    )  # noqa
 
     # Cleanup
     w.write("cleanup:\n\trm " + tempdir + "*.sorted.txt.gz*\n\n")
 
     # Clean
     w.write(
-        "clean:\n\trm " + outdir + "*.sorted.txt.gz* " + outdir + "gene.chrom.pos.lookup.sqlite3.db " + outdir + "gene.symbol.pickle\n")  # noqa
+        "clean:\n\trm "
+        + outdir
+        + "*.sorted.txt.gz* "
+        + outdir
+        + "gene.chrom.pos.lookup.sqlite3.db "
+        + outdir
+        + "gene.symbol.pickle\n"
+    )  # noqa

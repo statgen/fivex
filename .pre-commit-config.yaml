@@ -1,0 +1,15 @@
+repos:
+- repo: https://github.com/4Catalyzer/fourmat
+  rev: master  # or specify a version
+  hooks:
+    - id: fourmat
+
+- repo: https://github.com/pre-commit/mirrors-eslint
+  rev: 'v6.7.0'
+  hooks:
+  -   id: eslint
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: 'v0.740'  # Use the sha / tag you want to point at
+  hooks:
+  - id: mypy

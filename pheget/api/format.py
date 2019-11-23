@@ -1,7 +1,11 @@
 import math
-import typing as ty
-import pickle
 import os
+import pickle
+import typing as ty
+
+from zorp import parser_utils, readers  # type: ignore
+
+import pheget
 
 try:
     # Optional speedup features
@@ -9,11 +13,10 @@ try:
 except ImportError:
     pass
 
-from zorp import parser_utils, readers  # type: ignore
 
-import pheget
-
-with open(os.path.join(pheget.app.config['DATA_DIR'], 'gene.symbol.pickle'), 'rb') as f:
+with open(
+    os.path.join(pheget.app.config["DATA_DIR"], "gene.symbol.pickle"), "rb"
+) as f:
     SYMBOL_DICT = pickle.load(f)
 
 
@@ -24,7 +27,7 @@ def parse_position(chrom_pos: str):
     Most urls in the app will specify the variant in some way- for now, we'll do the simplest thing and expect
     `chrom, pos`.
     """
-    chrom, pos = chrom_pos.split('_')
+    chrom, pos = chrom_pos.split("_")
     return chrom, int(pos)
 
 
@@ -78,7 +81,7 @@ GROUP_DICT = {
     "Thyroid": "Thyroid",
     "Uterus": "Uterus",
     "Vagina": "Vagina",
-    "Whole_Blood": "Whole Blood"
+    "Whole_Blood": "Whole Blood",
 }
 
 # Sample sizes from GTEx v8
@@ -131,7 +134,7 @@ SAMPLESIZE_DICT = {
     "Thyroid": 574,
     "Uterus": 129,
     "Vagina": 141,
-    "Whole_Blood": 670
+    "Whole_Blood": 670,
 }  # type: ty.Dict[str, int]
 
 
@@ -143,11 +146,26 @@ class VariantContainer:
         name, the code is isolated from the impact of changes.
     """
 
-    def __init__(self, gene_id, chrom, pos, ref, alt, build,
-                 tss_distance,
-                 ma_samples, ma_count, maf,
-                 log_pvalue_nominal, beta, stderr_beta,
-                 tissue, symbol, system, sample_size):
+    def __init__(
+        self,
+        gene_id,
+        chrom,
+        pos,
+        ref,
+        alt,
+        build,
+        tss_distance,
+        ma_samples,
+        ma_count,
+        maf,
+        log_pvalue_nominal,
+        beta,
+        stderr_beta,
+        tissue,
+        symbol,
+        system,
+        sample_size,
+    ):
         self.chromosome = chrom
         self.position = pos
 
@@ -173,7 +191,7 @@ class VariantContainer:
 
     @property
     def id_field(self):
-        return f'{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}'
+        return f"{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}"
 
     @property
     def pvalue(self):
@@ -198,53 +216,71 @@ def variant_parser(row: str) -> VariantContainer:
 
     The parser is the piece tied to file format, so this must change if the file format changes!
     """
-    fields = row.split('\t')
+    fields = row.split("\t")
     # For now we clean up three fields exactly.
     # Revise if data format changes!
-    fields[1] = fields[1].replace('chr', '')  # chrom
+    fields[1] = fields[1].replace("chr", "")  # chrom
     fields[2] = int(fields[2])  # pos
     fields[6] = int(fields[6])  # tss_distance
     fields[7] = int(fields[7])  # ma_samples
     fields[8] = int(fields[8])  # ma_count
     fields[9] = float(fields[9])  # maf
-    fields[10] = parser_utils.parse_pval_to_log(fields[10], is_neg_log=False)  # pvalue_nominal --> serialize as log
+    fields[10] = parser_utils.parse_pval_to_log(
+        fields[10], is_neg_log=False
+    )  # pvalue_nominal --> serialize as log
     fields[11] = float(fields[11])  # beta
     fields[12] = float(fields[12])  # stderr_beta
-    fields.append(SYMBOL_DICT.get(fields[0].split(".")[0], 'Unknown_Gene'))  # Add gene symbol
-    fields.append(GROUP_DICT.get(fields[13], 'Unknown_Tissue'))  # Add tissue system from GTEx
-    fields.append(SAMPLESIZE_DICT.get(fields[13], -1))  # Add sample sizes from GTEx v8
+    fields.append(
+        SYMBOL_DICT.get(fields[0].split(".")[0], "Unknown_Gene")
+    )  # Add gene symbol
+    fields.append(
+        GROUP_DICT.get(fields[13], "Unknown_Tissue")
+    )  # Add tissue system from GTEx
+    fields.append(
+        SAMPLESIZE_DICT.get(fields[13], -1)
+    )  # Add sample sizes from GTEx v8
     return VariantContainer(*fields)
 
 
-def query_variants(chrom: str, start: int, end: int = None,
-                   tissue: str = None, gene_id: str = None) -> ty.Iterable[VariantContainer]:
+def query_variants(
+    chrom: str,
+    start: int,
+    end: int = None,
+    tissue: str = None,
+    gene_id: str = None,
+) -> ty.Iterable[VariantContainer]:
     """
     Fetch GTEX data for one or more variants, and apply optional filters
     """
-    if not chrom.startswith('chr'):  # Our tabix file happens to use `chr1` format, so make our query match
-        chrom = f'chr{chrom}'
+    if not chrom.startswith("chr"):
+        # Our tabix file happens to use `chr1` format, so make our query match
+        chrom = f"chr{chrom}"
 
-    source = pheget.model.locate_data(chrom)  # Faster retrieval for a single variant
+    source = pheget.model.locate_data(
+        chrom
+    )  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
 
     # Filters for tissue and gene name
     if tissue:
-        reader.add_filter('tissue', tissue)
+        reader.add_filter("tissue", tissue)
     if gene_id:
-        if '.' in gene_id:
-            reader.add_filter('gene_id', gene_id)
+        if "." in gene_id:
+            reader.add_filter("gene_id", gene_id)
         else:
             # The internal data storage includes gene version (id.version). But the user-driven query may not.
             #   Ensure that the search works with how data is represented internally.
-            reader.add_filter('gene_id')
-            reader.add_filter(lambda result: result.gene_id.split('.')[0] == gene_id)
+            reader.add_filter("gene_id")
+            reader.add_filter(
+                lambda result: result.gene_id.split(".")[0] == gene_id
+            )
 
     if end is None:
         # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open
         # intervals. Filter out extraneous information
-        reader.add_filter('position', start)
+        reader.add_filter("position", start)
 
-    reader.add_filter('maf')
+    reader.add_filter("maf")
     reader.add_filter(lambda result: result.maf > 0.0)
 
     if end is None:
