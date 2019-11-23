@@ -1,68 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" 
-      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <title>PheGET: eQTL Browser</title>
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
 
-    <style>
-        body {
-            height: 100%;
-        }
-    </style>
-</head>
+{% block css %}
+  <style>
+    body {
+      height: 100%;
+    }
+  </style>
+{% endblock %}
 
-<body>
-
-<div class="container d-flex vh-100">
+{% block content %}
+  <div class="container d-flex vh-100">
     <div class="row justify-content-center align-self-center">
-        <div class="col-xs-12">
-            <h2 class="text-center">
-                PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues
-            </h2>
+      <div class="col-xs-12">
+        <h2 class="text-center">
+          PheGET: Visualization for Phenotypes, Genotypes, Expression data, and Tissues
+        </h2>
 
-            <form id="variant-search" class="mb-3">
-                <div class="input-group">
-                    <input id="query-field" name="query-field" autocomplete="off" class="form-control"
-                           type="text"
-                           placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+        <form id="variant-search" class="mb-3">
+          <div class="input-group">
+            <input id="query-field" name="query-field" autocomplete="off" class="form-control"
+                   type="text"
+                   placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
 
-                    <div class="input-group-append">
-                        <button type="submit" id="navigate-variant" class="btn btn-primary">Search <span class="fa fa-search"></span></button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="text-center">
-            Examples:
-            <a href="{{ url_for('variant_view', chrom_pos='19_6718376') }}">chr19:6718376</a>
-            <a href="{{ url_for('variant_view', chrom_pos='15_78570111') }}">chr15:78570111</a>
-            <a href="{{ url_for('variant_view', chrom_pos='12_56007301') }}">chr12:56007301</a>
-            <a href="{{ url_for('variant_view', chrom_pos='19_488506') }}">chr19:488506</a>
-            <a href="{{ url_for('variant_view', chrom_pos='19_991063') }}">chr19:991063</a>
-            <a href="{{ url_for('variant_view', chrom_pos='19_4425308') }}">chr19:4425308</a><br>
+            <div class="input-group-append">
+              <button type="submit" id="navigate-variant" class="btn btn-primary">Search <span
+                  class="fa fa-search"></span></button>
             </div>
+          </div>
+        </form>
+
+        <div class="text-center">
+          Examples:
+          <a href="{{ url_for('variant_view', chrom_pos='19_6718376') }}">chr19:6718376</a>
+          <a href="{{ url_for('variant_view', chrom_pos='15_78570111') }}">chr15:78570111</a>
+          <a href="{{ url_for('variant_view', chrom_pos='12_56007301') }}">chr12:56007301</a>
+          <a href="{{ url_for('variant_view', chrom_pos='19_488506') }}">chr19:488506</a>
+          <a href="{{ url_for('variant_view', chrom_pos='19_991063') }}">chr19:991063</a>
+          <a href="{{ url_for('variant_view', chrom_pos='19_4425308') }}">chr19:4425308</a><br>
+          Example for single tissue range plot:
+          <a href="{{ url_for('single_view', chrom='chr19', pos='448506', tissue='Brain_Cortex', gene_id='ENSG00000129946.10') }}">chr19:398506-498506,
+            Brain Cortex, <i>SHC2</i></a> <br>
         </div>
+      </div>
 
     </div>
-</div>
+  </div>
+{% endblock %}
 
 
-<script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
+{% block javascript %}
+  <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
 
-<script>
-    document.getElementById('variant-search').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const variant = document.getElementById('query-field').value;
-        if (!variant) {
-            return;
-        }
-        parseSearch(variant);
-    });
-</script>
-
-</body>
-</html>
+  <script>
+      document.getElementById('variant-search').addEventListener('submit', function (event) {
+          event.preventDefault();
+          const variant = document.getElementById('query-field').value;
+          if (!variant) {
+              return;
+          }
+          parseSearch(variant);
+      });
+  </script>
+{% endblock %}

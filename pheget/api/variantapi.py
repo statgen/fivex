@@ -20,6 +20,7 @@ def query(chrom_pos):
             for res in query_variants(chrom, pos, tissue=tissue, gene_id=gene_id)]
     if not data:
         abort(404)
+
     for i, item in enumerate(data):
         # FIXME: Ugly hack: add a synthetic ID, just so that locuszoom can tell the difference between any
         #   two given items on the plot

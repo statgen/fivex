@@ -150,8 +150,9 @@ class VariantContainer:
                  tissue, symbol, system, sample_size):
         self.chromosome = chrom
         self.position = pos
-        self.refAllele = ref
-        self.altAllele = alt
+
+        self.ref_allele = ref
+        self.alt_allele = alt
         self.gene_id = gene_id
 
         self.build = build
@@ -172,7 +173,7 @@ class VariantContainer:
 
     @property
     def id_field(self):
-        return f'{self.chromosome}:{self.position}_{self.refAllele}/{self.altAllele}'
+        return f'{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}'
 
     @property
     def pvalue(self):
@@ -230,7 +231,13 @@ def query_variants(chrom: str, start: int, end: int = None,
     if tissue:
         reader.add_filter('tissue', tissue)
     if gene_id:
-        reader.add_filter('gene_id', gene_id)
+        if '.' in gene_id:
+            reader.add_filter('gene_id', gene_id)
+        else:
+            # The internal data storage includes gene version (id.version). But the user-driven query may not.
+            #   Ensure that the search works with how data is represented internally.
+            reader.add_filter('gene_id')
+            reader.add_filter(lambda result: result.gene_id.split('.')[0] == gene_id)
 
     if end is None:
         # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open

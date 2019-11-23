@@ -14,12 +14,12 @@ import pheget
 
 
 class InfoContainer:
-    def __init__(self, chromosome, position, refAllele, altAllele,
+    def __init__(self, chromosome, position, ref_allele, alt_allele,
                  top_gene, top_tissue, ac, af, an, rsid):
         self.chromsome = chromosome
         self.position = int(position)
-        self.refAllele = refAllele
-        self.altAllele = altAllele
+        self.ref_allele = ref_allele
+        self.alt_allele = alt_allele
 
         self.top_gene = top_gene
         self.top_tissue = top_tissue
@@ -58,8 +58,8 @@ def get_variant_info(chrom: str, pos: int):
     reader.add_filter('position', pos)
     try:
         data = next(reader.fetch('chr' + chrom, pos - 1, pos + 1))
-        ref = data.refAllele
-        alt = data.altAllele
+        ref = data.ref_allele
+        alt = data.alt_allele
         top_gene = SYMBOL_DICT.get(data.top_gene.split('.')[0], 'Unknown_Gene')
         top_tissue = data.top_tissue
         ac = data.ac
