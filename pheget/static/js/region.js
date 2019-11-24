@@ -96,7 +96,7 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
     newgenestooltip.html = newgenestooltip.html + `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
     const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true, tooltip: newgenestooltip });
 
-    return LocusZoom.Layouts.get('plot', 'standard_association', {
+    const base_layout = LocusZoom.Layouts.get('plot', 'standard_association', {
         state: initial_state,
         max_region_scale: MAX_EXTENT,
         responsive_resize: 'both',
@@ -107,6 +107,8 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
             })
         ]
     });
+    base_layout.dashboard.components.push(LocusZoom.Layouts.get('dashboard_components', 'ldlz2_pop_selector'));
+    return base_layout;
 }
 
 /**
