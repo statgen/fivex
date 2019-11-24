@@ -4,6 +4,8 @@ API endpoints (return JSON, not HTML)
 
 from flask import Blueprint, abort, jsonify, request
 
+from .format import parse_position, query_variants
+
 api_blueprint = Blueprint("api", __name__)
 
 
@@ -15,8 +17,6 @@ def range_query():  # fields to get: chrom, start, end, gene_id, tissue
     In its current form, this allows fetching ALL points across any gene and tissue. We may wish to revisit this
     due to performance considerations. (FIXME)
     """
-    from .format import query_variants
-
     try:
         chrom = request.args["chrom"]
         start = int(request.args["start"])
@@ -48,8 +48,6 @@ def query(chrom_pos):
     """
     Fetch the data for a single variant (for a PheWAS plot)
     """
-    from .format import parse_position, query_variants
-
     chrom, pos = parse_position(chrom_pos)
 
     tissue = request.args.get("tissue", None)

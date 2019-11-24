@@ -1,9 +1,6 @@
 import math
-import os
-import pickle
 import typing as ty
 
-from flask import current_app
 from zorp import parser_utils, readers  # type: ignore
 
 from .. import model
@@ -13,13 +10,6 @@ try:
     from fastnumbers import int, float  # type: ignore
 except ImportError:
     pass
-
-
-with open(
-    os.path.join(current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"),
-    "rb",
-) as f:
-    SYMBOL_DICT = pickle.load(f)
 
 
 def parse_position(chrom_pos: str):
@@ -209,39 +199,45 @@ class VariantContainer:
         return vars(self)
 
 
-def variant_parser(row: str) -> VariantContainer:
-    """
-    This is a stub class that specifies how to parse a line. It could accept configuration in the future,
-    eg diff column numbers if there was more than one file with the same data arranged in diff ways
+class VariantParser:
+    def __init__(self):
+        # We only need to load the gene locator once per usage, not on every line parsed
+        self.gene_lookup = model.get_gene_lookup()
 
-    It does the work of finding the fields, and of turning the text file into numeric data where appropriate
+    def __call__(self, row: str) -> VariantContainer:
 
-    The parser is the piece tied to file format, so this must change if the file format changes!
-    """
-    fields = row.split("\t")
-    # For now we clean up three fields exactly.
-    # Revise if data format changes!
-    fields[1] = fields[1].replace("chr", "")  # chrom
-    fields[2] = int(fields[2])  # pos
-    fields[6] = int(fields[6])  # tss_distance
-    fields[7] = int(fields[7])  # ma_samples
-    fields[8] = int(fields[8])  # ma_count
-    fields[9] = float(fields[9])  # maf
-    fields[10] = parser_utils.parse_pval_to_log(
-        fields[10], is_neg_log=False
-    )  # pvalue_nominal --> serialize as log
-    fields[11] = float(fields[11])  # beta
-    fields[12] = float(fields[12])  # stderr_beta
-    fields.append(
-        SYMBOL_DICT.get(fields[0].split(".")[0], "Unknown_Gene")
-    )  # Add gene symbol
-    fields.append(
-        GROUP_DICT.get(fields[13], "Unknown_Tissue")
-    )  # Add tissue system from GTEx
-    fields.append(
-        SAMPLESIZE_DICT.get(fields[13], -1)
-    )  # Add sample sizes from GTEx v8
-    return VariantContainer(*fields)
+        """
+        This is a stub class that specifies how to parse a line. It could accept configuration in the future,
+        eg diff column numbers if there was more than one file with the same data arranged in diff ways
+
+        It does the work of finding the fields, and of turning the text file into numeric data where appropriate
+
+        The parser is the piece tied to file format, so this must change if the file format changes!
+        """
+        fields = row.split("\t")
+        # For now we clean up three fields exactly.
+        # Revise if data format changes!
+        fields[1] = fields[1].replace("chr", "")  # chrom
+        fields[2] = int(fields[2])  # pos
+        fields[6] = int(fields[6])  # tss_distance
+        fields[7] = int(fields[7])  # ma_samples
+        fields[8] = int(fields[8])  # ma_count
+        fields[9] = float(fields[9])  # maf
+        fields[10] = parser_utils.parse_pval_to_log(
+            fields[10], is_neg_log=False
+        )  # pvalue_nominal --> serialize as log
+        fields[11] = float(fields[11])  # beta
+        fields[12] = float(fields[12])  # stderr_beta
+        fields.append(
+            self.gene_lookup.get(fields[0].split(".")[0], "Unknown_Gene")
+        )  # Add gene symbol
+        fields.append(
+            GROUP_DICT.get(fields[13], "Unknown_Tissue")
+        )  # Add tissue system from GTEx
+        fields.append(
+            SAMPLESIZE_DICT.get(fields[13], -1)
+        )  # Add sample sizes from GTEx v8
+        return VariantContainer(*fields)
 
 
 def query_variants(
@@ -259,7 +255,7 @@ def query_variants(
         chrom = f"chr{chrom}"
 
     source = model.locate_data(chrom)  # Faster retrieval for a single variant
-    reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
+    reader = readers.TabixReader(source, parser=VariantParser(), skip_rows=1)
 
     # Filters for tissue and gene name
     if tissue:

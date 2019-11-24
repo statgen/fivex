@@ -1,8 +1,8 @@
 import math
-import os
-import pickle
 
 from zorp import readers  # type: ignore
+
+from pheget import model
 
 try:
     # Optional speedup features
@@ -54,40 +54,27 @@ def parse_position(chrom_pos: str):
     return chrom, int(pos)
 
 
-def afFormat(af):
+def allele_freq_display(af):
     """Format allele frequency. Use scientific notation for anything below 1e-4, else display as decimal"""
     return str(round(af, math.floor(-math.log10(float(af))) + 4))
 
 
 def get_variant_info(chrom: str, pos: int):
-    from flask import (
-        current_app,
-    )  # avoid application context error on app init FIXME: find better workaround
-
-    with open(
-        os.path.join(
-            current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"
-        ),
-        "rb",
-    ) as f:
-        SYMBOL_DICT = pickle.load(f)
-    infoDB = os.path.join(
-        current_app.config["PHEGET_DATA_DIR"],
-        "best.genes.tissues.allele.info.rsnum.txt.gz",
-    )
-    reader = readers.TabixReader(infoDB, parser=info_parser)
+    gene_lookup = model.get_gene_lookup()
+    per_variant_path = model.get_best_per_variant_lookup()
+    reader = readers.TabixReader(per_variant_path, parser=info_parser)
     reader.add_filter("position", pos)
     try:
         data = next(reader.fetch("chr" + chrom, pos - 1, pos + 1))
         ref = data.ref_allele
         alt = data.alt_allele
-        top_gene = SYMBOL_DICT.get(data.top_gene.split(".")[0], "Unknown_Gene")
+        top_gene = gene_lookup.get(data.top_gene.split(".")[0], "Unknown_Gene")
         top_tissue = data.top_tissue
         ac = data.ac
-        af = afFormat(data.af)
+        af = allele_freq_display(data.af)
         an = data.an
         rsid = data.rsid
-    except (StopIteration, OSError, ValueError):
+    except (StopIteration, ValueError):
         (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = (
             None,
             None,
