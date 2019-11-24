@@ -13,110 +13,61 @@ except ImportError:
 
 
 # A convenient lookup used to group multiple tissue types into a smaller number of systems
-GROUP_DICT = {
-    "Adipose_Subcutaneous": "Adipose Tissue",
-    "Adipose_Visceral_Omentum": "Adipose Tissue",
-    "Adrenal_Gland": "Adrenal Gland",
-    "Artery_Aorta": "Blood Vessel",
-    "Artery_Coronary": "Blood Vessel",
-    "Artery_Tibial": "Blood Vessel",
-    "Brain_Amygdala": "Brain",
-    "Brain_Anterior_cingulate_cortex_BA24": "Brain",
-    "Brain_Caudate_basal_ganglia": "Brain",
-    "Brain_Cerebellar_Hemisphere": "Brain",
-    "Brain_Cerebellum": "Brain",
-    "Brain_Cortex": "Brain",
-    "Brain_Frontal_Cortex_BA9": "Brain",
-    "Brain_Hippocampus": "Brain",
-    "Brain_Hypothalamus": "Brain",
-    "Brain_Nucleus_accumbens_basal_ganglia": "Brain",
-    "Brain_Putamen_basal_ganglia": "Brain",
-    "Brain_Spinal_cord_cervical_c-1": "Brain",
-    "Brain_Substantia_nigra": "Brain",
-    "Breast_Mammary_Tissue": "Breast - Mammary Tissue",
-    "Cells_Cultured_fibroblasts": "Skin",
-    "Cells_EBV-transformed_lymphocytes": "Blood Vessel",
-    "Colon_Sigmoid": "Colon",
-    "Colon_Transverse": "Colon",
-    "Esophagus_Gastroesophageal_Junction": "Esophagus",
-    "Esophagus_Mucosa": "Esophagus",
-    "Esophagus_Muscularis": "Esophagus",
-    "Heart_Atrial_Appendage": "Heart",
-    "Heart_Left_Ventricle": "Heart",
-    "Kidney_Cortex": "Kidney - Cortex",
-    "Liver": "Liver",
-    "Lung": "Lung",
-    "Minor_Salivary_Gland": "Minor Salivary Gland",
-    "Muscle_Skeletal": "Muscle - Skeletal",
-    "Nerve_Tibial": "Nerve - Tibial",
-    "Ovary": "Ovary",
-    "Pancreas": "Pancreas",
-    "Pituitary": "Pituitary",
-    "Prostate": "Prostate",
-    "Skin_Not_Sun_Exposed_Suprapubic": "Skin",
-    "Skin_Sun_Exposed_Lower_leg": "Skin",
-    "Small_Intestine_Terminal_Ileum": "Small Intestine - Terminal Ileum",
-    "Spleen": "Spleen",
-    "Stomach": "Stomach",
-    "Testis": "Testis",
-    "Thyroid": "Thyroid",
-    "Uterus": "Uterus",
-    "Vagina": "Vagina",
-    "Whole_Blood": "Whole Blood",
+# For each tissue, provide 1) a related grouping name, and 2) the sample size (from GTEx v8)
+TISSUE_DATA = {
+    "Adipose_Subcutaneous": ("Adipose Tissue", 581),
+    "Adipose_Visceral_Omentum": ("Adipose Tissue", 469),
+    "Adrenal_Gland": ("Adrenal Gland", 233),
+    "Artery_Aorta": ("Blood Vessel", 387),
+    "Artery_Coronary": ("Blood Vessel", 213),
+    "Artery_Tibial": ("Blood Vessel", 584),
+    "Brain_Amygdala": ("Brain", 129),
+    "Brain_Anterior_cingulate_cortex_BA24": ("Brain", 147),
+    "Brain_Caudate_basal_ganglia": ("Brain", 194),
+    "Brain_Cerebellar_Hemisphere": ("Brain", 175),
+    "Brain_Cerebellum": ("Brain", 209),
+    "Brain_Cortex": ("Brain", 205),
+    "Brain_Frontal_Cortex_BA9": ("Brain", 175),
+    "Brain_Hippocampus": ("Brain", 165),
+    "Brain_Hypothalamus": ("Brain", 170),
+    "Brain_Nucleus_accumbens_basal_ganglia": ("Brain", 202),
+    "Brain_Putamen_basal_ganglia": ("Brain", 170),
+    "Brain_Spinal_cord_cervical_c-1": ("Brain", 126),
+    "Brain_Substantia_nigra": ("Brain", 114),
+    "Breast_Mammary_Tissue": ("Breast - Mammary Tissue", 396),
+    "Cells_Cultured_fibroblasts": ("Skin", 483),
+    "Cells_EBV-transformed_lymphocytes": ("Blood Vessel", 147),
+    "Colon_Sigmoid": ("Colon", 318),
+    "Colon_Transverse": ("Colon", 368),
+    "Esophagus_Gastroesophageal_Junction": ("Esophagus", 330),
+    "Esophagus_Mucosa": ("Esophagus", 497),
+    "Esophagus_Muscularis": ("Esophagus", 465),
+    "Heart_Atrial_Appendage": ("Heart", 372),
+    "Heart_Left_Ventricle": ("Heart", 386),
+    "Kidney_Cortex": ("Kidney - Cortex", 73),
+    "Liver": ("Liver", 208),
+    "Lung": ("Lung", 515),
+    "Minor_Salivary_Gland": ("Minor Salivary Gland", 144),
+    "Muscle_Skeletal": ("Muscle - Skeletal", 706),
+    "Nerve_Tibial": ("Nerve - Tibial", 532),
+    "Ovary": ("Ovary", 167),
+    "Pancreas": ("Pancreas", 305),
+    "Pituitary": ("Pituitary", 237),
+    "Prostate": ("Prostate", 221),
+    "Skin_Not_Sun_Exposed_Suprapubic": ("Skin", 517),
+    "Skin_Sun_Exposed_Lower_leg": ("Skin", 605),
+    "Small_Intestine_Terminal_Ileum": (
+        "Small Intestine - Terminal Ileum",
+        174,
+    ),
+    "Spleen": ("Spleen", 227),
+    "Stomach": ("Stomach", 324),
+    "Testis": ("Testis", 322),
+    "Thyroid": ("Thyroid", 574),
+    "Uterus": ("Uterus", 129),
+    "Vagina": ("Vagina", 141),
+    "Whole_Blood": ("Whole Blood", 670),
 }
-
-# Sample sizes from GTEx v8
-SAMPLESIZE_DICT = {
-    "Adipose_Subcutaneous": 581,
-    "Adipose_Visceral_Omentum": 469,
-    "Adrenal_Gland": 233,
-    "Artery_Aorta": 387,
-    "Artery_Coronary": 213,
-    "Artery_Tibial": 584,
-    "Brain_Amygdala": 129,
-    "Brain_Anterior_cingulate_cortex_BA24": 147,
-    "Brain_Caudate_basal_ganglia": 194,
-    "Brain_Cerebellar_Hemisphere": 175,
-    "Brain_Cerebellum": 209,
-    "Brain_Cortex": 205,
-    "Brain_Frontal_Cortex_BA9": 175,
-    "Brain_Hippocampus": 165,
-    "Brain_Hypothalamus": 170,
-    "Brain_Nucleus_accumbens_basal_ganglia": 202,
-    "Brain_Putamen_basal_ganglia": 170,
-    "Brain_Spinal_cord_cervical_c-1": 126,
-    "Brain_Substantia_nigra": 114,
-    "Breast_Mammary_Tissue": 396,
-    "Cells_Cultured_fibroblasts": 483,
-    "Cells_EBV-transformed_lymphocytes": 147,
-    "Colon_Sigmoid": 318,
-    "Colon_Transverse": 368,
-    "Esophagus_Gastroesophageal_Junction": 330,
-    "Esophagus_Mucosa": 497,
-    "Esophagus_Muscularis": 465,
-    "Heart_Atrial_Appendage": 372,
-    "Heart_Left_Ventricle": 386,
-    "Kidney_Cortex": 73,
-    "Liver": 208,
-    "Lung": 515,
-    "Minor_Salivary_Gland": 144,
-    "Muscle_Skeletal": 706,
-    "Nerve_Tibial": 532,
-    "Ovary": 167,
-    "Pancreas": 305,
-    "Pituitary": 237,
-    "Prostate": 221,
-    "Skin_Not_Sun_Exposed_Suprapubic": 517,
-    "Skin_Sun_Exposed_Lower_leg": 605,
-    "Small_Intestine_Terminal_Ileum": 174,
-    "Spleen": 227,
-    "Stomach": 324,
-    "Testis": 322,
-    "Thyroid": 574,
-    "Uterus": 129,
-    "Vagina": 141,
-    "Whole_Blood": 670,
-}  # type: ty.Dict[str, int]
 
 
 class VariantContainer:
@@ -203,7 +154,7 @@ class VariantParser:
 
         The parser is the piece tied to file format, so this must change if the file format changes!
         """
-        fields = row.split("\t")
+        fields: ty.List[ty.Any] = row.split("\t")
         # For now we clean up three fields exactly.
         # Revise if data format changes!
         fields[1] = fields[1].replace("chr", "")  # chrom
@@ -220,12 +171,10 @@ class VariantParser:
         fields.append(
             self.gene_lookup.get(fields[0].split(".")[0], "Unknown_Gene")
         )  # Add gene symbol
-        fields.append(
-            GROUP_DICT.get(fields[13], "Unknown_Tissue")
-        )  # Add tissue system from GTEx
-        fields.append(
-            SAMPLESIZE_DICT.get(fields[13], -1)
-        )  # Add sample sizes from GTEx v8
+
+        # FIXME: Why is the sample size "-1"? We should avoid fake values
+        tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", -1))
+        fields.extend(tissue_data)
         return VariantContainer(*fields)
 
 
