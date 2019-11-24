@@ -4,8 +4,6 @@ import pickle
 
 from zorp import readers  # type: ignore
 
-import pheget
-
 try:
     # Optional speedup features
     from fastnumbers import int  # type: ignore
@@ -62,12 +60,19 @@ def afFormat(af):
 
 
 def get_variant_info(chrom: str, pos: int):
+    from flask import (
+        current_app,
+    )  # avoid application context error on app init FIXME: find better workaround
+
     with open(
-        os.path.join(pheget.app.config["DATA_DIR"], "gene.symbol.pickle"), "rb"
+        os.path.join(
+            current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"
+        ),
+        "rb",
     ) as f:
         SYMBOL_DICT = pickle.load(f)
     infoDB = os.path.join(
-        pheget.app.config["DATA_DIR"],
+        current_app.config["PHEGET_DATA_DIR"],
         "best.genes.tissues.allele.info.rsnum.txt.gz",
     )
     reader = readers.TabixReader(infoDB, parser=info_parser)

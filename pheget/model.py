@@ -3,10 +3,11 @@ Models/ datastores
 """
 import os
 
-import pheget  # noqa
+from flask import current_app
 
 
 def locate_data(chrom):
     return os.path.join(
-        pheget.app.config["DATA_DIR"], f"{chrom}.All_Tissues.sorted.txt.gz"
+        current_app.config["PHEGET_DATA_DIR"],
+        f"{chrom}.All_Tissues.sorted.txt.gz",
     )

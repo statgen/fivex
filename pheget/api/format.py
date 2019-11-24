@@ -3,9 +3,10 @@ import os
 import pickle
 import typing as ty
 
+from flask import current_app
 from zorp import parser_utils, readers  # type: ignore
 
-import pheget
+from .. import model
 
 try:
     # Optional speedup features
@@ -15,7 +16,8 @@ except ImportError:
 
 
 with open(
-    os.path.join(pheget.app.config["DATA_DIR"], "gene.symbol.pickle"), "rb"
+    os.path.join(current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"),
+    "rb",
 ) as f:
     SYMBOL_DICT = pickle.load(f)
 
@@ -256,9 +258,7 @@ def query_variants(
         # Our tabix file happens to use `chr1` format, so make our query match
         chrom = f"chr{chrom}"
 
-    source = pheget.model.locate_data(
-        chrom
-    )  # Faster retrieval for a single variant
+    source = model.locate_data(chrom)  # Faster retrieval for a single variant
     reader = readers.TabixReader(source, parser=variant_parser, skip_rows=1)
 
     # Filters for tissue and gene name
