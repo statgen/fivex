@@ -1,11 +1,20 @@
-/* global LocusZoom */
+/* global LocusZoom, $ */
 
 const API_BASE = 'https://portaldev.sph.umich.edu/api/v1/';
 // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
 const MAX_EXTENT = 80000;
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
     getURL(state) {
-        return `${this.url}?chrom=${state.chr}&start=${state.start}&end=${state.end}&gene_id=${this.params.gene_id}&tissue=${this.params.tissue}`;
+        let url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
+        let params = {};
+        if (this.params.gene_id) {
+            params.gene_id = this.params.gene_id;
+        }
+        if (this.params.tissue) {
+            params.tissue = this.params.tissue;
+        }
+        params = $.param(params);
+        return `${url}?${params}`;
     },
     annotateData(data) {
         data.forEach(item => {
@@ -24,7 +33,7 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
 function getTrackSources(gene_id, tissue) {
     const geneid_short = gene_id.split('.')[0];
     return [
-        [`assoc_${tissue}_${geneid_short}`, ['assocGET', { url: '/api/range/', params: { gene_id, tissue } }]]
+        [`assoc_${tissue}_${geneid_short}`, ['assocGET', { url: '/api/region', params: { gene_id, tissue } }]]
     ];
 }
 
@@ -41,7 +50,7 @@ function getTrackLayout(gene_id, tissue, state) {
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = newscattertooltip.html +
-        `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
+        `<a href='/variant/{{{{namespace[assoc]}}chromosome}}-{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
@@ -54,7 +63,7 @@ function getTrackLayout(gene_id, tissue, state) {
         ],
         tooltip: newscattertooltip
     });
-    const line = {
+    const line = {  // TODO: What is the purpose of these boundary lines?
         type: 'orthogonal_line',
         orientation: 'vertical',
         style: { 'stroke': '#FF3333', 'stroke-width': '2px', 'stroke-dasharray': '4px 4px' }
@@ -136,17 +145,15 @@ function addPanels(plot, data_sources, panel_options, source_options) {
 /**
  * Create a plot based on some simple initial options
  * @param {string} chrom
- * @param {number} center
+ * @param {number} start
+ * @param {number} end
  * @param {string} gene_id
  * @param {string} tissue
  * @param {string} selector
  * @returns {[LocusZoom.Plot, LocusZoom.DataSources]}
  */
 // eslint-disable-next-line no-unused-vars
-function makeSinglePlot(chrom, center, gene_id, tissue, selector) {
-    const each_side = MAX_EXTENT / 2;
-    const start = Math.max(+center - each_side, 1);
-    const end = +center + each_side;
+function makeSinglePlot(chrom, start, end, gene_id, tissue, selector) {
     const initialState = { chr: chrom, start: start, end: end };
 
     const track_panels = getTrackLayout(gene_id, tissue, initialState);

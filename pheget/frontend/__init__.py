@@ -1,7 +1,7 @@
 """
 Front end views: pages that are visited in the web browser and return HTML
 """
-from flask import Blueprint, abort, render_template, request
+from flask import Blueprint, abort, redirect, render_template, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from . import format
@@ -17,39 +17,57 @@ def home():
     return render_template("frontend/index.html")
 
 
-@views_blueprint.route("/singlegene/", methods=["GET"])
-def single_view():
+@views_blueprint.route("/region/", methods=["GET"])
+def region_view():
     """Region view"""
-    # All params always required
-    chrom = request.args.get("chrom", None)
-    pos = request.args.get("pos", None)
+    # The canonical form of this view uses start and end query params
+    #  However, for convenience, some plots will want to link by a single position.
+    # We implement this as a simple redirect that otherwise preserves the query string.
+    pos = request.args.get("position", None)
+    if pos:
+        args = request.args.copy()
+        pos = int(pos)
+        args.pop("position")
+        # FIXME: Add a smarter way of choosing default region size etc (eg making MAX_SIZE a config option, to allow
+        #   performance to be tuned per dataset)
+        args["start"] = max(pos - 40000, 1)
+        args["end"] = pos + 40000
+        return redirect(url_for("frontend.region_view", **args))
+
+    try:
+        # These params are always required. They are query params so the URL can update as the plot is scrolled.
+        chrom = request.args["chrom"]
+        start = int(request.args["start"])
+        end = int(request.args["end"])
+    except (KeyError, ValueError):
+        return abort(400)
+
+    center = (end - start) / 2
+
     tissue = request.args.get("tissue", None)
 
-    # One of these params is needed
+    # One of these params is needed (TODO: Pick one of these and resolve differences via omnisearch)
     gene_id = request.args.get("gene_id", None)
     symbol = request.args.get("symbol", None)
 
-    if not (chrom and pos and tissue) or not (gene_id or symbol):
+    if not tissue or not (gene_id or symbol):
         return abort(400)
 
     return render_template(
-        "frontend/singleview.html",
+        "frontend/region.html",
         chrom=chrom,
-        pos=pos,
+        start=start,
+        end=end,
+        center=center,
         gene_id=gene_id,
         tissue=tissue,
         symbol=symbol,
     )
 
 
-@views_blueprint.route("/variant/<chrom_pos>/")
-def variant_view(chrom_pos):
+@views_blueprint.route("/variant/<string:chrom>-<int:pos>/")
+def variant_view(chrom: str, pos: int):
     """Single variant (PheWAS) view"""
-    # TODO: Allow query params to be passed from the base page to the api endpoint, so user can direct link to a
-    #   custom view
-
-    chrom, pos = format.parse_position(chrom_pos)
-
     (
         ref,
         alt,

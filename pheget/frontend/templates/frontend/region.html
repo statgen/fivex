@@ -34,7 +34,8 @@
     <br>
   </div>
 
-  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ pos }}</strong></h1>
+  {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
+  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }}</strong></h1>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
@@ -129,7 +130,7 @@
   <div class="container-fluid">
     <div class="row justify-content-start">
       <div class="col-sm">
-        <form action="#" method="post" class="yaxis-display" id="transform-y">
+        <form action="#" method="POST" class="yaxis-display" id="transform-y">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
@@ -163,14 +164,14 @@
   <script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.app.min.js"
           type="application/javascript"></script>
 
-  <script src="{{ url_for('static', filename='js/single_gene.js') }}" type="application/javascript"></script>
+  <script src="{{ url_for('static', filename='js/region.js') }}" type="application/javascript"></script>
 
   <script type="application/javascript">
       'use strict';
       let ANCHOR_GENE = {{gene_id|tojson}};
       let ANCHOR_TISSUE = {{tissue|tojson}};
 
-      [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{pos|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
+      [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{start|tojson}}, {{end|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
       // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
       document.getElementById('variant-search').addEventListener('submit', function (event) {
