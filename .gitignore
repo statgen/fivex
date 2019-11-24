@@ -1,14 +1,14 @@
 # Common python generated files
 __pycache__/
 .mypy_cache/
-.pytype/
 
 # Common python venv folders
 .venv/
 venv/
-env/
+
+# Machine-specific configuration lives in a file called .env and should not be committed.
+#  (an example file is provided in the repo as a template)
+.env
+
 # JS / build assets
 node_modules/
-
-# Developer-specific settings
-localsettings.py

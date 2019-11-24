@@ -240,7 +240,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var pos_higher = pos + 500000;
     dataSources
         .add('phewas', ['PheGET', {
-            url: `/api/variant/${chrom}_${pos}/`,
+            url: `/api/variant/${chrom}-${pos}/`,
         }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
@@ -339,9 +339,9 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
-<form action="/singlegene" method="get">
+<form action="/region/" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
-    <input name="pos" type="hidden" value='{{{{namespace[phewas]}}position}}'>
+    <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>
     <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
     <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
     <input type="submit" class="linkButton" value="Search this gene"/>

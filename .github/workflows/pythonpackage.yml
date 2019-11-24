@@ -27,7 +27,7 @@ jobs:
         npm ci
     - name: Standard linting rules
       run: |
-        eslint .
+        npx eslint .
         fourmat check
         mypy .
 #    - name: Test with pytest (future)

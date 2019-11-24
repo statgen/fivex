@@ -25,20 +25,27 @@ $ pre-commit install-hooks
 ```
 
 For a development instance, you may wish to install additional dependencies:
-`$ pip3 install -r requirements/dev.txt`
-`$ npm install --dev`
+```bash
+$ pip3 install -r requirements/dev.txt
+$ npm install --dev
+```
 
 ### Source data
 For the prototype, source data will live in the folder `data/`. Really large files should not be checked into github, 
     so you will need to download them separately for your environment.
 
+To change settings specific to an individual machine (such as the data directory), edit the contents of `.env` 
+in the root directory of your project. 
+
+
 ### Running the development server
 Make sure to activate your virtualenv at the start of every new terminal session: `$ source venv/bin/activate` 
 
 The following command will start a basic flask app server that reloads whenever code is changed:
-`$ ./phegetrun`
+`$ ./run-development.sh`
 
 Then follow the instructions printed to the console to visit the app in your web browser.
+
 
 ### Testing and code quality
 Before any commit, please run the following commands. (a sample pre-commit hook is provided that will do this for you,
