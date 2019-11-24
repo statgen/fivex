@@ -11,6 +11,7 @@ load_dotenv()
 
 # Root of this application, useful if it doesn't occupy an entire domain
 APPLICATION_ROOT = "/"
+SECRET_KEY = os.getenv("SECRET_KEY", None)
 
 
 # Default data directory - this contains both variant-level (tabixed) data files and supporting databases
