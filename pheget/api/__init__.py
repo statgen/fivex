@@ -12,7 +12,7 @@ api_blueprint = Blueprint("api", __name__)
 @api_blueprint.route(
     "/region/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
 )
-def range_query(chrom, start, end):
+def region_query(chrom, start, end):
     """
     Fetch the data for a given region
 
@@ -38,7 +38,7 @@ def range_query(chrom, start, end):
 
 
 @api_blueprint.route("/variant/<string:chrom>-<int:pos>/", methods=["GET"])
-def query(chrom: str, pos: int):
+def variant_query(chrom: str, pos: int):
     """
     Fetch the data for a single variant (for a PheWAS plot)
 

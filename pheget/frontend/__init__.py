@@ -68,16 +68,7 @@ def region_view():
 @views_blueprint.route("/variant/<string:chrom>-<int:pos>/")
 def variant_view(chrom: str, pos: int):
     """Single variant (PheWAS) view"""
-    (
-        ref,
-        alt,
-        top_gene,
-        top_tissue,
-        ac,
-        af,
-        an,
-        rsid,
-    ) = format.get_variant_info(chrom, pos)
+    annotations = format.get_variant_info(chrom, pos)
 
     try:
         nearest_genes = gl.at(chrom, pos)
@@ -95,14 +86,14 @@ def variant_view(chrom: str, pos: int):
         "frontend/phewas.html",
         chrom=chrom,
         pos=pos,
-        ref=ref,
-        alt=alt,
-        top_gene=top_gene,
-        top_tissue=top_tissue,
-        ac=ac,
-        af=af,
-        an=an,
-        rsid=rsid,
+        ref=annotations.ref_allele,
+        alt=annotations.alt_allele,
+        top_gene=annotations.top_gene,
+        top_tissue=annotations.top_tissue,
+        ac=annotations.ac,
+        af=annotations.af,
+        an=annotations.an,
+        rsid=annotations.rsid,
         nearest_genes=nearest_genes,
         is_inside_gene=is_inside_gene,
     )

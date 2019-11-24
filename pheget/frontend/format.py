@@ -14,16 +14,16 @@ except ImportError:
 class InfoContainer:
     def __init__(
         self,
-        chromosome,
-        position,
-        ref_allele,
-        alt_allele,
-        top_gene,
-        top_tissue,
-        ac,
-        af,
-        an,
-        rsid,
+        chromosome=None,
+        position=None,
+        ref_allele=None,
+        alt_allele=None,
+        top_gene=None,
+        top_tissue=None,
+        ac=None,
+        af=None,
+        an=None,
+        rsid=None,
     ):
         self.chromsome = chromosome
         self.position = int(position)
@@ -38,18 +38,8 @@ class InfoContainer:
         self.an = int(an)
         self.rsid = rsid
 
-    @property
-    def af_display(self) -> str:
-        """
-        A human-readable representation of allele frequency
-        Use scientific notation for anything below 1e-4, else display as decimal
-        # TODO: This sounds like a generic precision rule and should be moved to a template filter; our data classes
-            should not be implementing UI decisions
-        """
-        return str(round(self.af, math.floor(-math.log10(float(self.af))) + 4))
 
-
-def info_parser(row: str):
+def info_parser(row: str) -> InfoContainer:
     fields = row.split("\t")
     return InfoContainer(*fields)
 
@@ -58,30 +48,28 @@ def get_variant_info(chrom: str, pos: int):
     """Get variant-specific information for annotations"""
     gene_lookup = model.get_gene_lookup()
     per_variant_path = model.get_best_per_variant_lookup()
-    reader = readers.TabixReader(per_variant_path, parser=info_parser)
-    reader.add_filter("position", pos)
+    reader = (
+        readers.TabixReader(per_variant_path, parser=info_parser)
+        .add_filter("position", pos)
+        .add_transform(
+            "top_gene",
+            lambda item: gene_lookup.get(
+                item.top_gene.split(".")[0], "Unknown_Gene"
+            ),
+        )
+        .add_transform(
+            "af",
+            lambda item: str(
+                round(item.af, math.floor(-math.log10(float(item.af))) + 4)
+            ),
+        )
+    )
+
     try:
         # It's possible that the user will request a variant for which no annotations are available,
         #  even if the variant is present in GTEx
         data = next(reader.fetch("chr" + chrom, pos - 1, pos + 1))
-        ref = data.ref_allele
-        alt = data.alt_allele
-        top_gene = gene_lookup.get(data.top_gene.split(".")[0], "Unknown_Gene")
-        top_tissue = data.top_tissue
-        ac = data.ac
-        af = data.af_display
-        an = data.an
-        rsid = data.rsid
-    except (StopIteration, ValueError):
-        (ref, alt, top_gene, top_tissue, ac, af, an, rsid) = (
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+    except StopIteration:
+        data = InfoContainer()
 
-    return [ref, alt, top_gene, top_tissue, ac, af, an, rsid]
+    return data
