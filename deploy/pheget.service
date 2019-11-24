@@ -1,0 +1,24 @@
+# A systemd service file to run the app, and ensure it restarts when the server goes down. Install in:
+#   /etc/systemd/system/
+
+# Sample commands of use:
+#   sudo systemctl start pheget
+#   sudo systemctl restart pheget
+#   sudo systemctl enable pheget
+
+# Patterned on:
+# https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04
+
+# See also:
+# https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
+
+[Unit]
+Description=Gunicorn instance to serve PheGET
+After=network.target
+
+[Service]
+User=abought
+Group=www-data
+WorkingDirectory=/path/to/pheget
+Environment="PATH=/path/to/pheget/venv/bin"
+ExecStart=/path/to/pheget/venv/bin/gunicorn --workers 4  -m 007 deploy.wsgi:app
