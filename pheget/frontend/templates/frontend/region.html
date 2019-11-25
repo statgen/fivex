@@ -42,8 +42,8 @@
 
       <div class="col-1">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
             Add Tissue
           </button>
           <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
@@ -61,8 +61,8 @@
 
       <div class="col-1">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
             Add Gene
           </button>
           <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
@@ -78,8 +78,8 @@
 
       <div class="col-2">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
           </button>
           <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
@@ -97,8 +97,8 @@
 
       <div class="col-2">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
           </button>
           <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
@@ -249,26 +249,9 @@
               switchY_region(plot, this.value);
           };
       });
-/*
-      document.getElementById('addtissue').addEventListener('change', function (event) {
-          addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
-      });
-      document.getElementById('addgene').addEventListener('change', function (event) {
-          addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
-      });
-      document.getElementById('anchor-tissue').addEventListener('change', function (event) {
-          ANCHOR_TISSUE = event.target.value;
-      });
-      document.getElementById('anchor-gene').addEventListener('change', function (event) {
-          ANCHOR_GENE = event.target.value;
-      }); 
-*/
-  </script>
 
-  <script>
   document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
   document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
-  //$('.anchortissue').html(ANCHOR_TISSUE);
-  //$('.anchorgene').html(ANCHOR_GENE);
+
   </script>
 {% endblock %}
