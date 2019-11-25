@@ -240,7 +240,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var pos_higher = pos + 500000;
     dataSources
         .add('phewas', ['PheGET', {
-            url: `/api/variant/${chrom}-${pos}/`,
+            url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
