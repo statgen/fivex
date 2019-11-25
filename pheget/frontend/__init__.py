@@ -65,7 +65,7 @@ def region_view():
     )
 
 
-@views_blueprint.route("/variant/<string:chrom>-<int:pos>/")
+@views_blueprint.route("/variant/<string:chrom>_<int:pos>/")
 def variant_view(chrom: str, pos: int):
     """Single variant (PheWAS) view"""
     annotations = format.get_variant_info(chrom, pos)

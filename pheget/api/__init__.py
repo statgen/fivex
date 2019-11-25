@@ -37,7 +37,7 @@ def region_query(chrom, start, end):
     return jsonify(results)
 
 
-@api_blueprint.route("/variant/<string:chrom>-<int:pos>/", methods=["GET"])
+@api_blueprint.route("/variant/<string:chrom>_<int:pos>/", methods=["GET"])
 def variant_query(chrom: str, pos: int):
     """
     Fetch the data for a single variant (for a PheWAS plot)

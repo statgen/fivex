@@ -1,6 +1,5 @@
 -r ./base.txt
 
-flask-debugtoolbar==0.10.1
 fourmat==0.4.0
 pre-commit==1.20.0
 mypy==0.740
