@@ -100,6 +100,15 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
         state: initial_state,
         max_region_scale: MAX_EXTENT,
         responsive_resize: 'both',
+        dashboard: {
+            components: [
+               {
+                    color: 'gray',
+                    position: 'right',
+                    type: 'download'
+                }
+            ]
+        },
         panels: [
             ...track_panels,
             LocusZoom.Layouts.get('panel', 'genes', {
