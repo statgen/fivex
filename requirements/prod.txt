@@ -1,3 +1,4 @@
 -r ./base.txt
 
 gunicorn==20.0.2
+gevent==1.4.0
