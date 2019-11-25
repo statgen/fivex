@@ -189,7 +189,7 @@ function addTrack(plot, datasources, gene_id, tissue) {
  * @param {LocusZoom.Plot} plot
  * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue' or 'beta'
  */
- // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
 function switchY_region(plot, yfield) {
     // Function to switch to betas
     function switchToBeta(panel) {
@@ -197,14 +197,14 @@ function switchY_region(plot, yfield) {
         let panel_base_y = scatter_layout.y_axis;
         panel.axes.y1.label = 'Normalized Effect Size (NES)';
         panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-        panel.data_layers[0].style = { 
-            'stroke': 'gray', 
-            'stroke-width': '1px', 
-            'stroke-dasharray': '10px 0px' 
+        panel.data_layers[0].style = {
+            'stroke': 'gray',
+            'stroke-width': '1px',
+            'stroke-dasharray': '10px 0px'
         };
         panel_base_y.field = panel.id + ':beta';
         delete panel_base_y.floor;
-        panel_base_y.min_extent = [-1, 1];  
+        panel_base_y.min_extent = [-1, 1];
     }
     // Function to switch to -log10 P-values
     function switchToLog(panel) {
