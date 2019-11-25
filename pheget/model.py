@@ -14,6 +14,13 @@ def locate_data(chrom):
     )
 
 
+def locate_tissue_data(tissue):
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"],
+        f"{tissue}.allpairs.sorted.txt.gz",
+    )
+
+
 def get_gene_lookup():
     """Get a gene locator object to find the gene names in a given region"""
     with open(

@@ -140,9 +140,10 @@ class VariantContainer:
 
 
 class VariantParser:
-    def __init__(self):
+    def __init__(self, tissue=None):
         # We only need to load the gene locator once per usage, not on every line parsed
         self.gene_lookup = model.get_gene_lookup()
+        self.tissue = tissue
 
     def __call__(self, row: str) -> VariantContainer:
 
@@ -155,7 +156,6 @@ class VariantParser:
         The parser is the piece tied to file format, so this must change if the file format changes!
         """
         fields: ty.List[ty.Any] = row.split("\t")
-        # For now we clean up three fields exactly.
         # Revise if data format changes!
         fields[1] = fields[1].replace("chr", "")  # chrom
         fields[2] = int(fields[2])  # pos
@@ -168,6 +168,8 @@ class VariantParser:
         )  # pvalue_nominal --> serialize as log
         fields[11] = float(fields[11])  # beta
         fields[12] = float(fields[12])  # stderr_beta
+        if self.tissue:
+            fields.append(self.tissue)
         fields.append(
             self.gene_lookup.get(fields[0].split(".")[0], "Unknown_Gene")
         )  # Add gene symbol
@@ -186,18 +188,22 @@ def query_variants(
     gene_id: str = None,
 ) -> ty.Iterable[VariantContainer]:
     """
-    Fetch GTEX data for one or more variants, and apply optional filters
+    Fetch GTEx data for one or more variants, and apply optional filters
     """
     if not chrom.startswith("chr"):
         # Our tabix file happens to use `chr1` format, so make our query match
         chrom = f"chr{chrom}"
 
-    source = model.locate_data(chrom)  # Faster retrieval for a single variant
-    reader = readers.TabixReader(source, parser=VariantParser(), skip_rows=1)
+    if (
+        tissue
+    ):  # If query is single-tissue, use tissue-specific files for faster query
+        source = model.locate_tissue_data(tissue)
+    else:  # Otherwise, query from a chromosome-specific file with all tissues
+        source = model.locate_data(chrom)
+    reader = readers.TabixReader(
+        source, parser=VariantParser(tissue), skip_rows=1
+    )
 
-    # Filters for tissue and gene name
-    if tissue:
-        reader.add_filter("tissue", tissue)
     if gene_id:
         if "." in gene_id:
             reader.add_filter("gene_id", gene_id)
