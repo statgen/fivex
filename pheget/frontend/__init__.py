@@ -42,7 +42,7 @@ def region_view():
     except (KeyError, ValueError):
         return abort(400)
 
-    center = (end - start) / 2
+    center = int((end - start) / 2)
 
     tissue = request.args.get("tissue", None)
 

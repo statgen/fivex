@@ -189,35 +189,50 @@ function addTrack(plot, datasources, gene_id, tissue) {
  * @param {LocusZoom.Plot} plot
  * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue' or 'beta'
  */
-// eslint-disable-next-line no-unused-vars
-function switchY(plot, yfield) {
-    let assoc_panels = plot.layout.panels.slice(0, -1);
+ // eslint-disable-next-line no-unused-vars
+function switchY_region(plot, yfield) {
+    // Function to switch to betas
+    function switchToBeta(panel) {
+        let scatter_layout = panel.data_layers[4];
+        let panel_base_y = scatter_layout.y_axis;
+        panel.axes.y1.label = 'Normalized Effect Size (NES)';
+        panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
+        panel.data_layers[0].style = { 
+            'stroke': 'gray', 
+            'stroke-width': '1px', 
+            'stroke-dasharray': '10px 0px' 
+        };
+        panel_base_y.field = panel.id + ':beta';
+        delete panel_base_y.floor;
+        panel_base_y.min_extent = [-1, 1];  
+    }
+    // Function to switch to -log10 P-values
+    function switchToLog(panel) {
+        let scatter_layout = panel.data_layers[4];
+        let panel_base_y = scatter_layout.y_axis;
+        panel.axes.y1.label = '-log 10 p-value';
+        panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
+        panel.data_layers[0].style = {
+            'stroke': '#D3D3D3',
+            'stroke-width': '3px',
+            'stroke-dasharray': '10px 10px'
+        };
+        panel_base_y.field = panel.id + ':log_pvalue';
+        // Set minimum y value to zero when looking at -log10 p-values
+        panel_base_y.floor = 0;
+        panel_base_y.min_extent = [0, 10];
+    }
+    let assoc_panel = plot.layout.panels.slice(0, 1)[0];  // The initial association panel
+    let assoc_panels = plot.layout.panels.slice(2);       // All added panels (with indices after the gene track), if any
     if (yfield === 'beta') {
+        switchToBeta(assoc_panel);
         assoc_panels.forEach(function (panel) {
-            let scatter_layout = panel.data_layers[4];
-            let panel_base_y = scatter_layout.y_axis;
-            panel.axes.y1.label = 'Normalized Effect Size (NES)';
-            panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-            panel.data_layers[0].style = { 'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px' };
-            panel_base_y.field = panel.id + ':beta';
-            delete panel_base_y.floor;
-            panel_base_y.min_extent = [-1, 1];
+            switchToBeta(panel);
         });
     } else if (yfield === 'log_pvalue') {
+        switchToLog(assoc_panel);
         assoc_panels.forEach(function (panel) {
-            let scatter_layout = panel.data_layers[4];
-            let panel_base_y = scatter_layout.y_axis;
-            panel.axes.y1.label = '-log 10 p-value';
-            panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-            panel.data_layers[0].style = {
-                'stroke': '#D3D3D3',
-                'stroke-width': '3px',
-                'stroke-dasharray': '10px 10px'
-            };
-            panel_base_y.field = panel.id + ':log_pvalue';
-            // Set minimum y value to zero when looking at -log10 p-values
-            panel_base_y.floor = 0;
-            panel_base_y.min_extent = [0, 10];
+            switchToLog(panel);
         });
     } else {
         throw new Error('Unrecognized yfield option');

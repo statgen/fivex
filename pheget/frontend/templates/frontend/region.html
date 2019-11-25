@@ -35,7 +35,7 @@
   </div>
 
   {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }}</strong></h1>
+  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ ((start + end)/2) | round | int }}</strong></h1>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
@@ -51,6 +51,7 @@
       </div>
     </div>
   </div>
+<!--
   <div class="container-fluid">
     <div class="row padtop">
       <div class="col-sm-10">
@@ -69,7 +70,7 @@
         </div>
       </div>
     </div>
-
+-->
     <div class="row">
       <div class="col">
         <div class="dropdown bootstrap-select">
@@ -184,6 +185,7 @@
           parseSearch(variant);
       });
 
+      /*
       document.getElementById('gene-search').addEventListener('submit', function (event) {
           event.preventDefault();
           const geneName = document.getElementById('gene-query-field').value;
@@ -195,21 +197,30 @@
               }
           });
       });
+      */
 
       // Bootstrap dropdown selector for adding a new tissue
       var tissueElements = document.getElementsByClassName('tissueselect-class');
       Array.from(tissueElements).forEach((selectedTissue) => {
           selectedTissue.addEventListener('click', (event) => {
-              addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
           });
       });
 
+      /*
       var y_axis_options = document.forms['transform-y'].elements['y-options'];
       for (var j = 0, len = y_axis_options.length; j < len; j++) {
           y_axis_options[j].onchange = function () {
               switchY(window.plot, this.value);
           }
       }
+      */
+
+      document.forms['transform-y'].elements['y-options'].forEach(function (form) {
+          form.onchange = function () {
+              switchY_region(plot, this.value);
+          };
+      });
 
       document.getElementById('addtissue').addEventListener('change', function (event) {
           addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
