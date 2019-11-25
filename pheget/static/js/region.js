@@ -99,7 +99,7 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
     const base_layout = LocusZoom.Layouts.get('plot', 'standard_association', {
         state: initial_state,
         max_region_scale: MAX_EXTENT,
-        responsive_resize: 'both',
+        responsive_resize: 'width_only',
         panels: [
             ...track_panels,
             LocusZoom.Layouts.get('panel', 'genes', {
