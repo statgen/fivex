@@ -30,8 +30,8 @@ def region_view():
         args.pop("position")
         # FIXME: Add a smarter way of choosing default region size etc (eg making MAX_SIZE a config option, to allow
         #   performance to be tuned per dataset)
-        args["start"] = max(pos - 40000, 1)
-        args["end"] = pos + 40000
+        args["start"] = max(pos - 500000, 1)
+        args["end"] = pos + 500000
         return redirect(url_for("frontend.region_view", **args))
 
     try:
