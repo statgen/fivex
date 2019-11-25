@@ -63,7 +63,7 @@ function getTrackLayout(gene_id, tissue, state) {
         ],
         tooltip: newscattertooltip
     });
-    const line = {  // TODO: What is the purpose of these boundary lines?
+    const line = {  // TODO: What is the purpose of these boundary lines?  A: These originally appeared on the gene track to mark boundaries; we don't really need them
         type: 'orthogonal_line',
         orientation: 'vertical',
         style: { 'stroke': '#FF3333', 'stroke-width': '2px', 'stroke-dasharray': '4px 4px' }
@@ -72,7 +72,7 @@ function getTrackLayout(gene_id, tissue, state) {
     return [
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
-            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },
+            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },  // TODO: Use gene symbol instead of gene id
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),

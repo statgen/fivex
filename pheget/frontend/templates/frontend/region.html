@@ -7,7 +7,6 @@
         type="text/css"/>
 {% endblock %}
 
-
 {% block content %}
   <div class="container-fluid">
     <div class="row padtop">
@@ -35,23 +34,88 @@
   </div>
 
   {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ ((start + end)/2) | round | int }}</strong></h1>
+  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ ((start + end)/2) | round | int }} </strong></h1>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-        Add Tissue
-      </button>
-      <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
-      <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
-        <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
-        <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
+    <div class="row justify-content-start">
+
+      <div class="col-1">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+            Add Tissue
+          </button>
+          <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
+          <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
+            <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Nerve_Tibial">Nerve Tibial</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Heart_Left_Ventricle">Heart Left Ventricle</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Whole_Blood">Whole Blood</button>
+            <button class="dropdown-item tissueselect-class" type="button" value="Adipose_Subcutaneous">Adipose Subcutaneous</button>
+          </div>
+        </div>
       </div>
+
+      <div class="col-1">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+            Add Gene
+          </button>
+          <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
+          <div class="dropdown-menu" aria-labelledby="dropdown_geneselect">
+            <button class="dropdown-item geneselect-class" type="button" value="CHRNA5">CHRNA5</button>
+            <button class="dropdown-item geneselect-class" type="button" value="CHRNA3">CHRNA3</button>
+            <button class="dropdown-item geneselect-class" type="button" value="AC022748.2">AC022748.2</button>
+            <button class="dropdown-item geneselect-class" type="button" value="AC027228.2">AC027228.2</button>
+            <button class="dropdown-item geneselect-class" type="button" value="PSMA4">PSMA4</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
+          </button>
+          <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
+          <div class="dropdown-menu" aria-labelledby="dropdown_anchortissueselect">
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Nerve_Tibial">Nerve Tibial</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Heart_Left_Ventricle">Heart Left Ventricle</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Whole_Blood">Whole Blood</button>
+            <button class="dropdown-item anchortissueselect-class" type="button" value="Adipose_Subcutaneous">Adipose Subcutaneous</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
+          </button>
+          <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
+          <div class="dropdown-menu" aria-labelledby="dropdown_anchorgeneselect">
+            <button class="dropdown-item anchorgeneselect-class" type="button" value="CHRNA5">CHRNA5</button>
+            <button class="dropdown-item anchorgeneselect-class" type="button" value="CHRNA3">CHRNA3</button>
+            <button class="dropdown-item anchorgeneselect-class" type="button" value="AC022748.2">AC022748.2</button>
+            <button class="dropdown-item anchorgeneselect-class" type="button" value="AC027228.2">AC027228.2</button>
+            <button class="dropdown-item anchorgeneselect-class" type="button" value="PSMA4">PSMA4</button>
+          </div>
+        </div>
+      </div>
+  
     </div>
   </div>
-<!--
+
+<!-- Disabled for now; may bring it back for trans-eQTLs
   <div class="container-fluid">
     <div class="row padtop">
       <div class="col-sm-10">
@@ -71,64 +135,8 @@
       </div>
     </div>
 -->
-    <div class="row">
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addtissue">Add a new tissue:</label>
-          <select class="form-control" tabindex="-98" id="addtissue">
-            <option disabled selected value="">Please select a tissue</option>
-            <option value="Muscle_Skeletal">Muscle Skeletal</option>
-            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-            <option value="Nerve_Tibial">Nerve Tibial</option>
-            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-            <option value="Whole_Blood">Whole Blood</option>
-            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-          </select>
-        </div>
-      </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addgene">Add a new gene:</label>
-          <select class="form-control" tabindex="-98" id="addgene">
-            <option disabled selected value="">Please select a gene</option>
-            <option value="CHRNA5">CHRNA5</option>
-            <option value="CHRNA3">CHRNA3</option>
-            <option value="AC022748.2">AC022748.2</option>
-            <option value="AC027228.2">AC027228.2</option>
-            <option value="PSMA4">PSMA4</option>
-          </select>
-        </div>
-      </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="anchor-tissue">Change anchor tissue:</label>
-          <select class="form-control" tabindex="-98" id="anchor-tissue">
-            <option disabled selected value="">Please select a tissue</option>
-            <option value="Muscle_Skeletal">Muscle Skeletal</option>
-            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-            <option value="Nerve_Tibial">Nerve Tibial</option>
-            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-            <option value="Whole_Blood">Whole Blood</option>
-            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-          </select>
-        </div>
-      </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addgene">Change anchor gene:</label>
-          <select class="form-control" tabindex="-98" id="anchor-gene">
-            <option disabled selected value="">Please select a gene</option>
-            <option value="CHRNA5">CHRNA5</option>
-            <option value="CHRNA3">CHRNA3</option>
-            <option value="AC022748.2">AC022748.2</option>
-            <option value="AC027228.2">AC027228.2</option>
-            <option value="PSMA4">PSMA4</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="container-fluid">
+
+<div class="container-fluid">
     <div class="row justify-content-start">
       <div class="col-sm">
         <form action="#" method="POST" class="yaxis-display" id="transform-y">
@@ -149,11 +157,15 @@
         </form>
       </div>
     </div>
+  </div>
 
+  <div class="container-fluid">
     <div class="row">
-      <div id="lz-plot" class="ten columns"></div>
+      <div id="lz-plot" class="ten columns">
+      </div>
     </div>
   </div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -185,7 +197,7 @@
           parseSearch(variant);
       });
 
-      /*
+      /* Disabled for now; may bring it back for trans-eQTLs
       document.getElementById('gene-search').addEventListener('submit', function (event) {
           event.preventDefault();
           const geneName = document.getElementById('gene-query-field').value;
@@ -207,21 +219,37 @@
           });
       });
 
-      /*
-      var y_axis_options = document.forms['transform-y'].elements['y-options'];
-      for (var j = 0, len = y_axis_options.length; j < len; j++) {
-          y_axis_options[j].onchange = function () {
-              switchY(window.plot, this.value);
-          }
-      }
-      */
+      var geneElements = document.getElementsByClassName('geneselect-class');
+      Array.from(geneElements).forEach((selectedGene) => {
+          selectedGene.addEventListener('click', (event) => {
+              addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+          });
+      });
+
+      var anchortissueElements = document.getElementsByClassName('anchortissueselect-class');
+      Array.from(anchortissueElements).forEach((selectedAnchorTissue) => {
+          selectedAnchorTissue.addEventListener('click', (event) => {
+            ANCHOR_TISSUE = event.target.value;
+            // TODO: Delete all other tracks
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+          });
+      });
+
+      var anchorgeneElements = document.getElementsByClassName('anchorgeneselect-class');
+      Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
+          selectedAnchorGene.addEventListener('click', (event) => {
+            ANCHOR_GENE = event.target.value;
+            // TODO: Delete all other tracks
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+          });
+      });
 
       document.forms['transform-y'].elements['y-options'].forEach(function (form) {
           form.onchange = function () {
               switchY_region(plot, this.value);
           };
       });
-
+/*
       document.getElementById('addtissue').addEventListener('change', function (event) {
           addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
       });
@@ -233,6 +261,14 @@
       });
       document.getElementById('anchor-gene').addEventListener('change', function (event) {
           ANCHOR_GENE = event.target.value;
-      });
+      }); 
+*/
+  </script>
+
+  <script>
+  document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
+  document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
+  //$('.anchortissue').html(ANCHOR_TISSUE);
+  //$('.anchorgene').html(ANCHOR_GENE);
   </script>
 {% endblock %}

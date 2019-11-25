@@ -22,7 +22,7 @@ function parseSearch(searchText) {
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
         const pos = cMatch[3];
-        window.location = `/variant/${chrom}_${pos}`;
+        window.location = `/variant/${chrom}-${pos}`;
     } else {
         // Use omnisearch - works especially well for rs numbers
         const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
@@ -33,7 +33,7 @@ function parseSearch(searchText) {
                 if (omniJson.data[0].chrom !== undefined && omniJson.data[0].start === omniJson.data[0].end) {
                     const chrom = omniJson.data[0].chrom;
                     const pos = omniJson.data[0].start;
-                    window.location = `/variant/${chrom}_${pos}`;
+                    window.location = `/variant/${chrom}-${pos}`;
                 } else if (omniJson.data[0].gene_name !== undefined) {
                     // If omnisearch returns a region (because you entered a gene)
                     // TODO: Create a region view
