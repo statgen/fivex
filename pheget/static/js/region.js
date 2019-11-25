@@ -184,6 +184,7 @@ function addTrack(plot, datasources, gene_id, tissue) {
     addPanels(plot, datasources, track_layout, track_sources);
 }
 
+
 /**
  * Switch the options used in displaying Y axis
  * @param {LocusZoom.Plot} plot
@@ -191,52 +192,40 @@ function addTrack(plot, datasources, gene_id, tissue) {
  */
 // eslint-disable-next-line no-unused-vars
 function switchY_region(plot, yfield) {
-    // Function to switch to betas
-    function switchToBeta(panel) {
-        let scatter_layout = panel.data_layers[4];
-        let panel_base_y = scatter_layout.y_axis;
-        panel.axes.y1.label = 'Normalized Effect Size (NES)';
-        panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-        panel.data_layers[0].style = {
-            'stroke': 'gray',
-            'stroke-width': '1px',
-            'stroke-dasharray': '10px 0px'
-        };
-        panel_base_y.field = panel.id + ':beta';
-        delete panel_base_y.floor;
-        panel_base_y.min_extent = [-1, 1];
-    }
-    // Function to switch to -log10 P-values
-    function switchToLog(panel) {
-        let scatter_layout = panel.data_layers[4];
-        let panel_base_y = scatter_layout.y_axis;
-        panel.axes.y1.label = '-log 10 p-value';
-        panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-        panel.data_layers[0].style = {
-            'stroke': '#D3D3D3',
-            'stroke-width': '3px',
-            'stroke-dasharray': '10px 10px'
-        };
-        panel_base_y.field = panel.id + ':log_pvalue';
-        // Set minimum y value to zero when looking at -log10 p-values
-        panel_base_y.floor = 0;
-        panel_base_y.min_extent = [0, 10];
-    }
-    let assoc_panels = plot.layout.panels;
-    if (yfield === 'beta') {
-        assoc_panels.forEach(function (panel) {
-            if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
-                switchToBeta(panel);
+    let assoc_panels = plot.layout.panels;  // Iterate through all panels, including any added panels
+    assoc_panels.forEach(function (panel) {
+        if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
+            if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+                let scatter_layout = panel.data_layers[4];
+                let panel_base_y = scatter_layout.y_axis;
+                panel.axes.y1.label = 'Normalized Effect Size (NES)';
+                panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
+                panel.data_layers[0].style = {
+                    'stroke': 'gray',
+                    'stroke-width': '1px',
+                    'stroke-dasharray': '10px 0px'
+                };
+                panel_base_y.field = panel.id + ':beta';
+                delete panel_base_y.floor;
+                panel_base_y.min_extent = [-1, 1];
+            } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
+                let scatter_layout = panel.data_layers[4];
+                let panel_base_y = scatter_layout.y_axis;
+                panel.axes.y1.label = '-log 10 p-value';
+                panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
+                panel.data_layers[0].style = {
+                    'stroke': '#D3D3D3',
+                    'stroke-width': '3px',
+                    'stroke-dasharray': '10px 10px'
+                };
+                panel_base_y.field = panel.id + ':log_pvalue';
+                // Set minimum y value to zero when looking at -log10 p-values
+                panel_base_y.floor = 0;
+                panel_base_y.min_extent = [0, 10];
+            } else {
+                throw new Error('Unrecognized yfield option');
             }
-        });
-    } else if (yfield === 'log_pvalue') {
-        assoc_panels.forEach(function (panel) {
-            if (panel.id !== 'genes') {
-                switchToLog(panel);
-            }
-        });
-    } else {
-        throw new Error('Unrecognized yfield option');
-    }
-    plot.applyState();
+            plot.applyState();
+        }
+    });
 }
