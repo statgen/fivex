@@ -177,7 +177,7 @@
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
                 title="Reorder the x-axis by one of these listed categories" data-placement="top">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Group by: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-exchange-alt"></span> Group by: </button>
           </span>
             <label class="btn btn-primary" data-toggle="tooltip" data-placement="top"
                    title="Group eQTLs by tissues, sorted alphabetically">
@@ -200,7 +200,7 @@
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Show: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Show: </button>
           </span>
             <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true"
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
@@ -219,7 +219,7 @@
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
                 title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Label: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
           </span>
             <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
               <input type="radio" name="label-options" autocomplete=off value="0"> None
@@ -248,7 +248,7 @@
         <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
               title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance of this variant.">
           <button type="button" class="btn btn-secondary" style="pointer-events: none;"><span
-              class="fa fa-arrows-h"></span> Filter by TSS Distance </button>
+              class="fa fa-arrows-alt-h"></span> Filter by TSS Distance </button>
         </span>
             <label class="btn btn-info" data-toggle="tooltip" data-placement="top"
                    title="Show eQTLs for genes with TSS in the range chr{{ chrom }}:{{ '{:,}'.format([pos - 20000, 1] | max) }}-{{ '{:,}'.format(pos + 20000) }}">
