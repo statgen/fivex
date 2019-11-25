@@ -37,6 +37,15 @@ function parseSearch(searchText) {
                 } else if (omniJson.data[0].gene_name !== undefined) {
                     // If omnisearch returns a region (because you entered a gene)
                     // TODO: Create a region view
+                    // Region view plot requires the following: chrom (no 'chr'), gene_id, tissue, start, end
+                    // Given a gene, we first look up in an sqlite3 database for the eQTL with the most significant p-value
+                    // This gives us the "best tissue"
+                    // Then we draw a region around the position of that eQTL to set start and end (+/- 500k?)
+                    // chrom = chrom.replace("chr","")
+                    // gene_id = omniJson.data[0].gene_id
+                    // Query sqlite3 database here
+                    // center =  // get from sqlite3 results
+                    // tissue =  // get from sqlite3 results
                     alert('You searched for the following gene: ' + omniJson.data[0].gene_name + '.\nSorry, we currently do not support region view (Will be added later).');
                 } else {
                     alert('Sorry, we were unable to find variant "' + searchText + '" in our database.');

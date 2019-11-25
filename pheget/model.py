@@ -31,3 +31,10 @@ def get_best_per_variant_lookup():
         current_app.config["PHEGET_DATA_DIR"],
         "best.genes.tissues.allele.info.rsnum.txt.gz",
     )
+
+
+def get_region_most_sig_tissue_variant_lookup():
+    """Get the path to an sqlite3 database file containing some data for eQTLs more significant than 1e-5"""
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"], "sig.lookup.db",
+    )

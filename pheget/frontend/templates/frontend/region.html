@@ -78,7 +78,7 @@
 
       <div class="col-2">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
                   aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
           </button>
@@ -97,7 +97,7 @@
 
       <div class="col-2">
         <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
                   aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
           </button>
@@ -181,8 +181,8 @@
 
   <script type="application/javascript">
       'use strict';
-      let ANCHOR_GENE = {{gene_id|tojson}};
-      let ANCHOR_TISSUE = {{tissue|tojson}};
+      var ANCHOR_GENE = {{gene_id|tojson}};
+      var ANCHOR_TISSUE = {{tissue|tojson}};
 
       [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{start|tojson}}, {{end|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
@@ -230,6 +230,7 @@
       Array.from(anchortissueElements).forEach((selectedAnchorTissue) => {
           selectedAnchorTissue.addEventListener('click', (event) => {
             ANCHOR_TISSUE = event.target.value;
+            document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
             // TODO: Delete all other tracks
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
           });
@@ -239,6 +240,7 @@
       Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
           selectedAnchorGene.addEventListener('click', (event) => {
             ANCHOR_GENE = event.target.value;
+            document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
             // TODO: Delete all other tracks
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
           });
@@ -250,6 +252,7 @@
           };
       });
 
+  // initialize labels for anchor tissue and gene
   document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
   document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
 
