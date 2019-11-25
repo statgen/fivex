@@ -227,13 +227,13 @@ function switchY_region(plot, yfield) {
         assoc_panels.forEach(function (panel) {
             if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
                 switchToBeta(panel);
-                }
+            }
         });
     } else if (yfield === 'log_pvalue') {
         assoc_panels.forEach(function (panel) {
             if (panel.id !== 'genes') {
                 switchToLog(panel);
-                }
+            }
         });
     } else {
         throw new Error('Unrecognized yfield option');
