@@ -46,15 +46,11 @@
                   aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
             Add Tissue
           </button>
-          <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
-          <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
-            <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Nerve_Tibial">Nerve Tibial</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Heart_Left_Ventricle">Heart Left Ventricle</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Whole_Blood">Whole Blood</button>
-            <button class="dropdown-item tissueselect-class" type="button" value="Adipose_Subcutaneous">Adipose Subcutaneous</button>
+          <!-- Dynamically generate tissue buttons from tissue_list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
+            {% for single_tissue in tissue_list %}
+            <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+            {% endfor %}            
           </div>
         </div>
       </div>
@@ -82,15 +78,11 @@
                   aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
           </button>
-          <!-- TODO: list of tissues should be dynamically generated instead of hand-coded -->
-          <div class="dropdown-menu" aria-labelledby="dropdown_anchortissueselect">
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Nerve_Tibial">Nerve Tibial</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Heart_Left_Ventricle">Heart Left Ventricle</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Whole_Blood">Whole Blood</button>
-            <button class="dropdown-item anchortissueselect-class" type="button" value="Adipose_Subcutaneous">Adipose Subcutaneous</button>
+          <!-- Dynamically generate list of anchor tissue buttons -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
+              {% for single_tissue in tissue_list %}
+              <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+              {% endfor %}            
           </div>
         </div>
       </div>

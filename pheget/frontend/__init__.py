@@ -4,6 +4,7 @@ Front end views: pages that are visited in the web browser and return HTML
 from flask import Blueprint, abort, redirect, render_template, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
+from ..api.format import TISSUE_DATA
 from . import format
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
@@ -53,6 +54,8 @@ def region_view():
     if not tissue or not (gene_id or symbol):
         return abort(400)
 
+    tissue_list = TISSUE_DATA.keys()
+
     return render_template(
         "frontend/region.html",
         chrom=chrom,
@@ -62,6 +65,7 @@ def region_view():
         gene_id=gene_id,
         tissue=tissue,
         symbol=symbol,
+        tissue_list=tissue_list,
     )
 
 
