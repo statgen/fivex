@@ -231,7 +231,13 @@
           selectedAnchorTissue.addEventListener('click', (event) => {
             ANCHOR_TISSUE = event.target.value;
             document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
-            // TODO: Delete all other tracks
+            let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
+            panel_ids.forEach(function(id){
+              if (id !=='genes'){
+                plot.removePanel(id);
+              }
+            });
+            // FIXME: seems to be an ugly way of removing panels one by one
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
           });
       });
@@ -241,6 +247,13 @@
           selectedAnchorGene.addEventListener('click', (event) => {
             ANCHOR_GENE = event.target.value;
             document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
+            let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
+            panel_ids.forEach(function(id){
+              if (id !=='genes'){
+                plot.removePanel(id);
+              }
+            });
+            // FIXME: seems to be an ugly way of removing panels one by one
             // TODO: Delete all other tracks
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
           });
