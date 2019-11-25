@@ -222,17 +222,18 @@ function switchY_region(plot, yfield) {
         panel_base_y.floor = 0;
         panel_base_y.min_extent = [0, 10];
     }
-    let assoc_panel = plot.layout.panels.slice(0, 1)[0];  // The initial association panel
-    let assoc_panels = plot.layout.panels.slice(2);       // All added panels (with indices after the gene track), if any
+    let assoc_panels = plot.layout.panels;
     if (yfield === 'beta') {
-        switchToBeta(assoc_panel);
         assoc_panels.forEach(function (panel) {
-            switchToBeta(panel);
+            if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
+                switchToBeta(panel);
+                }
         });
     } else if (yfield === 'log_pvalue') {
-        switchToLog(assoc_panel);
         assoc_panels.forEach(function (panel) {
-            switchToLog(panel);
+            if (panel.id !== 'genes') {
+                switchToLog(panel);
+                }
         });
     } else {
         throw new Error('Unrecognized yfield option');
