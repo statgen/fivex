@@ -4,7 +4,7 @@
 /* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL(state, chain) {  // removed fields from this at the moment since we are not using it (eslint error)
+    getURL(state, chain) {
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
@@ -244,7 +244,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var pos_higher = pos + 500000;
     dataSources
         .add('phewas', ['PheGET', {
-            url: `/api/variant/${chrom}-${pos}/`,
+            url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);

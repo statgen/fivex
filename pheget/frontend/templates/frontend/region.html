@@ -34,7 +34,7 @@
   </div>
 
   {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ ((start + end)/2) | round | int }} </strong></h1>
+  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }} </strong></h1>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">

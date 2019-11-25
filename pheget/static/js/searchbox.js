@@ -22,7 +22,7 @@ function parseSearch(searchText) {
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
         const pos = cMatch[3];
-        window.location = `/variant/${chrom}-${pos}`;
+        window.location = `/variant/${chrom}_${pos}`;
     } else {
         // Use omnisearch - works especially well for rs numbers
         const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
