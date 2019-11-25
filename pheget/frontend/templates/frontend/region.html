@@ -164,6 +164,9 @@
   <script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.app.min.js"
           type="application/javascript"></script>
 
+  <script type="application/javascript"
+          src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/ext/lz-dynamic-urls.min.js"></script>
+
   <script src="{{ url_for('static', filename='js/region.js') }}" type="application/javascript"></script>
 
   <script type="application/javascript">
@@ -171,7 +174,7 @@
       let ANCHOR_GENE = {{gene_id|tojson}};
       let ANCHOR_TISSUE = {{tissue|tojson}};
 
-      [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{start|tojson}}, {{end|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
+      [window.plot, window.datasources] = makeSinglePlot(ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
       // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
       document.getElementById('variant-search').addEventListener('submit', function (event) {

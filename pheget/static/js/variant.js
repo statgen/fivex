@@ -245,17 +245,24 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
 
+    // Allow the URL to change as the user selects interactive options
+    const stateUrlMapping = {minimum_tss_distance: 'minimum_tss_distance', maximum_tss_distance: 'maximum_tss_distance'};
+    let initialState = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
+
+    initialState = Object.assign({
+        variant: `${chrom}:${pos}`,
+        start: pos_lower,
+        end: pos_higher,
+        chr: chrom,
+        minimum_tss_distance: -1000000,
+        maximum_tss_distance: 1000000,
+        position: pos,
+    }, initialState);
+
+    // The backend guarantees that these params will be part of the URL on pageload
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
-        state: {
-            variant: `${chrom}:${pos}`,
-            start: pos_lower,
-            end: pos_higher,
-            chr: chrom,
-            minimum_tss_distance: -1000000,
-            maximum_tss_distance: 1000000,
-            position: pos,
-        },
+        state: initialState,
         dashboard: {
             components: [
                 {
@@ -411,6 +418,11 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+
+    // Changes in the plot can be reflected in the URL, and vice versa (eg browser back button can go back to
+    //   a previously viewed region)
+    LocusZoom.ext.DynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
+    LocusZoom.ext.DynamicUrls.plotWatchesUrl(plot, stateUrlMapping);
 
     // Attach the current position as a state variable - used for resizing the gene track dynamically
     return [plot, dataSources];

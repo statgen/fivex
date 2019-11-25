@@ -83,7 +83,7 @@ def variant_view(chrom: str, pos: int):
     )
 
     return render_template(
-        "frontend/phewas.html",
+        "frontend/variant.html",
         chrom=chrom,
         pos=pos,
         ref=annotations.ref_allele,
