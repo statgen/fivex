@@ -35,7 +35,7 @@ For the prototype, source data will live in the folder `data/`. Really large fil
     so you will need to download them separately for your environment.
 
 To change settings specific to an individual machine (such as the data directory), edit the contents of `.env` 
-in the root directory of your project. 
+in the root directory of your project. A `.env-sample` file is provided as a template.
 
 
 ### Running the development server
