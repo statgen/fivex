@@ -4,7 +4,7 @@
 /* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL(state, chain, fields) {
+    getURL(state, chain) {  // removed fields from this at the moment since we are not using it (eslint error)
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
@@ -108,6 +108,10 @@ LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
         }
     }
     return null;
+});
+
+LocusZoom.TransformationFunctions.add('twosigfigs', function(x) {
+    return (Math.abs(x) >= .1) ? x.toFixed(2) : (Math.abs(x) >= .01) ? x.toFixed(3) : x.toExponential(1);
 });
 
 // Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
@@ -333,10 +337,10 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
-<strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
-<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
+<strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
+<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}<br>
 
-<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
+<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
 <form action="/region/" method="get">
