@@ -247,8 +247,8 @@
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
-              <button type="button" class="btn btn-secondary" style="pointer-events: none;"> 
-                <span class="fa fa-arrows-alt-h"></span> Filter by TSS Distance 
+              <button type="button" class="btn btn-secondary" style="pointer-events: none;">
+                <span class="fa fa-arrows-alt-h"></span> Filter by TSS Distance
               </button>
             </span>
             <label class="btn btn-info" data-toggle="tooltip" data-placement="top"
@@ -333,7 +333,7 @@
       const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#plot');
       plot.subscribeToData(['phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
 
-      // Use omnisearch (https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch) to parse rsids
+      // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse rsids
       document.getElementById('variant-search').addEventListener('submit', function () {
           event.preventDefault();
           const variant = document.getElementById('query-field').value;
