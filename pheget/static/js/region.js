@@ -2,7 +2,7 @@
 
 const API_BASE = 'https://portaldev.sph.umich.edu/api/v1/';
 // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
-const MAX_EXTENT = 80000;
+const MAX_EXTENT = 500000;
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
     getURL(state) {
         let url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
@@ -50,20 +50,23 @@ function getTrackLayout(gene_id, tissue, state) {
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = newscattertooltip.html +
-        `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
+        `<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
+        <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
+        <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
         unnamespaced: true,
         fields: [
-            '{{namespace[assoc]}}chromosome', '{{namespace[assoc]}}position', '{{namespace[assoc]}}ref_allele',
+            '{{namespace[assoc]}}chromosome', '{{namespace[assoc]}}position',
+            '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
         ],
         tooltip: newscattertooltip
     });
-    const line = {  // TODO: What is the purpose of these boundary lines?
+    const line = {  // TODO: What is the purpose of these boundary lines?  A: These originally appeared on the gene track to mark boundaries; we don't really need them
         type: 'orthogonal_line',
         orientation: 'vertical',
         style: { 'stroke': '#FF3333', 'stroke-width': '2px', 'stroke-dasharray': '4px 4px' }
@@ -72,7 +75,7 @@ function getTrackLayout(gene_id, tissue, state) {
     return [
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
-            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },
+            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },  // TODO: Use gene symbol instead of gene id
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -94,12 +97,19 @@ function getTrackLayout(gene_id, tissue, state) {
 function getBasicLayout(initial_state = {}, track_panels = []) {
     const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true }).tooltip;
     newgenestooltip.html = newgenestooltip.html + `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
-    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true, tooltip: newgenestooltip });
+    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', {
+        unnamespaced: true,
+        tooltip: newgenestooltip,
+        exon_height: 8,
+        bounding_box_padding: 5,
+        track_vertical_spacing: 5,
+        exon_label_spacing: 3
+    });
 
     const base_layout = LocusZoom.Layouts.get('plot', 'standard_association', {
         state: initial_state,
         max_region_scale: MAX_EXTENT,
-        responsive_resize: 'both',
+        responsive_resize: 'width_only',
         dashboard: {
             components: [
                 {
@@ -109,6 +119,7 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
                 }
             ]
         },
+
         panels: [
             ...track_panels,
             LocusZoom.Layouts.get('panel', 'genes', {
@@ -199,43 +210,48 @@ function addTrack(plot, datasources, gene_id, tissue) {
     addPanels(plot, datasources, track_layout, track_sources);
 }
 
+
 /**
  * Switch the options used in displaying Y axis
  * @param {LocusZoom.Plot} plot
  * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue' or 'beta'
  */
 // eslint-disable-next-line no-unused-vars
-function switchY(plot, yfield) {
-    let assoc_panels = plot.layout.panels.slice(0, -1);
-    if (yfield === 'beta') {
-        assoc_panels.forEach(function (panel) {
-            let scatter_layout = panel.data_layers[4];
-            let panel_base_y = scatter_layout.y_axis;
-            panel.axes.y1.label = 'Normalized Effect Size (NES)';
-            panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-            panel.data_layers[0].style = { 'stroke': 'gray', 'stroke-width': '1px', 'stroke-dasharray': '10px 0px' };
-            panel_base_y.field = panel.id + ':beta';
-            delete panel_base_y.floor;
-            panel_base_y.min_extent = [-1, 1];
-        });
-    } else if (yfield === 'log_pvalue') {
-        assoc_panels.forEach(function (panel) {
-            let scatter_layout = panel.data_layers[4];
-            let panel_base_y = scatter_layout.y_axis;
-            panel.axes.y1.label = '-log 10 p-value';
-            panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-            panel.data_layers[0].style = {
-                'stroke': '#D3D3D3',
-                'stroke-width': '3px',
-                'stroke-dasharray': '10px 10px'
-            };
-            panel_base_y.field = panel.id + ':log_pvalue';
-            // Set minimum y value to zero when looking at -log10 p-values
-            panel_base_y.floor = 0;
-            panel_base_y.min_extent = [0, 10];
-        });
-    } else {
-        throw new Error('Unrecognized yfield option');
-    }
-    plot.applyState();
+function switchY_region(plot, yfield) {
+    let assoc_panels = plot.layout.panels;  // Iterate through all panels, including any added panels
+    assoc_panels.forEach(function (panel) {
+        if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
+            if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+                let scatter_layout = panel.data_layers[4];
+                let panel_base_y = scatter_layout.y_axis;
+                panel.axes.y1.label = 'Normalized Effect Size (NES)';
+                panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
+                panel.data_layers[0].style = {
+                    'stroke': 'gray',
+                    'stroke-width': '1px',
+                    'stroke-dasharray': '10px 0px'
+                };
+                panel_base_y.field = panel.id + ':beta';
+                delete panel_base_y.floor;
+                panel_base_y.min_extent = [-1, 1];
+            } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
+                let scatter_layout = panel.data_layers[4];
+                let panel_base_y = scatter_layout.y_axis;
+                panel.axes.y1.label = '-log 10 p-value';
+                panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
+                panel.data_layers[0].style = {
+                    'stroke': '#D3D3D3',
+                    'stroke-width': '3px',
+                    'stroke-dasharray': '10px 10px'
+                };
+                panel_base_y.field = panel.id + ':log_pvalue';
+                // Set minimum y value to zero when looking at -log10 p-values
+                panel_base_y.floor = 0;
+                panel_base_y.min_extent = [0, 10];
+            } else {
+                throw new Error('Unrecognized yfield option');
+            }
+            plot.applyState();
+        }
+    });
 }

@@ -1,4 +1,5 @@
 import math
+import typing as ty
 
 from zorp import readers  # type: ignore
 
@@ -14,39 +15,43 @@ except ImportError:
 class InfoContainer:
     def __init__(
         self,
-        chromosome=None,
-        position=None,
-        ref_allele=None,
-        alt_allele=None,
-        top_gene=None,
-        top_tissue=None,
-        ac=None,
-        af=None,
-        an=None,
-        rsid=None,
+        chromosome: str = None,
+        position: int = None,
+        ref_allele: str = None,
+        alt_allele: str = None,
+        top_gene: str = None,
+        top_tissue: str = None,
+        ac: int = None,
+        af: float = None,
+        an: int = None,
+        rsid: str = None,
     ):
         self.chromsome = chromosome
-        self.position = int(position)
+        self.position = position
         self.ref_allele = ref_allele
         self.alt_allele = alt_allele
 
         self.top_gene = top_gene
         self.top_tissue = top_tissue
 
-        self.ac = int(ac)
-        self.af = float(af)
-        self.an = int(an)
+        self.ac = ac
+        self.af = af
+        self.an = an
         self.rsid = rsid
 
 
 def info_parser(row: str) -> InfoContainer:
-    fields = row.split("\t")
+    fields: ty.List[ty.Any] = row.split("\t")
+    fields[1] = int(fields[1])  # pos
+    fields[6] = int(fields[6])  # ac
+    fields[7] = float(fields[7])  # af
+    fields[8] = int(fields[8])  # an
     return InfoContainer(*fields)
 
 
 def get_variant_info(chrom: str, pos: int):
     """Get variant-specific information for annotations"""
-    gene_lookup = model.get_gene_lookup()
+    gene_lookup = model.get_gene_names_conversion()
     per_variant_path = model.get_best_per_variant_lookup()
     reader = (
         readers.TabixReader(per_variant_path, parser=info_parser)

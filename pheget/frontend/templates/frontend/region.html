@@ -7,7 +7,6 @@
         type="text/css"/>
 {% endblock %}
 
-
 {% block content %}
   <div class="container-fluid">
     <div class="row padtop">
@@ -32,102 +31,77 @@
         to PheGET Homepage</a>
     </center>
     <br>
+    {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
+    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }} </strong></h1>
   </div>
-
-  {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-  <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }}</strong></h1>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-        Add Tissue
-      </button>
-      <!-- TODO: list of tissues should to be dynamically generated instead of hand-coded -->
-      <div class="dropdown-menu" aria-labelledby="dropdown_tissueselect">
-        <button class="dropdown-item tissueselect-class" type="button" value="Brain_Cortex">Brain Cortex</button>
-        <button class="dropdown-item tissueselect-class" type="button" value="Muscle_Skeletal">Skeletal Muscle</button>
-      </div>
-    </div>
-  </div>
-  <div class="container-fluid">
-    <div class="row padtop">
-      <div class="col-sm-10">
-        <div id="gene-searchbox">
-          <form id="gene-search">
-            <div class="input-group">
-              <input id="gene-query-field" name="gene-query-field" autocomplete="off" class="form-control"
-                     type="text"
-                     placeholder="Add a gene"/>
-              <div class="input-group-append">
-                <button id="searchbox-gene" class="btn btn-primary" type="submit">Add Gene <span
-                    class="fa fa-search"></span></button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    <div class="row justify-content-start">
 
-    <div class="row">
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addtissue">Add a new tissue:</label>
-          <select class="form-control" tabindex="-98" id="addtissue">
-            <option disabled selected value="">Please select a tissue</option>
-            <option value="Muscle_Skeletal">Muscle Skeletal</option>
-            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-            <option value="Nerve_Tibial">Nerve Tibial</option>
-            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-            <option value="Whole_Blood">Whole Blood</option>
-            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-          </select>
+      <div class="col-1">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
+            Add Tissue
+          </button>
+          <!-- Dynamically generate tissue buttons from tissue_list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
+            {% for single_tissue in tissue_list %}
+            <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+            {% endfor %}
+          </div>
         </div>
       </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addgene">Add a new gene:</label>
-          <select class="form-control" tabindex="-98" id="addgene">
-            <option disabled selected value="">Please select a gene</option>
-            <option value="CHRNA5">CHRNA5</option>
-            <option value="CHRNA3">CHRNA3</option>
-            <option value="AC022748.2">AC022748.2</option>
-            <option value="AC027228.2">AC027228.2</option>
-            <option value="PSMA4">PSMA4</option>
-          </select>
+
+      <div class="col-1">
+        <div class="dropdown">
+          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
+            Add Gene
+          </button>
+          <!-- Dynamically generate gene list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
+                {% for single_geneid, single_symbol in gene_list.items() %}
+                <button class="dropdown-item geneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
+                {% endfor %}
+          </div>
         </div>
       </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="anchor-tissue">Change anchor tissue:</label>
-          <select class="form-control" tabindex="-98" id="anchor-tissue">
-            <option disabled selected value="">Please select a tissue</option>
-            <option value="Muscle_Skeletal">Muscle Skeletal</option>
-            <option value="Cells_Cultured_fibroblasts">Cells Cultured Fibroblasts</option>
-            <option value="Nerve_Tibial">Nerve Tibial</option>
-            <option value="Heart_Left_Ventricle">Heart Left Ventricle</option>
-            <option value="Whole_Blood">Whole Blood</option>
-            <option value="Adipose_Subcutaneous">Adipose Subcutaneous</option>
-          </select>
+
+      <div class="col-2">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
+                  <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
+          </button>
+          <!-- Dynamically generate list of anchor tissue buttons -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
+              {% for single_tissue in tissue_list %}
+              <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+              {% endfor %}
+          </div>
         </div>
       </div>
-      <div class="col">
-        <div class="dropdown bootstrap-select">
-          <label for="addgene">Change anchor gene:</label>
-          <select class="form-control" tabindex="-98" id="anchor-gene">
-            <option disabled selected value="">Please select a gene</option>
-            <option value="CHRNA5">CHRNA5</option>
-            <option value="CHRNA3">CHRNA3</option>
-            <option value="AC022748.2">AC022748.2</option>
-            <option value="AC027228.2">AC027228.2</option>
-            <option value="PSMA4">PSMA4</option>
-          </select>
+
+      <div class="col-2">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
+                  <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
+          </button>
+          <!-- Dynamically generate anchor gene list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
+            {% for single_geneid, single_symbol in gene_list.items() %}
+              <button class="dropdown-item anchorgeneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="container-fluid">
+
+<div class="container-fluid">
     <div class="row justify-content-start">
       <div class="col-sm">
         <form action="#" method="POST" class="yaxis-display" id="transform-y">
@@ -148,11 +122,15 @@
         </form>
       </div>
     </div>
+  </div>
 
+  <div class="container-fluid">
     <div class="row">
-      <div id="lz-plot" class="ten columns"></div>
+      <div id="lz-plot" class="ten columns">
+      </div>
     </div>
   </div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -171,8 +149,9 @@
 
   <script type="application/javascript">
       'use strict';
-      let ANCHOR_GENE = {{gene_id|tojson}};
-      let ANCHOR_TISSUE = {{tissue|tojson}};
+      var ANCHOR_GENE = {{gene_id|tojson}};
+      var ANCHOR_TISSUE = {{tissue|tojson}};
+      var GENE_DICT = {{gene_list|tojson}};
 
       [window.plot, window.datasources] = makeSinglePlot(ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
@@ -187,44 +166,63 @@
           parseSearch(variant);
       });
 
-      document.getElementById('gene-search').addEventListener('submit', function (event) {
-          event.preventDefault();
-          const geneName = document.getElementById('gene-query-field').value;
-          const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
-          getOmni(omniurl, function (err, omniJson) {
-              var geneID = omniJson.data[0].gene_id;
-              if (geneID) {
-                  addTrack(window.plot, window.datasources, geneID, ANCHOR_TISSUE);
-              }
-          });
-      });
-
       // Bootstrap dropdown selector for adding a new tissue
       var tissueElements = document.getElementsByClassName('tissueselect-class');
       Array.from(tissueElements).forEach((selectedTissue) => {
           selectedTissue.addEventListener('click', (event) => {
+              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
+          });
+      });
+
+      var geneElements = document.getElementsByClassName('geneselect-class');
+      Array.from(geneElements).forEach((selectedGene) => {
+          selectedGene.addEventListener('click', (event) => {
               addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
           });
       });
 
-      var y_axis_options = document.forms['transform-y'].elements['y-options'];
-      for (var j = 0, len = y_axis_options.length; j < len; j++) {
-          y_axis_options[j].onchange = function () {
-              switchY(window.plot, this.value);
-          }
-      }
+      var anchortissueElements = document.getElementsByClassName('anchortissueselect-class');
+      Array.from(anchortissueElements).forEach((selectedAnchorTissue) => {
+          selectedAnchorTissue.addEventListener('click', (event) => {
+            ANCHOR_TISSUE = event.target.value;
+            document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
+            let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
+            panel_ids.forEach(function(id){
+              if (id !=='genes'){
+                plot.removePanel(id);
+              }
+            });
+            // FIXME: seems to be an ugly way of removing panels one by one
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+          });
+      });
 
-      document.getElementById('addtissue').addEventListener('change', function (event) {
-          addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
+      var anchorgeneElements = document.getElementsByClassName('anchorgeneselect-class');
+      Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
+          selectedAnchorGene.addEventListener('click', (event) => {
+            ANCHOR_GENE = event.target.value;
+            document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
+            let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
+            panel_ids.forEach(function(id){
+              if (id !=='genes'){
+                plot.removePanel(id);
+              }
+            });
+            // FIXME: seems to be an ugly way of removing panels one by one
+            // TODO: Delete all other tracks
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+          });
       });
-      document.getElementById('addgene').addEventListener('change', function (event) {
-          addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+
+      document.forms['transform-y'].elements['y-options'].forEach(function (form) {
+          form.onchange = function () {
+              switchY_region(plot, this.value);
+          };
       });
-      document.getElementById('anchor-tissue').addEventListener('change', function (event) {
-          ANCHOR_TISSUE = event.target.value;
-      });
-      document.getElementById('anchor-gene').addEventListener('change', function (event) {
-          ANCHOR_GENE = event.target.value;
-      });
+
+  // initialize labels for anchor tissue and gene
+  document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
+  document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
+
   </script>
 {% endblock %}

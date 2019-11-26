@@ -1,8 +1,9 @@
 """
 Models/ datastores
 """
+import gzip
+import json
 import os
-import pickle
 
 from flask import current_app
 
@@ -14,15 +15,11 @@ def locate_data(chrom):
     )
 
 
-def get_gene_lookup():
-    """Get a gene locator object to find the gene names in a given region"""
-    with open(
-        os.path.join(
-            current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"
-        ),
-        "rb",
-    ) as f:
-        return pickle.load(f)
+def locate_tissue_data(tissue):
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"],
+        f"{tissue}.allpairs.sorted.txt.gz",
+    )
 
 
 def get_best_per_variant_lookup():
@@ -31,3 +28,22 @@ def get_best_per_variant_lookup():
         current_app.config["PHEGET_DATA_DIR"],
         "best.genes.tissues.allele.info.rsnum.txt.gz",
     )
+
+
+def get_sig_lookup():
+    """Get the path to an sqlite3 database file containing some data for eQTLs more significant than 1e-5"""
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"], "sig.lookup.db",
+    )
+
+
+def get_gene_names_conversion():
+    """Get the compressed file containing two-way mappings of gene_id to gene_symbol"""
+    with gzip.open(
+        os.path.join(
+            current_app.config["PHEGET_DATA_DIR"],
+            "gene.id.symbol.map.json.gz",
+        ),
+        "rb",
+    ) as f:
+        return json.loads(f.read().decode("utf-8"))
