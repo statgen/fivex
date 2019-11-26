@@ -26,16 +26,16 @@ class InfoContainer:
         rsid=None,
     ):
         self.chromsome = chromosome
-        self.position = int(position)
+        self.position = int(position) if position is not None else None
         self.ref_allele = ref_allele
         self.alt_allele = alt_allele
 
         self.top_gene = top_gene
         self.top_tissue = top_tissue
 
-        self.ac = int(ac)
-        self.af = float(af)
-        self.an = int(an)
+        self.ac = int(ac) if ac is not None else None
+        self.af = float(af) if af is not None else None
+        self.an = int(an) if an is not None else None
         self.rsid = rsid
 
 
