@@ -4,7 +4,7 @@ Common configuration variables for the application
 
 import os
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 
 # Load machine or deployment-specific configuration values from a local .env file
 load_dotenv()
