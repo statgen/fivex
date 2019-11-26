@@ -58,6 +58,10 @@ These commands will perform static analysis to catch common bugs, and auto-forma
 $ fourmat fix
 $ eslint . --fix
 $ mypy .
+$ pytest .
 ```
 
-(This is roughly equivalent to `pre-commit run --all-files`)
+The linting commands are run on every commit, and can be triggered manually via: `pre-commit run --all-files`.
+
+Because unit tests can be more complex, these must be run separately (or during the CI step). Mostly, we separate this 
+  step to avoid making commits slow.
