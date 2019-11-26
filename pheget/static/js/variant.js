@@ -9,25 +9,39 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
         //      state.start, etc)
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
         chain.header.minimum_tss_distance = state.minimum_tss_distance;
+        chain.header.y_field = state.y_field;
         return this.url;
     },
     annotateData(records, chain) {
         records = records.filter(function (record) {
             return record.tss_distance <= chain.header.maximum_tss_distance && record.tss_distance >= chain.header.minimum_tss_distance;
         });
-        // Add a synthetic field `pvalue_rank`, where the strongest pvalue gets rank 1.
-        // `pvalue_rank` is used to show labels for only a few points with the strongest p-values.
-        // To make it, sort a shallow copy of `records` by pvalue, and then iterate through the shallow copy, modifying each record object.
+        // Add a synthetic field `top_value_rank`, where the best value for a given field gets rank 1.
+        // This is used to show labels for only a few points with the strongest (y_field) value.
+        // As this is a source designed to power functionality on one specific page, we can hardcode specific behavior
+        //   to rank individual fields differently
+
+        // To make it, sort a shallow copy of `records` by `y_field`, and then iterate through the shallow copy, modifying each record object.
         // Because it's a shallow copy, the record objects in the original array are changed too.
-        var sort_field = 'log_pvalue';
+        const field = chain.header.y_field;
+        function getValue(item) {
+            if (field === 'log_pvalue') {
+                return item[field];
+            } else if (field === 'beta') {
+                return Math.abs(item[field]);
+            } else {
+                throw new Error('Unrecognized sort field');
+            }
+        }
+
         var shallow_copy = records.slice();
         shallow_copy.sort(function (a, b) {
-            var av = a[sort_field];
-            var bv = b[sort_field];
+            var av = getValue(a);
+            var bv = getValue(b);
             return (av === bv) ? 0 : (av < bv ? 1 : -1);  // log: descending order means most significant first
         });
         shallow_copy.forEach(function (value, index) {
-            value['log_pvalue_rank'] = 1 + index;
+            value['top_value_rank'] = index + 1;
         });
         return records;
     }
@@ -249,17 +263,25 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
         .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
 
+    // Allow the URL to change as the user selects interactive options
+    const stateUrlMapping = {minimum_tss_distance: 'minimum_tss_distance', maximum_tss_distance: 'maximum_tss_distance'};
+    let initialState = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
+
+    initialState = Object.assign({
+        variant: `${chrom}:${pos}`,
+        start: pos_lower,
+        end: pos_higher,
+        chr: chrom,
+        y_field: 'log_pvalue',
+        minimum_tss_distance: -1000000,
+        maximum_tss_distance: 1000000,
+        position: pos,
+    }, initialState);
+
+    // The backend guarantees that these params will be part of the URL on pageload
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
-        state: {
-            variant: `${chrom}:${pos}`,
-            start: pos_lower,
-            end: pos_higher,
-            chr: chrom,
-            minimum_tss_distance: -1000000,
-            maximum_tss_distance: 1000000,
-            position: pos,
-        },
+        state: initialState,
         dashboard: {
             components: [
                 {
@@ -282,7 +304,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                             '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                             '{{namespace[phewas]}}tss_distance',
-                            '{{namespace[phewas]}}log_pvalue_rank',
+                            '{{namespace[phewas]}}top_value_rank',
                             '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                             '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
 
@@ -353,7 +375,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                         base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
                         base.label.text = '{{{{namespace[phewas]}}tissue}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
-                        base.label.filters.push({ field: 'phewas:log_pvalue_rank', operator: '<=', value: 5 });
+                        base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
                         return base;
                     }(),
                     // TODO: Must decide on an appropriate significance threshold for this use case
@@ -415,6 +437,11 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+
+    // Changes in the plot can be reflected in the URL, and vice versa (eg browser back button can go back to
+    //   a previously viewed region)
+    LocusZoom.ext.DynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
+    LocusZoom.ext.DynamicUrls.plotWatchesUrl(plot, stateUrlMapping);
 
     // Attach the current position as a state variable - used for resizing the gene track dynamically
     return [plot, dataSources];
@@ -535,7 +562,7 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:beta', 'desc');
     }
-    plot.applyState();
+    plot.applyState({ y_field: yfield });
 }
 
 // Changes the number of top variants which are labeled on the plot

@@ -175,9 +175,10 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @returns {[LocusZoom.Plot, LocusZoom.DataSources]}
  */
 // eslint-disable-next-line no-unused-vars
-function makeSinglePlot(chrom, start, end, gene_id, tissue, selector) {
-    const initialState = { chr: chrom, start: start, end: end };
-
+function makeSinglePlot(gene_id, tissue, selector) {
+    const stateUrlMapping = {chr: 'chrom', start: 'start', end: 'end'};
+    // The backend guarantees that these params will be part of the URL on pageload
+    const initialState = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
     const track_panels = getTrackLayout(gene_id, tissue, initialState);
     const base_layout = getBasicLayout(initialState, track_panels);
 
@@ -187,6 +188,11 @@ function makeSinglePlot(chrom, start, end, gene_id, tissue, selector) {
     base_sources.forEach(([name, config]) => data_sources.add(name, config));
 
     const plot = LocusZoom.populate(selector, data_sources, base_layout);
+
+    // Changes in the plot can be reflected in the URL, and vice versa (eg browser back button can go back to
+    //   a previously viewed region)
+    LocusZoom.ext.DynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
+    LocusZoom.ext.DynamicUrls.plotWatchesUrl(plot, stateUrlMapping);
     return [plot, data_sources];
 }
 

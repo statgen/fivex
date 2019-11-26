@@ -108,7 +108,7 @@
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> Show: </button>
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
           </span>
             <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true"
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
@@ -142,6 +142,9 @@
   <script src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.app.min.js"
           type="application/javascript"></script>
 
+  <script type="application/javascript"
+          src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/ext/lz-dynamic-urls.min.js"></script>
+
   <script src="{{ url_for('static', filename='js/region.js') }}" type="application/javascript"></script>
 
   <script type="application/javascript">
@@ -150,7 +153,7 @@
       var ANCHOR_TISSUE = {{tissue|tojson}};
       var GENE_DICT = {{gene_list|tojson}};
 
-      [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{start|tojson}}, {{end|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
+      [window.plot, window.datasources] = makeSinglePlot(ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
       // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
       document.getElementById('variant-search').addEventListener('submit', function (event) {
