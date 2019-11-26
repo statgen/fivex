@@ -102,7 +102,7 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
         responsive_resize: 'both',
         dashboard: {
             components: [
-               {
+                {
                     color: 'gray',
                     position: 'right',
                     type: 'download'
