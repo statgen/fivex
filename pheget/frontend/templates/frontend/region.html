@@ -49,7 +49,7 @@
           <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
             {% for single_tissue in tissue_list %}
             <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
-            {% endfor %}            
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@
           <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
               {% for single_tissue in tissue_list %}
               <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
-              {% endfor %}            
+              {% endfor %}
           </div>
         </div>
       </div>
@@ -98,30 +98,8 @@
           </div>
         </div>
       </div>
-  
     </div>
   </div>
-
-<!-- Disabled for now; may bring it back for trans-eQTLs
-  <div class="container-fluid">
-    <div class="row padtop">
-      <div class="col-sm-10">
-        <div id="gene-searchbox">
-          <form id="gene-search">
-            <div class="input-group">
-              <input id="gene-query-field" name="gene-query-field" autocomplete="off" class="form-control"
-                     type="text"
-                     placeholder="Add a gene"/>
-              <div class="input-group-append">
-                <button id="searchbox-gene" class="btn btn-primary" type="submit">Add Gene <span
-                    class="fa fa-search"></span></button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
--->
 
 <div class="container-fluid">
     <div class="row justify-content-start">
@@ -184,20 +162,6 @@
           }
           parseSearch(variant);
       });
-
-      /* Disabled for now; may bring it back for trans-eQTLs
-      document.getElementById('gene-search').addEventListener('submit', function (event) {
-          event.preventDefault();
-          const geneName = document.getElementById('gene-query-field').value;
-          const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${geneName}&build=GRCh38`;
-          getOmni(omniurl, function (err, omniJson) {
-              var geneID = omniJson.data[0].gene_id;
-              if (geneID) {
-                  addTrack(window.plot, window.datasources, geneID, ANCHOR_TISSUE);
-              }
-          });
-      });
-      */
 
       // Bootstrap dropdown selector for adding a new tissue
       var tissueElements = document.getElementsByClassName('tissueselect-class');
