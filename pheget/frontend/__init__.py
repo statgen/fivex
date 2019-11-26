@@ -1,9 +1,13 @@
 """
 Front end views: pages that are visited in the web browser and return HTML
 """
+import sqlite3
+
 from flask import Blueprint, abort, redirect, render_template, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
+from .. import model
+from ..api.format import TISSUE_DATA
 from . import format
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
@@ -30,19 +34,28 @@ def region_view():
         args.pop("position")
         # FIXME: Add a smarter way of choosing default region size etc (eg making MAX_SIZE a config option, to allow
         #   performance to be tuned per dataset)
-        args["start"] = max(pos - 40000, 1)
-        args["end"] = pos + 40000
+        args["start"] = max(pos - 500000, 1)
+        args["end"] = pos + 500000
         return redirect(url_for("frontend.region_view", **args))
 
+    # Chromosome is always required
     try:
-        # These params are always required. They are query params so the URL can update as the plot is scrolled.
         chrom = request.args["chrom"]
-        start = int(request.args["start"])
-        end = int(request.args["end"])
+        if chrom[0:3] == "chr":
+            chrom = chrom[3:]
     except (KeyError, ValueError):
         return abort(400)
 
-    center = (end - start) / 2
+    # We allow a few different combinations of other missing data
+    #  by looking up the best tissue, best gene, or proper range if they are missing
+
+    # First, process start, end, tissue, and gene
+    start = request.args.get("start", None)
+    end = request.args.get("end", None)
+    if start is not None:
+        start = int(start)
+    if end is not None:
+        end = int(end)
 
     tissue = request.args.get("tissue", None)
 
@@ -50,8 +63,84 @@ def region_view():
     gene_id = request.args.get("gene_id", None)
     symbol = request.args.get("symbol", None)
 
-    if not tissue or not (gene_id or symbol):
-        return abort(400)
+    # If there is a chromosome and tissue but no range, then try to fill in the range
+    if tissue and (start is None or end is None):
+        conn = sqlite3.connect(model.get_sig_lookup())
+        with conn:
+            try:
+                (
+                    sqlgene,
+                    sqlchrom,
+                    sqlpos,
+                    sqlref,
+                    sqlalt,
+                    sqlpval,
+                    sqltissue,
+                ) = list(
+                    conn.execute(
+                        f"SELECT * FROM sig WHERE chrom=? AND tissue=? ORDER BY pval LIMIT 1;",
+                        (f"chr{chrom}", tissue),
+                    )
+                )[
+                    0
+                ]
+                start = max(int(sqlpos) - 500000, 1)
+                end = int(sqlpos + 500000)
+            except IndexError:
+                return abort(
+                    400
+                )  # This should never happen - all chromosome x tissue combo should have at least one point
+
+    # If there is a chromosome, start, and end, but no tissue or gene_id, then find out the best tissue and gene_id
+    if chrom and start and end and (tissue is None or gene_id is None):
+        conn = sqlite3.connect(model.get_sig_lookup())
+        with conn:
+            try:
+                (
+                    sqlgene_id,
+                    sqlchrom,
+                    sqlpos,
+                    sqlref,
+                    sqlalt,
+                    sqlval,
+                    sqltissue,
+                ) = list(
+                    conn.execute(
+                        f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
+                        (f"chr{chrom}", start, end),
+                    )
+                )[
+                    0
+                ]
+                if tissue is None:
+                    tissue = sqltissue
+                if gene_id is None:
+                    gene_id = sqlgene_id
+            except IndexError:
+                return abort(400)
+
+    center = (end + start) // 2
+
+    # Get the full tissue list from TISSUE_DATA
+    tissue_list = TISSUE_DATA.keys()
+
+    # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
+    gene_json = model.get_gene_names_conversion()
+
+    # Query the sqlite3 database for the range (chrom:start-end) and get the list of all genes
+    conn = sqlite3.connect(model.get_sig_lookup())
+    with conn:
+        geneid_list = list(
+            conn.execute(
+                f"SELECT DISTINCT(?) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
+                (gene_id, f"chr{chrom}", start, end),
+            )
+        )
+    gene_list = dict()
+    for geneid in geneid_list:
+        gene_list[str(geneid[0])] = str(
+            gene_json.get(geneid[0].split(".")[0], "")
+        )
 
     return render_template(
         "frontend/region.html",
@@ -62,6 +151,8 @@ def region_view():
         gene_id=gene_id,
         tissue=tissue,
         symbol=symbol,
+        tissue_list=tissue_list,
+        gene_list=gene_list,
     )
 
 

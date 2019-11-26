@@ -4,7 +4,7 @@
 /* global Tabulator */
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
-    getURL(state, chain, fields) {
+    getURL(state, chain) {
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
         //      state.start, etc)
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
@@ -108,6 +108,10 @@ LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
         }
     }
     return null;
+});
+
+LocusZoom.TransformationFunctions.add('twosigfigs', function(x) {
+    return (Math.abs(x) >= .1) ? x.toFixed(2) : (Math.abs(x) >= .01) ? x.toFixed(3) : x.toExponential(1);
 });
 
 // Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
@@ -332,20 +336,20 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}<br>
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
 <strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
-<strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
-<strong>MAF:</strong> {{{{namespace[phewas]}}maf|htmlescape}}<br>
-<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|htmlescape}}<br>
-
-<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|htmlescape}})<br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
+<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}<br>
+<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})<br>
+<strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
+<strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
 <form action="/region/" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
     <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>
     <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
     <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
-    <input type="submit" class="linkButton" value="Search this gene"/>
-</form>`;
+    <input type="submit" class="linkButton" value="See region plot for {{{{namespace[phewas]}}tissue|htmlescape}} x {{{{namespace[phewas]}}symbol|htmlescape}}"/>
+</form>
+`;
                         base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
                         base.label.text = '{{{{namespace[phewas]}}tissue}}';
                         base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';

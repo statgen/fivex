@@ -67,3 +67,11 @@ dl.variant-info-middle dd {
     overflow: hidden;
     flex: 0 0 70%; /* Increase the width available for the dd text */
 }
+
+/* Scrollable Bootstrap dropdown menus */
+
+.scrollable-menu {
+    height: auto;
+    max-height: 400px;
+    overflow-x: hidden;
+}
