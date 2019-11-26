@@ -1,3 +1,4 @@
+flask-debugtoolbar==0.10.1
 python-dotenv==0.10.3
 fastnumbers==2.2.1  # This can make parsing faster when you have a lot of rows
 flask==1.1.1
