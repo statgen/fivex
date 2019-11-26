@@ -1,6 +1,8 @@
 """
 Models/ datastores
 """
+import gzip
+import json
 import os
 import pickle
 
@@ -49,6 +51,11 @@ def get_sig_lookup():
 
 def get_gene_names_conversion():
     """Get the compressed file containing two-way mappings of gene_id to gene_symbol"""
-    return os.path.join(
-        current_app.config["PHEGET_DATA_DIR"], "gene.id.symbol.map.json.gz",
-    )
+    with gzip.open(
+        os.path.join(
+            current_app.config["PHEGET_DATA_DIR"],
+            "gene.id.symbol.map.json.gz",
+        ),
+        "rb",
+    ) as f:
+        return json.loads(f.read().decode("utf-8"))

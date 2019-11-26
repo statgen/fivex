@@ -1,8 +1,6 @@
 """
 Front end views: pages that are visited in the web browser and return HTML
 """
-import gzip
-import json
 import sqlite3
 
 from flask import Blueprint, abort, redirect, render_template, request, url_for
@@ -125,8 +123,7 @@ def region_view():
     tissue_list = TISSUE_DATA.keys()
 
     # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
-    with gzip.open(model.get_gene_names_conversion(), "rb") as f:
-        gene_json = json.loads(f.read().decode("utf-8"))
+    gene_json = model.get_gene_names_conversion()
 
     # Query the sqlite3 database for the range (chrom:start-end) and get the list of all genes
     conn = sqlite3.connect(model.get_sig_lookup())

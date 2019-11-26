@@ -142,7 +142,7 @@ class VariantContainer:
 class VariantParser:
     def __init__(self, tissue=None):
         # We only need to load the gene locator once per usage, not on every line parsed
-        self.gene_lookup = model.get_gene_lookup()
+        self.gene_json = model.get_gene_names_conversion()
         self.tissue = tissue
 
     def __call__(self, row: str) -> VariantContainer:
@@ -171,9 +171,8 @@ class VariantParser:
         if self.tissue:
             fields.append(self.tissue)
         fields.append(
-            self.gene_lookup.get(fields[0].split(".")[0], "Unknown_Gene")
-        )  # Add gene symbol
-
+            self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
+        )
         # FIXME: Why is the sample size "-1"? We should avoid fake values
         tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", -1))
         fields.extend(tissue_data)
