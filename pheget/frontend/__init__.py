@@ -78,7 +78,8 @@ def region_view():
                     sqltissue,
                 ) = list(
                     conn.execute(
-                        f'SELECT * FROM sig WHERE chrom="chr{chrom}" AND tissue="{tissue}" ORDER BY pval LIMIT 1;'
+                        f'SELECT * FROM sig WHERE chrom=? AND tissue="?" ORDER BY pval LIMIT 1;',
+                        (f"chr{chrom}", tissue),
                     )
                 )[
                     0
@@ -105,7 +106,8 @@ def region_view():
                     sqltissue,
                 ) = list(
                     conn.execute(
-                        f'SELECT * FROM sig WHERE chrom="chr{chrom}" AND pos >= {start} AND pos <= {end} ORDER BY pval LIMIT 1;'
+                        f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
+                        (f"chr{chrom}", start, end),
                     )
                 )[
                     0
@@ -130,7 +132,8 @@ def region_view():
     with conn:
         geneid_list = list(
             conn.execute(
-                f'SELECT DISTINCT(gene_id) FROM sig WHERE chrom="chr{chrom}" AND pos >= {start} AND pos <= {end};'
+                f"SELECT DISTINCT(?) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
+                (gene_id, f"chr{chrom}", start, end),
             )
         )
     gene_list = dict()

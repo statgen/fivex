@@ -169,6 +169,8 @@ class VariantParser:
         fields[11] = float(fields[11])  # beta
         fields[12] = float(fields[12])  # stderr_beta
         if self.tissue:
+            # Tissue-specific files have one less column, and so the field must
+            #   be appended to match the # of fields in the all-tissue file
             fields.append(self.tissue)
         fields.append(
             self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
@@ -198,6 +200,7 @@ def query_variants(
         source = model.locate_tissue_data(tissue)
     else:  # Otherwise, query from a chromosome-specific file with all tissues
         source = model.locate_data(chrom)
+
     reader = readers.TabixReader(
         source, parser=VariantParser(tissue), skip_rows=1
     )
