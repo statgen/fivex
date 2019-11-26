@@ -94,7 +94,14 @@ function getTrackLayout(gene_id, tissue, state) {
 function getBasicLayout(initial_state = {}, track_panels = []) {
     const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true }).tooltip;
     newgenestooltip.html = newgenestooltip.html + `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
-    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true, tooltip: newgenestooltip });
+    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', {
+        unnamespaced: true,
+        tooltip: newgenestooltip,
+        exon_height: 8,
+        bounding_box_padding: 5,
+        track_vertical_spacing: 5,
+        exon_label_spacing: 3
+    });
 
     const base_layout = LocusZoom.Layouts.get('plot', 'standard_association', {
         state: initial_state,

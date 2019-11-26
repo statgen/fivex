@@ -61,13 +61,11 @@
                   aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
             Add Gene
           </button>
-          <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
-          <div class="dropdown-menu" aria-labelledby="dropdown_geneselect">
-            <button class="dropdown-item geneselect-class" type="button" value="CHRNA5">CHRNA5</button>
-            <button class="dropdown-item geneselect-class" type="button" value="CHRNA3">CHRNA3</button>
-            <button class="dropdown-item geneselect-class" type="button" value="AC022748.2">AC022748.2</button>
-            <button class="dropdown-item geneselect-class" type="button" value="AC027228.2">AC027228.2</button>
-            <button class="dropdown-item geneselect-class" type="button" value="PSMA4">PSMA4</button>
+          <!-- Dynamically generate gene list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
+                {% for single_geneid, single_symbol in gene_list.items() %}
+                <button class="dropdown-item geneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
+                {% endfor %}
           </div>
         </div>
       </div>
@@ -93,13 +91,11 @@
                   aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
                   <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
           </button>
-          <!-- TODO: list of genes should be dynamically generated instead of hand-coded -->
-          <div class="dropdown-menu" aria-labelledby="dropdown_anchorgeneselect">
-            <button class="dropdown-item anchorgeneselect-class" type="button" value="CHRNA5">CHRNA5</button>
-            <button class="dropdown-item anchorgeneselect-class" type="button" value="CHRNA3">CHRNA3</button>
-            <button class="dropdown-item anchorgeneselect-class" type="button" value="AC022748.2">AC022748.2</button>
-            <button class="dropdown-item anchorgeneselect-class" type="button" value="AC027228.2">AC027228.2</button>
-            <button class="dropdown-item anchorgeneselect-class" type="button" value="PSMA4">PSMA4</button>
+          <!-- Dynamically generate anchor gene list -->
+          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
+            {% for single_geneid, single_symbol in gene_list.items() %}
+              <button class="dropdown-item anchorgeneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -175,6 +171,7 @@
       'use strict';
       var ANCHOR_GENE = {{gene_id|tojson}};
       var ANCHOR_TISSUE = {{tissue|tojson}};
+      var GENE_DICT = {{gene_list|tojson}};
 
       [window.plot, window.datasources] = makeSinglePlot({{chrom|tojson}}, {{start|tojson}}, {{end|tojson}}, ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
 
@@ -238,7 +235,7 @@
       Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
           selectedAnchorGene.addEventListener('click', (event) => {
             ANCHOR_GENE = event.target.value;
-            document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
+            document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
               if (id !=='genes'){
@@ -259,7 +256,7 @@
 
   // initialize labels for anchor tissue and gene
   document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
-  document.querySelector('.anchorgene').innerHTML = ANCHOR_GENE;
+  document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
 
   </script>
 {% endblock %}

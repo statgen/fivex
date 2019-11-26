@@ -1,9 +1,14 @@
 """
 Front end views: pages that are visited in the web browser and return HTML
 """
+import gzip
+import json
+import sqlite3
+
 from flask import Blueprint, abort, redirect, render_template, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
+from .. import model
 from ..api.format import TISSUE_DATA
 from . import format
 
@@ -38,6 +43,8 @@ def region_view():
     try:
         # These params are always required. They are query params so the URL can update as the plot is scrolled.
         chrom = request.args["chrom"]
+        if chrom[0:3] == "chr":
+            chrom = chrom[3:]
         start = int(request.args["start"])
         end = int(request.args["end"])
     except (KeyError, ValueError):
@@ -54,7 +61,26 @@ def region_view():
     if not tissue or not (gene_id or symbol):
         return abort(400)
 
+    # Get the full tissue list from TISSUE_DATA
     tissue_list = TISSUE_DATA.keys()
+
+    # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
+    with gzip.open(model.get_gene_names_conversion(), "rb") as f:
+        gene_json = json.loads(f.read().decode("utf-8"))
+
+    # Query the sqlite3 database for the range (chrom:start-end) and get the list of all genes
+    conn = sqlite3.connect(model.get_sig_lookup())
+    with conn:
+        geneid_list = list(
+            conn.execute(
+                f'SELECT DISTINCT(gene_id) FROM sig WHERE chrom="chr{chrom}" AND pos >= {start} AND pos <= {end};'
+            )
+        )
+    gene_list = dict()
+    for geneid in geneid_list:
+        gene_list[str(geneid[0])] = str(
+            gene_json.get(geneid[0].split(".")[0], "")
+        )
 
     return render_template(
         "frontend/region.html",
@@ -66,6 +92,7 @@ def region_view():
         tissue=tissue,
         symbol=symbol,
         tissue_list=tissue_list,
+        gene_list=gene_list,
     )
 
 
