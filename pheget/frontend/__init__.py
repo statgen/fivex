@@ -132,8 +132,8 @@ def region_view():
     with conn:
         geneid_list = list(
             conn.execute(
-                f"SELECT DISTINCT(?) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
-                (gene_id, f"chr{chrom}", start, end),
+                f"SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
+                (f"chr{chrom}", start, end),
             )
         )
     gene_list = dict()
