@@ -32,7 +32,7 @@ function parseSearch(searchText) {
         window.location = `/region/?chrom=${chrom}&start=${start}&end=${end}`;
     } else {
         // Use omnisearch - works especially well for rs numbers
-        const omniurl = 'https://portaldev.sph.umich.edu/api_internal_dev/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
+        const omniurl = 'https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
         getOmni(omniurl, function (err, omniJson) {
             if (err !== null) {
                 alert('Error encountered: ' + err);
