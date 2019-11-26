@@ -42,9 +42,12 @@ function parseSearch(searchText) {
                     const pos = omniJson.data[0].start;
                     window.location = `/variant/${chrom}_${pos}`;
                 } else if (omniJson.data[0].gene_id !== undefined) {
+                    const chrom = omniJson.data[0].chrom;
                     const gene_id = omniJson.data[0].gene_id;
-                    window.location = `/gene/${gene_id}`;
-                    alert('You searched for the following gene: ' + omniJson.data[0].gene_name + '.\nSorry, we currently do not support region view (Will be added later).');
+                    const start = omniJson.data[0].start;
+                    const end = omniJson.data[0].end;
+                    window.location = `/region/?chrom=${chrom}&gene_id=${gene_id}&start=${start}&end=${end}`;
+                    // alert('You searched for the following gene: ' + omniJson.data[0].gene_name + '.\nSorry, we currently do not support region view (Will be added later).');
                 } else {
                     alert('Sorry, we were unable to find variant "' + searchText + '" in our database.');
                 }
