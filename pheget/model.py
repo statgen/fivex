@@ -4,7 +4,6 @@ Models/ datastores
 import gzip
 import json
 import os
-import pickle
 
 from flask import current_app
 
@@ -21,17 +20,6 @@ def locate_tissue_data(tissue):
         current_app.config["PHEGET_DATA_DIR"],
         f"{tissue}.allpairs.sorted.txt.gz",
     )
-
-
-def get_gene_lookup():
-    """Get a gene locator object to find the gene names in a given region"""
-    with open(
-        os.path.join(
-            current_app.config["PHEGET_DATA_DIR"], "gene.symbol.pickle"
-        ),
-        "rb",
-    ) as f:
-        return pickle.load(f)
 
 
 def get_best_per_variant_lookup():

@@ -51,7 +51,7 @@ def info_parser(row: str) -> InfoContainer:
 
 def get_variant_info(chrom: str, pos: int):
     """Get variant-specific information for annotations"""
-    gene_lookup = model.get_gene_lookup()
+    gene_lookup = model.get_gene_names_conversion()
     per_variant_path = model.get_best_per_variant_lookup()
     reader = (
         readers.TabixReader(per_variant_path, parser=info_parser)
