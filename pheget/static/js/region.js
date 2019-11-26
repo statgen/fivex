@@ -50,13 +50,16 @@ function getTrackLayout(gene_id, tissue, state) {
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = newscattertooltip.html +
-        `<a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Search this variant</a>`;
+        `<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
+        <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
+        <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
         unnamespaced: true,
         fields: [
-            '{{namespace[assoc]}}chromosome', '{{namespace[assoc]}}position', '{{namespace[assoc]}}ref_allele',
+            '{{namespace[assoc]}}chromosome', '{{namespace[assoc]}}position',
+            '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
