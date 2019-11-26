@@ -1,6 +1,6 @@
 """Shared fixtures"""
 
-import pytest
+import pytest  # type: ignore  # noqa
 
 from pheget import create_app
 
