@@ -1,4 +1,5 @@
 import math
+import typing as ty
 
 from zorp import readers  # type: ignore
 
@@ -14,33 +15,37 @@ except ImportError:
 class InfoContainer:
     def __init__(
         self,
-        chromosome=None,
-        position=None,
-        ref_allele=None,
-        alt_allele=None,
-        top_gene=None,
-        top_tissue=None,
-        ac=None,
-        af=None,
-        an=None,
-        rsid=None,
+        chromosome: str = None,
+        position: int = None,
+        ref_allele: str = None,
+        alt_allele: str = None,
+        top_gene: str = None,
+        top_tissue: str = None,
+        ac: int = None,
+        af: float = None,
+        an: int = None,
+        rsid: str = None,
     ):
         self.chromsome = chromosome
-        self.position = int(position) if position is not None else None
+        self.position = position
         self.ref_allele = ref_allele
         self.alt_allele = alt_allele
 
         self.top_gene = top_gene
         self.top_tissue = top_tissue
 
-        self.ac = int(ac) if ac is not None else None
-        self.af = float(af) if af is not None else None
-        self.an = int(an) if an is not None else None
+        self.ac = ac
+        self.af = af
+        self.an = an
         self.rsid = rsid
 
 
 def info_parser(row: str) -> InfoContainer:
-    fields = row.split("\t")
+    fields: ty.List[ty.Any] = row.split("\t")
+    fields[1] = int(fields[1])  # pos
+    fields[6] = int(fields[6])  # ac
+    fields[7] = float(fields[7])  # af
+    fields[8] = int(fields[8])  # an
     return InfoContainer(*fields)
 
 
