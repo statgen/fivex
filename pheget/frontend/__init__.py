@@ -40,17 +40,24 @@ def region_view():
         args["end"] = pos + 500000
         return redirect(url_for("frontend.region_view", **args))
 
+    # Chromosome is always required
     try:
-        # These params are always required. They are query params so the URL can update as the plot is scrolled.
         chrom = request.args["chrom"]
         if chrom[0:3] == "chr":
             chrom = chrom[3:]
-        start = int(request.args["start"])
-        end = int(request.args["end"])
     except (KeyError, ValueError):
         return abort(400)
 
-    center = (end + start) // 2
+    # We allow a few different combinations of other missing data
+    #  by looking up the best tissue, best gene, or proper range if they are missing
+
+    # First, process start, end, tissue, and gene
+    start = request.args.get("start", None)
+    end = request.args.get("end", None)
+    if start is not None:
+        start = int(start)
+    if end is not None:
+        end = int(end)
 
     tissue = request.args.get("tissue", None)
 
@@ -58,8 +65,61 @@ def region_view():
     gene_id = request.args.get("gene_id", None)
     symbol = request.args.get("symbol", None)
 
-    if not tissue or not (gene_id or symbol):
-        return abort(400)
+    # If there is a chromosome and tissue but no range, then try to fill in the range
+    if tissue and (start is None or end is None):
+        conn = sqlite3.connect(model.get_sig_lookup())
+        with conn:
+            try:
+                (
+                    sqlgene,
+                    sqlchrom,
+                    sqlpos,
+                    sqlref,
+                    sqlalt,
+                    sqlpval,
+                    sqltissue,
+                ) = list(
+                    conn.execute(
+                        f'SELECT * FROM sig WHERE chrom="chr{chrom}" AND tissue="{tissue}" ORDER BY pval LIMIT 1;'
+                    )
+                )[
+                    0
+                ]
+                start = max(int(sqlpos) - 500000, 1)
+                end = int(sqlpos + 500000)
+            except IndexError:
+                return abort(
+                    400
+                )  # This should never happen - all chromosome x tissue combo should have at least one point
+
+    # If there is a chromosome, start, and end, but no tissue or gene_id, then find out the best tissue and gene_id
+    if chrom and start and end and (tissue is None or gene_id is None):
+        conn = sqlite3.connect(model.get_sig_lookup())
+        with conn:
+            try:
+                (
+                    sqlgene_id,
+                    sqlchrom,
+                    sqlpos,
+                    sqlref,
+                    sqlalt,
+                    sqlval,
+                    sqltissue,
+                ) = list(
+                    conn.execute(
+                        f'SELECT * FROM sig WHERE chrom="chr{chrom}" AND pos >= {start} AND pos <= {end} ORDER BY pval LIMIT 1;'
+                    )
+                )[
+                    0
+                ]
+                if tissue is None:
+                    tissue = sqltissue
+                if gene_id is None:
+                    gene_id = sqlgene_id
+            except IndexError:
+                return abort(400)
+
+    center = (end + start) // 2
 
     # Get the full tissue list from TISSUE_DATA
     tissue_list = TISSUE_DATA.keys()

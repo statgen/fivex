@@ -194,9 +194,8 @@ def query_variants(
         # Our tabix file happens to use `chr1` format, so make our query match
         chrom = f"chr{chrom}"
 
-    if (
-        tissue
-    ):  # If query is single-tissue, use tissue-specific files for faster query
+    # If query is single-tissue, use tissue-specific files for faster query
+    if tissue:
         source = model.locate_tissue_data(tissue)
     else:  # Otherwise, query from a chromosome-specific file with all tissues
         source = model.locate_data(chrom)
