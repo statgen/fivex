@@ -129,39 +129,39 @@
                    class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                    data-placement="top" data-html=true
                    title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
-                  BRAVO <span class="fa fa-external-link"></span> </a>
+                  BRAVO <span class="fa fa-external-link-alt"></span> </a>
                 <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38"
                    class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                    data-placement="top"
                    title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
-                  GTEx Portal <span class="fa fa-external-link"></span> </a>
+                  GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
                 <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ pos - 25 }}-{{ pos + 25 }}"
                    class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                    data-placement="top" title="The UC Santa Cruz Genome Browser"> UCSC <span
-                    class="fa fa-external-link"></span></a>
+                    class="fa fa-external-link-alt"></span></a>
                 <a href="https://gnomad.broadinstitute.org/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}?dataset=gnomad_r3"
                    class="btn btn-primary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                    data-placement="top"
                    title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
-                  gnomAD <span class="fa fa-external-link"></span></a>
+                  gnomAD <span class="fa fa-external-link-alt"></span></a>
               {% endif %}
               {% if rsid is not none %}
                 <a href="https://www.ncbi.nlm.nih.gov/snp/{{ rsid }}" class="btn btn-primary btn-sm" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
-                  <span class="fa fa-external-link"></span> </a>
+                  <span class="fa fa-external-link-alt"></span> </a>
                 <a href="http://pheweb.sph.umich.edu/go?query={{ rsid }}" class="btn btn-primary btn-sm" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
-                  MGI <span class="fa fa-external-link"></span></a>
+                  MGI <span class="fa fa-external-link-alt"></span></a>
                 <a href="http://pheweb.sph.umich.edu/SAIGE-UKB/go?query={{ rsid }}" class="btn btn-primary btn-sm"
                    role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
-                  UKB-SAIGE <span class="fa fa-external-link"></span></a>
+                  UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
                 <a href="http://big.stats.ox.ac.uk/go?query={{ rsid }}" class="btn btn-primary btn-sm" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
-                  UKB-Oxford BIG <span class="fa fa-external-link"></span></a>
+                  UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
               {% endif %}
             </div>
           </div>
@@ -220,18 +220,18 @@
         <form action="#" method="post" class="label-display" id="toggle-labels">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
-                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>.">
+                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 50 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
             <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
           </span>
             <label class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
               <input type="radio" name="label-options" autocomplete=off value="0"> None
             </label>
             <label class="btn btn-info active" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>">
+                   title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" autocomplete=off value="5"> Top 5
             </label>
             <label class="btn btn-info" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="Add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>">
+                   title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" autocomplete=off value="50"> Top 50
             </label>
           </div>
@@ -300,11 +300,11 @@
         <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary"
            data-toggle="tooltip" data-placement="top"
            title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data">
-          <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link"></span> </a>
+          <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link-alt"></span> </a>
         <a href="https://www.gtexportal.org/home/documentationPage" class="badge badge-pill badge-secondary"
            data-toggle="tooltip" data-placement="top"
            title="Normalized Effect Size (NES) is defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Follow this link for more details from the GTEx Portal.">
-          Definition of NES <span class="fa fa-external-link"></span> </a>
+          Definition of NES <span class="fa fa-external-link-alt"></span> </a>
         <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
               title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span
