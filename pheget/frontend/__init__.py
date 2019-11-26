@@ -78,7 +78,7 @@ def region_view():
                     sqltissue,
                 ) = list(
                     conn.execute(
-                        f'SELECT * FROM sig WHERE chrom=? AND tissue="?" ORDER BY pval LIMIT 1;',
+                        f"SELECT * FROM sig WHERE chrom=? AND tissue=? ORDER BY pval LIMIT 1;",
                         (f"chr{chrom}", tissue),
                     )
                 )[
