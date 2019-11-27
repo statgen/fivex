@@ -37,72 +37,79 @@
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
-    <div class="row justify-content-start">
-
-      <div class="col-1">
-        <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
-            Add Tissue
-          </button>
-          <!-- Dynamically generate tissue buttons from tissue_list -->
-          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
-            {% for single_tissue in tissue_list %}
-            <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-
-      <div class="col-1">
-        <div class="dropdown">
-          <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                  aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
-            Add Gene
-          </button>
-          <!-- Dynamically generate gene list -->
-          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
-                {% for single_geneid, single_symbol in gene_list.items() %}
-                <button class="dropdown-item geneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
-                {% endfor %}
-          </div>
-        </div>
-      </div>
-
-      <div class="col-2">
-        <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                  aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
-                  <span class="fa fa-anchor"></span> <span class="anchortissue"></span>
-          </button>
-          <!-- Dynamically generate list of anchor tissue buttons -->
-          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
+    <div class="row justify-content-start pb-1">
+      <div class="col-sm">
+        <div class="btn-group pr-1">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+                title="Add a new tissue with the current anchor gene, or add a new gene with the current anchor tissue">
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
+          </span>
+          <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                    aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
+              Tissue
+            </button>
+            <!-- Dynamically generate tissue buttons from tissue_list -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
               {% for single_tissue in tissue_list %}
-              <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+              <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
               {% endfor %}
+            </div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                    aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
+              Gene
+            </button>
+            <!-- Dynamically generate gene list -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
+              {% for single_geneid, single_symbol in gene_list.items() %}
+              <button class="dropdown-item geneselect-class" type="button" value="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-2">
-        <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                  aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
-                  <span class="fa fa-anchor"></span> <span class="anchorgene"></span>
-          </button>
-          <!-- Dynamically generate anchor gene list -->
-          <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
-            {% for single_geneid, single_symbol in gene_list.items() %}
-              <button class="dropdown-item anchorgeneselect-class" type="button" value="{{ single_geneid }}">{{ single_symbol }}</button>
-            {% endfor %}
+        <div class="btn-group">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+                title="Choose a new anchor tissue or gene">
+            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-anchor"></span></button>
+          </span>
+
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                    aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
+                    <span class="anchortissue"></span>
+            </button>
+            <!-- Dynamically generate list of anchor tissue buttons -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
+                {% for single_tissue in tissue_list %}
+                <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+                {% endfor %}
+            </div>
+          </div>
+
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                    aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
+                    <i><span class="anchorgene"></span></i>
+            </button>
+            <!-- Dynamically generate anchor gene list -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
+              {% for single_geneid, single_symbol in gene_list.items() %}
+                <button class="dropdown-item anchorgeneselect-class" type="button" value="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
+              {% endfor %}
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
+</div>
 
 <div class="container-fluid">
-    <div class="row justify-content-start">
+    <div class="row justify-content-start pb-1">
       <div class="col-sm">
         <form action="#" method="POST" class="yaxis-display" id="transform-y">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -123,6 +130,7 @@
       </div>
     </div>
   </div>
+
 
   <div class="container-fluid">
     <div class="row">
