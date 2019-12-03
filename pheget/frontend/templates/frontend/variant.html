@@ -175,7 +175,7 @@
     <div class="row justify-content-start">
 
       <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form action="#" method="post" class="grouping" id="grouping-buttons">
+        <form class="grouping" id="grouping-buttons">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
                 title="Reorder the x-axis by one of these listed categories" data-placement="top">
@@ -198,7 +198,7 @@
       </div>
 
       <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form action="#" method="post" class="yaxis-display" id="transform-y">
+        <form class="yaxis-display" id="transform-y">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Switches the variable plotted on the Y-axis between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
@@ -217,7 +217,7 @@
       </div>
 
       <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form action="#" method="post" class="label-display" id="toggle-labels">
+        <form class="label-display" id="toggle-labels">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline=block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
                 title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 50 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
@@ -243,7 +243,7 @@
     <!-- Filters all points by TSS. Applies a region filter which is symmetric around the current point -->
     <div class="row justify-content-start">
       <div class="col-12 col-lg-6 col-xl-6" style="margin-bottom:0.8em">
-        <form action="#" method="post" class="tss-range" id="tss-both-range">
+        <form class="tss-range" id="tss-both-range">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
