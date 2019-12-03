@@ -3,9 +3,10 @@
 
 # Sample commands to use:
 #   sudo systemctl daemon-reload  # makes systemd notice changes to this file
+#   sudo systemctl enable pheget  # run once (re-running is fine) so that systemd knows to run this when the system starts
 #   sudo systemctl start pheget
 #   sudo systemctl restart pheget
-#   sudo systemctl enable pheget  # run once (re-running is fine) so that systemd knows to run this when the system starts
+#   sudo systemctl status -n30 pheget  # show status and the last 30 lines of output
 
 # Patterned on:
 # https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04
