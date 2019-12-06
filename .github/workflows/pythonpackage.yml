@@ -35,6 +35,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        # Install `wheel` so that pip can cache wheels it builds to save a few minutes on each run.
+        # Pip keeps a cache of HTTPS requests in `~/.cache/pip/http/`.  For packages that have only
+        # a tar file available (and no wheel), pip builds the package itself.  It only caches to
+        # `~/.cache/pip/wheels/` if `wheel` is installed.
+        pip install wheel
         pip install -r requirements/dev.txt
         npm ci
     - name: Standard linting rules
