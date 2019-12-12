@@ -1,5 +1,4 @@
 // This section will define the code required for the plot
-/* global d3 */
 /* global LocusZoom */
 /* global Tabulator */
 
@@ -126,126 +125,6 @@ LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
 
 LocusZoom.TransformationFunctions.add('twosigfigs', function(x) {
     return (Math.abs(x) >= .1) ? x.toFixed(2) : (Math.abs(x) >= .01) ? x.toFixed(3) : x.toExponential(1);
-});
-
-// Redefine the `resize_to_data` button to set the text to "Show All Genes" (and no other changes).
-// Delete this once LocusZoom allows configuring the text via the layout.
-LocusZoom.Dashboard.Components.set('resize_to_data', function (layout) {
-    LocusZoom.Dashboard.Component.apply(this, arguments);
-    this.update = function () {
-        if (this.button) {
-            return this;
-        }
-        this.button = new LocusZoom.Dashboard.Component.Button(this)
-            .setColor(layout.color).setHtml('Show All Genes')
-            .setTitle('Automatically resize this panel to fit the data its currently showing')
-            .setOnclick(function () {
-                this.parent_panel.scaleHeightToData();
-                this.update();
-            }.bind(this));
-        this.button.show();
-        return this;
-    };
-});
-
-
-// Redefine the orthogonal line element from locuszoom/assets/js/app/DataLayers/line.js so we can make it draw all the way down
-LocusZoom.DataLayers.add('orthogonal_line_varpos', function (layout) {
-    // Define a default layout for this DataLayer type and merge it with the passed argument
-    this.DefaultLayout = {
-        style: {
-            'stroke': '#FF3333',
-            'stroke-width': '2px',
-            'stroke-dasharray': '4px 4px'
-        },
-        orientation: 'vertical',
-        x_axis: {
-            axis: 1,
-            decoupled: true
-        },
-        y_axis: {
-            axis: 1,
-            decoupled: true
-        },
-        offset: 0
-    };
-    layout = LocusZoom.Layouts.merge(layout, this.DefaultLayout);
-
-    // Require that orientation be "horizontal" or "vertical" only
-    if (['horizontal', 'vertical'].indexOf(layout.orientation) === -1) {
-        layout.orientation = 'vertical';
-    }
-
-    // Vars for storing the data generated line
-    /** @member {Array} */
-    this.data = [];
-    /** @member {d3.svg.line} */
-    this.line = null;
-
-    // Apply the arguments to set LocusZoom.DataLayer as the prototype
-    LocusZoom.DataLayer.apply(this, arguments);
-
-    /**
-     * Implement the main render function
-     */
-    this.render = function () {
-
-        // Several vars needed to be in scope
-        var panel = this.parent;
-        var x_scale = 'x_scale';
-        var y_scale = 'y' + this.layout.y_axis.axis + '_scale';
-        var y_extent = 'y' + this.layout.y_axis.axis + '_extent';
-        var x_range = 'x_range';
-        var y_range = 'y' + this.layout.y_axis.axis + '_range';
-
-        // Generate data using extents - use two points, but with NaNs in the y-axis
-        this.data = [
-            { x: this.layout.offset, y: panel[y_extent][0] },  // panel[y1_extent][0] = NaN
-            { x: this.layout.offset, y: panel[y_extent][1] }   // panel[y1_extent][1] = NaN
-        ];
-
-        // Join data to the line selection
-        var selection = this.svg.group
-            .selectAll('path.lz-data_layer-line')
-            .data([this.data]);
-
-        // Create path element, apply class
-        this.path = selection.enter()
-            .append('path')
-            .attr('class', 'lz-data_layer-line');
-
-        panel[y_range][0] = panel.layout.height;  // Forcibly extract the height of this panel and set it as the height of this line (see below)
-
-        // Generate the line
-        this.line = d3.svg.line()
-            .x(function (d, i) {
-                var x = parseFloat(panel[x_scale](d['x']));
-                return isNaN(x) ? panel[x_range][i] : x;
-            })
-            .y(function (d, i) {
-                var y = parseFloat(panel[y_scale](d['y']));
-                return isNaN(y) ? panel[y_range][i] : y;  // This will use the forcibly-changed height value
-            })
-            .interpolate('linear');
-
-        // Apply line and style
-        if (this.canTransition()) {
-            selection
-                .transition()
-                .duration(this.layout.transition.duration || 0)
-                .ease(this.layout.transition.ease || 'cubic-in-out')
-                .attr('d', this.line)
-                .style(this.layout.style);
-        } else {
-            selection
-                .attr('d', this.line)
-                .style(this.layout.style);
-        }
-        selection.exit().remove();
-    };
-
-    return this;
-
 });
 
 
@@ -421,7 +300,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     }(),
                     {
                         id: 'variant',
-                        type: 'orthogonal_line_varpos',
+                        type: 'orthogonal_line',
                         orientation: 'vertical',
                         offset: pos,
                         style: {
