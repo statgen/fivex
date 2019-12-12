@@ -22,8 +22,8 @@ parser.add_argument(
 args = parser.parse_args()
 with shelve.open(args.outfile) as s, gzip.open(args.infile) as f:
     for line in f:
-        (b38pos, chrom, pos, ref, alt, naps, rsnum, b37pos) = line.rstrip(
-            "\n"
-        ).split("\t")
+        (b38pos, chrom, pos, ref, alt, naps, rsnum, b37pos) = (
+            line.decode("utf-8").rstrip("\n").split("\t")
+        )
         if rsnum != ".":
             s[":".join([chrom, pos, ref, alt])] = rsnum
