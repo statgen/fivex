@@ -18,11 +18,20 @@ This will symlink the data files and a gff3 file necessary for PheGET to functio
 
 Alternate method for local testing
 
-(1) Download **Homo_sapiens.GRCh38.97.chr.gff3.gz** to the **data** directory
+(1) Download the following files to the **data** directory:
+- **Homo_sapiens.GRCh38.97.chr.gff3.gz**
 - If you have access to the UM StatGen cluster, you can find this file at **'/net/amd/amkwong/browseQTL/all_chr/ensembl/Homo_sapiens.GRCh38.97.chr.gff3.gz'**
 - This file can be found at 
 **`ftp://ftp.ensembl.org/pub/release-97/gff3/homo_sapiens/Homo_sapiens.GRCh38.97.chr.gff3.gz`**
 - As long as future releases retain the same formatting, they will still work, but the user will need to manually edit the value of the "ensemb" variable to match the new file name in generate.makefile.to.process.data.py
+
+- **GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz**
+- This file can be found at the GTEx portal site at https://gtexportal.org/home/datasets or directly from the following link:
+- **`https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz`**
+
+- **GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.vcf.gz**
+- This file contains the full genotypes from GTEx v8, and contains allele counts and allele frequencies.
+- You will need to request this controlled-access data from dbGaP
 
 (2) Enter the **util** directory.
 
