@@ -34,12 +34,11 @@ combinescript = os.path.join(scriptdir, "combine.ac.af.an.gene.tissue.rsid.py")
 # ftp://ftp.ensembl.org/pub/release-97/gff3/homo_sapiens/Homo_sapiens.GRCh38.97.chr.gff3.gz
 ensemb = os.path.join(outdir, "Homo_sapiens.GRCh38.97.chr.gff3.gz")
 # For rs numbers, the user will need to download the following file from the GTEx portal:
-# https://storage.googleapis.com/gtex_analysis_v8/ref-erence/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz
+# https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz
 rsgtex = os.path.join(
     outdir,
     "GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz",
 )
-# rsbgzip = os.path.join(outdir, "rs.numbers.txt.gz")
 rsshelve = os.path.join(outdir, "rs.numbers.shelve")
 makeshelve = os.path.join(scriptdir, "create.rs.num.shelve.py")
 # For AC and AN, we will need to extract the INFO column from the full genotype file (need to request from dbGaP)
@@ -116,11 +115,6 @@ with open("run.extract.Makefile", "w") as w:
     w.write(
         f"{bestinterm}: {gtexgeno}\n\tzgrep -v ^# {gtexgeno} | tr ';' '\\t' | tr '=' '\\t' | cut -f 1,2,4,5,9,11,13 | bgzip -c > {bestinterm}\n"
     )
-
-    # Create a tabixed file containing only the chromosome and positions of all variants across all chromosomes
-    # This will be a list of only variants with GTEx v8 expression data
-    # w.write(f"{varlist}.tbi: {varlist}\n\ttabix -s 1 -b 2 -e 2 {varlist}\n\n")
-    # w.write(f"{varlist}: {outall}\n\tzcat {outall} | cut -f 2,3 | uniq > {varlist}\n\n")
 
     # Generate an sqlite3 database with only significant (p<1e-5) variants for fast lookup and suggestions
     w.write(
