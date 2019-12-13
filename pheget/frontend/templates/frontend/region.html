@@ -176,21 +176,21 @@
       var tissueElements = document.getElementsByClassName('tissueselect-class');
       Array.from(tissueElements).forEach((selectedTissue) => {
           selectedTissue.addEventListener('click', (event) => {
-              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.target.value);
+              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.currentTarget.value);
           });
       });
 
       var geneElements = document.getElementsByClassName('geneselect-class');
       Array.from(geneElements).forEach((selectedGene) => {
           selectedGene.addEventListener('click', (event) => {
-              addTrack(window.plot, window.datasources, event.target.value, ANCHOR_TISSUE);
+              addTrack(window.plot, window.datasources, event.currentTarget.value, ANCHOR_TISSUE);
           });
       });
 
       var anchortissueElements = document.getElementsByClassName('anchortissueselect-class');
       Array.from(anchortissueElements).forEach((selectedAnchorTissue) => {
           selectedAnchorTissue.addEventListener('click', (event) => {
-            ANCHOR_TISSUE = event.target.value;
+            ANCHOR_TISSUE = event.currentTarget.value;
             document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
@@ -206,7 +206,7 @@
       var anchorgeneElements = document.getElementsByClassName('anchorgeneselect-class');
       Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
           selectedAnchorGene.addEventListener('click', (event) => {
-            ANCHOR_GENE = event.target.value;
+            ANCHOR_GENE = event.currentTarget.value;
             document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
