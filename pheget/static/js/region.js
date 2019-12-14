@@ -213,14 +213,14 @@ function addTrack(plot, datasources, gene_id, tissue) {
 function switchY_region(plot, yfield) {
     let assoc_panels = plot.layout.panels;  // Iterate through all panels, including any added panels
     assoc_panels.forEach(function (panel) {
-        if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
+        if (panel.data_layers.some(d => d.id === 'associationpvalues') && panel.data_layers.some(d => d.id === 'significance')) {
+            let scatter_layout = panel.data_layers.find(d => d.id === 'associationpvalues');
+            let panel_base_y = scatter_layout.y_axis;
+            let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
-                let scatter_layout = panel.data_layers.filter(d => d.id === 'associationpvalues')[0];
-                let panel_base_y = scatter_layout.y_axis;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
-                let significance_layout = panel.data_layers.filter(d => d.id === 'significance')[0];
-                significance_layout.offset = 0;  // Change dotted horizontal line to y=0
-                significance_layout.style = {
+                significance_line_layout.offset = 0;  // Change dotted horizontal line to y=0
+                significance_line_layout.style = {
                     'stroke': 'gray',
                     'stroke-width': '1px',
                     'stroke-dasharray': '10px 0px'
@@ -229,12 +229,9 @@ function switchY_region(plot, yfield) {
                 delete panel_base_y.floor;
                 panel_base_y.min_extent = [-1, 1];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
-                let scatter_layout = panel.data_layers.filter(d => d.id === 'associationpvalues')[0];
-                let panel_base_y = scatter_layout.y_axis;
                 panel.axes.y1.label = '-log 10 p-value';
-                let significance_layout = panel.data_layers.filter(d => d.id === 'significance')[0];
-                significance_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-                significance_layout.style = {
+                significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
+                significance_line_layout.style = {
                     'stroke': '#D3D3D3',
                     'stroke-width': '3px',
                     'stroke-dasharray': '10px 10px'
@@ -246,7 +243,7 @@ function switchY_region(plot, yfield) {
             } else {
                 throw new Error('Unrecognized yfield option');
             }
-            plot.applyState();
         }
     });
+    plot.applyState();
 }
