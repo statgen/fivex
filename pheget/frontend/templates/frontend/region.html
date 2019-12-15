@@ -32,7 +32,7 @@
     </center>
     <br>
     {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }} </strong></h1>
+    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }}</strong></h1>
   </div>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
@@ -64,7 +64,7 @@
             <!-- Dynamically generate gene list -->
             <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
               {% for single_geneid, single_symbol in gene_list.items() %}
-              <button class="dropdown-item geneselect-class" type="button" value="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
+              <button class="dropdown-item geneselect-class" type="button" data-genesymbol="{{ single_symbol }}" data-geneid="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
               {% endfor %}
             </div>
           </div>
@@ -97,7 +97,7 @@
             <!-- Dynamically generate anchor gene list -->
             <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
               {% for single_geneid, single_symbol in gene_list.items() %}
-                <button class="dropdown-item anchorgeneselect-class" type="button" value="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
+                <button class="dropdown-item anchorgeneselect-class" type="button" data-genesymbol="{{ single_symbol }}" data-geneid="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
               {% endfor %}
             </div>
           </div>
@@ -156,10 +156,11 @@
   <script type="application/javascript">
       'use strict';
       var ANCHOR_GENE = {{gene_id|tojson}};
+      var ANCHOR_SYMBOL = {{symbol|tojson}};
       var ANCHOR_TISSUE = {{tissue|tojson}};
       var GENE_DICT = {{gene_list|tojson}};
 
-      [window.plot, window.datasources] = makeSinglePlot(ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot');
+      [window.plot, window.datasources] = makeSinglePlot(ANCHOR_GENE, ANCHOR_TISSUE, '#lz-plot', ANCHOR_SYMBOL);
 
       // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse
       document.getElementById('variant-search').addEventListener('submit', function (event) {
@@ -176,14 +177,14 @@
       var tissueElements = document.getElementsByClassName('tissueselect-class');
       Array.from(tissueElements).forEach((selectedTissue) => {
           selectedTissue.addEventListener('click', (event) => {
-              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.currentTarget.value);
+              addTrack(window.plot, window.datasources, ANCHOR_GENE, event.currentTarget.value, ANCHOR_SYMBOL);
           });
       });
 
       var geneElements = document.getElementsByClassName('geneselect-class');
       Array.from(geneElements).forEach((selectedGene) => {
           selectedGene.addEventListener('click', (event) => {
-              addTrack(window.plot, window.datasources, event.currentTarget.value, ANCHOR_TISSUE);
+              addTrack(window.plot, window.datasources, event.currentTarget.dataset.geneid, ANCHOR_TISSUE, event.currentTarget.dataset.genesymbol);
           });
       });
 
@@ -199,14 +200,15 @@
               }
             });
             // FIXME: seems to be an ugly way of removing panels one by one
-            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE, ANCHOR_SYMBOL);
           });
       });
 
       var anchorgeneElements = document.getElementsByClassName('anchorgeneselect-class');
       Array.from(anchorgeneElements).forEach((selectedAnchorGene) => {
           selectedAnchorGene.addEventListener('click', (event) => {
-            ANCHOR_GENE = event.currentTarget.value;
+            ANCHOR_GENE = event.currentTarget.dataset.geneid;
+            ANCHOR_SYMBOL = event.currentTarget.dataset.genesymbol;
             document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
@@ -216,7 +218,7 @@
             });
             // FIXME: seems to be an ugly way of removing panels one by one
             // TODO: Delete all other tracks
-            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE);
+            addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE, ANCHOR_SYMBOL);
           });
       });
 

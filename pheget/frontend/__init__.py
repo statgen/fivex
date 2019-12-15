@@ -127,6 +127,10 @@ def region_view():
     # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
     gene_json = model.get_gene_names_conversion()
 
+    # If no symbol is entered but we have gene_id, try to look it up in gene_json
+    if symbol is None:
+        symbol = gene_json.get(gene_id.split(".")[0], None)
+
     # Query the sqlite3 database for the range (chrom:start-end) and get the list of all genes
     conn = sqlite3.connect(model.get_sig_lookup())
     with conn:
