@@ -32,7 +32,7 @@
     </center>
     <br>
     {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ center }}</strong></h1>
+    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ "{:,}".format(center) }} </strong></h1>
   </div>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
