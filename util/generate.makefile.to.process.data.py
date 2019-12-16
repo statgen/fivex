@@ -113,7 +113,7 @@ with open("run.extract.Makefile", "w") as w:
         f"{bestinterm}.tbi: {bestinterm}\n\ttabix -s 1 -b 2 -e 2 {bestinterm}\n\n"
     )
     w.write(
-        f"{bestinterm}: {gtexgeno}\n\tzgrep -v ^# {gtexgeno} | tr ';' '\\t' | tr '=' '\\t' | cut -f 1,2,4,5,9,11,13 | bgzip -c > {bestinterm}\n\n"
+        f"{bestinterm}: {gtexgeno}\n\tzgrep -v ^'#' {gtexgeno} | tr ';' '\\t' | tr '=' '\\t' | cut -f 1,2,4,5,9,11,13 | bgzip -c > {bestinterm}\n\n"
     )
 
     # Generate an sqlite3 database with only significant (p<1e-5) variants for fast lookup and suggestions
