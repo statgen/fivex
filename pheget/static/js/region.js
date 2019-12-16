@@ -71,7 +71,16 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
     return [
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
-            //title: { text: `Association between ${tissue} and ${genesymbol}`, x: 100, y: 30 },  // TODO: Use gene symbol instead of gene id
+            title: { text: `${genesymbol} in ${tissue}`, x: 100, y: 30 },  // TODO: Use gene symbol instead of gene id
+            // dashboard: {
+            //     components: [
+            //         {
+            //             type: 'title',
+            //             title: `<i>${genesymbol}</i> in ${tissue}`,
+            //             position: 'left'
+            //         }
+            //     ]
+            // },  // Adding this makes the text auto-hide initially, but adds extra copies on mouse hover
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
