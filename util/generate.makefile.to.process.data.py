@@ -113,7 +113,7 @@ with open("run.extract.Makefile", "w") as w:
         f"{bestinterm}.tbi: {bestinterm}\n\ttabix -s 1 -b 2 -e 2 {bestinterm}\n\n"
     )
     w.write(
-        f"{bestinterm}: {gtexgeno}\n\tzgrep -v ^# {gtexgeno} | tr ';' '\\t' | tr '=' '\\t' | cut -f 1,2,4,5,9,11,13 | bgzip -c > {bestinterm}\n"
+        f"{bestinterm}: {gtexgeno}\n\tzgrep -v ^# {gtexgeno} | tr ';' '\\t' | tr '=' '\\t' | cut -f 1,2,4,5,9,11,13 | bgzip -c > {bestinterm}\n\n"
     )
 
     # Generate an sqlite3 database with only significant (p<1e-5) variants for fast lookup and suggestions
@@ -125,12 +125,15 @@ with open("run.extract.Makefile", "w") as w:
         outfile = os.path.join(outdir, f"chr{i}.All_Tissues.sorted.txt.gz")
         w.write(f" {outfile}")
     w.write("\n")
+    w.write("\t(")
     for i in list(range(1, 23)) + ["X"]:  # type: ignore
         outfile = os.path.join(outdir, f"chr{i}.All_Tissues.sorted.txt.gz")
         w.write(
-            f"\tzcat {outfile} | tail -n +2 | perl -nale 'print if $F[10] < 1e-5' | cut -f 1-5,11,14 >> {siglines}\n"
+            f"zcat {outfile} | tail -n +2 | perl -nale 'print if $F[10] < 1e-5' | cut -f 1-5,11,14"
         )
-    w.write("\n")
+        if i != "X":
+            w.write("; ")
+    w.write(f") > {siglines}\n\n")
 
     # Create sorted chromosome-specific, all-tissues tmp files from chromosome-specific, tissue-specific data files
     for i in list(range(1, 23)) + ["X"]:  # type: ignore
