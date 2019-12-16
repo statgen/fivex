@@ -90,7 +90,7 @@ with open("run.extract.Makefile", "w") as w:
         )
         w.write(f" {infile}")
     w.write(
-        f"\n\tpython {combinescript} {bestinterm} {outdir} .GTEx.v8.variant.level.top.genes.and.tissues.txt {bestfile} {rsshelve}\n\n"
+        f"\n\tpython {combinescript} {bestinterm} {outdir}/ .GTEx.v8.variant.level.top.genes.and.tissues.txt {bestfile} {rsshelve}\n\n"
     )
 
     # Create a python shelve dictionary that translates 'chr:pos:ref:alt' to 'rsid'

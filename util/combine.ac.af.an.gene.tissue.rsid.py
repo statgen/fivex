@@ -28,7 +28,7 @@ def gtexGen(fileObj):
 # This file contains chrom, pos, ref, alt, bestGene, bestTissue
 def bestGen(fileObj):
     while True:
-        line = fileObj.readline().decode("utf-8")
+        line = fileObj.readline()
         if not line:
             break
         temp = line.rstrip("\n").split("\t")
@@ -93,7 +93,7 @@ def main():
         chrRangeGen = rangeGen()  # Initialize the chromosome generator
         currentChr = next(chrRangeGen)
         bestInfile = f"{args.prefix}{currentChr}{args.suffix}"  # This contains best gene/tissue information
-        g = gzip.open(bestInfile)
+        g = open(bestInfile)
         bestInfoGen = bestGen(g)
         (gchr, gpos, gref, galt, gene, tissue) = next(
             bestInfoGen
