@@ -14,11 +14,14 @@
         <div id="home-searchbox">
           <form id="variant-search">
             <div class="input-group">
+              <div class="input-group-prepend">
+                  <a href="/" class="btn btn-secondary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span></a>
+              </div>
               <input id="query-field" name="query-field" autocomplete="off" class="form-control"
                      type="text"
                      placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
               <div class="input-group-append">
-                <button id="navigate-variant" class="btn btn-primary" type="submit">Search <span
+                <button id="navigate-variant" class="btn btn-secondary" type="submit"><span
                     class="fa fa-search"></span></button>
               </div>
             </div>
@@ -26,73 +29,33 @@
         </div>
       </div>
     </div>
-    <center>
-      <a href="/" class="btn btn-primary btn-sm" role="button" aria-pressed="true"><span class="fa fa-home"></span> Back
-        to PheGET Homepage</a>
-    </center>
+    
     <br>
     {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near {{ chrom }}:{{ "{:,}".format(center) }} </strong></h1>
+    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs in {{ chrom }}:{{ "{:,}".format(start) }}-{{ "{:,}".format(end) }} </strong></h1>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div id="lz-plot" class="ten columns">
+      </div>
+    </div>
   </div>
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
     <div class="row justify-content-start pb-1">
       <div class="col-sm">
+
         <div class="btn-group pr-1">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
-                title="Add a new tissue with the current anchor gene, or add a new gene with the current anchor tissue">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
-          </span>
-          <div class="dropdown">
-            <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                    aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected tissue and the current anchor gene">
-              Tissue
-            </button>
-            <!-- Dynamically generate tissue buttons from tissue_list -->
-            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
-              {% for single_tissue in tissue_list %}
-              <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-info dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                    aria-haspopup="true" aria-expanded="false" title="Add a new panel with the selected gene and the current anchor tissue">
-              Gene
-            </button>
-            <!-- Dynamically generate gene list -->
-            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
-              {% for single_geneid, single_symbol in gene_list.items() %}
-              <button class="dropdown-item geneselect-class" type="button" data-genesymbol="{{ single_symbol }}" data-geneid="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <div class="btn-group">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                 title="Choose a new anchor tissue or gene">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-anchor"></span></button>
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-anchor"></span></button>
           </span>
-
           <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                    aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
-                    <span class="anchortissue"></span>
-            </button>
-            <!-- Dynamically generate list of anchor tissue buttons -->
-            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
-                {% for single_tissue in tissue_list %}
-                <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
-                {% endfor %}
-            </div>
-          </div>
-
-          <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
-                    aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
-                    <i><span class="anchorgene"></span></i>
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
+              <i><span class="anchorgene"></span></i>
             </button>
             <!-- Dynamically generate anchor gene list -->
             <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchorgeneselect">
@@ -101,38 +64,86 @@
               {% endfor %}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="container-fluid">
-    <div class="row justify-content-start pb-1">
-      <div class="col-sm">
-        <form class="yaxis-display" id="transform-y">
-          <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
-                title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
-            <button type="button" class="btn btn-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
+          <span class="d-inline-block">
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> in</button>
           </span>
-            <label class="btn btn-success active" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-              <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
-            </label>
-            <label class="btn btn-success" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-              <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
-            </label>
+
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
+                <span class="anchortissue"></span>
+            </button>
+            <!-- Dynamically generate list of anchor tissue buttons -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_anchortissueselect">
+                {% for single_tissue in tissue_list %}
+                  <button class="dropdown-item anchortissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+                {% endfor %}
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
-  </div>
+        </div>
 
+        <div class="btn-group pr-1">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+                title="Add a new gene with the current anchor tissue">
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
+          </span>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                    aria-haspopup="true" aria-expanded="false" title="Choose a gene to add a new panel showing eQTLs between that gene and the current anchor tissue">
+              Gene
+            </button>
+            <!-- Dynamically generate gene list -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_geneselect">
+              {% for single_geneid, single_symbol in gene_list.items() %}
+               <button class="dropdown-item geneselect-class" type="button" data-genesymbol="{{ single_symbol }}" data-geneid="{{ single_geneid }}"><i>{{ single_symbol }}</i></button>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">in</button>
+          <button type="button" class="btn btn-outline-secondary anchor-tissue-label" style="pointer-events: none;">{{ tissue }}</button>
+        </div>
 
-  <div class="container-fluid">
-    <div class="row">
-      <div id="lz-plot" class="ten columns">
+        <div class="btn-group pr-1">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+            title="Add a new tissue with the current anchor gene">
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
+          </span>
+          <button type="button" class="btn btn-outline-secondary anchor-gene-label" style="pointer-events: none;"><i>{{ symbol }}</i></button>
+          <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">in</button>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+                  aria-haspopup="true" aria-expanded="false" title="Choose a tissue to add a new panel with eQTLs between that tissue and the current anchor gene">
+            Tissue
+            </button>
+          <!-- Dynamically generate tissue buttons from tissue_list -->
+            <div class="dropdown-menu scrollable-menu" aria-labelledby="dropdown_tissueselect">
+              {% for single_tissue in tissue_list %}
+              <button class="dropdown-item tissueselect-class" type="button" value="{{ single_tissue }}">{{ single_tissue }}</button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group pr-1">
+          <form class="yaxis-display" id="transform-y">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+                  title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
+                <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
+              </span>
+              <label class="btn btn-secondary active" data-toggle="tooltip" data-placement="top" data-html="true"
+                  title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+                <input type="radio" name="y-options" autocomplete=off id="show-log-pvalue" value="log_pvalue"> P-values
+              </label>
+              <label class="btn btn-secondary" data-toggle="tooltip" data-placement="top" data-html="true"
+                  title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
+                <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
+              </label>
+            </div>
+          </form>
+        </div>
+
       </div>
     </div>
   </div>
@@ -193,6 +204,7 @@
           selectedAnchorTissue.addEventListener('click', (event) => {
             ANCHOR_TISSUE = event.currentTarget.value;
             document.querySelector('.anchortissue').innerHTML = ANCHOR_TISSUE;
+            document.querySelector('.anchor-tissue-label').innerHTML = ANCHOR_TISSUE;
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
               if (id !=='genes'){
@@ -210,6 +222,7 @@
             ANCHOR_GENE = event.currentTarget.dataset.geneid;
             ANCHOR_SYMBOL = event.currentTarget.dataset.genesymbol;
             document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
+            document.querySelector('.anchor-gene-label').innerHTML = GENE_DICT[ANCHOR_GENE]
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
               if (id !=='genes'){
