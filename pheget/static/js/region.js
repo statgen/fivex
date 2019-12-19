@@ -66,11 +66,6 @@ function getTrackLayout(gene_id, tissue, state) {
         ],
         tooltip: newscattertooltip
     });
-    const line = {  // TODO: What is the purpose of these boundary lines?  A: These originally appeared on the gene track to mark boundaries; we don't really need them
-        type: 'orthogonal_line',
-        orientation: 'vertical',
-        style: { 'stroke': '#FF3333', 'stroke-width': '2px', 'stroke-dasharray': '4px 4px' }
-    };
 
     return [
         LocusZoom.Layouts.get('panel', 'association', {
@@ -80,8 +75,6 @@ function getTrackLayout(gene_id, tissue, state) {
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                 LocusZoom.Layouts.get('data_layer', 'recomb_rate', { unnamespaced: true }),
-                Object.assign({ id: 'start', offset: state.start }, line),
-                Object.assign({ id: 'end', offset: state.end }, line),
                 assoc_layer,
             ]
         })
@@ -220,13 +213,14 @@ function addTrack(plot, datasources, gene_id, tissue) {
 function switchY_region(plot, yfield) {
     let assoc_panels = plot.layout.panels;  // Iterate through all panels, including any added panels
     assoc_panels.forEach(function (panel) {
-        if (panel.id !== 'genes') {  // Only switch y-axis category if the current panel is not the genes track
+        if (panel.data_layers.some(d => d.id === 'associationpvalues') && panel.data_layers.some(d => d.id === 'significance')) {
+            let scatter_layout = panel.data_layers.find(d => d.id === 'associationpvalues');
+            let panel_base_y = scatter_layout.y_axis;
+            let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
-                let scatter_layout = panel.data_layers[4];
-                let panel_base_y = scatter_layout.y_axis;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
-                panel.data_layers[0].offset = 0;  // Change dotted horizontal line to y=0
-                panel.data_layers[0].style = {
+                significance_line_layout.offset = 0;  // Change dotted horizontal line to y=0
+                significance_line_layout.style = {
                     'stroke': 'gray',
                     'stroke-width': '1px',
                     'stroke-dasharray': '10px 0px'
@@ -235,11 +229,9 @@ function switchY_region(plot, yfield) {
                 delete panel_base_y.floor;
                 panel_base_y.min_extent = [-1, 1];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
-                let scatter_layout = panel.data_layers[4];
-                let panel_base_y = scatter_layout.y_axis;
                 panel.axes.y1.label = '-log 10 p-value';
-                panel.data_layers[0].offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
-                panel.data_layers[0].style = {
+                significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
+                significance_line_layout.style = {
                     'stroke': '#D3D3D3',
                     'stroke-width': '3px',
                     'stroke-dasharray': '10px 10px'
@@ -251,7 +243,7 @@ function switchY_region(plot, yfield) {
             } else {
                 throw new Error('Unrecognized yfield option');
             }
-            plot.applyState();
         }
     });
+    plot.applyState();
 }
