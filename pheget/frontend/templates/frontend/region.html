@@ -48,12 +48,12 @@
       <div class="col-sm">
         Set a default gene or tissue as the anchor<br>
         <div class="btn-group pr-1">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
                 title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
-            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"><span class="fa fa-info-circle"></span> <span class="fa fa-anchor"></span></button>
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"><span class="fa fa-info-circle"></span><span class="fa fa-anchor"></span></button>
           </span>
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="right"
                   aria-haspopup="true" aria-expanded="false" title="Choose a gene to serve as an anchor">
               <i><span class="anchorgene"></span></i>
             </button>
@@ -70,7 +70,7 @@
           </span>
 
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchortissueselect" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="right"
                 aria-haspopup="true" aria-expanded="false" title="Choose a tissue to serve as an anchor">
                 <span class="anchortissue"></span>
             </button>
@@ -91,7 +91,7 @@
             <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
           </span>
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip"
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_geneselect" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="left"
                     aria-haspopup="true" aria-expanded="false" title="Choose a gene to add a new panel showing eQTLs between that gene and the current anchor tissue">
               Gene
             </button>
@@ -116,7 +116,7 @@
           <button type="button" class="btn btn-outline-secondary anchor-gene-label" style="pointer-events: none;"><i>{{ symbol }}</i></button>
           <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">in</button>
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip"
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tissueselect" data-toggle="dropdown" data-toggle-second="tooltip" data-placement="right"
                   aria-haspopup="true" aria-expanded="false" title="Choose a tissue to add a new panel with eQTLs between that tissue and the current anchor gene">
             Tissue
             </button>
