@@ -71,6 +71,11 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
     const layoutBase =
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
+            title: {  // Remove this when LocusZoom update with the fix to dashboard titles is published
+                text: `${genesymbol} in ${tissue}`,
+                x: 60,
+                y: 30
+            },
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
@@ -79,6 +84,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             ]
         });
 
+    /* Add this back in when LocusZoom update is published
     layoutBase.dashboard.components.push(
         {
             type: 'title',
@@ -86,6 +92,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             position: 'left'
         }
     );
+    */
 
     return [layoutBase];
 }
