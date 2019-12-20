@@ -29,7 +29,7 @@
         </div>
       </div>
     </div>
-    
+
     <br>
     {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
     <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs in {{ chrom }}:{{ "{:,}".format(start) }}-{{ "{:,}".format(end) }} </strong></h1>
@@ -37,7 +37,7 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div id="lz-plot" class="ten columns">
+      <div id="lz-plot">
       </div>
     </div>
   </div>
@@ -82,7 +82,7 @@
             </div>
           </div>
         </div>
-      </div>        
+      </div>
       <div class="col-sm">
         Add plot for a new gene in the anchor tissue<br>
         <div class="btn-group pr-1">
@@ -162,7 +162,7 @@
       <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
         title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
-          <span class="fa fa-lightbulb-o"></span> Credits 
+          <span class="fa fa-lightbulb-o"></span> Credits
         </span>
       </span>
     </div>
