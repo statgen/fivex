@@ -44,13 +44,13 @@
 
   <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
   <div class="container-fluid">
-    <div class="row justify-content-start pb-1">
+    <div class="row justify-content-start">
       <div class="col-sm">
-
+        Set a default gene or tissue as the anchor<br>
         <div class="btn-group pr-1">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
-                title="Choose a new anchor tissue or gene">
-            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-anchor"></span></button>
+                title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
+            <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"><span class="fa fa-info-circle"></span> <span class="fa fa-anchor"></span></button>
           </span>
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_anchorgeneselect" data-toggle="dropdown" data-toggle-second="tooltip"
@@ -82,10 +82,12 @@
             </div>
           </div>
         </div>
-
+      </div>        
+      <div class="col-sm">
+        Add plot for a new gene in the anchor tissue<br>
         <div class="btn-group pr-1">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
-                title="Add a new gene with the current anchor tissue">
+                title="Add an eQTL plot for a gene in the current anchor tissue">
             <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-plus"></span></button>
           </span>
           <div class="dropdown">
@@ -103,7 +105,9 @@
           <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">in</button>
           <button type="button" class="btn btn-outline-secondary anchor-tissue-label" style="pointer-events: none;">{{ tissue }}</button>
         </div>
-
+      </div>
+      <div class="col-sm">
+        Add plot for the anchor gene in a new tissue
         <div class="btn-group pr-1">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
             title="Add a new tissue with the current anchor gene">
@@ -124,13 +128,15 @@
             </div>
           </div>
         </div>
-
+      </div>
+      <div class="col-sm">
+        Change the plotted values
         <div class="btn-group pr-1">
           <form class="yaxis-display" id="transform-y">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
               <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
                   title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
-                <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
+                <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Y-Axis: </button>
               </span>
               <label class="btn btn-secondary active" data-toggle="tooltip" data-placement="top" data-html="true"
                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
@@ -138,15 +144,30 @@
               </label>
               <label class="btn btn-secondary" data-toggle="tooltip" data-placement="top" data-html="true"
                   title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-                <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size (NES)
+                <input type="radio" name="y-options" autocomplete=off id="show-beta" value="beta"> Effect Size
               </label>
             </div>
           </form>
         </div>
-
       </div>
+
     </div>
   </div>
+
+<br>
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
+        title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
+        <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
+          <span class="fa fa-lightbulb-o"></span> Credits 
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 
@@ -212,6 +233,7 @@
               }
             });
             // FIXME: seems to be an ugly way of removing panels one by one
+            // TODO: When changing anchors, simply redirect to new URL with the new anchors
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE, ANCHOR_SYMBOL);
           });
       });
@@ -230,7 +252,7 @@
               }
             });
             // FIXME: seems to be an ugly way of removing panels one by one
-            // TODO: Delete all other tracks
+            // TODO: Same as above - redirect to new URL with new anchors
             addTrack(window.plot, window.datasources, ANCHOR_GENE, ANCHOR_TISSUE, ANCHOR_SYMBOL);
           });
       });
