@@ -45,7 +45,8 @@ function getTrackSources(gene_id, tissue) {
  * @param {object} state
  * @returns {[*]}
  */
-function getTrackLayout(gene_id, tissue, state) {
+function getTrackLayout(gene_id, tissue, state, genesymbol) {
+    genesymbol = genesymbol || gene_id;
     const geneid_short = gene_id.split('.')[0];
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
@@ -67,18 +68,33 @@ function getTrackLayout(gene_id, tissue, state) {
         tooltip: newscattertooltip
     });
 
-    return [
+    const layoutBase =
         LocusZoom.Layouts.get('panel', 'association', {
             id: `assoc_${tissue}_${geneid_short}`,
-            title: { text: `Association between ${tissue} and ${geneid_short}`, x: 100, y: 30 },  // TODO: Use gene symbol instead of gene id
+            title: {  // Remove this when LocusZoom update with the fix to dashboard titles is published
+                text: `${genesymbol} in ${tissue}`,
+                x: 60,
+                y: 30
+            },
             namespace,
             data_layers: [
                 LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
                 LocusZoom.Layouts.get('data_layer', 'recomb_rate', { unnamespaced: true }),
                 assoc_layer,
             ]
-        })
-    ];
+        });
+
+    /* Add this back in when LocusZoom update is published
+    layoutBase.dashboard.components.push(
+        {
+            type: 'title',
+            title: `<i>${genesymbol}</i> in ${tissue}`,
+            position: 'left'
+        }
+    );
+    */
+
+    return [layoutBase];
 }
 
 /**
@@ -168,11 +184,11 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @returns {[LocusZoom.Plot, LocusZoom.DataSources]}
  */
 // eslint-disable-next-line no-unused-vars
-function makeSinglePlot(gene_id, tissue, selector) {
+function makeSinglePlot(gene_id, tissue, selector, genesymbol) {
     const stateUrlMapping = {chr: 'chrom', start: 'start', end: 'end'};
     // The backend guarantees that these params will be part of the URL on pageload
     const initialState = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
-    const track_panels = getTrackLayout(gene_id, tissue, initialState);
+    const track_panels = getTrackLayout(gene_id, tissue, initialState, genesymbol);
     const base_layout = getBasicLayout(initialState, track_panels);
 
     const track_sources = getTrackSources(gene_id, tissue);
@@ -197,8 +213,8 @@ function makeSinglePlot(gene_id, tissue, selector) {
  * @param {string} tissue
  */
 // eslint-disable-next-line no-unused-vars
-function addTrack(plot, datasources, gene_id, tissue) {
-    const track_layout = getTrackLayout(gene_id, tissue, plot.state);
+function addTrack(plot, datasources, gene_id, tissue, genesymbol) {
+    const track_layout = getTrackLayout(gene_id, tissue, plot.state, genesymbol);
     const track_sources = getTrackSources(gene_id, tissue);
     addPanels(plot, datasources, track_layout, track_sources);
 }
