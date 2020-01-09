@@ -35,3 +35,4 @@ with conn:
     )
     conn.execute("CREATE INDEX idx_dapg_chrom_pos ON dapg (chrom, pos)")
     conn.execute("CREATE INDEX idx_dapg_tissue ON dapg (tissue)")
+    conn.execute("CREATE INDEX idx_dapg_gene on dapg (gene)")
