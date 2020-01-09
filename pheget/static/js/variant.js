@@ -189,6 +189,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
                             '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                             '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
+                            '{{namespace[phewas]}}cluster', '{{namespace[phewas]}}spip',
+                            '{{namespace[phewas]}}pip',
                         ];
                         base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                         base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -243,6 +245,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
+<strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
 <form action="/region/" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
     <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>

@@ -1,4 +1,5 @@
 import math
+import sqlite3
 import typing as ty
 
 from zorp import parser_utils, readers  # type: ignore
@@ -97,16 +98,17 @@ class VariantContainer:
         symbol,
         system,
         sample_size,
+        cluster,
+        spip,
+        pip,
     ):
         self.chromosome = chrom
         self.position = pos
-
         self.ref_allele = ref
         self.alt_allele = alt
         self.gene_id = gene_id
 
         self.build = build
-
         self.tss_distance = tss_distance
         self.ma_samples = ma_samples
         self.ma_count = ma_count
@@ -115,11 +117,14 @@ class VariantContainer:
         self.log_pvalue = log_pvalue_nominal
         self.beta = beta
         self.stderr_beta = stderr_beta
-
         self.tissue = tissue
         self.symbol = symbol
+
         self.system = system
         self.samples = sample_size
+        self.cluster = cluster
+        self.spip = spip
+        self.pip = pip
 
     @property
     def id_field(self):
@@ -172,12 +177,29 @@ class VariantParser:
             # Tissue-specific files have one less column, and so the field must
             #   be appended to match the # of fields in the all-tissue file
             fields.append(self.tissue)
+            tissuevar = self.tissue
+        else:
+            tissuevar = fields[13]
         fields.append(
             self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
         )
         # FIXME: Why is the sample size "-1"? We should avoid fake values
-        tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", -1))
+        tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", None))
         fields.extend(tissue_data)
+        # Looks up posterior inclusion probability (PIP) from DAP-G data
+        conn = sqlite3.connect(model.get_dapg())
+        with conn:
+            dapg = list(
+                conn.execute(
+                    "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=? AND gene=? LIMIT 1;",
+                    ("chr" + fields[1], fields[2], tissuevar, fields[0]),
+                )
+            )
+            if dapg == []:
+                cluster_spip_pip = [0, 0.0, 0.0]
+            else:
+                cluster_spip_pip = dapg[0][6:9]
+        fields.extend(cluster_spip_pip)
         return VariantContainer(*fields)
 
 
