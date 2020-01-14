@@ -102,11 +102,11 @@ class VariantContainer:
         spip,
         pip,
     ):
+        self.gene_id = gene_id
         self.chromosome = chrom
         self.position = pos
         self.ref_allele = ref
         self.alt_allele = alt
-        self.gene_id = gene_id
 
         self.build = build
         self.tss_distance = tss_distance
@@ -145,10 +145,11 @@ class VariantContainer:
 
 
 class VariantParser:
-    def __init__(self, tissue=None):
+    def __init__(self, tissue=None, pipDict=None):
         # We only need to load the gene locator once per usage, not on every line parsed
         self.gene_json = model.get_gene_names_conversion()
         self.tissue = tissue
+        self.pipDict = pipDict
 
     def __call__(self, row: str) -> VariantContainer:
 
@@ -163,6 +164,22 @@ class VariantParser:
         fields: ty.List[ty.Any] = row.split("\t")
         # Revise if data format changes!
         fields[1] = fields[1].replace("chr", "")  # chrom
+        if self.pipDict is None:
+            (cluster, spip, pip) = (0, 0.0, 0.0)
+        else:
+            (cluster, spip, pip) = self.pipDict.get(
+                ":".join(
+                    [
+                        "chr" + fields[1],
+                        fields[2],
+                        fields[3],
+                        fields[4],
+                        fields[13],
+                        fields[0],
+                    ]
+                ),
+                (0, 0.0, 0.0),
+            )
         fields[2] = int(fields[2])  # pos
         fields[6] = int(fields[6])  # tss_distance
         fields[7] = int(fields[7])  # ma_samples
@@ -173,33 +190,27 @@ class VariantParser:
         )  # pvalue_nominal --> serialize as log
         fields[11] = float(fields[11])  # beta
         fields[12] = float(fields[12])  # stderr_beta
+
         if self.tissue:
-            # Tissue-specific files have one less column, and so the field must
-            #   be appended to match the # of fields in the all-tissue file
-            fields.append(self.tissue)
+            # Tissue-specific files have one fewer column, and so the field must
+            #   be appended to match the number of fields in the all-tissue file
             tissuevar = self.tissue
+            fields.append(tissuevar)
         else:
             tissuevar = fields[13]
+
+        # Append gene symbol
         fields.append(
             self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
         )
-        # FIXME: Why is the sample size "-1"? We should avoid fake values
-        tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", None))
+        tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
+
+        # Add tissue grouping from GTEx and sample size
         fields.extend(tissue_data)
-        # Looks up posterior inclusion probability (PIP) from DAP-G data
-        conn = sqlite3.connect(model.get_dapg())
-        with conn:
-            dapg = list(
-                conn.execute(
-                    "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=? AND gene=? LIMIT 1;",
-                    ("chr" + fields[1], fields[2], tissuevar, fields[0]),
-                )
-            )
-            if dapg == []:
-                cluster_spip_pip = [0, 0.0, 0.0]
-            else:
-                cluster_spip_pip = dapg[0][6:9]
-        fields.extend(cluster_spip_pip)
+
+        # Add PIP data
+        fields.extend([cluster, spip, pip])
+
         return VariantContainer(*fields)
 
 
@@ -223,8 +234,80 @@ def query_variants(
     else:  # Otherwise, query from a chromosome-specific file with all tissues
         source = model.locate_data(chrom)
 
+    # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to data
+    pipDict = dict()
+    conn = sqlite3.connect(model.get_dapg())
+    with conn:
+        if end is None:
+            if tissue is None:
+                if gene_id is None:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND pos=?;",
+                            (chrom, start),
+                        )
+                    )
+                else:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND gene=?;",
+                            (chrom, start, gene_id),
+                        )
+                    )
+            else:
+                if gene_id is None:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=?;",
+                            (chrom, start, tissue),
+                        )
+                    )
+                else:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=? AND gene=? LIMIT 1;",
+                            (chrom, start, tissue, gene_id),
+                        )
+                    )
+        else:
+            if tissue is None:
+                if gene_id is None:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND pos BETWEEN ? AND ?;",
+                            (chrom, start, end),
+                        )
+                    )
+                else:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND gene=? AND pos BETWEEN ? AND ?;",
+                            (chrom, gene_id, start, end),
+                        )
+                    )
+            else:
+                if gene_id is None:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND tissue=? AND pos BETWEEN ? and ?;",
+                            (chrom, tissue, start, end),
+                        )
+                    )
+                else:
+                    dapg = list(
+                        conn.execute(
+                            "SELECT * FROM dapg WHERE chrom=? AND tissue=? AND gene=? AND pos between ? AND ?;",
+                            (chrom, tissue, gene_id, start, end),
+                        )
+                    )
+    for line in dapg:
+        pipDict[":".join([str(x) for x in line[0:6]])] = line[
+            6:
+        ]  # Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
+
+    # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(
-        source, parser=VariantParser(tissue), skip_rows=1
+        source, parser=VariantParser(tissue, pipDict), skip_rows=1
     )
 
     if gene_id:

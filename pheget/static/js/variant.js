@@ -28,6 +28,8 @@ LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', 
                 return item[field];
             } else if (field === 'beta') {
                 return Math.abs(item[field]);
+            } else if (field === 'pip') {
+                return item[field];
             } else {
                 throw new Error('Unrecognized sort field');
             }
@@ -246,6 +248,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
 <strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
+<strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
+<strong>PIP cluster:</strong> {{{{namespace[phewas]}}cluster}}<br>
 <form action="/region/" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
     <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>
@@ -443,6 +447,15 @@ function switchY(plot, table, yfield) {
         scatter_config.y_axis.lower_buffer = 0.15;
 
         table.setSort('phewas:beta', 'desc');
+    } else if (yfield === 'pip') {
+        scatter_config.y_axis.field = 'phewas:pip';
+        scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.lower_buffer = 0;
+        scatter_config.y_axis.min_extent = [0, 1];
+        plot.layout.panels[0].axes.y1['label'] = 'Posterior Inclusion Probability (PIP)';
+        plot.layout.panels[0].data_layers[1].offset = 0;
+
+        table.setSort('phewas:pip', 'desc');
     }
     plot.applyState({ y_field: yfield });
 }
