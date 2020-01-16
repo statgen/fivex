@@ -53,6 +53,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
     newscattertooltip.html = newscattertooltip.html +
         `<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
         <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
+        <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
         <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
@@ -64,6 +65,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
+            '{{namespace[assoc]}}pip',
         ],
         tooltip: newscattertooltip
     });
@@ -256,6 +258,17 @@ function switchY_region(plot, yfield) {
                 // Set minimum y value to zero when looking at -log10 p-values
                 panel_base_y.floor = 0;
                 panel_base_y.min_extent = [0, 10];
+            } else if (yfield === 'pip') {
+                panel_base_y.field = panel.id + ':pip';
+                panel_base_y.floor = 0;
+                panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+                significance_line_layout.offset = 0;
+                significance_line_layout.style = {
+                    'stroke': 'gray',
+                    'stroke-width': '1px',
+                    'stroke-dasharray': '10px 0px'
+                };
+                panel_base_y.min_extent = [0, 1];
             } else {
                 throw new Error('Unrecognized yfield option');
             }
