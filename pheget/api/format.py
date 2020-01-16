@@ -243,68 +243,26 @@ def query_variants(
     conn = sqlite3.connect(model.get_dapg())
 
     with conn:
+        arglist = [chrom]
+
+        # Build up SQL request based on the query fields given
+        sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
+        if tissue is not None:
+            sqlcommand += " AND tissue=?"
+            arglist.append(tissue)
+        if gene_id is not None:
+            sqlcommand += " AND gene=?"
+            arglist.append(gene_id)
         if end is None:
-            if tissue is None:
-                if gene_id is None:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND pos=?;",
-                            (chrom, start),
-                        )
-                    )
-                else:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND gene=?;",
-                            (chrom, start, gene_id),
-                        )
-                    )
-            else:
-                if gene_id is None:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=?;",
-                            (chrom, start, tissue),
-                        )
-                    )
-                else:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND pos=? AND tissue=? AND gene=? LIMIT 1;",
-                            (chrom, start, tissue, gene_id),
-                        )
-                    )
+            sqlcommand += " AND pos=?;"
+            arglist.append(start)
         else:
-            if tissue is None:
-                if gene_id is None:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND pos BETWEEN ? AND ?;",
-                            (chrom, start, end),
-                        )
-                    )
-                else:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND gene=? AND pos BETWEEN ? AND ?;",
-                            (chrom, gene_id, start, end),
-                        )
-                    )
-            else:
-                if gene_id is None:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND tissue=? AND pos BETWEEN ? and ?;",
-                            (chrom, tissue, start, end),
-                        )
-                    )
-                else:
-                    dapg = list(
-                        conn.execute(
-                            "SELECT * FROM dapg WHERE chrom=? AND tissue=? AND gene=? AND pos between ? AND ?;",
-                            (chrom, tissue, gene_id, start, end),
-                        )
-                    )
+            sqlcommand += " AND pos BETWEEN ? AND ?;"
+            arglist.extend([start, end])
+
+        # Generate the list of results based on the query request
+        dapg = list(conn.execute(sqlcommand, tuple(arglist),))
+
     # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
     for line in dapg:
         pipDict[":".join([str(x) for x in line[0:6]])] = line[6:]
