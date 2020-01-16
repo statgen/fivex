@@ -164,6 +164,13 @@ class VariantParser:
         fields: ty.List[ty.Any] = row.split("\t")
         # Revise if data format changes!
         fields[1] = fields[1].replace("chr", "")  # chrom
+        if self.tissue:
+            # Tissue-specific files have one fewer column, and so the field must
+            #   be appended to match the number of fields in the all-tissue file
+            tissuevar = self.tissue
+            fields.append(tissuevar)
+        else:
+            tissuevar = fields[13]
         if self.pipDict is None:
             (cluster, spip, pip) = (0, 0.0, 0.0)
         else:
@@ -174,7 +181,7 @@ class VariantParser:
                         fields[2],
                         fields[3],
                         fields[4],
-                        fields[13],
+                        tissuevar,
                         fields[0],
                     ]
                 ),
@@ -190,14 +197,6 @@ class VariantParser:
         )  # pvalue_nominal --> serialize as log
         fields[11] = float(fields[11])  # beta
         fields[12] = float(fields[12])  # stderr_beta
-
-        if self.tissue:
-            # Tissue-specific files have one fewer column, and so the field must
-            #   be appended to match the number of fields in the all-tissue file
-            tissuevar = self.tissue
-            fields.append(tissuevar)
-        else:
-            tissuevar = fields[13]
 
         # Append gene symbol
         fields.append(
