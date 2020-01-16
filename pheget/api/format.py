@@ -171,8 +171,13 @@ class VariantParser:
             fields.append(tissuevar)
         else:
             tissuevar = fields[13]
+        # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
+        # PIP is the Posterior Inclusion Probability for a single variant
+        # SPIP is the sum of PIPs for all variants belonging to the same cluster
         if self.pipDict is None:
             (cluster, spip, pip) = (0, 0.0, 0.0)
+        # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
+        #  and (cluster, spip, pip) is the value
         else:
             (cluster, spip, pip) = self.pipDict.get(
                 ":".join(
@@ -202,9 +207,9 @@ class VariantParser:
         fields.append(
             self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
         )
-        tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
 
-        # Add tissue grouping from GTEx and sample size
+        # Add tissue grouping and sample size from GTEx
+        tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
         fields.extend(tissue_data)
 
         # Add PIP data
@@ -236,6 +241,7 @@ def query_variants(
     # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to data
     pipDict = dict()
     conn = sqlite3.connect(model.get_dapg())
+
     with conn:
         if end is None:
             if tissue is None:
@@ -299,10 +305,9 @@ def query_variants(
                             (chrom, tissue, gene_id, start, end),
                         )
                     )
+    # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
     for line in dapg:
-        pipDict[":".join([str(x) for x in line[0:6]])] = line[
-            6:
-        ]  # Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
+        pipDict[":".join([str(x) for x in line[0:6]])] = line[6:]
 
     # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(
