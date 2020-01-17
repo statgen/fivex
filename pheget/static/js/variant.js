@@ -555,8 +555,6 @@ function switchY(plot, table, yfield) {
         scatter_config.y_axis.floor = -6.1;
         scatter_config.y_axis.ceiling = 0.2;
         scatter_config.y_axis.lower_buffer = 0;
-        // scatter_config.y_axis.upper_buffer = 0.1;
-        // scatter_config.y_axis.min_extent = [0, 1];
         scatter_config.point_shape = [
             {
                 scale_function: 'pip_cluster',
