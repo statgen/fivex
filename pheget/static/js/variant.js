@@ -190,7 +190,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     color: 'gray',
                     position: 'right',
                     type: 'download'
-                }
+                },
+
             ]
         },
         panels: [
@@ -198,6 +199,20 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                 const panel = LocusZoom.Layouts.get('panel', 'phewas', {
                     unnamespaced: true,
                     min_height: 500,
+                    dashboard: {
+                        components: [
+                            {
+                                color: 'gray',
+                                position: 'right',
+                                type: 'toggle_legend'
+                            }
+                        ]
+                    },
+                    legend: {
+                        orientation: 'vertical',
+                        origin: { x: 55, y: 30 },
+                        hidden: true
+                    },
                     data_layers: [
                         function () {
                             const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
@@ -221,6 +236,12 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
                             base.x_axis.category_order_field = 'phewas:tss_distance';
                             base.y_axis.min_extent = [0, 8];
+
+                            base.legend = [
+                                { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
+                                { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+                                { shape: 'triangle-down', size: 40, label: 'Negative effect', class: 'lz-data_layer-scatter' },
+                            ];
 
                             base.color = [
                                 {
@@ -454,8 +475,15 @@ function groupByThing(plot, thing) {
 function switchY(plot, table, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
     if (yfield === 'log_pvalue') {
+        scatter_config.legend = [
+            { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-down', size: 40, label: 'Negative effect', class: 'lz-data_layer-scatter' },
+        ];
         delete scatter_config.y_axis.ceiling;
         delete plot.layout.panels[0].axes.y1.ticks;
+        plot.panels.phewas.legend.layout.hidden = true;
+        plot.panels.phewas.legend.render();
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
@@ -480,10 +508,17 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
+        scatter_config.legend = [
+            { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-down', size: 40, label: 'Negative effect', class: 'lz-data_layer-scatter' },
+        ];
         delete scatter_config.y_axis.floor;
         delete scatter_config.y_axis.min_extent;
         delete scatter_config.y_axis.ceiling;
         delete plot.layout.panels[0].axes.y1.ticks;
+        plot.panels.phewas.legend.layout.hidden = true;
+        plot.panels.phewas.legend.render();
         scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
@@ -506,6 +541,15 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:beta', 'desc');
     } else if (yfield === 'pip') {
+        scatter_config.legend = [
+            { shape: 'diamond', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+            { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+            { shape: 'cross', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
+        ];
+        plot.panels.phewas.legend.layout.hidden = false;
+        plot.panels.phewas.legend.render();
         scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
         scatter_config.y_axis.floor = -6.1;
         scatter_config.y_axis.ceiling = 0.2;
