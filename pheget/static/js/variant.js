@@ -2,6 +2,8 @@
 /* global LocusZoom */
 /* global Tabulator */
 
+LocusZoom.TransformationFunctions.set('pip_yvalue', function (x) {return Math.max(Math.log10(x), -6);});
+
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL(state, chain) {
         // FIXME: Instead of hardcoding a single variant as URL, make this part dynamic (build URL from state.chr,
@@ -109,6 +111,25 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
     }
 });
 
+LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
+    if (typeof input !== 'undefined') {
+        var pip_cluster = input['phewas:cluster'];
+        if (pip_cluster === 1) {
+            return 'diamond';
+        }
+        if (pip_cluster === 2) {
+            return 'square';
+        }
+        if (pip_cluster === 3) {
+            return 'triangle-up';
+        }
+        if (pip_cluster >= 4) {
+            return 'cross';
+        }
+    }
+    return null;
+});
+
 LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
     if (typeof input !== 'undefined') {
         var beta = input['phewas:beta'];
@@ -173,74 +194,76 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             ]
         },
         panels: [
-            LocusZoom.Layouts.get('panel', 'phewas', {
-                unnamespaced: true,
-                min_height: 500,
-                data_layers: [
-                    function () {
-                        const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
-                        base.fields = [
-                            '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
-                            '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
-                            '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
-                            '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
-                            '{{namespace[phewas]}}tss_distance',
-                            '{{namespace[phewas]}}top_value_rank',
-                            '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
-                            '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
+            function() {
+                const panel = LocusZoom.Layouts.get('panel', 'phewas', {
+                    unnamespaced: true,
+                    min_height: 500,
+                    data_layers: [
+                        function () {
+                            const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
+                            // TODO: Peter remembers a bug involving LD-refvar; Y-axis transform that is not in the fields array
+                            base.fields = [
+                                '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
+                                '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
+                                '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
+                                '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
+                                '{{namespace[phewas]}}tss_distance',
+                                '{{namespace[phewas]}}top_value_rank',
+                                '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
+                                '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
 
-                            '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
-                            '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
-                            '{{namespace[phewas]}}cluster', '{{namespace[phewas]}}spip',
-                            '{{namespace[phewas]}}pip',
-                        ];
-                        base.x_axis.category_field = '{{namespace[phewas]}}symbol';
-                        base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
-                        base.x_axis.category_order_field = 'phewas:tss_distance';
-                        base.y_axis.min_extent = [0, 8];
+                                '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
+                                '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
+                                '{{namespace[phewas]}}cluster', '{{namespace[phewas]}}spip',
+                                '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
+                            ];
+                            base.x_axis.category_field = '{{namespace[phewas]}}symbol';
+                            base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
+                            base.x_axis.category_order_field = 'phewas:tss_distance';
+                            base.y_axis.min_extent = [0, 8];
 
-                        base.color = [
-                            {
-                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
-                                scale_function: 'if',
-                                parameters: {
-                                    field_value: true,
-                                    then: '#ED180A'
+                            base.color = [
+                                {
+                                    field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                    scale_function: 'if',
+                                    parameters: {
+                                        field_value: true,
+                                        then: '#ED180A'
+                                    },
                                 },
-                            },
-                            {
-                                field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
-                                scale_function: 'if',
-                                parameters: {
-                                    field_value: false,
-                                    then: '#EAE6E6'
+                                {
+                                    field: 'lz_highlight_match',  // Special field name whose presence triggers custom rendering
+                                    scale_function: 'if',
+                                    parameters: {
+                                        field_value: false,
+                                        then: '#EAE6E6'
+                                    },
                                 },
-                            },
-                            {
-                                field: '{{namespace[phewas]}}symbol',
-                                scale_function: 'categorical_bin',
-                                parameters: {
-                                    categories: [],
-                                    values: [],
-                                    null_value: '#B8B8B8'
+                                {
+                                    field: '{{namespace[phewas]}}symbol',
+                                    scale_function: 'categorical_bin',
+                                    parameters: {
+                                        categories: [],
+                                        values: [],
+                                        null_value: '#B8B8B8'
+                                    }
                                 }
-                            }
-                        ];
-                        base.point_shape = [
-                            {
-                                scale_function: 'effect_direction',
-                                parameters: {
-                                    '+': 'triangle-up',
-                                    '-': 'triangle-down'
-                                }
-                            },
-                            'circle'
-                        ];
+                            ];
+                            base.point_shape = [
+                                {
+                                    scale_function: 'effect_direction',
+                                    parameters: {
+                                        '+': 'triangle-up',
+                                        '-': 'triangle-down'
+                                    }
+                                },
+                                'circle'
+                            ];
 
-                        base.tooltip.html = `
+                            base.tooltip.html = `
 <strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}<br>
 <strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
-<strong>Gene name:</strong> {{{{namespace[phewas]}}symbol|htmlescape}}<br>
+<strong>Gene name:</strong> <i>{{{{namespace[phewas]}}symbol|htmlescape}}</i><br>
 <strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
 <strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}<br>
 <strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})<br>
@@ -258,16 +281,19 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     <input type="submit" class="linkButton" value="See region plot for {{{{namespace[phewas]}}tissue|htmlescape}} x {{{{namespace[phewas]}}symbol|htmlescape}}"/>
 </form>
 `;
-                        base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
-                        base.label.text = '{{{{namespace[phewas]}}tissue}}';
-                        base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
-                        base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
-                        return base;
-                    }(),
-                    // TODO: Must decide on an appropriate significance threshold for this use case
-                    LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
-                ],
-            }),
+                            base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
+                            base.label.text = '{{{{namespace[phewas]}}tissue}}';
+                            base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
+                            base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
+                            return base;
+                        }(),
+                        // TODO: Must decide on an appropriate significance threshold for this use case
+                        LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
+                    ],
+                });
+                panel.axes.y1.label_offset = 38;
+                return panel;
+            }(),
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
                 margin: { bottom: 40 },
@@ -345,6 +371,13 @@ function makeTable(selector) {
         var d = -Math.floor(Math.log10(Math.abs(x)));
         return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
     };
+    var pip_fmt = function (cell) {
+        var x = cell.getValue();
+        if (x === 0) {
+            return '0';
+        }
+        return x.toPrecision(2);
+    };
     var tabulator_tooltip_maker = function (cell) {
         // Only show tooltips when an ellipsis ('...') is hiding part of the data.
         // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
@@ -372,8 +405,9 @@ function makeTable(selector) {
             { title: 'System', field: 'phewas:system', headerFilter: true },
             { title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number' },
             // A large effect size in either direction is good, so sort by abs value
-            { title: 'Normalized Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number' },
-            { title: 'SE (Normalized Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
+            { title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number' },
+            { title: 'SE (Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
+            { title: 'PIP', field: 'phewas:pip', formatter: pip_fmt },
         ],
         placeholder: 'No data available',
         initialSort: [{ column: 'phewas:log_pvalue', dir: 'desc' }],
@@ -420,10 +454,22 @@ function groupByThing(plot, thing) {
 function switchY(plot, table, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
     if (yfield === 'log_pvalue') {
+        delete scatter_config.y_axis.ceiling;
+        delete plot.layout.panels[0].axes.y1.ticks;
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
         scatter_config.y_axis.min_extent = [0, 8];
+        scatter_config.point_shape = [
+            {
+                scale_function: 'effect_direction',
+                parameters: {
+                    '+': 'triangle-up',
+                    '-': 'triangle-down'
+                }
+            },
+            'circle'
+        ];
         plot.layout.panels[0].axes.y1['label'] = '-log 10 p-value';
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {
@@ -436,9 +482,21 @@ function switchY(plot, table, yfield) {
     } else if (yfield === 'beta') {
         delete scatter_config.y_axis.floor;
         delete scatter_config.y_axis.min_extent;
+        delete scatter_config.y_axis.ceiling;
+        delete plot.layout.panels[0].axes.y1.ticks;
         scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
+        scatter_config.point_shape = [
+            {
+                scale_function: 'effect_direction',
+                parameters: {
+                    '+': 'triangle-up',
+                    '-': 'triangle-down'
+                }
+            },
+            'circle'
+        ];
         plot.layout.panels[0].data_layers[1].style = {
             'stroke': 'gray',
             'stroke-width': '1px',
@@ -448,12 +506,30 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:beta', 'desc');
     } else if (yfield === 'pip') {
-        scatter_config.y_axis.field = 'phewas:pip';
-        scatter_config.y_axis.floor = 0;
+        scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
+        scatter_config.y_axis.floor = -6.1;
+        scatter_config.y_axis.ceiling = 0.2;
         scatter_config.y_axis.lower_buffer = 0;
-        scatter_config.y_axis.min_extent = [0, 1];
-        plot.layout.panels[0].axes.y1['label'] = 'Posterior Inclusion Probability (PIP)';
-        plot.layout.panels[0].data_layers[1].offset = 0;
+        // scatter_config.y_axis.upper_buffer = 0.1;
+        // scatter_config.y_axis.min_extent = [0, 1];
+        scatter_config.point_shape = [
+            {
+                scale_function: 'pip_cluster',
+            },
+            'circle'
+        ];
+        plot.layout.panels[0].axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+        plot.layout.panels[0].axes.y1.ticks = [
+            {position: 'left', text: '1', y: 0},
+            {position: 'left', text: '0.1', y: -1},
+            {position: 'left', text: '0.01', y: -2},
+            {position: 'left', text: '1e-3', y: -3},
+            {position: 'left', text: '1e-4', y: -4},
+            {position: 'left', text: '1e-5', y: -5},
+            {position: 'left', text: '≤1e-6', y: -6}
+        ];
+        plot.layout.panels[0].data_layers[1].offset = -1000;
+
 
         table.setSort('phewas:pip', 'desc');
     }

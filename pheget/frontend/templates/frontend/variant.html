@@ -348,7 +348,7 @@
   <script type="application/javascript">
       const table = makeTable('#table');
       const [plot, datasources] = makePhewasPlot({{chrom|tojson}}, {{pos|tojson}}, '#lz-plot');
-      plot.subscribeToData(['phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta'], updateTable.bind(null, table));
+      plot.subscribeToData(['phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip'], updateTable.bind(null, table));
 
       // Use omnisearch (https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch) to parse rsids
       document.getElementById('variant-search').addEventListener('submit', function () {
