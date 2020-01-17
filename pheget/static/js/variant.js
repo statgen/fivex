@@ -211,6 +211,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                     legend: {
                         orientation: 'vertical',
                         origin: { x: 55, y: 30 },
+                        pad_from_right: 50 + 10, // 50 is panel.margin.right
                         hidden: true
                     },
                     data_layers: [
