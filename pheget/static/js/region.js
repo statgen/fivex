@@ -7,40 +7,40 @@ const MAX_EXTENT = 500000;
 
 LocusZoom.TransformationFunctions.set('pip_yvalue', function (x) {return Math.max(Math.log10(x), -6);});
 
-LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var pip_cluster = input['phewas:cluster'];
-        if (pip_cluster === 1) {
-            return 'diamond';
-        }
-        if (pip_cluster === 2) {
-            return 'square';
-        }
-        if (pip_cluster === 3) {
-            return 'triangle-up';
-        }
-        if (pip_cluster >= 4) {
-            return 'cross';
-        }
-    }
-    return null;
-});
+// LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
+//     if (typeof input !== 'undefined') {
+//         var pip_cluster = input['assoc:cluster'];
+//         if (pip_cluster === 1) {
+//             return 'diamond';
+//         }
+//         if (pip_cluster === 2) {
+//             return 'square';
+//         }
+//         if (pip_cluster === 3) {
+//             return 'triangle-up';
+//         }
+//         if (pip_cluster >= 4) {
+//             return 'cross';
+//         }
+//     }
+//     return null;
+// });
 
-LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var beta = input['phewas:beta'];
-        var stderr_beta = input['phewas:stderr_beta'];
-        if (!isNaN(beta) && !isNaN(stderr_beta)) {
-            if (beta - 1.96 * stderr_beta > 0) {
-                return parameters['+'] || null;
-            } // 1.96*se to find 95% confidence interval
-            if (beta + 1.96 * stderr_beta < 0) {
-                return parameters['-'] || null;
-            }
-        }
-    }
-    return null;
-});
+// LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
+//     if (typeof input !== 'undefined') {
+//         var beta = input['assoc:beta'];
+//         var stderr_beta = input['assoc:stderr_beta'];
+//         if (!isNaN(beta) && !isNaN(stderr_beta)) {
+//             if (beta - 1.96 * stderr_beta > 0) {
+//                 return parameters['+'] || null;
+//             } // 1.96*se to find 95% confidence interval
+//             if (beta + 1.96 * stderr_beta < 0) {
+//                 return parameters['-'] || null;
+//             }
+//         }
+//     }
+//     return null;
+// });
 
 
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
@@ -314,6 +314,16 @@ function switchY_region(plot, yfield) {
                 panel_base_y.floor = 0;
                 delete panel_base_y.ceiling;
                 panel_base_y.lower_buffer = 0;
+                // scatter_layout.point_shape = [
+                //     {
+                //         scale_function: 'effect_direction',
+                //         parameters: {
+                //             '+': 'triangle-up',
+                //             '-': 'triangle-down'
+                //         }
+                //     },
+                //     'circle'
+                // ];
             } else if (yfield === 'pip') {
                 panel_base_y.field = panel.id + ':pip|pip_yvalue';
                 panel_base_y.floor = -6.1;
@@ -328,6 +338,12 @@ function switchY_region(plot, yfield) {
                     {position: 'left', text: '1e-5', y: -5},
                     {position: 'left', text: '≤1e-6', y: -6}
                 ];
+                // scatter_layout.point_shape = [
+                //     {
+                //         scale_function: 'pip_cluster',
+                //     },
+                //     'circle'
+                // ];
                 significance_line_layout.offset = -1000;
                 significance_line_layout.style = {
                     'stroke': 'gray',
