@@ -142,8 +142,6 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
                 assoc_layer,
             ]
         });
-    layoutBase.legend.orientation = 'horizontal';
-    layoutBase.legend.pad_from_bottom = 46;
     layoutBase.axes.y1.label_offset = 36;
 
     /* Add this back in when LocusZoom update is published
@@ -293,9 +291,12 @@ function switchY_region(plot, yfield) {
     assoc_panels.forEach(function (panel) {
         if (panel.data_layers.some(d => d.id === 'associationpvalues') && panel.data_layers.some(d => d.id === 'significance')) {
             let scatter_layout = panel.data_layers.find(d => d.id === 'associationpvalues');
+            console.log(scatter_layout);
             let panel_base_y = scatter_layout.y_axis;
             let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+                panel.legend.orientation = 'vertical';
+                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
                 significance_line_layout.offset = 0;  // Change dotted horizontal line to y=0
                 significance_line_layout.style = {
@@ -328,6 +329,8 @@ function switchY_region(plot, yfield) {
                     { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
+                panel.legend.orientation = 'vertical';
+                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = '-log 10 p-value';
                 significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
                 significance_line_layout.style = {
@@ -360,6 +363,8 @@ function switchY_region(plot, yfield) {
                     { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
             } else if (yfield === 'pip') {
+                panel.legend.orientation = 'horizontal';
+                panel.legend.pad_from_bottom = 46;
                 panel_base_y.field = panel.id + ':pip|pip_yvalue';
                 panel_base_y.floor = -6.1;
                 panel_base_y.ceiling = 0.2;
