@@ -543,10 +543,10 @@ function switchY(plot, table, yfield) {
         table.setSort('phewas:beta', 'desc');
     } else if (yfield === 'pip') {
         scatter_config.legend = [
-            { shape: 'diamond', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+            { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
             { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
             { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
-            { shape: 'cross', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+            { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
             { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
         ];
         plot.panels.phewas.legend.layout.hidden = false;
