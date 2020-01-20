@@ -115,7 +115,7 @@ LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
     if (typeof input !== 'undefined') {
         var pip_cluster = input['phewas:cluster'];
         if (pip_cluster === 1) {
-            return 'diamond';
+            return 'cross';
         }
         if (pip_cluster === 2) {
             return 'square';
@@ -124,7 +124,7 @@ LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
             return 'triangle-up';
         }
         if (pip_cluster >= 4) {
-            return 'cross';
+            return 'triangle-down';
         }
     }
     return null;

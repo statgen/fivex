@@ -7,40 +7,53 @@ const MAX_EXTENT = 500000;
 
 LocusZoom.TransformationFunctions.set('pip_yvalue', function (x) {return Math.max(Math.log10(x), -6);});
 
-// LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
-//     if (typeof input !== 'undefined') {
-//         var pip_cluster = input['assoc:cluster'];
-//         if (pip_cluster === 1) {
-//             return 'diamond';
-//         }
-//         if (pip_cluster === 2) {
-//             return 'square';
-//         }
-//         if (pip_cluster === 3) {
-//             return 'triangle-up';
-//         }
-//         if (pip_cluster >= 4) {
-//             return 'cross';
-//         }
-//     }
-//     return null;
-// });
+var retrieveBySuffix = function(input, suffix) {
+    var return_array = Object.entries(input)
+        .filter( function(x) {return x[0].endsWith(suffix); } )
+        .map( function(x) { return x[1];});
+    if (return_array.length !== 1) { return null; }
+    return return_array[0];
+};
 
-// LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
-//     if (typeof input !== 'undefined') {
-//         var beta = input['assoc:beta'];
-//         var stderr_beta = input['assoc:stderr_beta'];
-//         if (!isNaN(beta) && !isNaN(stderr_beta)) {
-//             if (beta - 1.96 * stderr_beta > 0) {
-//                 return parameters['+'] || null;
-//             } // 1.96*se to find 95% confidence interval
-//             if (beta + 1.96 * stderr_beta < 0) {
-//                 return parameters['-'] || null;
-//             }
-//         }
-//     }
-//     return null;
-// });
+LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
+    // console.log(input);
+    if (typeof input !== 'undefined') {
+        var pip_cluster = retrieveBySuffix(input, ':cluster');
+        if (pip_cluster === null) { return null; }
+        if (pip_cluster === 1) {
+            return 'cross';
+        }
+        if (pip_cluster === 2) {
+            return 'square';
+        }
+        if (pip_cluster === 3) {
+            return 'triangle-up';
+        }
+        if (pip_cluster >= 4) {
+            return 'triangle-down';
+        }
+    }
+    return null;
+});
+
+LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
+    if (typeof input !== 'undefined') {
+        var beta = retrieveBySuffix(input, ':beta');
+        var stderr_beta = retrieveBySuffix(input, ':stderr_beta');
+        if (beta === null || stderr_beta === null) { return null; }
+        // var beta = input['assoc:beta'];
+        // var stderr_beta = input['assoc:stderr_beta'];
+        if (!isNaN(beta) && !isNaN(stderr_beta)) {
+            if (beta - 1.96 * stderr_beta > 0) {
+                return parameters['+'] || null;
+            } // 1.96*se to find 95% confidence interval
+            if (beta + 1.96 * stderr_beta < 0) {
+                return parameters['-'] || null;
+            }
+        }
+    }
+    return null;
+});
 
 
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
@@ -106,6 +119,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
+            '{{namespace[assoc]}}stderr_beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
             '{{namespace[assoc]}}spip', '{{namespace[assoc]}}cluster',
@@ -291,16 +305,16 @@ function switchY_region(plot, yfield) {
                 delete panel_base_y.ceiling;
                 panel_base_y.min_extent = [-1, 1];
                 // Note: changing the shapes for displayed points is conflicting with the reshaping by LD -- need to fix this later
-                // scatter_layout.point_shape = [
-                //     {
-                //         scale_function: 'effect_direction',
-                //         parameters: {
-                //             '+': 'triangle-up',
-                //             '-': 'triangle-down'
-                //         }
-                //     },
-                //     'circle'
-                // ];
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'effect_direction',
+                        parameters: {
+                            '+': 'triangle-up',
+                            '-': 'triangle-down'
+                        }
+                    },
+                    'circle'
+                ];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
                 panel.axes.y1.label = '-log 10 p-value';
                 significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
@@ -314,16 +328,16 @@ function switchY_region(plot, yfield) {
                 panel_base_y.floor = 0;
                 delete panel_base_y.ceiling;
                 panel_base_y.lower_buffer = 0;
-                // scatter_layout.point_shape = [
-                //     {
-                //         scale_function: 'effect_direction',
-                //         parameters: {
-                //             '+': 'triangle-up',
-                //             '-': 'triangle-down'
-                //         }
-                //     },
-                //     'circle'
-                // ];
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'effect_direction',
+                        parameters: {
+                            '+': 'triangle-up',
+                            '-': 'triangle-down'
+                        }
+                    },
+                    'circle'
+                ];
             } else if (yfield === 'pip') {
                 panel_base_y.field = panel.id + ':pip|pip_yvalue';
                 panel_base_y.floor = -6.1;
@@ -338,12 +352,12 @@ function switchY_region(plot, yfield) {
                     {position: 'left', text: '1e-5', y: -5},
                     {position: 'left', text: '≤1e-6', y: -6}
                 ];
-                // scatter_layout.point_shape = [
-                //     {
-                //         scale_function: 'pip_cluster',
-                //     },
-                //     'circle'
-                // ];
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'pip_cluster',
+                    },
+                    'circle'
+                ];
                 significance_line_layout.offset = -1000;
                 significance_line_layout.style = {
                     'stroke': 'gray',
