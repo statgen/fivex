@@ -142,6 +142,9 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
                 assoc_layer,
             ]
         });
+    layoutBase.legend.orientation = 'horizontal';
+    layoutBase.legend.pad_from_bottom = 46;
+    layoutBase.axes.y1.label_offset = 36;
 
     /* Add this back in when LocusZoom update is published
     layoutBase.dashboard.components.push(
@@ -152,7 +155,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
         }
     );
     */
-    layoutBase.axes.y1.label_offset = 36;
+
     return [layoutBase];
 }
 
@@ -315,6 +318,16 @@ function switchY_region(plot, yfield) {
                     },
                     'circle'
                 ];
+                scatter_layout.legend = [
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
+                ];
+
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
                 panel.axes.y1.label = '-log 10 p-value';
                 significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
@@ -338,6 +351,15 @@ function switchY_region(plot, yfield) {
                     },
                     'circle'
                 ];
+                scatter_layout.legend = [
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
+                ];
             } else if (yfield === 'pip') {
                 panel_base_y.field = panel.id + ':pip|pip_yvalue';
                 panel_base_y.floor = -6.1;
@@ -357,6 +379,20 @@ function switchY_region(plot, yfield) {
                         scale_function: 'pip_cluster',
                     },
                     'circle'
+                ];
+                scatter_layout.legend = [
+                    { shape: 'diamond', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+                    { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+                    { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+                    { shape: 'cross', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
                 significance_line_layout.offset = -1000;
                 significance_line_layout.style = {
