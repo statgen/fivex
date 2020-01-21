@@ -169,7 +169,7 @@
     <div id="lz-plot">
     </div>
   </div>
-  
+
   <div class="container-fluid">
     <div class="row justify-content-center">
       <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
@@ -304,7 +304,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="container-fluid">
     <div id="table" style="width:90%;margin:0 auto">
     </div>
@@ -319,7 +319,7 @@
            title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data">
           <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link-alt"></span> </a>
         <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
-              title="Normalized Effect Sizes (NES) are defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Go <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>here</a> for more details from the GTEx Portal. <br> 
+              title="Normalized Effect Sizes (NES) are defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Go <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>here</a> for more details from the GTEx Portal. <br>
                      Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
           <span class="fa fa-info-circle"></span> Definitions </span> </span>
@@ -346,6 +346,7 @@
   <script type="application/javascript"
           src="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/ext/lz-dynamic-urls.min.js"></script>
 
+  <script src="{{ url_for('static', filename='js/common.js') }}" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/variant.js') }}" type="application/javascript"></script>
   <script src="{{ url_for('static', filename='js/searchbox.js') }}" type="application/javascript"></script>
   <script type="application/javascript">

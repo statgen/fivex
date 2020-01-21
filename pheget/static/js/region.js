@@ -5,56 +5,6 @@ const API_BASE = 'https://portaldev.sph.umich.edu/api/v1/';
 const MAX_EXTENT = 500000;
 
 
-LocusZoom.TransformationFunctions.set('pip_yvalue', function (x) {return Math.max(Math.log10(x), -6);});
-
-var retrieveBySuffix = function(input, suffix) {
-    var return_array = Object.entries(input)
-        .filter( function(x) {return x[0].endsWith(suffix); } )
-        .map( function(x) { return x[1];});
-    if (return_array.length !== 1) { return null; }
-    return return_array[0];
-};
-
-LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var pip_cluster = retrieveBySuffix(input, ':pip_cluster');
-        if (pip_cluster === null) { return null; }
-        if (pip_cluster === 1) {
-            return 'cross';
-        }
-        if (pip_cluster === 2) {
-            return 'square';
-        }
-        if (pip_cluster === 3) {
-            return 'triangle-up';
-        }
-        if (pip_cluster >= 4) {
-            return 'triangle-down';
-        }
-    }
-    return null;
-});
-
-LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var beta = retrieveBySuffix(input, ':beta');
-        var stderr_beta = retrieveBySuffix(input, ':stderr_beta');
-        if (beta === null || stderr_beta === null) { return null; }
-        // var beta = input['assoc:beta'];
-        // var stderr_beta = input['assoc:stderr_beta'];
-        if (!isNaN(beta) && !isNaN(stderr_beta)) {
-            if (beta - 1.96 * stderr_beta > 0) {
-                return parameters['+'] || null;
-            } // 1.96*se to find 95% confidence interval
-            if (beta + 1.96 * stderr_beta < 0) {
-                return parameters['-'] || null;
-            }
-        }
-    }
-    return null;
-});
-
-
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
     getURL(state) {
         let url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
@@ -211,7 +161,7 @@ function getBasicSources(track_sources = []) {
         }]],
         ['recomb', ['RecombLZ', { url: API_BASE + 'annotation/recomb/results/', params: { build: 'GRCh38' } }]],
         ['gene', ['GeneLZ', { url: API_BASE + 'annotation/genes/', params: { build: 'GRCh38' } }]],
-        ['constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]],
+        ['constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]],
     ];
 }
 

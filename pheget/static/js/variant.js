@@ -2,7 +2,6 @@
 /* global LocusZoom */
 /* global Tabulator */
 
-LocusZoom.TransformationFunctions.set('pip_yvalue', function (x) {return Math.max(Math.log10(x), -6);});
 
 LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
     getURL(state, chain) {
@@ -111,40 +110,7 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
     }
 });
 
-LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var pip_cluster = input['phewas:pip_cluster'];
-        if (pip_cluster === 1) {
-            return 'cross';
-        }
-        if (pip_cluster === 2) {
-            return 'square';
-        }
-        if (pip_cluster === 3) {
-            return 'triangle-up';
-        }
-        if (pip_cluster >= 4) {
-            return 'triangle-down';
-        }
-    }
-    return null;
-});
 
-LocusZoom.ScaleFunctions.add('effect_direction', function (parameters, input) {
-    if (typeof input !== 'undefined') {
-        var beta = input['phewas:beta'];
-        var stderr_beta = input['phewas:stderr_beta'];
-        if (!isNaN(beta) && !isNaN(stderr_beta)) {
-            if (beta - 1.96 * stderr_beta > 0) {
-                return parameters['+'] || null;
-            } // 1.96*se to find 95% confidence interval
-            if (beta + 1.96 * stderr_beta < 0) {
-                return parameters['-'] || null;
-            }
-        }
-    }
-    return null;
-});
 
 LocusZoom.TransformationFunctions.add('twosigfigs', function(x) {
     return (Math.abs(x) >= .1) ? x.toFixed(2) : (Math.abs(x) >= .01) ? x.toFixed(3) : x.toExponential(1);
@@ -163,7 +129,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             url: `/api/variant/${chrom}_${pos}/`,
         }])
         .add('gene', ['GeneLZ', { url: apiBase + 'annotation/genes/', params: { build: 'GRCh38' } }])
-        .add('constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]);
+        .add('constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]);
 
     // Allow the URL to change as the user selects interactive options
     const stateUrlMapping = {minimum_tss_distance: 'minimum_tss_distance', maximum_tss_distance: 'maximum_tss_distance'};
