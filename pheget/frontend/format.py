@@ -56,13 +56,13 @@ def get_variant_info(chrom: str, pos: int):
     reader = (
         readers.TabixReader(per_variant_path, parser=info_parser)
         .add_filter("position", pos)
-        .add_transform(
+        .add_lookup(
             "top_gene",
             lambda item: gene_lookup.get(
                 item.top_gene.split(".")[0], "Unknown_Gene"
             ),
         )
-        .add_transform(
+        .add_lookup(
             "af",
             lambda item: str(
                 round(item.af, math.floor(-math.log10(float(item.af))) + 4)

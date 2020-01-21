@@ -16,7 +16,6 @@ var retrieveBySuffix = function(input, suffix) {
 };
 
 LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
-    // console.log(input);
     if (typeof input !== 'undefined') {
         var pip_cluster = retrieveBySuffix(input, ':cluster');
         if (pip_cluster === null) { return null; }
@@ -291,7 +290,6 @@ function switchY_region(plot, yfield) {
     assoc_panels.forEach(function (panel) {
         if (panel.data_layers.some(d => d.id === 'associationpvalues') && panel.data_layers.some(d => d.id === 'significance')) {
             let scatter_layout = panel.data_layers.find(d => d.id === 'associationpvalues');
-            console.log(scatter_layout);
             let panel_base_y = scatter_layout.y_axis;
             let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
