@@ -47,3 +47,11 @@ def get_gene_names_conversion():
         "rb",
     ) as f:
         return json.loads(f.read().decode("utf-8"))
+
+
+def get_dapg_path():
+    """Return the path to the DAP-G database"""
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"],
+        "GTEx_v8_finemapping_DAPG.sqlite.db",
+    )

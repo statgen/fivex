@@ -3,6 +3,8 @@
 const API_BASE = 'https://portaldev.sph.umich.edu/api/v1/';
 // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
 const MAX_EXTENT = 500000;
+
+
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
     getURL(state) {
         let url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
@@ -53,6 +55,9 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
     newscattertooltip.html = newscattertooltip.html +
         `<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
         <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
+        <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
+        <strong>SPIP</strong>: {{{{namespace[assoc]}}spip}} <br>
+        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster}} <br>
         <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
@@ -63,7 +68,10 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
+            '{{namespace[assoc]}}stderr_beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
+            '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
+            '{{namespace[assoc]}}spip', '{{namespace[assoc]}}pip_cluster',
         ],
         tooltip: newscattertooltip
     });
@@ -83,6 +91,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
                 assoc_layer,
             ]
         });
+    layoutBase.axes.y1.label_offset = 36;
 
     /* Add this back in when LocusZoom update is published
     layoutBase.dashboard.components.push(
@@ -152,7 +161,7 @@ function getBasicSources(track_sources = []) {
         }]],
         ['recomb', ['RecombLZ', { url: API_BASE + 'annotation/recomb/results/', params: { build: 'GRCh38' } }]],
         ['gene', ['GeneLZ', { url: API_BASE + 'annotation/genes/', params: { build: 'GRCh38' } }]],
-        ['constraint', ['GeneConstraintLZ', { url: 'http://exac.broadinstitute.org/api/constraint' }]],
+        ['constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]],
     ];
 }
 
@@ -223,7 +232,7 @@ function addTrack(plot, datasources, gene_id, tissue, genesymbol) {
 /**
  * Switch the options used in displaying Y axis
  * @param {LocusZoom.Plot} plot
- * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue' or 'beta'
+ * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue', 'beta', or 'pip'
  */
 // eslint-disable-next-line no-unused-vars
 function switchY_region(plot, yfield) {
@@ -234,6 +243,9 @@ function switchY_region(plot, yfield) {
             let panel_base_y = scatter_layout.y_axis;
             let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+                delete panel.axes.y1.ticks;
+                panel.legend.orientation = 'vertical';
+                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
                 significance_line_layout.offset = 0;  // Change dotted horizontal line to y=0
                 significance_line_layout.style = {
@@ -243,8 +255,32 @@ function switchY_region(plot, yfield) {
                 };
                 panel_base_y.field = panel.id + ':beta';
                 delete panel_base_y.floor;
+                delete panel_base_y.ceiling;
                 panel_base_y.min_extent = [-1, 1];
+                // Note: changing the shapes for displayed points is conflicting with the reshaping by LD -- need to fix this later
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'effect_direction',
+                        parameters: {
+                            '+': 'triangle-up',
+                            '-': 'triangle-down'
+                        }
+                    },
+                    'circle'
+                ];
+                scatter_layout.legend = [
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
+                ];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
+                delete panel.axes.y1.ticks;
+                panel.legend.orientation = 'vertical';
+                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = '-log 10 p-value';
                 significance_line_layout.offset = 7.301;  // change dotted horizontal line to genomewide significant value 5e-8
                 significance_line_layout.style = {
@@ -255,7 +291,70 @@ function switchY_region(plot, yfield) {
                 panel_base_y.field = panel.id + ':log_pvalue';
                 // Set minimum y value to zero when looking at -log10 p-values
                 panel_base_y.floor = 0;
-                panel_base_y.min_extent = [0, 10];
+                delete panel_base_y.ceiling;
+                panel_base_y.lower_buffer = 0;
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'effect_direction',
+                        parameters: {
+                            '+': 'triangle-up',
+                            '-': 'triangle-down'
+                        }
+                    },
+                    'circle'
+                ];
+                scatter_layout.legend = [
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
+                ];
+            } else if (yfield === 'pip') {
+                panel.legend.orientation = 'horizontal';
+                panel.legend.pad_from_bottom = 46;
+                panel_base_y.field = panel.id + ':pip|pip_yvalue';
+                panel_base_y.floor = -6.1;
+                panel_base_y.ceiling = 0.2;
+                panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+                panel.axes.y1.ticks = [
+                    {position: 'left', text: '1', y: 0},
+                    {position: 'left', text: '0.1', y: -1},
+                    {position: 'left', text: '0.01', y: -2},
+                    {position: 'left', text: '1e-3', y: -3},
+                    {position: 'left', text: '1e-4', y: -4},
+                    {position: 'left', text: '1e-5', y: -5},
+                    {position: 'left', text: '≤1e-6', y: -6}
+                ];
+                scatter_layout.point_shape = [
+                    {
+                        scale_function: 'pip_cluster',
+                    },
+                    'circle'
+                ];
+                scatter_layout.legend = [
+                    { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+                    { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+                    { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+                    { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
+                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
+                ];
+                significance_line_layout.offset = -1000;
+                significance_line_layout.style = {
+                    'stroke': 'gray',
+                    'stroke-width': '1px',
+                    'stroke-dasharray': '10px 0px'
+                };
+                panel_base_y.min_extent = [0, 1];
             } else {
                 throw new Error('Unrecognized yfield option');
             }

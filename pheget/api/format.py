@@ -1,4 +1,5 @@
 import math
+import sqlite3
 import typing as ty
 
 from zorp import parser_utils, readers  # type: ignore
@@ -97,16 +98,18 @@ class VariantContainer:
         symbol,
         system,
         sample_size,
+        *,
+        pip_cluster=None,
+        spip=None,
+        pip=None,
     ):
+        self.gene_id = gene_id
         self.chromosome = chrom
         self.position = pos
-
         self.ref_allele = ref
         self.alt_allele = alt
-        self.gene_id = gene_id
 
         self.build = build
-
         self.tss_distance = tss_distance
         self.ma_samples = ma_samples
         self.ma_count = ma_count
@@ -115,11 +118,14 @@ class VariantContainer:
         self.log_pvalue = log_pvalue_nominal
         self.beta = beta
         self.stderr_beta = stderr_beta
-
         self.tissue = tissue
         self.symbol = symbol
+
         self.system = system
         self.samples = sample_size
+        self.pip_cluster = pip_cluster
+        self.spip = spip
+        self.pip = pip
 
     @property
     def id_field(self):
@@ -139,11 +145,89 @@ class VariantContainer:
         return vars(self)
 
 
+class PipAdder:
+    """
+    Add Posterior Inclusion Probability information to a parsed variant container object
+    """
+
+    def __init__(
+        self,
+        db_path: str,
+        chrom: str,
+        start: int,
+        *,
+        end=None,
+        tissue=None,
+        gene_id=None,
+    ):
+        # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
+        # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
+        pip_data = {}
+        conn = sqlite3.connect(db_path)
+
+        with conn:
+            arglist = [chrom]
+            # Build up SQL request based on the query fields given
+            sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
+            if tissue is not None:
+                sqlcommand += " AND tissue=?"
+                arglist.append(tissue)
+            if gene_id is not None:
+                sqlcommand += " AND gene=?"
+                arglist.append(gene_id)
+            if end is None:
+                sqlcommand += " AND pos=?;"
+                arglist.append(start)
+            else:
+                sqlcommand += " AND pos BETWEEN ? AND ?;"
+                arglist.extend([start, end])
+
+            # Generate the list of results based on the query request
+            dapg = list(conn.execute(sqlcommand, tuple(arglist),))
+
+        # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
+        for line in dapg:
+            pip_data[":".join([str(x) for x in line[0:6]])] = line[6:]
+
+        self.pip_data = pip_data
+
+    def __call__(self, variant: VariantContainer) -> VariantContainer:
+        # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
+        # PIP is the Posterior Inclusion Probability for a single variant
+        # SPIP is the sum of PIPs for all variants belonging to the same cluster
+
+        default = (0, 0.0, 0.0)
+        if self.pip_data is None:
+            (cluster, spip, pip) = default
+        else:
+            # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
+            #  and (cluster, spip, pip) is the value
+            (cluster, spip, pip) = self.pip_data.get(
+                ":".join(
+                    [
+                        "chr" + variant.chromosome,
+                        str(variant.position),
+                        variant.ref_allele,
+                        variant.alt_allele,
+                        variant.tissue,
+                        variant.gene_id,
+                    ]
+                ),
+                default,  # Some variants may lack information
+            )
+
+        variant.pip_cluster = cluster
+        variant.spip = spip
+        variant.pip = pip
+        return variant
+
+
 class VariantParser:
-    def __init__(self, tissue=None):
+    def __init__(self, tissue=None, pipDict=None):
         # We only need to load the gene locator once per usage, not on every line parsed
         self.gene_json = model.get_gene_names_conversion()
         self.tissue = tissue
+        self.pipDict = pipDict
 
     def __call__(self, row: str) -> VariantContainer:
 
@@ -158,6 +242,14 @@ class VariantParser:
         fields: ty.List[ty.Any] = row.split("\t")
         # Revise if data format changes!
         fields[1] = fields[1].replace("chr", "")  # chrom
+        if self.tissue:
+            # Tissue-specific files have one fewer column, and so the field must
+            #   be appended to match the number of fields in the all-tissue file
+            tissuevar = self.tissue
+            fields.append(tissuevar)
+        else:
+            tissuevar = fields[13]
+
         fields[2] = int(fields[2])  # pos
         fields[6] = int(fields[6])  # tss_distance
         fields[7] = int(fields[7])  # ma_samples
@@ -168,15 +260,14 @@ class VariantParser:
         )  # pvalue_nominal --> serialize as log
         fields[11] = float(fields[11])  # beta
         fields[12] = float(fields[12])  # stderr_beta
-        if self.tissue:
-            # Tissue-specific files have one less column, and so the field must
-            #   be appended to match the # of fields in the all-tissue file
-            fields.append(self.tissue)
+
+        # Append gene symbol
         fields.append(
             self.gene_json.get(fields[0].split(".")[0], "Unknown_Gene")
         )
-        # FIXME: Why is the sample size "-1"? We should avoid fake values
-        tissue_data = TISSUE_DATA.get(fields[13], ("Unknown Tissue", -1))
+
+        # Add tissue grouping and sample size from GTEx
+        tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
         fields.extend(tissue_data)
         return VariantContainer(*fields)
 
@@ -201,9 +292,22 @@ def query_variants(
     else:  # Otherwise, query from a chromosome-specific file with all tissues
         source = model.locate_data(chrom)
 
+    # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(
         source, parser=VariantParser(tissue), skip_rows=1
     )
+    # Add posterior incl probability annotations to the parsed data.
+    # (Writing as a transform allows us to replace the source of data or even manner of loading
+    #   without writing a different parser)
+    pip_adder = PipAdder(
+        model.get_dapg_path(),
+        chrom,
+        start,
+        end=end,
+        tissue=tissue,
+        gene_id=gene_id,
+    )
+    reader.add_transform(pip_adder)
 
     if gene_id:
         if "." in gene_id:
