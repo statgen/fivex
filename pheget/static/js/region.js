@@ -243,6 +243,7 @@ function switchY_region(plot, yfield) {
             let panel_base_y = scatter_layout.y_axis;
             let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
             if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+                delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
                 panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
@@ -277,6 +278,7 @@ function switchY_region(plot, yfield) {
                     { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
+                delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
                 panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = '-log 10 p-value';
