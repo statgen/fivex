@@ -113,7 +113,7 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
 
 LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
     if (typeof input !== 'undefined') {
-        var pip_cluster = input['phewas:cluster'];
+        var pip_cluster = input['phewas:pip_cluster'];
         if (pip_cluster === 1) {
             return 'cross';
         }
@@ -230,7 +230,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 
                                 '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
-                                '{{namespace[phewas]}}cluster', '{{namespace[phewas]}}spip',
+                                '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
@@ -294,7 +294,7 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
 <strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
 <strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
-<strong>PIP cluster:</strong> {{{{namespace[phewas]}}cluster}}<br>
+<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
 <form action="/region/" method="get">
     <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
     <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>

@@ -17,7 +17,7 @@ var retrieveBySuffix = function(input, suffix) {
 
 LocusZoom.ScaleFunctions.add('pip_cluster', function (parameters, input) {
     if (typeof input !== 'undefined') {
-        var pip_cluster = retrieveBySuffix(input, ':cluster');
+        var pip_cluster = retrieveBySuffix(input, ':pip_cluster');
         if (pip_cluster === null) { return null; }
         if (pip_cluster === 1) {
             return 'cross';
@@ -107,7 +107,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
         <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
         <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
         <strong>SPIP</strong>: {{{{namespace[assoc]}}spip}} <br>
-        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}cluster}} <br>
+        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster}} <br>
         <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
 
     const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
@@ -121,7 +121,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             '{{namespace[assoc]}}stderr_beta',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
-            '{{namespace[assoc]}}spip', '{{namespace[assoc]}}cluster',
+            '{{namespace[assoc]}}spip', '{{namespace[assoc]}}pip_cluster',
         ],
         tooltip: newscattertooltip
     });

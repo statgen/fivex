@@ -98,9 +98,10 @@ class VariantContainer:
         symbol,
         system,
         sample_size,
-        cluster,
-        spip,
-        pip,
+        *,
+        pip_cluster=None,
+        spip=None,
+        pip=None,
     ):
         self.gene_id = gene_id
         self.chromosome = chrom
@@ -122,7 +123,7 @@ class VariantContainer:
 
         self.system = system
         self.samples = sample_size
-        self.cluster = cluster
+        self.pip_cluster = pip_cluster
         self.spip = spip
         self.pip = pip
 
@@ -142,6 +143,83 @@ class VariantContainer:
 
     def to_dict(self):
         return vars(self)
+
+
+class PipAdder:
+    """
+    Add Posterior Inclusion Probability information to a parsed variant container object
+    """
+
+    def __init__(
+        self,
+        db_path: str,
+        chrom: str,
+        start: int,
+        *,
+        end=None,
+        tissue=None,
+        gene_id=None,
+    ):
+        # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
+        # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
+        pip_data = {}
+        conn = sqlite3.connect(db_path)
+
+        with conn:
+            arglist = [chrom]
+            # Build up SQL request based on the query fields given
+            sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
+            if tissue is not None:
+                sqlcommand += " AND tissue=?"
+                arglist.append(tissue)
+            if gene_id is not None:
+                sqlcommand += " AND gene=?"
+                arglist.append(gene_id)
+            if end is None:
+                sqlcommand += " AND pos=?;"
+                arglist.append(start)
+            else:
+                sqlcommand += " AND pos BETWEEN ? AND ?;"
+                arglist.extend([start, end])
+
+            # Generate the list of results based on the query request
+            dapg = list(conn.execute(sqlcommand, tuple(arglist),))
+
+        # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
+        for line in dapg:
+            pip_data[":".join([str(x) for x in line[0:6]])] = line[6:]
+
+        self.pip_data = pip_data
+
+    def __call__(self, variant: VariantContainer) -> VariantContainer:
+        # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
+        # PIP is the Posterior Inclusion Probability for a single variant
+        # SPIP is the sum of PIPs for all variants belonging to the same cluster
+
+        default = (0, 0.0, 0.0)
+        if self.pip_data is None:
+            (cluster, spip, pip) = default
+        else:
+            # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
+            #  and (cluster, spip, pip) is the value
+            (cluster, spip, pip) = self.pip_data.get(
+                ":".join(
+                    [
+                        "chr" + variant.chromosome,
+                        str(variant.position),
+                        variant.ref_allele,
+                        variant.alt_allele,
+                        variant.tissue,
+                        variant.gene_id,
+                    ]
+                ),
+                default,  # Some variants may lack information
+            )
+
+        variant.pip_cluster = cluster
+        variant.spip = spip
+        variant.pip = pip
+        return variant
 
 
 class VariantParser:
@@ -171,27 +249,7 @@ class VariantParser:
             fields.append(tissuevar)
         else:
             tissuevar = fields[13]
-        # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
-        # PIP is the Posterior Inclusion Probability for a single variant
-        # SPIP is the sum of PIPs for all variants belonging to the same cluster
-        if self.pipDict is None:
-            (cluster, spip, pip) = (0, 0.0, 0.0)
-        # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
-        #  and (cluster, spip, pip) is the value
-        else:
-            (cluster, spip, pip) = self.pipDict.get(
-                ":".join(
-                    [
-                        "chr" + fields[1],
-                        fields[2],
-                        fields[3],
-                        fields[4],
-                        tissuevar,
-                        fields[0],
-                    ]
-                ),
-                (0, 0.0, 0.0),
-            )
+
         fields[2] = int(fields[2])  # pos
         fields[6] = int(fields[6])  # tss_distance
         fields[7] = int(fields[7])  # ma_samples
@@ -211,10 +269,6 @@ class VariantParser:
         # Add tissue grouping and sample size from GTEx
         tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
         fields.extend(tissue_data)
-
-        # Add PIP data
-        fields.extend([cluster, spip, pip])
-
         return VariantContainer(*fields)
 
 
@@ -238,39 +292,22 @@ def query_variants(
     else:  # Otherwise, query from a chromosome-specific file with all tissues
         source = model.locate_data(chrom)
 
-    # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to data
-    pipDict = dict()
-    conn = sqlite3.connect(model.get_dapg())
-
-    with conn:
-        arglist = [chrom]
-
-        # Build up SQL request based on the query fields given
-        sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
-        if tissue is not None:
-            sqlcommand += " AND tissue=?"
-            arglist.append(tissue)
-        if gene_id is not None:
-            sqlcommand += " AND gene=?"
-            arglist.append(gene_id)
-        if end is None:
-            sqlcommand += " AND pos=?;"
-            arglist.append(start)
-        else:
-            sqlcommand += " AND pos BETWEEN ? AND ?;"
-            arglist.extend([start, end])
-
-        # Generate the list of results based on the query request
-        dapg = list(conn.execute(sqlcommand, tuple(arglist),))
-
-    # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
-    for line in dapg:
-        pipDict[":".join([str(x) for x in line[0:6]])] = line[6:]
-
     # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(
-        source, parser=VariantParser(tissue, pipDict), skip_rows=1
+        source, parser=VariantParser(tissue), skip_rows=1
     )
+    # Add posterior incl probability annotations to the parsed data.
+    # (Writing as a transform allows us to replace the source of data or even manner of loading
+    #   without writing a different parser)
+    pip_adder = PipAdder(
+        model.get_dapg_path(),
+        chrom,
+        start,
+        end=end,
+        tissue=tissue,
+        gene_id=gene_id,
+    )
+    reader.add_transform(pip_adder)
 
     if gene_id:
         if "." in gene_id:
