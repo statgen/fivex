@@ -193,7 +193,6 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
                                 '{{namespace[phewas]}}top_value_rank',
                                 '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                                 '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
-
                                 '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
@@ -449,8 +448,7 @@ function switchY(plot, table, yfield) {
         ];
         delete scatter_config.y_axis.ceiling;
         delete plot.layout.panels[0].axes.y1.ticks;
-        plot.panels.phewas.legend.layout.hidden = true;
-        plot.panels.phewas.legend.render();
+        plot.panels.phewas.legend.hide();
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
@@ -484,8 +482,7 @@ function switchY(plot, table, yfield) {
         delete scatter_config.y_axis.min_extent;
         delete scatter_config.y_axis.ceiling;
         delete plot.layout.panels[0].axes.y1.ticks;
-        plot.panels.phewas.legend.layout.hidden = true;
-        plot.panels.phewas.legend.render();
+        plot.panels.phewas.legend.hide();
         scatter_config.y_axis.field = 'phewas:beta';
         plot.layout.panels[0].axes.y1['label'] = 'Normalized Effect Size (NES)';
         plot.layout.panels[0].data_layers[1].offset = 0;
@@ -515,8 +512,7 @@ function switchY(plot, table, yfield) {
             { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
             { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
         ];
-        plot.panels.phewas.legend.layout.hidden = false;
-        plot.panels.phewas.legend.render();
+        plot.panels.phewas.legend.show();
         scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
         scatter_config.y_axis.floor = -6.1;
         scatter_config.y_axis.ceiling = 0.2;

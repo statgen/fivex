@@ -52,8 +52,9 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
     const geneid_short = gene_id.split('.')[0];
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
-    newscattertooltip.html = newscattertooltip.html +
+    newscattertooltip.html = newscattertooltip.html.replace('Make LD Reference', 'Set this variant as index for LD') +
         `<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
+        <strong>MAF</strong>: {{{{namespace[assoc]}}maf}} <br>
         <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
         <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
         <strong>SPIP</strong>: {{{{namespace[assoc]}}spip}} <br>
@@ -68,7 +69,7 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
             '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
-            '{{namespace[assoc]}}stderr_beta',
+            '{{namespace[assoc]}}stderr_beta', '{{namespace[assoc]}}maf',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
             '{{namespace[assoc]}}spip', '{{namespace[assoc]}}pip_cluster',
@@ -242,7 +243,7 @@ function switchY_region(plot, yfield) {
             let scatter_layout = panel.data_layers.find(d => d.id === 'associationpvalues');
             let panel_base_y = scatter_layout.y_axis;
             let significance_line_layout = panel.data_layers.find(d => d.id === 'significance');
-            if (yfield === 'beta') {   // Settings for using beta as the y-axis variable
+            if (yfield === 'beta') {  // Settings for using beta as the y-axis variable
                 delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
                 panel.legend.pad_from_top = 46;
