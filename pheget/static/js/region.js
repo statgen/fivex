@@ -278,6 +278,7 @@ function switchY_region(plot, yfield) {
                     { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
                     { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
+                for (let panel of Object.values(plot.panels)) {if (panel.legend) {panel.legend.hide();}}
             } else if (yfield === 'log_pvalue') {  // Settings for using -log10(P-value) as the y-axis variable
                 delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
@@ -313,6 +314,7 @@ function switchY_region(plot, yfield) {
                     { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
                     { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' }
                 ];
+                for (let panel of Object.values(plot.panels)) {if (panel.legend) {panel.legend.hide();}}
             } else if (yfield === 'pip') {
                 panel.legend.orientation = 'horizontal';
                 panel.legend.pad_from_bottom = 46;
@@ -356,6 +358,7 @@ function switchY_region(plot, yfield) {
                     'stroke-dasharray': '10px 0px'
                 };
                 panel_base_y.min_extent = [0, 1];
+                for (let panel of Object.values(plot.panels)) {if (panel.legend) {panel.legend.show();}}
             } else {
                 throw new Error('Unrecognized yfield option');
             }
