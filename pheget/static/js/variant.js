@@ -74,9 +74,13 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
             this.data.forEach(function (d) {
                 var item_cat_label = d[category_field];
                 var item_cat_order = d[category_order_field];
+                // In practice, we find that some gene symbols are ambiguous (appear at multiple positions), and close
+                //  enough Example: "RF00003". Hence, we will build the uniqueness check on TSS, not gene symbol (and
+                //  hope that TSS is more unique than gene name)
+                // TODO: If TSS can ever be ambiguous, we have traded one "not unique" bug for another. Check closely.
                 if (!Object.prototype.hasOwnProperty.call(unique_categories, item_cat_label)) {
-                    unique_categories[item_cat_label] = item_cat_order;
-                } else if (unique_categories[item_cat_label] !== item_cat_order) {
+                    unique_categories[item_cat_order] = item_cat_order;
+                } else if (unique_categories[item_cat_order] !== item_cat_order) {
                     throw new Error('Unable to sort PheWAS plot categories by ' + category_field + ' because the category ' + item_cat_label
                         + ' can have either the value "' + unique_categories[item_cat_label] + '" or "' + item_cat_order + '".');
                 }
@@ -433,7 +437,8 @@ function groupByThing(plot, thing) {
     scatter_config.label.text = `{{phewas:${point_label_field}}}`;
     scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
 
-    plot.applyState();
+    // Clear "same match" highlighting when re-rendering.
+    plot.applyState({ lz_match_value: null });
 }
 
 // Switches the displayed y-axis value between p-values and effect size
