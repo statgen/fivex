@@ -28,11 +28,21 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 
+{# Error monitoring: requires a setting in the machine-specific .env file #}
+{% if config.SENTRY_DSN %}
+  <script src="https://browser.sentry-cdn.com/5.12.0/bundle.min.js"
+          integrity="sha384-628yQYiY4aWhtsw5Qy17Mmuij8Qwsu5EeUbhpWDRUBkxa41oNaPoXwVJ7+dH7CJb"
+          crossorigin="anonymous"></script>
+  <script>
+    Sentry.init({ dsn: {{ config.SENTRY_DSN | tojson }} });
+  </script>
+{% endif %}
+
 <script>
     // Activates Bootstrap tooltips
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
-    })
+    });
     $(function () {
         $('[data-toggle-second="tooltip"]').tooltip()
     })

@@ -46,6 +46,8 @@ The following command will start a basic flask app server that reloads whenever 
 
 Then follow the instructions printed to the console to visit the app in your web browser.
 
+### Additional production options
+You may configure Sentry error monitoring by setting the config option `SENTRY_DSN` in your `.env` file.
 
 ### Testing and code quality
 Before any commit, please run the following commands. (a sample pre-commit hook is provided that will do this for you,

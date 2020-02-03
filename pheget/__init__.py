@@ -17,4 +17,13 @@ def create_app(settings_module="pheget.settings.dev"):
     app.register_blueprint(views_blueprint, url_prefix="/")
     # Flask debug toolbar: only enabled when debug mode is active
     DebugToolbarExtension(app)
+
+    if app.config["SENTRY_DSN"]:
+        # Only activate sentry if it is configured for this app
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+
+        sentry_sdk.init(
+            app.config["SENTRY_DSN"], integrations=[FlaskIntegration()]
+        )
     return app
