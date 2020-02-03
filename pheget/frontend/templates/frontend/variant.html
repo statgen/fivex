@@ -12,6 +12,11 @@
     .tooltip a {
       text-decoration: underline;
     }
+
+    /* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
+    .lz-data_layer-tooltip {
+      z-index: 2
+    }
   </style>
   <link rel="stylesheet" type="text/css"
         href="https://cdn.jsdelivr.net/npm/locuszoom@{{ config.LOCUSZOOM_VERSION }}/dist/locuszoom.css"/>
