@@ -125,9 +125,10 @@ LocusZoom.TransformationFunctions.add('twosigfigs', function(x) {
 function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
     var dataSources = new LocusZoom.DataSources();
     const apiBase = 'https://portaldev.sph.umich.edu/api/v1/';
+    const pos_range = 1000000;
     pos = +pos;
-    var pos_lower = pos - 500000;
-    var pos_higher = pos + 500000;
+    var pos_lower = pos - pos_range;
+    var pos_higher = pos + pos_range;
     dataSources
         .add('phewas', ['PheGET', {
             url: `/api/variant/${chrom}_${pos}/`,
@@ -145,8 +146,8 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         end: pos_higher,
         chr: chrom,
         y_field: 'log_pvalue',
-        minimum_tss_distance: -1000000,
-        maximum_tss_distance: 1000000,
+        minimum_tss_distance: -pos_range,
+        maximum_tss_distance: pos_range,
         position: pos,
     }, initialState);
 
