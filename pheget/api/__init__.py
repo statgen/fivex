@@ -2,11 +2,68 @@
 API endpoints (return JSON, not HTML)
 """
 
+import json
+import sqlite3
+import urllib.request
+
 from flask import Blueprint, abort, jsonify, request
 
+from .. import model
 from .format import query_variants
 
 api_blueprint = Blueprint("api", __name__)
+
+
+@api_blueprint.route("/bestvar/<string:symbol>/", methods=["GET"])
+def gene_query(symbol: str):
+    """
+    Given a gene, query an SQL database to find the variant with the strongest association with that gene
+    """
+    # Instead of querying locally, I will use omnisearch to get the relevant parameters (chrom, pos, gene_id)
+    url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={symbol}&build=GRCh38"
+    omniJson = json.load(urllib.request.urlopen(url))["data"][0]
+    if (
+        "gene_id" in omniJson
+        and "chrom" in omniJson
+        and "start" in omniJson
+        and "end" in omniJson
+    ):
+        conn = sqlite3.connect(model.get_sig_lookup())
+        with conn:
+            try:
+                (
+                    sqlgene_id,
+                    sqlchrom,
+                    sqlpos,
+                    sqlref,
+                    sqlalt,
+                    sqlval,
+                    sqltissue,
+                ) = list(
+                    conn.execute(
+                        f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
+                        (
+                            "chr" + omniJson["chrom"],
+                            omniJson["start"] - 1000000,
+                            omniJson["end"] + 1000000,
+                            omniJson["gene_id"].split(".")[0] + ".%",
+                        ),
+                    )
+                )[
+                    0
+                ]
+                data = {
+                    "chrom": sqlchrom,
+                    "pos": sqlpos,
+                    "ref": sqlref,
+                    "alt": sqlalt,
+                }
+                results = {"data": data}
+                return jsonify(results)
+            except IndexError:
+                abort(404)
+    else:
+        abort(404)
 
 
 @api_blueprint.route(
