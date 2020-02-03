@@ -20,8 +20,8 @@ def create_app(settings_module="pheget.settings.dev"):
 
     if app.config["SENTRY_DSN"]:
         # Only activate sentry if it is configured for this app
-        import sentry_sdk
-        from sentry_sdk.integrations.flask import FlaskIntegration
+        import sentry_sdk  # type: ignore
+        from sentry_sdk.integrations.flask import FlaskIntegration  # type: ignore
 
         sentry_sdk.init(
             app.config["SENTRY_DSN"], integrations=[FlaskIntegration()]
