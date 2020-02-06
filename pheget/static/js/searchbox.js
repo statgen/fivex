@@ -4,10 +4,20 @@ function failureCallback(error) {
 }
 
 
+// Handles bad requests - copied from https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
+
+
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
 function getOmniSearch(searchText) {
     const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${searchText}&build=GRCh38`;
     var data = fetch(omniurl)
+        .then(handleErrors)
         .then((response) => response.json())
         .then((myJson) => myJson.data[0])
         .catch(function(error) {
@@ -22,6 +32,7 @@ function getOmniSearch(searchText) {
 function getBestVar(symbol) {
     const bestVarURL = `/api/bestvar/${symbol}`;
     var data = fetch(bestVarURL)
+        .then(handleErrors)
         .then((response) => response.json())
         .then((resp) => resp.data)
         .catch(failureCallback);
