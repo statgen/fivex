@@ -5,9 +5,9 @@ function failureCallback(error) {
 
 
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
-async function getOmniSearch(searchText) {
+function getOmniSearch(searchText) {
     const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${searchText}&build=GRCh38`;
-    let data = await fetch(omniurl)
+    var data = fetch(omniurl)
         .then((response) => response.json())
         .then((myJson) => myJson.data[0])
         .catch(function(error) {
@@ -19,18 +19,19 @@ async function getOmniSearch(searchText) {
 
 
 // Returns the data from our internal best variant API by searching for the gene_id (ENSG...) or gene_name
-async function getBestVar(symbol) {
+function getBestVar(symbol) {
     const bestVarURL = `/api/bestvar/${symbol}`;
-    var data = await fetch(bestVarURL)
+    var data = fetch(bestVarURL)
         .then((response) => response.json())
+        .then((resp) => resp.data)
         .catch(failureCallback);
-    return data.data;
+    return data;
 }
 
 
 // Define a function that returns the search query type to the parseSearch function
 // We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end), or a gene name (ENSG or symbol)
-async function parseSearchText(searchText) {
+function parseSearchText(searchText) {
     // Use regular expressions to match known patterns for single variant, range, and rs number
     const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)/;
     const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)-([1-9][0-9]+)/;
