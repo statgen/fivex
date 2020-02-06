@@ -30,7 +30,7 @@ function getOmniSearch(searchText) {
 
 // Returns the data from our internal best variant API by searching for the gene_id (ENSG...) or gene_name
 function getBestVar(symbol) {
-    const bestVarURL = `/api/bestvar/${symbol}`;
+    const bestVarURL = `/api/${symbol}/bestvar/`;
     var data = fetch(bestVarURL)
         .then(handleErrors)
         .then((response) => response.json())
@@ -42,6 +42,7 @@ function getBestVar(symbol) {
 
 // Define a function that returns the search query type to the parseSearch function
 // We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end), or a gene name (ENSG or symbol)
+// This function always returns a Promise, because parseSearch expects it
 function parseSearchText(searchText) {
     // Use regular expressions to match known patterns for single variant, range, and rs number
     const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)/;
@@ -52,16 +53,28 @@ function parseSearchText(searchText) {
     const cMatchRS = searchText.match(rsPattern);
     // If input is in 'chrom:pos' format (with or without 'chr'), return the position of the single variant
     // TODO: Show closest variant if specific variant does not exist
+    var returnJson;
+    var jsonPromise;
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
-        const pos = cMatch[3];
-        return {'type': 'variant', 'chrom': {chrom}, 'start': {pos}, 'end': {pos}};
+        const pos = parseInt(cMatch[3]);
+        returnJson = {type: 'variant', chrom, start: pos, end: pos};
+        // eslint-disable-next-line no-undef
+        jsonPromise = new Promise((resolve) => {
+            resolve(returnJson);
+        });
+        return jsonPromise;
     } else if (cMatchRange !== null && searchText === cMatchRange[0]) {
         // If the query is a range in the form [chr]:[start]-[end], return the position of the range
         const chrom = cMatchRange[2];
-        const start = cMatchRange[3];
-        const end = cMatchRange[4];
-        return {type: 'range', chrom: {chrom}, start: {start}, end: {end}};
+        const start = parseInt(cMatchRange[3]);
+        const end = parseInt(cMatchRange[4]);
+        returnJson = {type: 'range', chrom, start, end};
+        // eslint-disable-next-line no-undef
+        jsonPromise = new Promise((resolve) => {
+            resolve(returnJson);
+        });
+        return jsonPromise;
     } else if (cMatchRS !== null && searchText === cMatchRS[0]) {
         // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
         var returnType = getOmniSearch(searchText)
@@ -70,7 +83,7 @@ function parseSearchText(searchText) {
                 const chrom = varData.chrom;
                 const start = varData.start;
                 const end = varData.end;
-                var returnStatus = {type: 'variant', chrom: {chrom}, start: {start}, end: {end}};
+                var returnStatus = {type: 'variant', chrom, start, end};
                 return returnStatus;
             })
             .catch(failureCallback);
@@ -92,7 +105,9 @@ function parseSearchText(searchText) {
                 // If omnisearch finds a gene_id, then attempt to find the best eQTL signal for this gene
                 var varData = getBestVar(gene_id)
                     .then(function(result) {
-                        return {type: 'variant', chrom: `${result.chrom}`, start: `${result.pos}`, end: `${result.pos}`};
+                        var pos = parseInt(result.pos);
+                        var chrom = result.chrom.replace('chr', '');
+                        return {type: 'variant', chrom, start: pos, end: pos};
                     })
                     .catch(function() {
                         console.log('Unable to the best variant for the gene "' + gene_id + '"');
@@ -107,17 +122,21 @@ function parseSearchText(searchText) {
 // eslint-disable-next-line no-unused-vars
 function parseSearch(searchText) {
     parseSearchText(searchText)
-        .then(function(results) {
-            if (results === undefined || results.type === 'other' && results.chrom === null && results.start === null && results.end === null) {
+        .then(function(omniresult) {
+            if (omniresult === undefined || omniresult.type === 'other' && omniresult.chrom === null && omniresult.start === null && omniresult.end === null) {
                 alert('Sorry, we are unable to parse your query.');
+                failureCallback('Omnisearch undefined or other');
             } else {
-                var chrom = results.chrom.replace('chr', '');
-                if (results.type === 'variant') {
-                    window.location = `/variant/${chrom}_${results.start}`;
-                }
-                if (results.type === 'range') {
-                    window.location = `/region/?chrom=${chrom}&start=${results.start}&end=${results.end}`;
-                }
+                return(omniresult);
+            }
+        })
+        .then(function(result) {
+            var chrom = result.chrom.replace('chr', '');
+            if (result.type === 'variant') {
+                window.location = `/variant/${chrom}_${result.start}`;
+            }
+            if (result.type === 'range') {
+                window.location = `/region/?chrom=${chrom}&start=${result.start}&end=${result.end}`;
             }
         })
         .catch(failureCallback);
