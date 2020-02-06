@@ -55,13 +55,13 @@ function parseSearchText(searchText) {
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
         const pos = cMatch[3];
-        return {'type': 'variant', 'chrom': `${chrom}`, 'start': `${pos}`, 'end': `${pos}`};
+        return {'type': 'variant', 'chrom': {chrom}, 'start': {pos}, 'end': {pos}};
     } else if (cMatchRange !== null && searchText === cMatchRange[0]) {
         // If the query is a range in the form [chr]:[start]-[end], return the position of the range
         const chrom = cMatchRange[2];
         const start = cMatchRange[3];
         const end = cMatchRange[4];
-        return {type: 'range', chrom: `${chrom}`, start: `${start}`, end: `${end}`};
+        return {type: 'range', chrom: {chrom}, start: {start}, end: {end}};
     } else if (cMatchRS !== null && searchText === cMatchRS[0]) {
         // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
         var returnType = getOmniSearch(searchText)
@@ -70,7 +70,7 @@ function parseSearchText(searchText) {
                 const chrom = varData.chrom;
                 const start = varData.start;
                 const end = varData.end;
-                var returnStatus = {type: 'variant', chrom: `${chrom}`, start: `${start}`, end: `${end}`};
+                var returnStatus = {type: 'variant', chrom: {chrom}, start: {start}, end: {end}};
                 return returnStatus;
             })
             .catch(failureCallback);
