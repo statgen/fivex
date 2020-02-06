@@ -14,7 +14,7 @@ from .format import query_variants
 api_blueprint = Blueprint("api", __name__)
 
 
-@api_blueprint.route("/<string:symbol>/bestvar/", methods=["GET"])
+@api_blueprint.route("/gene/<string:symbol>/bestvar/", methods=["GET"])
 def gene_query(symbol: str):
     """
     Given a gene, query an SQL database to find the variant with the strongest association with that gene

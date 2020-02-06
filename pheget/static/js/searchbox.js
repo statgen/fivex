@@ -30,7 +30,7 @@ function getOmniSearch(searchText) {
 
 // Returns the data from our internal best variant API by searching for the gene_id (ENSG...) or gene_name
 function getBestVar(symbol) {
-    const bestVarURL = `/api/${symbol}/bestvar/`;
+    const bestVarURL = `/api/gene/${symbol}/bestvar/`;
     var data = fetch(bestVarURL)
         .then(handleErrors)
         .then((response) => response.json())
