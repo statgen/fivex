@@ -1,60 +1,112 @@
-var getOmni = function (omniurl, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', omniurl, true);
-    xhr.responseType = 'json';
-    xhr.onload = function () {
-        var status = xhr.status;
-        if (status === 200) {
-            callback(null, xhr.response);
-        } else {
-            callback(status, xhr.response);
-        }
-    };
-    xhr.send();
-};
+// Generic failure callback function
+function failureCallback(error) {
+    console.log('Error status: ' + error);
+}
 
-// eslint-disable-next-line no-unused-vars
-function parseSearch(searchText) {
+
+// Returns the data from an omnisearch fetch if successful, return nothing otherwise
+async function getOmniSearch(searchText) {
+    const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${searchText}&build=GRCh38`;
+    let data = await fetch(omniurl)
+        .then((response) => response.json())
+        .then((myJson) => myJson.data[0])
+        .catch(function(error) {
+            console.log('Omnisearch error, status code: ' + error);
+            return;
+        });
+    return data;
+}
+
+
+// Returns the data from our internal best variant API by searching for the gene_id (ENSG...) or gene_name
+async function getBestVar(symbol) {
+    const bestVarURL = `/api/bestvar/${symbol}`;
+    var data = await fetch(bestVarURL)
+        .then((response) => response.json())
+        .catch(failureCallback);
+    return data.data;
+}
+
+
+// Define a function that returns the search query type to the parseSearch function
+// We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end), or a gene name (ENSG or symbol)
+async function parseSearchText(searchText) {
+    // Use regular expressions to match known patterns for single variant, range, and rs number
     const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)/;
     const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)-([1-9][0-9]+)/;
+    const rsPattern = /(rs[1-9][0-9]+)/;
     const cMatch = searchText.match(chromposPattern);
     const cMatchRange = searchText.match(rangePattern);
-    // If input is in 'chrom:pos' format (with or without 'chr'), go directly to the single-variant page
+    const cMatchRS = searchText.match(rsPattern);
+    // If input is in 'chrom:pos' format (with or without 'chr'), return the position of the single variant
     // TODO: Show closest variant if specific variant does not exist
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
         const pos = cMatch[3];
-        window.location = `/variant/${chrom}_${pos}`;
+        return {'type': 'variant', 'chrom': `${chrom}`, 'start': `${pos}`, 'end': `${pos}`};
     } else if (cMatchRange !== null && searchText === cMatchRange[0]) {
-        // If the query is a range in the form [chr]:[start]-[end], go to a region view page of that range
+        // If the query is a range in the form [chr]:[start]-[end], return the position of the range
         const chrom = cMatchRange[2];
         const start = cMatchRange[3];
         const end = cMatchRange[4];
-        window.location = `/region/?chrom=${chrom}&start=${start}&end=${end}`;
+        return {type: 'range', chrom: `${chrom}`, start: `${start}`, end: `${end}`};
+    } else if (cMatchRS !== null && searchText === cMatchRS[0]) {
+        // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
+        var returnType = getOmniSearch(searchText)
+            .then(function(result) {
+                var varData = result;
+                const chrom = varData.chrom;
+                const start = varData.start;
+                const end = varData.end;
+                var returnStatus = {type: 'variant', chrom: `${chrom}`, start: `${start}`, end: `${end}`};
+                return returnStatus;
+            })
+            .catch(failureCallback);
+        return returnType;
     } else {
-        // Use omnisearch to parse any other query - works especially well for rs numbers and gene names
-        const omniurl = 'https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=' + searchText + '&build=GRCh38';
-        getOmni(omniurl, function (err, omniJson) {
-            if (err !== null) {
-                alert('Error encountered: ' + err);
+        // If input is a gene or some other unknown format, then look for the best eQTL signal for that gene
+        // First, look up the search query on omnisearch
+        var jsonResult = getOmniSearch(searchText)
+            .then(function(result) {
+                // Pass the gene_id (ENSG...) to the next step, if it exists
+                if (result.gene_id === undefined) {
+                    return;
+                }
+                else {
+                    return result.gene_id;
+                }
+            })
+            .then(function(gene_id) {
+                // If omnisearch finds a gene_id, then attempt to find the best eQTL signal for this gene
+                var varData = getBestVar(gene_id)
+                    .then(function(result) {
+                        return {type: 'variant', chrom: `${result.chrom}`, start: `${result.pos}`, end: `${result.pos}`};
+                    })
+                    .catch(function() {
+                        console.log('Unable to the best variant for the gene "' + gene_id + '"');
+                    });
+                return varData;
+            })
+            .catch(failureCallback);
+        return jsonResult;
+    }
+}
+
+// eslint-disable-next-line no-unused-vars
+function parseSearch(searchText) {
+    parseSearchText(searchText)
+        .then(function(results) {
+            if (results === undefined || results.type === 'other' && results.chrom === null && results.start === null && results.end === null) {
+                alert('Sorry, we are unable to parse your query.');
             } else {
-                // If the result is a single variant, parse the position and try to go to the single variant view
-                // Note: this works because omnisearch will return start=end even for indels
-                if (omniJson.data[0].chrom !== undefined && omniJson.data[0].start === omniJson.data[0].end) {
-                    const chrom = omniJson.data[0].chrom;
-                    const pos = omniJson.data[0].start;
-                    window.location = `/variant/${chrom}_${pos}`;
-                } else if (omniJson.data[0].gene_id !== undefined) {
-                    // If the result is a gene, get the range of the gene, pad it on both sides, and go to a region view
-                    const chrom = omniJson.data[0].chrom;
-                    const gene_id = omniJson.data[0].gene_id;
-                    const start = Math.max(omniJson.data[0].start - 300000, 1);
-                    const end = omniJson.data[0].end + 300000;
-                    window.location = `/region/?chrom=${chrom}&gene_id=${gene_id}&start=${start}&end=${end}`;
-                } else {
-                    alert('Sorry, we were unable to find a match for the search term "' + searchText + '" in our database.');
+                var chrom = results.chrom.replace('chr', '');
+                if (results.type === 'variant') {
+                    window.location = `/variant/${chrom}_${results.start}`;
+                }
+                if (results.type === 'range') {
+                    window.location = `/region/?chrom=${chrom}&start=${results.start}&end=${results.end}`;
                 }
             }
-        });
-    }
+        })
+        .catch(failureCallback);
 }

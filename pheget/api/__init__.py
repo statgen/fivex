@@ -19,6 +19,9 @@ def gene_query(symbol: str):
     """
     Given a gene, query an SQL database to find the variant with the strongest association with that gene
     """
+    # ~UGLY HACK~ If omnisearch did not return a gene_id, then searchbox will fill in "undefined" - immediately abort in that case
+    if symbol == "undefined":
+        abort(404)
     # Instead of querying locally, I will use omnisearch to get the relevant parameters (chrom, pos, gene_id)
     url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={symbol}&build=GRCh38"
     omniJson = json.load(urllib.request.urlopen(url))["data"][0]
@@ -46,7 +49,7 @@ def gene_query(symbol: str):
                             "chr" + omniJson["chrom"],
                             omniJson["start"] - 1000000,
                             omniJson["end"] + 1000000,
-                            omniJson["gene_id"].split(".")[0] + ".%",
+                            omniJson["gene_id"].split(".")[0] + "._%",
                         ),
                     )
                 )[
