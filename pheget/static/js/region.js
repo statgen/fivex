@@ -2,7 +2,7 @@
 
 const API_BASE = 'https://portaldev.sph.umich.edu/api/v1/';
 // Set to smaller values for testing; go up to 50k or 200k after we make it more efficient
-const MAX_EXTENT = 500000;
+const MAX_EXTENT = 1000000;
 
 
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {

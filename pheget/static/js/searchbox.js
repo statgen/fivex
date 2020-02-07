@@ -40,6 +40,19 @@ function getBestVar(symbol) {
 }
 
 
+// Returns the data from our internal best range query API by searching for chrom:start-end
+//  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact range queries
+function getBestRange(chrom, start, end) {
+    const bestURL = `/api/region/${chrom}/${start}-${end}/best/`;
+    var data = fetch(bestURL)
+        .then(handleErrors)
+        .then((response) => response.json())
+        .then((resp) => resp.data)
+        .catch(failureCallback);
+    return data;
+}
+
+
 // Define a function that returns the search query type to the parseSearch function
 // We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end), or a gene name (ENSG or symbol)
 // This function always returns a Promise, because parseSearch expects it
@@ -59,6 +72,7 @@ function parseSearchText(searchText) {
         const chrom = cMatch[2];
         const pos = parseInt(cMatch[3]);
         returnJson = {type: 'variant', chrom, start: pos, end: pos};
+        // Forcefully convert this return to a Promise to match the others
         // eslint-disable-next-line no-undef
         jsonPromise = new Promise((resolve) => {
             resolve(returnJson);
@@ -69,15 +83,20 @@ function parseSearchText(searchText) {
         const chrom = cMatchRange[2];
         const start = parseInt(cMatchRange[3]);
         const end = parseInt(cMatchRange[4]);
-        returnJson = {type: 'range', chrom, start, end};
-        // eslint-disable-next-line no-undef
-        jsonPromise = new Promise((resolve) => {
-            resolve(returnJson);
-        });
-        return jsonPromise;
+        var returnType = getBestRange(chrom, start, end)
+            .then(function(result) {
+                var varData = result;
+                const gene_id = varData.gene_id;
+                const symbol = varData.symbol;
+                const tissue = varData.tissue;
+                var returnStatus = {type: 'range', chrom, start, end, gene_id, symbol, tissue};
+                return returnStatus;
+            })
+            .catch(failureCallback);
+        return returnType;
     } else if (cMatchRS !== null && searchText === cMatchRS[0]) {
         // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
-        var returnType = getOmniSearch(searchText)
+        var rangeReturn = getOmniSearch(searchText)
             .then(function(result) {
                 var varData = result;
                 const chrom = varData.chrom;
@@ -87,7 +106,7 @@ function parseSearchText(searchText) {
                 return returnStatus;
             })
             .catch(failureCallback);
-        return returnType;
+        return rangeReturn;
     } else {
         // If input is a gene or some other unknown format, then look for the best eQTL signal for that gene
         // First, look up the search query on omnisearch
@@ -98,21 +117,29 @@ function parseSearchText(searchText) {
                     return;
                 }
                 else {
-                    return result.gene_id;
+                    const chrom = result.chrom;
+                    const start = Math.max(result.start - 500000, 1);
+                    const end = result.end + 500000;
+                    const gene_id = result.gene_id;
+                    var omni = {chrom, start, end, gene_id};
+                    return omni;
                 }
             })
-            .then(function(gene_id) {
-                // If omnisearch finds a gene_id, then attempt to find the best eQTL signal for this gene
-                var varData = getBestVar(gene_id)
-                    .then(function(result) {
-                        var pos = parseInt(result.pos);
-                        var chrom = result.chrom.replace('chr', '');
-                        return {type: 'variant', chrom, start: pos, end: pos};
+            .then(function(omni) {
+                // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and send the user to the region view
+                const gene_id = omni.gene_id;
+                var returnStatus = getBestVar(gene_id)
+                    .then(function(bestVarResult) {
+                        const tissue = bestVarResult.tissue;
+                        const symbol = bestVarResult.symbol;
+                        const chrom = omni.chrom;
+                        const start = omni.start;
+                        const end = omni.end;
+                        var rangeData = {type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue};
+                        return rangeData;
                     })
-                    .catch(function() {
-                        console.log('Unable to the best variant for the gene "' + gene_id + '"');
-                    });
-                return varData;
+                    .catch(failureCallback);
+                return returnStatus;
             })
             .catch(failureCallback);
         return jsonResult;
@@ -136,7 +163,7 @@ function parseSearch(searchText) {
                 window.location = `/variant/${chrom}_${result.start}`;
             }
             if (result.type === 'range') {
-                window.location = `/region/?chrom=${chrom}&start=${result.start}&end=${result.end}`;
+                window.location = `/region/?chrom=${chrom}&start=${result.start}&end=${result.end}&gene_id=${result.gene_id}&symbol=${result.symbol}&tissue=${result.tissue}`;
             }
         })
         .catch(failureCallback);
