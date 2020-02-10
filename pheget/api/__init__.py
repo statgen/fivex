@@ -14,63 +14,6 @@ from .format import query_variants
 api_blueprint = Blueprint("api", __name__)
 
 
-# When given a gene name (symbol or ENSG...), return the chrom:pos of the variant with the strongest eQTL signal
-#  along with the associated tissue
-@api_blueprint.route("/gene/<string:symbol>/bestvar/", methods=["GET"])
-def gene_query(symbol: str):
-    """
-    Given a gene, query an SQL database to find the variant and tissue with the strongest association with that gene
-    """
-    # Instead of querying locally, I will use omnisearch to get the relevant parameters (chrom, pos, gene_id)
-    url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={symbol}&build=GRCh38"
-    omniJson = json.load(urllib.request.urlopen(url))["data"][0]
-    if (
-        "gene_id" in omniJson
-        and "chrom" in omniJson
-        and "start" in omniJson
-        and "end" in omniJson
-    ):
-        conn = sqlite3.connect(model.get_sig_lookup())
-        with conn:
-            try:
-                (
-                    sqlgene_id,
-                    sqlchrom,
-                    sqlpos,
-                    sqlref,
-                    sqlalt,
-                    sqlval,
-                    sqltissue,
-                ) = list(
-                    conn.execute(
-                        f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
-                        (
-                            "chr" + omniJson["chrom"],
-                            omniJson["start"] - 1000000,
-                            omniJson["end"] + 1000000,
-                            omniJson["gene_id"].split(".")[0] + "._%",
-                        ),
-                    )
-                )[
-                    0
-                ]
-                data = {
-                    "chrom": sqlchrom,
-                    "pos": sqlpos,
-                    "ref": sqlref,
-                    "alt": sqlalt,
-                    "tissue": sqltissue,
-                    "symbol": omniJson["gene_name"],
-                    "gene_id": omniJson["gene_id"],
-                }
-                results = {"data": data}
-                return jsonify(results)
-            except IndexError:
-                abort(404)
-    else:
-        abort(404)
-
-
 # Returns all eQTL data given a positional range, optionally filtering by tissue and gene_id
 @api_blueprint.route(
     "/region/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
@@ -107,42 +50,74 @@ def region_query(chrom, start, end):
     "/region/<string:chrom>/<int:start>-<int:end>/best/", methods=["GET"]
 )
 def best_range_query(chrom: str, start: int, end: int):
+    gene_id = request.args.get("gene_id", None)
+    if gene_id is None:
+        url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={gene_id}&build=GRCh38"
+        omniJson = json.load(urllib.request.urlopen(url))["data"][0]
+        if "gene_id" in omniJson:
+            gene_id = omniJson["gene_id"]
     gene_json = model.get_gene_names_conversion()
     if chrom is not None and chrom[0:3] == "chr":
         chrom = chrom[3:]
     if chrom is not None and start is not None and end is not None:
         conn = sqlite3.connect(model.get_sig_lookup())
         with conn:
-            try:
-                (
-                    sqlgene_id,
-                    sqlchrom,
-                    sqlpos,
-                    sqlref,
-                    sqlalt,
-                    sqlval,
-                    sqltissue,
-                ) = list(
-                    conn.execute(
-                        f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
-                        ("chr" + chrom, start, end,),
-                    )
-                )[
-                    0
-                ]
-                data = {
-                    "chrom": sqlchrom,
-                    "pos": sqlpos,
-                    "ref": sqlref,
-                    "alt": sqlalt,
-                    "tissue": sqltissue,
-                    "gene_id": sqlgene_id,
-                    "symbol": gene_json.get(sqlgene_id.split(".")[0], ""),
-                }
-                results = {"data": data}
-                return jsonify(results)
-            except IndexError:
-                abort(404)
+            if gene_id is None:
+                try:
+                    (
+                        sqlgene_id,
+                        sqlchrom,
+                        sqlpos,
+                        sqlref,
+                        sqlalt,
+                        sqlval,
+                        sqltissue,
+                    ) = list(
+                        conn.execute(
+                            f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
+                            ("chr" + chrom, start, end,),
+                        )
+                    )[
+                        0
+                    ]
+                except IndexError:
+                    abort(404)
+            else:
+                try:
+                    (
+                        sqlgene_id,
+                        sqlchrom,
+                        sqlpos,
+                        sqlref,
+                        sqlalt,
+                        sqlval,
+                        sqltissue,
+                    ) = list(
+                        conn.execute(
+                            f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
+                            (
+                                "chr" + chrom,
+                                start,
+                                end,
+                                gene_id.split(".")[0] + "._%",
+                            ),
+                        )
+                    )[
+                        0
+                    ]
+                except IndexError:
+                    abort(404)
+            data = {
+                "chrom": sqlchrom,
+                "pos": sqlpos,
+                "ref": sqlref,
+                "alt": sqlalt,
+                "tissue": sqltissue,
+                "gene_id": sqlgene_id,
+                "symbol": gene_json.get(sqlgene_id.split(".")[0], ""),
+            }
+            results = {"data": data}
+            return jsonify(results)
     else:
         abort(404)
 

@@ -28,22 +28,13 @@ function getOmniSearch(searchText) {
 }
 
 
-// Returns the data from our internal best variant API by searching for the gene_id (ENSG...) or gene_name
-function getBestVar(symbol) {
-    const bestVarURL = `/api/gene/${symbol}/bestvar/`;
-    var data = fetch(bestVarURL)
-        .then(handleErrors)
-        .then((response) => response.json())
-        .then((resp) => resp.data)
-        .catch(failureCallback);
-    return data;
-}
-
-
 // Returns the data from our internal best range query API by searching for chrom:start-end
 //  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact range queries
-function getBestRange(chrom, start, end) {
-    const bestURL = `/api/region/${chrom}/${start}-${end}/best/`;
+function getBestRange(chrom, start, end, gene_id = null) {
+    var bestURL = `/api/region/${chrom}/${start}-${end}/best/`;
+    if (gene_id !== null) {
+        bestURL = bestURL + `?gene_id=${gene_id}`;
+    }
     var data = fetch(bestURL)
         .then(handleErrors)
         .then((response) => response.json())
@@ -58,9 +49,9 @@ function getBestRange(chrom, start, end) {
 // This function always returns a Promise, because parseSearch expects it
 function parseSearchText(searchText) {
     // Use regular expressions to match known patterns for single variant, range, and rs number
-    const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)/;
-    const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]+)-([1-9][0-9]+)/;
-    const rsPattern = /(rs[1-9][0-9]+)/;
+    const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)/;
+    const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)-([1-9][0-9]*)/;
+    const rsPattern = /(rs[1-9][0-9]*)/;
     const cMatch = searchText.match(chromposPattern);
     const cMatchRange = searchText.match(rangePattern);
     const cMatchRS = searchText.match(rsPattern);
@@ -127,8 +118,13 @@ function parseSearchText(searchText) {
             })
             .then(function(omni) {
                 // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and send the user to the region view
+                // const gene_id = omni.gene_id;
+                // var returnStatus = getBestVar(gene_id)
+                const chrom = omni.chrom;
+                const start = omni.start;
+                const end = omni.end;
                 const gene_id = omni.gene_id;
-                var returnStatus = getBestVar(gene_id)
+                var returnStatus = getBestRange(chrom, start, end, gene_id)
                     .then(function(bestVarResult) {
                         const tissue = bestVarResult.tissue;
                         const symbol = bestVarResult.symbol;
