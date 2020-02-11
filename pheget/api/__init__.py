@@ -14,13 +14,12 @@ from .format import query_variants
 api_blueprint = Blueprint("api", __name__)
 
 
-# Returns all eQTL data given a positional range, optionally filtering by tissue and gene_id
 @api_blueprint.route(
     "/region/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
 )
 def region_query(chrom, start, end):
     """
-    Fetch the data for a given region
+    Fetch the eQTL data for a given region, optionally filtering by tissue and gene_id
 
     In its current form, this allows fetching ALL points across any gene and tissue. We may wish to revisit this
     due to performance considerations. (FIXME)
@@ -43,13 +42,15 @@ def region_query(chrom, start, end):
     return jsonify(results)
 
 
-# Given a chromosome and positional range, returns the tissue with the strongest single eQTL signal,
-#  along with gene symbol and gene_id. This is queried when a user enters chr:start-end directly
-#  to find the best tissue and gene within the provided query.
 @api_blueprint.route(
     "/region/<string:chrom>/<int:start>-<int:end>/best/", methods=["GET"]
 )
-def best_range_query(chrom: str, start: int, end: int):
+def region_query_bestvar(chrom: str, start: int, end: int):
+    """
+    Given a region, returns the tissue with the strongest single eQTL signal, along with gene symbol and gene_id.
+
+    Optionally, a gene_id can be specified as query param, in which it will get the best signal within that gene.
+    """
     gene_id = request.args.get("gene_id", None)
     if gene_id is None:
         url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={gene_id}&build=GRCh38"

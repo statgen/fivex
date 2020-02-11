@@ -1,8 +1,6 @@
-// Generic failure callback function
-function failureCallback(error) {
-    console.log('Error status: ' + error);
-}
-
+/**
+ * Reusable code for searchbox widget
+ */
 
 // Handles bad requests - copied from https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
 function handleErrors(response) {
@@ -16,15 +14,10 @@ function handleErrors(response) {
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
 function getOmniSearch(searchText) {
     const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${searchText}&build=GRCh38`;
-    var data = fetch(omniurl)
+    return fetch(omniurl)
         .then(handleErrors)
         .then((response) => response.json())
-        .then((myJson) => myJson.data[0])
-        .catch(function(error) {
-            console.log('Omnisearch error, status code: ' + error);
-            return;
-        });
-    return data;
+        .then((myJson) => myJson.data[0]);
 }
 
 
@@ -35,12 +28,10 @@ function getBestRange(chrom, start, end, gene_id = null) {
     if (gene_id !== null) {
         bestURL = bestURL + `?gene_id=${gene_id}`;
     }
-    var data = fetch(bestURL)
+    return fetch(bestURL)
         .then(handleErrors)
         .then((response) => response.json())
-        .then((resp) => resp.data)
-        .catch(failureCallback);
-    return data;
+        .then((resp) => resp.data);
 }
 
 
@@ -48,6 +39,7 @@ function getBestRange(chrom, start, end, gene_id = null) {
 // We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end), or a gene name (ENSG or symbol)
 // This function always returns a Promise, because parseSearch expects it
 function parseSearchText(searchText) {
+    searchText = searchText.trim();
     // Use regular expressions to match known patterns for single variant, range, and rs number
     const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)/;
     const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)-([1-9][0-9]*)/;
@@ -57,88 +49,61 @@ function parseSearchText(searchText) {
     const cMatchRS = searchText.match(rsPattern);
     // If input is in 'chrom:pos' format (with or without 'chr'), return the position of the single variant
     // TODO: Show closest variant if specific variant does not exist
-    var returnJson;
-    var jsonPromise;
     if (cMatch !== null && searchText === cMatch[0]) {
         const chrom = cMatch[2];
         const pos = parseInt(cMatch[3]);
-        returnJson = {type: 'variant', chrom, start: pos, end: pos};
-        // Forcefully convert this return to a Promise to match the others
-        // eslint-disable-next-line no-undef
-        jsonPromise = new Promise((resolve) => {
-            resolve(returnJson);
-        });
-        return jsonPromise;
+        return Promise.resolve({ type: 'variant', chrom, start: pos, end: pos });
     } else if (cMatchRange !== null && searchText === cMatchRange[0]) {
         // If the query is a range in the form [chr]:[start]-[end], return the position of the range
         const chrom = cMatchRange[2];
         const start = parseInt(cMatchRange[3]);
         const end = parseInt(cMatchRange[4]);
-        var returnType = getBestRange(chrom, start, end)
+        return getBestRange(chrom, start, end)
             .then(function(result) {
                 var varData = result;
                 const gene_id = varData.gene_id;
                 const symbol = varData.symbol;
                 const tissue = varData.tissue;
-                var returnStatus = {type: 'range', chrom, start, end, gene_id, symbol, tissue};
-                return returnStatus;
-            })
-            .catch(failureCallback);
-        return returnType;
+                return { type: 'range', chrom, start, end, gene_id, symbol, tissue };
+            });
     } else if (cMatchRS !== null && searchText === cMatchRS[0]) {
         // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
-        var rangeReturn = getOmniSearch(searchText)
+        return getOmniSearch(searchText)
             .then(function(result) {
-                var varData = result;
-                const chrom = varData.chrom;
-                const start = varData.start;
-                const end = varData.end;
-                var returnStatus = {type: 'variant', chrom, start, end};
-                return returnStatus;
-            })
-            .catch(failureCallback);
-        return rangeReturn;
+                const { chrom, start, end } = result;
+                return { type: 'variant', chrom, start, end };
+            });
     } else {
         // If input is a gene or some other unknown format, then look for the best eQTL signal for that gene
         // First, look up the search query on omnisearch
-        var jsonResult = getOmniSearch(searchText)
+        return getOmniSearch(searchText)
             .then(function(result) {
                 // Pass the gene_id (ENSG...) to the next step, if it exists
                 if (result.gene_id === undefined) {
                     return;
-                }
-                else {
+                } else {
                     const chrom = result.chrom;
                     const start = Math.max(result.start - 500000, 1);
                     const end = result.end + 500000;
                     const gene_id = result.gene_id;
-                    var omni = {chrom, start, end, gene_id};
-                    return omni;
+                    return { chrom, start, end, gene_id };
                 }
             })
             .then(function(omni) {
                 // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and send the user to the region view
-                // const gene_id = omni.gene_id;
-                // var returnStatus = getBestVar(gene_id)
-                const chrom = omni.chrom;
-                const start = omni.start;
-                const end = omni.end;
+                if (!omni) {
+                    // TODO: If the input is not recognizable as any format, and is not a gene, then we should show a user error message that the requested entity was not found
+                    return;
+                }
+                const { chrom, start, end } = omni;
                 const gene_id = omni.gene_id;
-                var returnStatus = getBestRange(chrom, start, end, gene_id)
+                return getBestRange(chrom, start, end, gene_id)
                     .then(function(bestVarResult) {
-                        const tissue = bestVarResult.tissue;
-                        const symbol = bestVarResult.symbol;
-                        const chrom = omni.chrom;
-                        const start = omni.start;
-                        const end = omni.end;
-                        var rangeData = {type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue};
-                        return rangeData;
-                    })
-                    .catch(failureCallback);
-                return returnStatus;
-            })
-            .catch(failureCallback);
-        return jsonResult;
+                        const { symbol, tissue } = bestVarResult;
+                        const { chrom, start, end } = omni;
+                        return { type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue };
+                    });
+            });
     }
 }
 
@@ -147,8 +112,7 @@ function parseSearch(searchText) {
     parseSearchText(searchText)
         .then(function(omniresult) {
             if (omniresult === undefined || omniresult.type === 'other' && omniresult.chrom === null && omniresult.start === null && omniresult.end === null) {
-                alert('Sorry, we are unable to parse your query.');
-                failureCallback('Omnisearch undefined or other');
+                throw new Error('Sorry, we are unable to parse your query.');
             } else {
                 return(omniresult);
             }
@@ -162,5 +126,8 @@ function parseSearch(searchText) {
                 window.location = `/region/?chrom=${chrom}&start=${result.start}&end=${result.end}&gene_id=${result.gene_id}&symbol=${result.symbol}&tissue=${result.tissue}`;
             }
         })
-        .catch(failureCallback);
+        .catch(err => {
+            alert(err.message);
+            console.log(err.message);
+        });
 }
