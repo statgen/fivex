@@ -108,6 +108,15 @@ function parseSearchText(searchText) {
                         const { symbol, tissue } = bestRangeResult;
                         const { chrom, start, end } = omni;
                         return { type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue };
+                    })
+                    .catch(function() {
+                        return getBestRange(chrom, start, end)
+                            .then(function(bestRangeResult) {
+                                const { symbol, gene_id, tissue } = bestRangeResult;
+                                const { chrom, start, end } = omni;
+                                alert('No significant eQTLs found for the query gene, redirecting to next best match.');
+                                return { type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue};
+                            });
                     });
             });
     }
