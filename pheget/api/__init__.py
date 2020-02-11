@@ -2,9 +2,7 @@
 API endpoints (return JSON, not HTML)
 """
 
-import json
 import sqlite3
-import urllib.request
 
 from flask import Blueprint, abort, jsonify, request
 
@@ -52,75 +50,62 @@ def region_query_bestvar(chrom: str, start: int, end: int):
     Optionally, a gene_id can be specified as query param, in which it will get the best signal within that gene.
     """
     gene_id = request.args.get("gene_id", None)
-    if gene_id is None:
-        url = f"https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q={gene_id}&build=GRCh38"
-        omniJson = json.load(urllib.request.urlopen(url))["data"][0]
-        if "gene_id" in omniJson:
-            gene_id = omniJson["gene_id"]
     gene_json = model.get_gene_names_conversion()
     if chrom is not None and chrom[0:3] == "chr":
         chrom = chrom[3:]
-    if chrom is not None and start is not None and end is not None:
-        conn = sqlite3.connect(model.get_sig_lookup())
-        with conn:
-            if gene_id is None:
-                try:
-                    (
-                        sqlgene_id,
-                        sqlchrom,
-                        sqlpos,
-                        sqlref,
-                        sqlalt,
-                        sqlval,
-                        sqltissue,
-                    ) = list(
-                        conn.execute(
-                            f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
-                            ("chr" + chrom, start, end,),
-                        )
-                    )[
-                        0
-                    ]
-                except IndexError:
-                    abort(404)
-            else:
-                try:
-                    (
-                        sqlgene_id,
-                        sqlchrom,
-                        sqlpos,
-                        sqlref,
-                        sqlalt,
-                        sqlval,
-                        sqltissue,
-                    ) = list(
-                        conn.execute(
-                            f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
-                            (
-                                "chr" + chrom,
-                                start,
-                                end,
-                                gene_id.split(".")[0] + "._%",
-                            ),
-                        )
-                    )[
-                        0
-                    ]
-                except IndexError:
-                    abort(404)
-            data = {
-                "chrom": sqlchrom,
-                "pos": sqlpos,
-                "ref": sqlref,
-                "alt": sqlalt,
-                "tissue": sqltissue,
-                "gene_id": sqlgene_id,
-                "symbol": gene_json.get(sqlgene_id.split(".")[0], ""),
-            }
-            results = {"data": data}
-            return jsonify(results)
-    else:
-        abort(404)
+
+    # FIXME: Move SQL work to models.py (out of view logic)
+    conn = sqlite3.connect(model.get_sig_lookup())
+    with conn:
+        cursor = conn.cursor()
+        if gene_id is None:
+            cursor.execute(
+                f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
+                ("chr" + chrom, start, end,),
+            )
+        else:
+            cursor.execute(
+                f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
+                ("chr" + chrom, start, end, gene_id.split(".")[0] + "._%",),
+            )
+
+        result = cursor.fetchone()
+
+        if result is None:
+            return (
+                jsonify(
+                    {
+                        "errors": [
+                            {
+                                "detail": "No variants found for specified region or gene"
+                            }
+                        ]
+                    },
+                ),
+                404,
+            )
+
+        (
+            sqlgene_id,
+            sqlchrom,
+            sqlpos,
+            sqlref,
+            sqlalt,
+            sqlval,
+            sqltissue,
+        ) = result
+
+        data = {
+            "chrom": sqlchrom,
+            "pos": sqlpos,
+            "ref": sqlref,
+            "alt": sqlalt,
+            "tissue": sqltissue,
+            "gene_id": sqlgene_id,
+            "symbol": gene_json.get(sqlgene_id.split(".")[0], ""),
+        }
+        results = {"data": data}
+        return jsonify(results)
 
 
 @api_blueprint.route("/variant/<string:chrom>_<int:pos>/", methods=["GET"])

@@ -26,7 +26,7 @@ function getOmniSearch(searchText) {
 function getBestRange(chrom, start, end, gene_id = null) {
     var bestURL = `/api/region/${chrom}/${start}-${end}/best/`;
     if (gene_id !== null) {
-        bestURL = bestURL + `?gene_id=${gene_id}`;
+        bestURL += `?gene_id=${gene_id}`;
     }
     return fetch(bestURL)
         .then(handleErrors)
