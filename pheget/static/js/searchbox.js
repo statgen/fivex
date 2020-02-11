@@ -56,8 +56,10 @@ function parseSearchText(searchText) {
     } else if (cMatchRange !== null && searchText === cMatchRange[0]) {
         // If the query is a range in the form [chr]:[start]-[end], return the position of the range
         const chrom = cMatchRange[2];
-        const start = parseInt(cMatchRange[3]);
-        const end = parseInt(cMatchRange[4]);
+        const range1 = parseInt(cMatchRange[3]);
+        const range2 = parseInt(cMatchRange[4]);
+        const start = Math.min(range1, range2);
+        const end = Math.max(range1, range2);
         return getBestRange(chrom, start, end)
             .then(function(result) {
                 var varData = result;
@@ -70,8 +72,12 @@ function parseSearchText(searchText) {
         // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
         return getOmniSearch(searchText)
             .then(function(result) {
-                const { chrom, start, end } = result;
-                return { type: 'variant', chrom, start, end };
+                if (result.error === 'SNP not found') {
+                    throw new Error('Omnisearch was unable to find the variant with rs number "' + searchText + '"');
+                } else {
+                    const { chrom, start, end } = result;
+                    return { type: 'variant', chrom, start, end };
+                }
             });
     } else {
         // If input is a gene or some other unknown format, then look for the best eQTL signal for that gene
@@ -93,13 +99,13 @@ function parseSearchText(searchText) {
                 // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and send the user to the region view
                 if (!omni) {
                     // TODO: If the input is not recognizable as any format, and is not a gene, then we should show a user error message that the requested entity was not found
-                    return;
+                    throw new Error('Sorry, we were unable to parse your query.');
                 }
                 const { chrom, start, end } = omni;
                 const gene_id = omni.gene_id;
                 return getBestRange(chrom, start, end, gene_id)
-                    .then(function(bestVarResult) {
-                        const { symbol, tissue } = bestVarResult;
+                    .then(function(bestRangeResult) {
+                        const { symbol, tissue } = bestRangeResult;
                         const { chrom, start, end } = omni;
                         return { type: 'range', chrom, start, end, gene_id: gene_id, symbol, tissue };
                     });
