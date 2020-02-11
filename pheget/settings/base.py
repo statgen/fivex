@@ -22,7 +22,7 @@ PHEGET_DATA_DIR = os.getenv(
     ),
 )
 
-LOCUSZOOM_VERSION = "0.10.1"
+LOCUSZOOM_VERSION = "0.10.2"
 
 # .env file can optionally provide a Sentry key for automatic error reporting
 # TODO: add for frontend and backend

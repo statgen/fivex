@@ -32,7 +32,7 @@
 
     <br>
     {#  FIXME: This label does not update as the plot is panned or zoomed. We can resolve this in the future when we move to a dynamic frontend #}
-    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs in {{ chrom }}:{{ "{:,}".format(start) }}-{{ "{:,}".format(end) }} </strong></h1>
+    <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near <span id="header-symbol">{{ symbol }}</span> (chr{{ chrom }}:{{ "{:,}".format(start) }}-{{ "{:,}".format(end) }}) </strong></h1>
   </div>
 
   <div class="container-fluid">
@@ -160,13 +160,66 @@
 
 <br>
 
+<!-- 
+  Since these links are based on Jinja template values, they currently do not update when we change anchor genes.
+  We plan to update the mechanism handling URLs so that when you change the anchor gene, you are redirected to a new page.
+  This will allow these links to update correctly when changing the anchor gene.
+-->
 <div class="container-fluid">
   <div class="card">
-    <div class="card-body">
+    <div class="row">
+      <div class="col">
+        <div class="card-body">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
+            title="External links for more information about this gene">
+          <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span
+            class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> More info about {{ symbol }} </button>
+          </span>
+          {% set short_gene_id = gene_id.split('.')[0] %}
+          <a href="https://bravo.sph.umich.edu/freeze5/hg38/gene/{{ short_gene_id }}" target="_blank"
+              class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
+              data-placement="top" data-html=true
+              title="Gene information from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
+            BRAVO <span class="fa fa-external-link-alt"></span> </a>          
+          <a href="https://gtexportal.org/home/gene/{{ symbol }}" target="_blank"
+              class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
+              data-placement="top" data-html=true
+              title="Detailed information from the GTEx Portal, including both gene and exon expression, along with single-tissue eQTLs and sQTLs.">
+            GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
+          <a href="https://gnomad.broadinstitute.org/gene/{{ symbol }}?dataset=gnomad_r3" target="_blank"
+              class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
+              data-placement="top"
+              title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
+            gnomAD <span class="fa fa-external-link-alt"></span></a>
+          <a href="http://pheweb.sph.umich.edu/gene/{{ symbol }}" target="_blank" class="btn btn-secondary btn-sm" role="button"
+              aria-pressed="true" data-toggle="tooltip" data-placement="top"
+              title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
+            MGI <span class="fa fa-external-link-alt"></span></a>
+          <a href="http://pheweb.sph.umich.edu/SAIGE-UKB/gene/{{ symbol }}" target="_blank" class="btn btn-secondary btn-sm"
+              role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
+              title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
+            UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
+          <a href="http://big.stats.ox.ac.uk/gene/{{ symbol }}" target="_blank" class="btn btn-secondary btn-sm" role="button"
+              aria-pressed="true" data-toggle="tooltip" data-placement="top"
+              title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
+            UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
+          <a href="http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'{{symbol}}'}]" target="_blank" class="btn btn-secondary btn-sm" role="button"
+              aria-pressed="true" dadta-toggle="tooltip" data-placement="top"
+              title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
+             Expression Atlas <span class="fa fa-external-link-alt"></span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
       <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
-        title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
+          title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
-          <span class="fa fa-lightbulb-o"></span> Credits
+        <span class="fa fa-lightbulb-o"></span> Credits
         </span>
       </span>
     </div>
@@ -249,7 +302,8 @@
             ANCHOR_GENE = event.currentTarget.dataset.geneid;
             ANCHOR_SYMBOL = event.currentTarget.dataset.genesymbol;
             document.querySelector('.anchorgene').innerHTML = GENE_DICT[ANCHOR_GENE];
-            document.querySelector('.anchor-gene-label').innerHTML = GENE_DICT[ANCHOR_GENE]
+            document.querySelector('.anchor-gene-label').innerHTML = GENE_DICT[ANCHOR_GENE];
+            document.getElementById('header-symbol').innerHTML = GENE_DICT[ANCHOR_GENE];
             let panel_ids = Array.from(plot.layout.panels, panel => panel.id);
             panel_ids.forEach(function(id){
               if (id !=='genes'){
