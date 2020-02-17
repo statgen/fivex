@@ -9,14 +9,28 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: {
+      title: 'PheGET eQTL browser',
+    },
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/variant/:variant/',
+    name: 'variant',
+    meta: {
+      title: 'Variant data | PheGET',
+    },
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk (variant.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    component: () => import(/* webpackChunkName: "variant" */ '../views/Variant.vue'),
+  },
+  {
+    path: '/region/:region/',
+    name: 'region',
+    meta: {
+      title: 'Region view | PheGET',
+    },
+    component: () => import(/* webpackChunkName: "region" */ '../views/Region.vue'),
   },
 ];
 
