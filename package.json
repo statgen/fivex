@@ -1,23 +1,47 @@
 {
   "name": "pheget",
   "version": "0.1.0",
+  "private": true,
   "description": "GTEx EQTL browser",
-  "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {
-    "eslint": "^6.7.0"
+  "author": {
+    "name": "University of Michigan Center for Statistical Genetics"
   },
   "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "main": "index.js",
+  "dependencies": {
+    "core-js": "^3.6.4",
+    "vue": "^2.6.11",
+    "vue-router": "^3.1.5"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.2.0",
+    "@vue/cli-plugin-eslint": "~4.2.0",
+    "@vue/cli-plugin-router": "~4.2.0",
+    "@vue/cli-plugin-unit-mocha": "~4.2.0",
+    "@vue/cli-service": "~4.2.0",
+    "@vue/eslint-config-airbnb": "^5.0.2",
+    "@vue/test-utils": "1.0.0-beta.31",
+    "babel-eslint": "^10.0.3",
+    "chai": "^4.1.2",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-vue": "^6.1.2",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "_id": "pheget@0.1.0",
+  "bugs": {
+    "url": "https://github.com/statgen/pheget/issues"
+  },
+  "homepage": "https://github.com/statgen/pheget#readme",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abought/pheget.git"
-  },
-  "author": "University of Michigan Center for Statistical Genetics",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/abought/pheget/issues"
-  },
-  "homepage": "https://github.com/abought/pheget#readme"
+    "url": "git+https://github.com/statgen/pheget.git"
+  }
 }

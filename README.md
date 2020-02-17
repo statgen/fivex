@@ -46,6 +46,8 @@ The following command will start a basic flask app server that reloads whenever 
 
 Then follow the instructions printed to the console to visit the app in your web browser.
 
+In a separate terminal, you will also want to run `vue serve` to build front-end assets
+
 ### Additional production options
 You may configure Sentry error monitoring by setting the config option `SENTRY_DSN` in your `.env` file.
 
@@ -61,6 +63,7 @@ $ fourmat fix
 $ eslint . --fix
 $ mypy .
 $ pytest .
+$ npm run test:unit
 ```
 
 The linting commands are run on every commit, and can be triggered manually via: `pre-commit run --all-files`.
