@@ -372,19 +372,25 @@
       // On hitting toggle buttons, run JavaScript to update plot views
       document.forms['grouping-buttons'].elements['group-options'].forEach(function (form) {
           form.onchange = function () {
-              groupByThing(plot, this.value);
+              groupByThing(plot.layout, this.value);
+              // Clear "same match" highlighting when re-rendering.
+              plot.applyState({ lz_match_value: null });
           };
       });
 
       document.forms['transform-y'].elements['y-options'].forEach(function (form) {
           form.onchange = function () {
-              switchY(plot, table, this.value);
+              const y_field = this.value;
+              switchY_Plot(plot, y_field);
+              switchY_Table(table, y_field);
+              plot.applyState({ y_field });
           };
       });
 
       document.forms['toggle-labels'].elements['label-options'].forEach(function (form) {
           form.onchange = function () {
-              labelTopVariants(plot, this.value);
+              labelTopVariants(plot.layout, this.value);
+              plot.applyState();
           };
       });
 

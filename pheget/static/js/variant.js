@@ -137,24 +137,35 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
         .add('constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]);
 
     // Allow the URL to change as the user selects interactive options
-    const stateUrlMapping = {minimum_tss_distance: 'minimum_tss_distance', maximum_tss_distance: 'maximum_tss_distance'};
-    let initialState = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
+    const stateUrlMapping = {
+        minimum_tss_distance: 'minimum_tss_distance',
+        maximum_tss_distance: 'maximum_tss_distance',
+        group: 'group',
+        n_labels: 'n_labels',
+        y_field: 'y_field',
+    };
+    let initialOptions = LocusZoom.ext.DynamicUrls.paramsFromUrl(stateUrlMapping);
 
-    initialState = Object.assign({
+    initialOptions = Object.assign({
         variant: `${chrom}:${pos}`,
         start: pos_lower,
         end: pos_higher,
         chr: chrom,
         y_field: 'log_pvalue',
+        n_labels: 0,
+        group: 'tissue',
         minimum_tss_distance: -pos_range,
         maximum_tss_distance: pos_range,
         position: pos,
-    }, initialState);
+    }, initialOptions);
 
-    // The backend guarantees that these params will be part of the URL on pageload
+    const initialState = JSON.parse(JSON.stringify({ variant: initialOptions.variant }));
+    delete initialState.group;
+    delete initialState.n_labels;
+
     var layout = LocusZoom.Layouts.get('plot', 'standard_phewas', {
         responsive_resize: 'width_only',
-        state: initialState,
+        state: initialOptions,
         dashboard: {
             components: [
                 {
@@ -338,14 +349,33 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
             })
         ]
     });
+    groupByThing(layout, initialOptions.group);
+    labelTopVariants(layout, initialOptions.n_labels);
 
     // Generate the plot
     var plot = LocusZoom.populate(selector, dataSources, layout);
+    switchY_Plot(plot, initialOptions.y_field);
 
     // Changes in the plot can be reflected in the URL, and vice versa (eg browser back button can go back to
     //   a previously viewed region)
-    LocusZoom.ext.DynamicUrls.plotUpdatesUrl(plot, stateUrlMapping);
-    LocusZoom.ext.DynamicUrls.plotWatchesUrl(plot, stateUrlMapping);
+    LocusZoom.ext.DynamicUrls.plotUpdatesUrl(plot, stateUrlMapping, function (plot, mapping) {
+        const state_fields = LocusZoom.ext.DynamicUrls.extractValues(plot.state, mapping);
+        Object.assign(state_fields, {
+            // These are not maintainable: improve state management
+            n_labels: layout.panels[0].data_layers[0].label.filters[1].value,
+            group: layout.panels[0].data_layers[0].x_axis.category_field.replace('phewas:', '')
+        });
+        return state_fields;
+    });
+    LocusZoom.ext.DynamicUrls.plotWatchesUrl(plot, stateUrlMapping, function (plot, data) {
+        // Define how to apply the info in the URL to the plot
+        const { group, minimum_tss_distance, maximum_tss_distance, n_labels, y_field } = data;
+        labelTopVariants(plot.layout, n_labels);
+        switchY_Plot(plot, y_field);
+        groupByThing(plot.layout, group);
+        // FIXME: This doesn't update the table sort order (eventually it should)
+        plot.applyState({ minimum_tss_distance, maximum_tss_distance, y_field, lz_match_value: null });
+    });
 
     // Attach the current position as a state variable - used for resizing the gene track dynamically
     return [plot, dataSources];
@@ -364,7 +394,7 @@ function makeTable(selector) {
         return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
     };
     var pip_fmt = function (cell) {
-        var x = cell.getValue();
+        const x = cell.getValue();
         if (x === 0) {
             return '0';
         }
@@ -416,9 +446,9 @@ function updateTable(table, data) {
 
 // Changes the variable used to generate groups for coloring purposes; also changes the labeling field
 // eslint-disable-next-line no-unused-vars
-function groupByThing(plot, thing) {
+function groupByThing(layout, thing) {
     var group_field, point_label_field;
-    const scatter_config = plot.layout.panels[0].data_layers[0];
+    const scatter_config = layout.panels[0].data_layers[0];
     delete scatter_config.x_axis.category_order_field;
     if (thing === 'tissue') {
         group_field = 'tissue';
@@ -437,14 +467,11 @@ function groupByThing(plot, thing) {
     scatter_config.color[2].field = `phewas:${group_field}`;
     scatter_config.label.text = `{{phewas:${point_label_field}}}`;
     scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
-
-    // Clear "same match" highlighting when re-rendering.
-    plot.applyState({ lz_match_value: null });
 }
 
 // Switches the displayed y-axis value between p-values and effect size
 // eslint-disable-next-line no-unused-vars
-function switchY(plot, table, yfield) {
+function switchY_Plot(plot, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
     if (yfield === 'log_pvalue') {
         scatter_config.legend = [
@@ -477,7 +504,6 @@ function switchY(plot, table, yfield) {
             'stroke-dasharray': '10px 10px'
         };
 
-        table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
         scatter_config.legend = [
             { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
@@ -509,7 +535,6 @@ function switchY(plot, table, yfield) {
         };
         scatter_config.y_axis.lower_buffer = 0.15;
 
-        table.setSort('phewas:beta', 'desc');
     } else if (yfield === 'pip') {
         scatter_config.legend = [
             { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
@@ -540,16 +565,22 @@ function switchY(plot, table, yfield) {
             {position: 'left', text: '≤1e-6', y: -6}
         ];
         plot.layout.panels[0].data_layers[1].offset = -1000;
+    }
+}
 
-
+// eslint-disable-next-line no-unused-vars
+function switchY_Table(table, y_field) {
+    if (y_field === 'log_pvalue') {
+        table.setSort('phewas:log_pvalue', 'desc');
+    } else if (y_field === 'beta') {
+        table.setSort('phewas:beta', 'desc');
+    } else if (y_field === 'pip') {
         table.setSort('phewas:pip', 'desc');
     }
-    plot.applyState({ y_field: yfield });
 }
 
 // Changes the number of top variants which are labeled on the plot
 // eslint-disable-next-line no-unused-vars
-function labelTopVariants(plot, topVariantsToShow) {
-    plot.layout.panels[0].data_layers[0].label.filters[1].value = topVariantsToShow;
-    plot.applyState();
+function labelTopVariants(layout, topVariantsToShow) {
+    layout.panels[0].data_layers[0].label.filters[1].value = topVariantsToShow;
 }
