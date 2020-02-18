@@ -1,11 +1,20 @@
 <template>
   <div>
-    <form @submit.prevent="parseSearch">
-      <input v-model.trim="term"
-             autocomplete="off" class="form-control" type="text"
-             placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
-      <button id="navigate-variant" class="btn btn-secondary"
-              type="submit"><span class="fa fa-search"></span></button>
+    <form @submit.prevent="parseSearch" class="mb-3">
+      <div class="input-group">
+        <input v-model.trim="term"
+               autocomplete="off" class="form-control" type="text"
+               placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+        <div class="input-group-append">
+          <button class="btn btn-secondary" type="submit">
+            <span class="fa fa-search" aria-hidden="true"></span>
+            <span class="sr-only">Search</span>
+          </button>
+        </div>
+      </div>
+      <div class="row" v-if="message">
+        <div class="col-sm-12"><span :class="[message_class]">{{message}}</span></div>
+      </div>
     </form>
   </div>
 </template>
@@ -38,7 +47,7 @@ function getOmniSearch(searchText) {
 //  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact
 //  range queries
 function getBestRange(chrom, start, end, gene_id = null) {
-  let bestURL = `/api/region/${chrom}/${start}-${end}/best/`;
+  let bestURL = `/backend/api/region/${chrom}/${start}-${end}/best/`;
   if (gene_id !== null) {
     bestURL += `?gene_id=${gene_id}`;
   }
@@ -87,7 +96,8 @@ function parseSearchText(text) {
           type: 'range', chrom, start, end, gene_id, symbol, tissue,
         };
       });
-  } if (cMatchRS !== null && searchText === cMatchRS[0]) {
+  }
+  if (cMatchRS !== null && searchText === cMatchRS[0]) {
     // If input is in rs# format, use omnisearch to convert to chrom:pos, then return the position
     return getOmniSearch(searchText)
       .then((result) => {
@@ -107,18 +117,20 @@ function parseSearchText(text) {
   return getOmniSearch(searchText)
     .then((result) => {
       // Pass the gene_id (ENSG...) to the next step, if it exists
-      if (result.gene_id !== undefined) {
-        const { chrom, gene_id } = result;
-        const start = Math.max(result.start - 500000, 1);
-        const end = result.end + 500000;
-        return {
-          chrom, start, end, gene_id,
-        };
+      if (!result.gene_id) {
+        return false;
       }
+
+      const { chrom, gene_id } = result;
+      const start = Math.max(result.start - 500000, 1);
+      const end = result.end + 500000;
+      return {
+        chrom, start, end, gene_id,
+      };
     })
     .then((omni) => {
       // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and
-      // send the user to the region view
+    // send the user to the region view
       if (!omni) {
         // TODO: If the input is not recognizable as any format, and is not a gene, then we
         //  should show a user error message that the requested entity was not found
@@ -141,7 +153,8 @@ function parseSearchText(text) {
             const { symbol, gene_id, tissue } = bestRangeResult;
             // eslint-disable-next-line no-shadow
             const { chrom, start, end } = omni;
-            alert('No significant eQTLs found for the query gene, redirecting to next best match.');
+
+            this.showMessage('No significant eQTLs found for the query gene, redirecting to next best match.');
             return {
               type: 'range', chrom, start, end, gene_id, symbol, tissue,
             };
@@ -149,42 +162,58 @@ function parseSearchText(text) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
-function parseSearch(searchText) {
-  parseSearchText(searchText)
-    .then((omniresult) => {
-      if ((omniresult === undefined || omniresult.type === 'other') && omniresult.chrom === null && omniresult.start === null && omniresult.end === null) {
-        throw new Error('Sorry, we are unable to parse your query.');
-      } else {
-        return (omniresult);
-      }
-    })
-    .then((result) => {
-      const chrom = result.chrom.replace('chr', '');
-      if (result.type === 'variant') {
-        window.location = `/variant/${chrom}_${result.start}`;
-      }
-      if (result.type === 'range') {
-        window.location = `/region/?chrom=${chrom}&start=${result.start}&end=${result.end}&gene_id=${result.gene_id}&symbol=${result.symbol}&tissue=${result.tissue}`;
-      }
-    })
-    .catch((err) => {
-      alert(err.message);
-      console.log(err.message);
-    });
-}
-
-
 export default {
   name: 'SearchBox',
   data() {
     return {
-      term: null,
+      term: '',
+      message: '',
+      message_class: '',
     };
+  },
+  methods: {
+    showMessage(message, style = 'text-danger') {
+      this.message = message;
+      this.message_class = style;
+    },
+    parseSearch() {
+      parseSearchText(this.term)
+        .then((omniresult) => {
+          if ((omniresult === undefined || omniresult.type === 'other') && omniresult.chrom === null && omniresult.start === null && omniresult.end === null) {
+            throw new Error('Sorry, we are unable to parse your query.');
+          } else {
+            return (omniresult);
+          }
+        })
+        .then((result) => {
+          const chrom = result.chrom.replace('chr', '');
+          if (result.type === 'variant') {
+            this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
+          } else if (result.type === 'range') {
+            const {
+              start, end, gene_id, tissue, symbol,
+            } = result;
+            this.$router.push({
+              name: 'region',
+              query: {
+                chrom,
+                start,
+                end,
+                gene_id,
+                symbol,
+                tissue,
+              },
+            });
+          }
+        })
+        .catch((err) => {
+          this.showMessage(err.message);
+          console.error(err);
+        });
+    },
   },
 };
 </script>
 
 <style scoped>
-
 </style>

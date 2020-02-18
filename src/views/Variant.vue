@@ -1,9 +1,20 @@
 <script>
+/**
+ * Single-variant view: PheWAS plot with interactive display options
+ */
 
+import SearchBox from '@/components/SearchBox.vue';
+
+export default {
+  name: 'VariantView',
+  components: {
+    SearchBox,
+  },
+};
 </script>
 
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <div>
+    <search-box></search-box>
   </div>
 </template>

@@ -1,3 +1,6 @@
+import 'bootstrap/dist/css/bootstrap.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
@@ -10,14 +13,14 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: {
-      title: 'PheGET eQTL browser',
+      title: 'Home | PheGET: eQTL browser',
     },
   },
   {
     path: '/variant/:variant/',
     name: 'variant',
     meta: {
-      title: 'Variant data | PheGET',
+      title: 'Variant | PheGET: eQTL browser',
     },
     // route level code-splitting
     // this generates a separate chunk (variant.[hash].js) for this route
@@ -25,10 +28,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "variant" */ '../views/Variant.vue'),
   },
   {
-    path: '/region/:region/',
+    path: '/region/',
     name: 'region',
     meta: {
-      title: 'Region view | PheGET',
+      title: 'Region | PheGET: eQTL browser',
     },
     component: () => import(/* webpackChunkName: "region" */ '../views/Region.vue'),
   },
