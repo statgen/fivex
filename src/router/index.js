@@ -1,8 +1,9 @@
 // Load dependencies (for their side effects)
 import 'jquery';
 import 'popper.js';
-import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap';
+
+import 'bootstrap/dist/css/bootstrap.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 
 import Vue from 'vue';

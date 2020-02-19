@@ -2,6 +2,7 @@
 /**
  * Single-variant view: PheWAS plot with interactive display options
  */
+import $ from 'jquery';
 
 import SearchBox from '@/components/SearchBox.vue';
 
@@ -56,6 +57,14 @@ export default {
     getData(to.params.id).then((data) => {
       this.setData(data);
       next();
+    });
+  },
+  updated() {
+    // Popper tooltips depend on dynamic data. They must be initialized after the component
+    //   has finished rendering.
+    this.$nextTick(() => {
+      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-toggle-second="tooltip"]').tooltip();
     });
   },
   methods: {
@@ -248,33 +257,34 @@ export default {
             <div class="card variant-information-grouped-card">
               <div class="card-body">
                 <dl class="variant-information-dl">
-                  {% if ac is not none and an is not none %}
+                  <template v-if="ac !== null && an !== null">
                     <dt>Allele count / total</dt>
                     <dd>{{ ac }} / {{ an }}</dd>
-                  {% else %}
+                  </template>
+                  <template v-else>
                     <dt>Note:</dt>
                     <dd>Allele information not found</dd>
-                  {% endif %}
+                  </template>
 
-                  {% if af is not none %}
+                  <template v-if="af !== null">
                     <dt>Allele frequency</dt>
                     <dd>{{ af }}</dd>
-                    </dl>
-                  {% endif %}
+                  </template>
+                </dl>
               </div>
             </div>
 
             <div class="card variant-information-grouped-card">
               <div class="card-body">
                 <dl class="variant-info-middle">
-                  {% if top_gene is not none %}
+                  <template v-if="top_gene !== null">
                     <dt>Top gene</dt>
                     <dd><i>{{ top_gene }}</i></dd>
-                  {% endif %}
-                  {% if top_tissue is not none %}
+                  </template>
+                  <template v-if="top_tissue !== null">
                     <dt>Top tissue</dt>
                     <dd>{{ top_tissue }}</dd>
-                  {% endif %}
+                  </template>
                 </dl>
               </div>
             </div>
@@ -282,26 +292,24 @@ export default {
             <div class="card variant-information-grouped-card">
               <div class="card-body">
                 <dl class="variant-information-dl">
-                  {% if rsid is not none %}
+                  <template v-if="rsid !== null">
                     <dt>
                       rsid
                     </dt>
                     <dd>
                       {{ rsid }}
                     </dd>
-                  {% endif %}
+                  </template>
                   <dt>
                     {{is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)
                   </dt>
                   <dd>
                     <i>
-                      <!-- FIXME: Convert to Vue for loop syntax -->
-                      {% for gene in nearest_genes %}
-                        <span class="text-with-definition" title="{{ gene.ensg }}">{{ gene.symbol }}</span>
-                        {%- if not loop.last -%},{% endif %}
-                      {% else %}
-                        (no genes found)
-                      {% endfor %}
+                      <span v-for="(gene, index) in nearest_genes" :key="gene.ensg"
+                            class="text-with-definition" :title="gene.ensg">
+                        {{ gene.symbol }}<span v-if="nearest_genes && index === nearest_genes.length">,</span>
+                      </span>
+                      <span v-if="!nearest_genes || !nearest_genes.length">(no genes found)</span>
                     </i>
                   </dd>
                 </dl>
@@ -316,45 +324,45 @@ export default {
                 <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span
                     class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> Variant info </button>
               </span>
-              {% if ref is not none and alt is not none %}
-                <a href="https://bravo.sph.umich.edu/freeze5/hg38/variant/{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}" target="_blank"
+              <template v-if="ref!==null && alt !== null">
+                <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`" target="_blank"
                     class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                     data-placement="top" data-html=true
                     title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
                   BRAVO <span class="fa fa-external-link-alt"></span> </a>
-                <a href="https://gtexportal.org/home/snp/chr{{ chrom }}_{{ pos }}_{{ ref }}_{{ alt }}_b38" target="_blank"
+                <a :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`" target="_blank"
                     class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                     data-placement="top"
                     title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
                   GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
-                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr{{ chrom }}%3A{{ pos }}-{{ pos }}&position=chr{{ chrom }}%3A{{ pos - 25 }}-{{ pos + 25 }}" target="_blank"
+                <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`" target="_blank"
                     class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                     data-placement="top" title="The UC Santa Cruz Genome Browser"> UCSC <span
                     class="fa fa-external-link-alt"></span></a>
-                <a href="https://gnomad.broadinstitute.org/variant/chr{{ chrom }}-{{ pos }}-{{ ref }}-{{ alt }}?dataset=gnomad_r3" target="_blank"
+                <a :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`" target="_blank"
                     class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
                     data-placement="top"
                     title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
                   gnomAD <span class="fa fa-external-link-alt"></span></a>
-              {% endif %}
-              {% if rsid is not none %}
-                <a href="https://www.ncbi.nlm.nih.gov/snp/{{ rsid }}" target="_blank" class="btn btn-secondary btn-sm" role="button"
+              </template>
+              <template v-if="rsid !==null">
+                <a :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
                     aria-pressed="true" data-toggle="tooltip" data-placement="top"
                     title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
                   <span class="fa fa-external-link-alt"></span> </a>
-                <a href="http://pheweb.sph.umich.edu/go?query={{ rsid }}" target="_blank" class="btn btn-secondary btn-sm" role="button"
+                <a :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
                     aria-pressed="true" data-toggle="tooltip" data-placement="top"
                     title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
                   MGI <span class="fa fa-external-link-alt"></span></a>
-                <a href="http://pheweb.sph.umich.edu/SAIGE-UKB/go?query={{ rsid }}" target="_blank" class="btn btn-secondary btn-sm"
+                <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm"
                     role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
                     title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
                   UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
-                <a href="http://big.stats.ox.ac.uk/go?query={{ rsid }}" target="_blank" class="btn btn-secondary btn-sm" role="button"
+                <a :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
                     aria-pressed="true" data-toggle="tooltip" data-placement="top"
                     title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
                   UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
-              {% endif %}
+              </template>
             </div>
           </div>
         </div>
@@ -371,7 +379,7 @@ export default {
           <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link-alt"></span> </a>
         <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
               title="Normalized Effect Sizes (NES) are defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Go <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>here</a> for more details from the GTEx Portal. <br>
-                     Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
+                     Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
           <span class="fa fa-info-circle"></span> Definitions </span> </span>
         <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
