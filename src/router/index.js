@@ -1,4 +1,8 @@
+// Load dependencies (for their side effects)
+import 'jquery';
+import 'popper.js';
 import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap';
 import '@fortawesome/fontawesome-free/css/all.css';
 
 import Vue from 'vue';
@@ -10,7 +14,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: Home,
     meta: {
       title: 'Home | PheGET: eQTL browser',
@@ -34,6 +38,14 @@ const routes = [
       title: 'Region | PheGET: eQTL browser',
     },
     component: () => import(/* webpackChunkName: "region" */ '../views/Region.vue'),
+  },
+  {
+    path: '*',
+    name: '404',
+    meta: {
+      title: 'Not found | PheGET: eQTL browser',
+    },
+    component: () => import(/* webpackChunkName: "errors" */ '../views/NotFound.vue'),
   },
 ];
 

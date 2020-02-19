@@ -3,7 +3,15 @@ Front end views: pages that are visited in the web browser and return HTML
 """
 import sqlite3
 
-from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
@@ -177,18 +185,19 @@ def variant_view(chrom: str, pos: int):
         and nearest_genes[0]["start"] <= pos <= nearest_genes[0]["end"]
     )
 
-    return render_template(
-        "frontend/variant.html",
-        chrom=chrom,
-        pos=pos,
-        ref=annotations.ref_allele,
-        alt=annotations.alt_allele,
-        top_gene=annotations.top_gene,
-        top_tissue=annotations.top_tissue,
-        ac=annotations.ac,
-        af=annotations.af,
-        an=annotations.an,
-        rsid=annotations.rsid,
-        nearest_genes=nearest_genes,
-        is_inside_gene=is_inside_gene,
+    return jsonify(
+        dict(
+            chrom=chrom,
+            pos=pos,
+            ref=annotations.ref_allele,
+            alt=annotations.alt_allele,
+            top_gene=annotations.top_gene,
+            top_tissue=annotations.top_tissue,
+            ac=annotations.ac,
+            af=annotations.af,
+            an=annotations.an,
+            rsid=annotations.rsid,
+            nearest_genes=nearest_genes,
+            is_inside_gene=is_inside_gene,
+        )
     )

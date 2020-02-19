@@ -24,13 +24,7 @@
  * Reusable code for searchbox widget
  */
 
-// Handles bad requests - copied from https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
-function handleErrors(response) {
-  if (!response.ok) {
-    throw Error(response.statusText);
-  }
-  return response;
-}
+import { handleErrors } from '../util';
 
 
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
@@ -179,7 +173,9 @@ export default {
     parseSearch() {
       parseSearchText(this.term)
         .then((omniresult) => {
-          if ((omniresult === undefined || omniresult.type === 'other') && omniresult.chrom === null && omniresult.start === null && omniresult.end === null) {
+          if ((omniresult === undefined || omniresult.type === 'other')
+            && omniresult.chrom === null && omniresult.start === null
+            && omniresult.end === null) {
             throw new Error('Sorry, we are unable to parse your query.');
           } else {
             return (omniresult);
