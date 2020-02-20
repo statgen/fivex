@@ -10,6 +10,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 
+import '@/assets/common.css';
+
 Vue.use(VueRouter);
 
 const routes = [

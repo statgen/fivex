@@ -4,9 +4,12 @@
  */
 import $ from 'jquery';
 
-import SearchBox from '@/components/SearchBox.vue';
+import LocusZoom from 'locuszoom';
+import '@/lz-helpers';
+import { handleErrors, PORTALDEV_URL } from '@/util';
 
-import { handleErrors } from '../util';
+import LzPlot from '@/components/LzPlot.vue';
+import SearchBox from '@/components/SearchBox.vue';
 
 function getData(variant) {
   return fetch(`/backend/views/variant/${variant}/`)
@@ -14,9 +17,405 @@ function getData(variant) {
     .then((resp) => resp.json());
 }
 
+
+function getSources(chrom, pos) {
+  return [
+    ['phewas', ['PheGET', { url: `/backend/api/variant/${chrom}_${pos}/` }]],
+    ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
+    ['constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]],
+  ];
+}
+
+
+function getLayout(chrom, pos, initialState = {}) {
+  return LocusZoom.Layouts.get('plot', 'standard_phewas', {
+    responsive_resize: 'width_only',
+    state: initialState,
+    dashboard: {
+      components: [
+        {
+          color: 'gray',
+          position: 'right',
+          type: 'download',
+        },
+
+      ],
+    },
+    panels: [
+      (function () {
+        const panel = LocusZoom.Layouts.get('panel', 'phewas', {
+          unnamespaced: true,
+          min_height: 500,
+          dashboard: {
+            components: [
+              {
+                color: 'gray',
+                position: 'right',
+                type: 'toggle_legend',
+              },
+            ],
+          },
+          legend: {
+            orientation: 'vertical',
+            origin: { x: 55, y: 30 },
+            pad_from_right: 50 + 10, // 50 is panel.margin.right
+            hidden: true,
+          },
+          data_layers: [
+            (function () {
+              const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
+              base.fields = [
+                '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
+                '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
+                '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
+                '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
+                '{{namespace[phewas]}}tss_distance',
+                '{{namespace[phewas]}}top_value_rank',
+                '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
+                '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
+                '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ma_count',
+                '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
+                '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
+                '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
+              ];
+              base.x_axis.category_field = '{{namespace[phewas]}}symbol';
+              base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
+              base.x_axis.category_order_field = 'phewas:tss_distance';
+              base.y_axis.min_extent = [0, 8];
+
+              base.legend = [
+                {
+                  shape: 'circle',
+                  size: 40,
+                  label: 'Non-significant effect',
+                  class: 'lz-data_layer-scatter',
+                },
+                {
+                  shape: 'triangle-up',
+                  size: 40,
+                  label: 'Positive effect',
+                  class: 'lz-data_layer-scatter',
+                },
+                {
+                  shape: 'triangle-down',
+                  size: 40,
+                  label: 'Negative effect',
+                  class: 'lz-data_layer-scatter',
+                },
+              ];
+
+              base.color = [
+                {
+                  field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                  scale_function: 'if',
+                  parameters: {
+                    field_value: true,
+                    then: '#ED180A',
+                  },
+                },
+                {
+                  field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                  scale_function: 'if',
+                  parameters: {
+                    field_value: false,
+                    then: '#EAE6E6',
+                  },
+                },
+                {
+                  field: '{{namespace[phewas]}}symbol',
+                  scale_function: 'categorical_bin',
+                  parameters: {
+                    categories: [],
+                    values: [],
+                    null_value: '#B8B8B8',
+                  },
+                },
+              ];
+              base.point_shape = [
+                {
+                  scale_function: 'effect_direction',
+                  parameters: {
+                    '+': 'triangle-up',
+                    '-': 'triangle-down',
+                  },
+                },
+                'circle',
+              ];
+
+              base.tooltip.html = `
+<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}<br>
+<strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
+<strong>Gene name:</strong> <i>{{{{namespace[phewas]}}symbol|htmlescape}}</i><br>
+<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
+<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}<br>
+<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})<br>
+<strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
+<strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
+<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
+<strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
+<strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
+<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
+<form action="/region/" method="get">
+    <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
+    <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>
+    <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
+    <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
+    <input type="submit" class="linkButton" value="See region plot for {{{{namespace[phewas]}}tissue|htmlescape}} x {{{{namespace[phewas]}}symbol|htmlescape}}"/>
+</form>
+`;
+              base.match = {
+                send: '{{namespace[phewas]}}tissue',
+                receive: '{{namespace[phewas]}}tissue',
+              };
+              base.label.text = '{{{{namespace[phewas]}}tissue}}';
+              base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
+              base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
+              return base;
+            }()),
+            // TODO: Must decide on an appropriate significance threshold for this use case
+            LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
+          ],
+        });
+        panel.axes.y1.label_offset = 38;
+        return panel;
+      }()),
+      LocusZoom.Layouts.get('panel', 'genes', {
+        unnamespaced: true,
+        margin: { bottom: 40 },
+        min_height: 150,
+        axes: {
+          x: {
+            label: `Chromosome ${chrom} (Mb)`,
+            label_offset: 32,
+            tick_format: 'region',
+            extent: 'state',
+          },
+        },
+        data_layers: [
+          (function () {
+            const base = LocusZoom.Layouts.get('data_layer', 'genes', {
+              unnamespaced: true,
+              exon_height: 8,
+              bounding_box_padding: 5,
+              track_vertical_spacing: 5,
+              exon_label_spacing: 3,
+            });
+            base.color = [
+              {
+                field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                scale_function: 'if',
+                parameters: {
+                  field_value: true,
+                  then: '#ED180A',
+                },
+              },
+            ];
+            base.match = {
+              send: '{{namespace[genes]}}gene_name',
+              receive: '{{namespace[genes]}}gene_name',
+            };
+            return base;
+          }()),
+          {
+            id: 'variant',
+            type: 'orthogonal_line',
+            orientation: 'vertical',
+            offset: pos,
+            style: {
+              stroke: '#FF3333',
+              'stroke-width': '2px',
+              'stroke-dasharray': '4px 4px',
+            },
+          },
+        ],
+      }),
+    ],
+  });
+}
+
+// /**
+//  * Layout mutation function: Changes the variable used to generate groups for coloring purposes;
+//  *  also changes the labeling field
+//  * @param plot
+//  * @param thing
+//  */
+// function groupByThing(plot, thing) {
+//   let group_field; let
+//     point_label_field;
+//   const scatter_config = plot.layout.panels[0].data_layers[0];
+//   delete scatter_config.x_axis.category_order_field;
+//   if (thing === 'tissue') {
+//     group_field = 'tissue';
+//     point_label_field = 'symbol';
+//   } else if (thing === 'symbol') {
+//     group_field = 'symbol'; // label by gene name, but arrange those genes based on position
+//     point_label_field = 'tissue';
+//     scatter_config.x_axis.category_order_field = 'phewas:tss_distance';
+//   } else if (thing === 'system') {
+//     group_field = 'system';
+//     point_label_field = 'symbol';
+//   } else {
+//     throw new Error('Unrecognized grouping field');
+//   }
+//   scatter_config.x_axis.category_field = `phewas:${group_field}`;
+//   scatter_config.color[2].field = `phewas:${group_field}`;
+//   scatter_config.label.text = `{{phewas:${point_label_field}}}`;
+//   // eslint-disable-next-line no-multi-assign
+//   scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
+//
+//   // Clear "same match" highlighting when re-rendering.
+//   plot.applyState({ lz_match_value: null });
+// }
+//
+// // Switches the displayed y-axis value between p-values and effect size
+// function switchY(plot, table, yfield) {
+//   const scatter_config = plot.layout.panels[0].data_layers[0];
+//   if (yfield === 'log_pvalue') {
+//     scatter_config.legend = [
+//       {
+//         shape: 'circle',
+//         size: 40,
+//         label: 'Non-significant effect',
+//         class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-down',
+//         size: 40,
+//         label: 'Negative effect',
+//         class: 'lz-data_layer-scatter',
+//       },
+//     ];
+//     delete scatter_config.y_axis.ceiling;
+//     delete plot.layout.panels[0].axes.y1.ticks;
+//     plot.panels.phewas.legend.hide();
+//     scatter_config.y_axis.field = 'phewas:log_pvalue';
+//     scatter_config.y_axis.floor = 0;
+//     scatter_config.y_axis.lower_buffer = 0;
+//     scatter_config.y_axis.min_extent = [0, 8];
+//     scatter_config.point_shape = [
+//       {
+//         scale_function: 'effect_direction',
+//         parameters: {
+//           '+': 'triangle-up',
+//           '-': 'triangle-down',
+//         },
+//       },
+//       'circle',
+//     ];
+//     plot.layout.panels[0].axes.y1.label = '-log 10 p-value';
+//     plot.layout.panels[0].data_layers[1].offset = 7.301;
+//     plot.layout.panels[0].data_layers[1].style = {
+//       stroke: '#D3D3D3',
+//       'stroke-width': '3px',
+//       'stroke-dasharray': '10px 10px',
+//     };
+//
+//     table.setSort('phewas:log_pvalue', 'desc');
+//   } else if (yfield === 'beta') {
+//     scatter_config.legend = [
+//       {
+//         shape: 'circle',
+//         size: 40,
+//         label: 'Non-significant effect',
+//         class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-down',
+//         size: 40,
+//         label: 'Negative effect',
+//         class: 'lz-data_layer-scatter',
+//       },
+//     ];
+//     delete scatter_config.y_axis.floor;
+//     delete scatter_config.y_axis.min_extent;
+//     delete scatter_config.y_axis.ceiling;
+//     delete plot.layout.panels[0].axes.y1.ticks;
+//     plot.panels.phewas.legend.hide();
+//     scatter_config.y_axis.field = 'phewas:beta';
+//     plot.layout.panels[0].axes.y1.label = 'Normalized Effect Size (NES)';
+//     plot.layout.panels[0].data_layers[1].offset = 0;
+//     scatter_config.point_shape = [
+//       {
+//         scale_function: 'effect_direction',
+//         parameters: {
+//           '+': 'triangle-up',
+//           '-': 'triangle-down',
+//         },
+//       },
+//       'circle',
+//     ];
+//     plot.layout.panels[0].data_layers[1].style = {
+//       stroke: 'gray',
+//       'stroke-width': '1px',
+//       'stroke-dasharray': '10px 0px',
+//     };
+//     scatter_config.y_axis.lower_buffer = 0.15;
+//
+//     table.setSort('phewas:beta', 'desc');
+//   } else if (yfield === 'pip') {
+//     scatter_config.legend = [
+//       {
+//         shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter',
+//       },
+//       {
+//         shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter',
+//       },
+//     ];
+//     plot.panels.phewas.legend.show();
+//     scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
+//     scatter_config.y_axis.floor = -6.1;
+//     scatter_config.y_axis.ceiling = 0.2;
+//     scatter_config.y_axis.lower_buffer = 0;
+//     scatter_config.point_shape = [
+//       {
+//         scale_function: 'pip_cluster',
+//       },
+//       'circle',
+//     ];
+//     plot.layout.panels[0].axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+//     plot.layout.panels[0].axes.y1.ticks = [
+//       { position: 'left', text: '1', y: 0 },
+//       { position: 'left', text: '0.1', y: -1 },
+//       { position: 'left', text: '0.01', y: -2 },
+//       { position: 'left', text: '1e-3', y: -3 },
+//       { position: 'left', text: '1e-4', y: -4 },
+//       { position: 'left', text: '1e-5', y: -5 },
+//       { position: 'left', text: '≤1e-6', y: -6 },
+//     ];
+//     plot.layout.panels[0].data_layers[1].offset = -1000;
+//
+//
+//     table.setSort('phewas:pip', 'desc');
+//   }
+//   plot.applyState({ y_field: yfield });
+// }
+//
+// // Changes the number of top variants which are labeled on the plot
+// function labelTopVariants(plot, topVariantsToShow) {
+//   plot.layout.panels[0].data_layers[0].label.filters[1].value = topVariantsToShow;
+//   plot.applyState();
+// }
+
+
 export default {
   name: 'VariantView',
   components: {
+    LzPlot,
     SearchBox,
   },
   data() {
@@ -40,7 +439,20 @@ export default {
       group: 'tissue',
       n_labels: 0,
       tss_distance: 1000000,
+      base_plot_sources: null,
+      base_plot_layout: null,
+
+      // Internal state
+      loading_done: false,
     };
+  },
+  computed: {
+    pos_start() {
+      return this.pos - this.tss_distance;
+    },
+    pos_end() {
+      return this.pos + this.tss_distance;
+    },
   },
   // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
   beforeRouteEnter(to, from, next) {
@@ -52,16 +464,31 @@ export default {
       });
   },
   beforeRouteUpdate(to, from, next) {
-    // When going from one variant page to another (component is reused)
+    // When going from one variant page to another (component is reused, only variable part of route changes)
     this.setData();
+    this.assoc_plot = null;
+    this.assoc_sources = null;
+
     getData(to.params.id).then((data) => {
       this.setData(data);
       next();
     });
   },
+  beforeCreate() {
+    // Preserve a reference to component widgets so that their methods can be accessed directly
+    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
+    //  bypass these problems by assigning them as static properties instead of nested
+    //  observables.
+    this.assoc_plot = null;
+    this.assoc_sources = null;
+  },
+  // beforeRouteLeave(to, from, next) {
+  // TODO: Clean up event listeners
+  // }
   updated() {
     // Popper tooltips depend on dynamic data. They must be initialized after the component
     //   has finished rendering.
+    // TODO: This would reinitialize tooltips every time a radio button is selected, which seems wasteful
     this.$nextTick(() => {
       $('[data-toggle="tooltip"]').tooltip();
       $('[data-toggle-second="tooltip"]').tooltip();
@@ -88,18 +515,50 @@ export default {
         nearest_genes,
         is_inside_gene,
       });
+
+      //  When the page is first loaded, create the plot instance
+      this.base_plot_layout = getLayout(
+        this.chrom,
+        this.pos,
+        {
+          variant: this.variant,
+          position: this.pos,
+          chr: this.chrom,
+          start: this.pos_start,
+          end: this.pos_end,
+          minimum_tss_distance: -this.tss_distance,
+          maximum_tss_distance: this.tss_distance,
+          y_field: this.y_field,
+        },
+      );
+      this.base_plot_sources = getSources(this.chrom, this.pos);
+
+      // If used in reset mode, set loading to true
+      this.loading_done = !!data;
+    },
+    receivePlot(plot, data_sources) {
+      this.assoc_plot = plot;
+      this.assoc_sources = data_sources;
+      // TODO: Connect event listeners
     },
   },
 };
 </script>
 
 <template>
-  <div class="container-fluid">
+  <div v-if="!loading_done">
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+  </div>
+  <div v-else class="container-fluid">
 
     <div class="row padtop">
       <div class="col-sm-10">
         <!-- FIXME: This link positioning is wrong. Sorry! -->
-        <router-link to="home" class="btn btn-secondary btn-sm" role="button">
+        <router-link :to="{ name: 'home' }" class="btn btn-secondary btn-sm" role="button">
           <span class="fa fa-home" aria-hidden="true"></span>
           <span class="sr-only">Home</span>
         </router-link>
@@ -238,6 +697,12 @@ export default {
     </div>
 
     <!--     TODO: Now insert plot here! -->
+    <lz-plot :base_layout="base_plot_layout"
+             :base_sources="base_plot_sources"
+             :chr="chrom"
+             :start="pos_start"
+             :end="pos_end"
+             @connected="receivePlot" />
 
     <div class="row justify-content-center">
       <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"

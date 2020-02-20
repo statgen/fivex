@@ -1,0 +1,77 @@
+.padtop {
+    padding-top: 20px;
+}
+
+.linkButton {
+    background: none;
+    border: none;
+    color: #0066ff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.text-with-definition {
+    text-decoration: dotted underline;
+}
+
+.variant-information-grouped-card {
+    /* Make the cards in the card-group wrap onto separate rows on narrow screens to avoid text overflow off the right.
+       Boostrap sets `min-width:0` for cards, but we set it back to `auto` so that it will consider the width of its contents. */
+    min-width: auto;
+}
+
+/* Formats dt/dd to display on the same line */
+dl.variant-information-dl {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    width: 360px;
+    overflow: visible;
+    margin-bottom: 0; /* Cards already have 20px padding, so adding margin for the lone <dl> is excessive. */
+}
+
+dl.variant-information-dl dt {
+    flex: 0 0 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+dl.variant-information-dl dd {
+    margin-left: auto;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex: 0 0 50%;
+}
+
+/* Middle information box needs slightly different formatting to display longer tissues correctly */
+dl.variant-info-middle {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    width: 360px;
+    overflow: visible;
+    margin-bottom: 0;
+}
+
+dl.variant-info-middle dt {
+    flex: 0 0 30%; /* Reduce the width for the dt text */
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+dl.variant-info-middle dd {
+    margin-left: auto;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex: 0 0 70%; /* Increase the width available for the dd text */
+}
+
+/* Scrollable Bootstrap dropdown menus */
+
+.scrollable-menu {
+    height: auto;
+    max-height: 400px;
+    overflow-x: hidden;
+}

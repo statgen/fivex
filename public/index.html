@@ -5,6 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.png">
+
+    <!--  Manually import stylesheet. This is required because the "make SVG" button looks for an unbundled
+          filename by exact match. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locuszoom@0.10.2/dist/locuszoom.css" type="text/css"/>
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
