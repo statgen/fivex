@@ -10,6 +10,7 @@ import { handleErrors, PORTALDEV_URL } from '@/util';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
+import TabulatorTable from '@/components/TabulatorTable.vue';
 
 function getData(variant) {
   return fetch(`/backend/views/variant/${variant}/`)
@@ -18,7 +19,7 @@ function getData(variant) {
 }
 
 
-function getSources(chrom, pos) {
+function getPlotSources(chrom, pos) {
   return [
     ['phewas', ['PheGET', { url: `/backend/api/variant/${chrom}_${pos}/` }]],
     ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
@@ -27,7 +28,7 @@ function getSources(chrom, pos) {
 }
 
 
-function getLayout(chrom, pos, initialState = {}) {
+function getPlotLayout(chrom, pos, initialState = {}) {
   return LocusZoom.Layouts.get('plot', 'standard_phewas', {
     responsive_resize: 'width_only',
     state: initialState,
@@ -411,12 +412,72 @@ function getLayout(chrom, pos, initialState = {}) {
 //   plot.applyState();
 // }
 
+// ----------------------------
+// Tabulator formatting helpers
+function two_digit_fmt1(cell) {
+  const x = cell.getValue();
+  const d = -Math.floor(Math.log10(Math.abs(x)));
+  return (d < 6) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
+}
+
+function two_digit_fmt2(cell) {
+  const x = cell.getValue();
+  const d = -Math.floor(Math.log10(Math.abs(x)));
+  return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
+}
+
+function pip_fmt(cell) {
+  const x = cell.getValue();
+  if (x === 0) {
+    return '0';
+  }
+  return x.toPrecision(2);
+}
+
+function tabulator_tooltip_maker(cell) {
+  // Only show tooltips when an ellipsis ('...') is hiding part of the data.
+  // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
+  // Unfortunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+  // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
+  const e = cell.getElement();
+  if (e.clientWidth >= e.scrollWidth) {
+    return false; // all the text is shown, so there is no '...', so tooltip is unneeded
+  }
+  return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
+}
+
+const TABLE_BASE_COLUMNS = [
+  {
+    title: 'Gene',
+    field: 'phewas:symbol',
+    headerFilter: true,
+    formatter(cell) {
+      return `<i>${cell.getValue()} (${cell.getData()['phewas:gene_id']}</i>)`;
+    },
+  },
+  { title: 'Tissue', field: 'phewas:tissue', headerFilter: true },
+  { title: 'System', field: 'phewas:system', headerFilter: true },
+  {
+    title: '-log<sub>10</sub>(p)',
+    field: 'phewas:log_pvalue',
+    formatter: two_digit_fmt2,
+    sorter: 'number',
+  },
+  // A large effect size in either direction is good, so sort by abs value
+  {
+    title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number',
+  },
+  { title: 'SE (Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
+  { title: 'PIP', field: 'phewas:pip', formatter: pip_fmt },
+];
+
 
 export default {
   name: 'VariantView',
   components: {
     LzPlot,
     SearchBox,
+    TabulatorTable,
   },
   data() {
     return {
@@ -442,6 +503,9 @@ export default {
       base_plot_sources: null,
       base_plot_layout: null,
 
+      // Internal data passed between widgets
+      table_data: [],
+
       // Internal state
       loading_done: false,
     };
@@ -453,6 +517,24 @@ export default {
     pos_end() {
       return this.pos + this.tss_distance;
     },
+    table_sort() {
+      return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
+    },
+  },
+  beforeCreate() {
+    // Preserve a reference to component widgets so that their methods can be accessed directly
+    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
+    //  bypass these problems by assigning them as static properties instead of nested
+    //  observables.
+    this.assoc_plot = null;
+    this.assoc_sources = null;
+
+    this.variants_table = null;
+    this.tmp_table_callback = null;
+
+    // Make some constants available to the Vue instance for use as props in rendering
+    this.table_base_columns = TABLE_BASE_COLUMNS;
+    this.tabulator_tooltip_maker = tabulator_tooltip_maker;
   },
   // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
   beforeRouteEnter(to, from, next) {
@@ -473,14 +555,6 @@ export default {
       this.setData(data);
       next();
     });
-  },
-  beforeCreate() {
-    // Preserve a reference to component widgets so that their methods can be accessed directly
-    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
-    //  bypass these problems by assigning them as static properties instead of nested
-    //  observables.
-    this.assoc_plot = null;
-    this.assoc_sources = null;
   },
   // beforeRouteLeave(to, from, next) {
   // TODO: Clean up event listeners
@@ -517,7 +591,7 @@ export default {
       });
 
       //  When the page is first loaded, create the plot instance
-      this.base_plot_layout = getLayout(
+      this.base_plot_layout = getPlotLayout(
         this.chrom,
         this.pos,
         {
@@ -531,7 +605,8 @@ export default {
           y_field: this.y_field,
         },
       );
-      this.base_plot_sources = getSources(this.chrom, this.pos);
+      this.base_plot_sources = getPlotSources(this.chrom, this.pos);
+      this.table_data = [];
 
       // If used in reset mode, set loading to true
       this.loading_done = !!data;
@@ -539,7 +614,14 @@ export default {
     receivePlot(plot, data_sources) {
       this.assoc_plot = plot;
       this.assoc_sources = data_sources;
-      // TODO: Connect event listeners
+
+      plot.subscribeToData(
+        [
+          'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
+          'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
+        ],
+        (data) => { this.table_data = data; },
+      );
     },
   },
 };
@@ -835,6 +917,12 @@ export default {
     </div>
 
     <!--    TODO: Now insert table here-->
+    <tabulator-table :columns="table_base_columns"
+                     :table_data="table_data"
+                     :sort="table_sort"
+                     :tooltips="tabulator_tooltip_maker"
+                     tooltip-generation-mode="hover"
+                     :tooltips-header="true" />
 
     <div class="card">
       <div class="card-body">
