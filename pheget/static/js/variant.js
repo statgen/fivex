@@ -275,8 +275,10 @@ function makePhewasPlot(chrom, pos, selector) {  // add a parameter geneid
 `;
                             base.match = { send: '{{namespace[phewas]}}tissue', receive: '{{namespace[phewas]}}tissue' };
                             base.label.text = '{{{{namespace[phewas]}}tissue}}';
-                            base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
-                            base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
+                            base.label.filters = [
+                                {field: '{{namespace[phewas]}}log_pvalue', operator: '>=', value: 10},
+                                {field: 'phewas:top_value_rank', operator: '<=', value: 5 },
+                            ];
                             return base;
                         }(),
                         // TODO: Must decide on an appropriate significance threshold for this use case
@@ -447,6 +449,7 @@ function groupByThing(plot, thing) {
 function switchY(plot, table, yfield) {
     const scatter_config = plot.layout.panels[0].data_layers[0];
     if (yfield === 'log_pvalue') {
+        scatter_config.label.filters[0] = {field: 'phewas:log_pvalue', operator: '>=', value: 10};
         scatter_config.legend = [
             { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
             { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
@@ -479,6 +482,7 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:log_pvalue', 'desc');
     } else if (yfield === 'beta') {
+        scatter_config.label.filters[0] = {field: 'phewas:log_pvalue', operator: '>=', value: 10};
         scatter_config.legend = [
             { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
             { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
@@ -511,6 +515,7 @@ function switchY(plot, table, yfield) {
 
         table.setSort('phewas:beta', 'desc');
     } else if (yfield === 'pip') {
+        scatter_config.label.filters[0] = {field: 'phewas:log_pvalue', operator: '>=', value: 0};
         scatter_config.legend = [
             { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
             { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
