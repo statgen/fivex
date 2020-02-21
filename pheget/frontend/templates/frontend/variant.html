@@ -110,7 +110,7 @@
         <form class="label-display" id="toggle-labels">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
-                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 50 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
+                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 20 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
             <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
           </span>
             <label class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Turn off all labels">
@@ -121,8 +121,8 @@
               <input type="radio" name="label-options" autocomplete=off value="5"> Top 5
             </label>
             <label class="btn btn-secondary" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" autocomplete=off value="50"> Top 50
+                   title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+              <input type="radio" name="label-options" autocomplete=off value="20"> Top 20
             </label>
           </div>
         </form>
