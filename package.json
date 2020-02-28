@@ -16,6 +16,8 @@
   "main": "index.js",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
+    "@sentry/browser": "^5.13.0",
+    "@sentry/integrations": "^5.13.0",
     "bootstrap": "^4.4.1",
     "core-js": "^3.6.4",
     "jquery": "^3.4.1",

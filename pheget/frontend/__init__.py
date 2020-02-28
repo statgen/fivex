@@ -1,17 +1,9 @@
 """
-Front end views: pages that are visited in the web browser and return HTML
+Front end views: provide the data needed by pages that are visited in the web browser
 """
 import sqlite3
 
-from flask import (
-    Blueprint,
-    abort,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
@@ -21,12 +13,6 @@ from . import format
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 
 views_blueprint = Blueprint("frontend", __name__, template_folder="templates")
-
-
-@views_blueprint.route("/")
-def home():
-    """Site homepage"""
-    return render_template("frontend/index.html")
 
 
 @views_blueprint.route("/region/", methods=["GET"])
@@ -148,23 +134,23 @@ def region_view():
                 (f"chr{chrom}", start, end),
             )
         )
-    gene_list = dict()
-    for geneid in geneid_list:
-        gene_list[str(geneid[0])] = str(
-            gene_json.get(geneid[0].split(".")[0], "")
-        )
+    gene_list = {  # FIXME: Confusing name (it's not a list)
+        str(geneid[0]): str(gene_json.get(geneid[0].split(".")[0], ""))
+        for geneid in geneid_list
+    }
 
-    return render_template(
-        "frontend/region.html",
-        chrom=chrom,
-        start=start,
-        end=end,
-        center=center,
-        gene_id=gene_id,
-        tissue=tissue,
-        symbol=symbol,
-        tissue_list=tissue_list,
-        gene_list=gene_list,
+    return jsonify(
+        {
+            "chrom": chrom,
+            "start": start,
+            "end": end,
+            "center": center,
+            "gene_id": gene_id,
+            "tissue": tissue,
+            "symbol": symbol,
+            "tissue_list": list(tissue_list),
+            "gene_list": gene_list,
+        }
     )
 
 

@@ -8,11 +8,6 @@ from flask import url_for
 # Smoke tests: ensure that each page of the app loads.
 # This is a safeguard against forgetting to provide sample data. URLs reference example views,
 # and may need to be updated if the homepage examples change
-def test_loads_home(client):
-    url = url_for("frontend.home")
-    assert client.get(url).status_code == 200
-
-
 def test_loads_region(client):
     url = url_for("frontend.region_view", chrom="19", start=448506, end=528506)
     assert client.get(url).status_code == 200

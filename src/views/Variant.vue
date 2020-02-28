@@ -545,7 +545,7 @@ export default {
   updated() {
     // Popper tooltips depend on dynamic data. They must be initialized after the component
     //   has finished rendering.
-    // TODO: This would reinitialize tooltips every time a radio button is selected, which seems wasteful
+    // TODO: This would reinitialize tooltips every time a radio button is selected, which seems slightly wasteful
     this.$nextTick(() => {
       $('[data-toggle="tooltip"]').tooltip();
       $('[data-toggle-second="tooltip"]').tooltip();

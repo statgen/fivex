@@ -6,6 +6,8 @@
  * It can be useful to define these in a single central file, so that changes to the display layer
  *  don't cause these things to be re-registered when the page reloads
  */
+import $ from 'jquery';
+
 import LocusZoom from 'locuszoom';
 
 /**
@@ -194,6 +196,28 @@ LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
     return x.toFixed(3);
   }
   return x.toExponential(1);
+});
+
+
+LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
+  getURL(state) {
+    const url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
+    let params = {};
+    if (this.params.gene_id) {
+      params.gene_id = this.params.gene_id;
+    }
+    if (this.params.tissue) {
+      params.tissue = this.params.tissue;
+    }
+    params = $.param(params);
+    return `${url}?${params}`;
+  },
+  annotateData(data) {
+    data.forEach((item) => {
+      item.variant = `${item.chromosome}:${item.position}_${item.ref_allele}/${item.alt_allele}`;
+    });
+    return data;
+  },
 });
 
 
