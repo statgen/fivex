@@ -6,11 +6,11 @@ import $ from 'jquery';
  */
 export default {
   name: 'SelectAnchors',
-  props: ['gene_list', 'tissue_list'],
+  props: ['gene_list', 'tissue_list', 'current_gene', 'current_tissue'],
   data() {
     return {
-      anchor_gene: null,
-      anchor_tissue: null,
+      anchor_gene: this.current_gene,
+      anchor_tissue: this.current_tissue,
     };
   },
   methods: {

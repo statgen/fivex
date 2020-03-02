@@ -523,7 +523,6 @@ export default {
         options.extra_tissues = extra_tissues;
       }
 
-      console.log(options);
       return $.param(options);
     },
   },
@@ -580,10 +579,16 @@ export default {
       this.region_data = data;
 
       if (data) {
+        // TODO: Improve how we set default query param options
+        this.y_field = this.$route.query.y_field || this.query;
+
         const {
           chrom: chr, start, end, gene_id, tissue, symbol,
         } = data;
-        const initialState = { chr, start, end };
+        const { y_field } = this;
+        const initialState = {
+          chr, start, end, y_field,
+        };
         this.chrom = chr;
         this.start = start;
         this.end = end;
@@ -591,20 +596,27 @@ export default {
         this.tissue = tissue;
 
         const track_panels = getTrackLayout(gene_id, tissue, initialState, symbol);
+        // TODO: Make base plot layout respond to y_field query param
         this.base_plot_layout = getBasicLayout(initialState, track_panels);
         const track_sources = getTrackSources(gene_id, tissue);
 
         // TODO: Should we add track sources for the other "optional" tracks, when creating the base plot layout?
         this.base_plot_sources = getBasicSources(track_sources);
-
-        // On first page load, update the query string to reflect plot options. Such options include:
-        window.history.replaceState({}, document.title, `?${this.query_params}`);
       }
       this.loading_done = !!data;
     },
     receivePlot(plot, data_sources) {
       this.assoc_plot = plot;
       this.assoc_sources = data_sources;
+    },
+
+    /**
+     * Update the page when the plot region is changed
+     */
+    changePlotRegion({ chr, start, end }) {
+      this.chrom = chr;
+      this.start = start;
+      this.end = end;
     },
 
     /**
@@ -626,12 +638,21 @@ export default {
       if (type === 'tissue') {
         addTrack(this.assoc_plot, this.assoc_sources, this.gene_id, track_id, this.region_data.symbol);
       }
-      window.history.pushState({}, document.title, `?${this.query_params}`);
     },
   },
   watch: {
     y_field() {
-      switchY_region(this.assoc_plot, this.y_field);
+      // This param might be set when the page first loads, but the associated function
+      //   requires a reference to the plot. nextTick says "don't fire this watcher
+      //   until after the plot has been created"
+      this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
+    },
+    query_params() {
+      // Update the URL whenever query params change (including at first page load)
+      // We're very intentionally bypassing the Vue router functions here. Those would trigger
+      //   a full page reload whenever params change, but we want to do incremental things
+      //   (like adding plot panels) that would not benefit from a reload.
+      window.history.pushState({}, document.title, `?${this.query_params}`);
     },
   },
   components: {
@@ -677,7 +698,7 @@ export default {
                      :chr="chrom"
                      :start="start"
                      :end="end"
-                     @region_changed="receivePlot"
+                     @region_changed="changePlotRegion"
                      @connected="receivePlot" />
       </div>
     </div>
@@ -687,8 +708,10 @@ export default {
       <div class="col-sm-12">
 
         <select-anchors @navigate="changeAnchors"
-          :gene_list="region_data.gene_list"
-          :tissue_list="region_data.tissue_list"/>
+                        :current_gene="gene_id"
+                        :current_tissue="tissue"
+                        :gene_list="region_data.gene_list"
+                        :tissue_list="region_data.tissue_list"/>
 
         <br>
 
