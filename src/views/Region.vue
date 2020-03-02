@@ -7,6 +7,7 @@ import { handleErrors, PORTALDEV_URL } from '@/util';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
+import SelectAnchors from '@/components/SelectAnchors.vue';
 
 const MAX_EXTENT = 1000000;
 
@@ -111,7 +112,6 @@ function getTrackLayout(gene_id, tissue, state, genesymbol) {
  * @param {Array[]} track_panels
  * @returns {Object}
  */
-// eslint-disable-next-line no-unused-vars
 function getBasicLayout(initial_state = {}, track_panels = []) {
   const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true }).tooltip;
   newgenestooltip.html += `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
@@ -152,7 +152,6 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
 /**
  * Get the default source configurations for a plot
  */
-// eslint-disable-next-line no-unused-vars
 function getBasicSources(track_sources = []) {
   return [
     ...track_sources,
@@ -196,7 +195,6 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @param {string} tissue
  * @param {string} genesymbol
  */
-// eslint-disable-next-line no-unused-vars
 function addTrack(plot, datasources, gene_id, tissue, genesymbol) {
   const track_layout = getTrackLayout(gene_id, tissue, plot.state, genesymbol);
   const track_sources = getTrackSources(gene_id, tissue);
@@ -209,7 +207,6 @@ function addTrack(plot, datasources, gene_id, tissue, genesymbol) {
  * @param {LocusZoom.Plot} plot
  * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue', 'beta', or 'pip'
  */
-// eslint-disable-next-line no-unused-vars
 function switchY_region(plot, yfield) {
   // Iterate through all panels, including any added panels
   Object.keys(plot.panels).forEach((panel_id) => {
@@ -495,10 +492,12 @@ export default {
 
       // Internal state (UI and buttons)
       y_field: 'log_pvalue',
-      anchor_gene: null,
-      anchor_tissue: null,
-      extra_gene: null,
-      extra_tissue: null,
+      gene_id: null,
+      tissue: null,
+
+      extra_genes: [],
+      extra_tissues: [],
+
       loading_done: false,
     };
   },
@@ -507,14 +506,25 @@ export default {
       const { gene_id } = this;
       return gene_id && gene_id.split('.')[0];
     },
-    extra_gene_symbol() {
-      const { gene_list } = this.region_data;
-      const { extra_gene } = this;
+    query_params() {
+      const {
+        chrom, start, end, gene_id, tissue, y_field, extra_genes, extra_tissues,
+      } = this;
 
-      if (!extra_gene || !gene_list) {
-        return null;
+      const options = {
+        chrom, start, end, gene_id, tissue, y_field,
+      };
+
+      if (extra_genes.length) {
+        options.extra_genes = extra_genes;
       }
-      return gene_list[extra_gene];
+
+      if (extra_tissues.length) {
+        options.extra_tissues = extra_tissues;
+      }
+
+      console.log(options);
+      return $.param(options);
     },
   },
   beforeCreate() {
@@ -556,23 +566,39 @@ export default {
     });
   },
   methods: {
+    changeAnchors(tissue, gene_id) {
+      const { chrom, start, end } = this;
+      this.$router.push({
+        name: 'region',
+        query: {
+          chrom, start, end, gene_id, tissue,
+        },
+      });
+    },
     setData(data) {
       // Convert passed params to instance variables. Also create plot and do other reactive things.
       this.region_data = data;
 
       if (data) {
-        const { chrom: chr, start, end } = data;
+        const {
+          chrom: chr, start, end, gene_id, tissue, symbol,
+        } = data;
         const initialState = { chr, start, end };
         this.chrom = chr;
         this.start = start;
         this.end = end;
-        this.anchor_gene = data.gene_id;
-        this.anchor_tissue = data.tissue;
+        this.gene_id = gene_id;
+        this.tissue = tissue;
 
-        const track_panels = getTrackLayout(data.gene_id, data.tissue, initialState, data.symbol);
+        const track_panels = getTrackLayout(gene_id, tissue, initialState, symbol);
         this.base_plot_layout = getBasicLayout(initialState, track_panels);
-        const track_sources = getTrackSources(data.gene_id, data.tissue);
+        const track_sources = getTrackSources(gene_id, tissue);
+
+        // TODO: Should we add track sources for the other "optional" tracks, when creating the base plot layout?
         this.base_plot_sources = getBasicSources(track_sources);
+
+        // On first page load, update the query string to reflect plot options. Such options include:
+        window.history.replaceState({}, document.title, `?${this.query_params}`);
       }
       this.loading_done = !!data;
     },
@@ -580,22 +606,38 @@ export default {
       this.assoc_plot = plot;
       this.assoc_sources = data_sources;
     },
+
+    /**
+     * Add a new gene or tissue track to the plot, after the plot has been created
+     */
+    addTrack(type, track_id) {
+      if (type === 'gene') {
+        const { gene_list } = this.region_data;
+        const { extra_gene } = this;
+        let extra_gene_symbol;
+        if (!extra_gene || !gene_list) {
+          extra_gene_symbol = null;
+        } else {
+          extra_gene_symbol = gene_list[extra_gene];
+        }
+        addTrack(this.assoc_plot, this.assoc_sources, track_id, this.tissue, extra_gene_symbol);
+      }
+
+      if (type === 'tissue') {
+        addTrack(this.assoc_plot, this.assoc_sources, this.gene_id, track_id, this.region_data.symbol);
+      }
+      window.history.pushState({}, document.title, `?${this.query_params}`);
+    },
   },
   watch: {
     y_field() {
       switchY_region(this.assoc_plot, this.y_field);
     },
-    extra_gene() {
-      // FIXME: When anchor gene/symbol change this should trigger a route transition
-      addTrack(this.assoc_plot, this.assoc_sources, this.extra_gene, this.anchor_tissue, this.extra_gene_symbol);
-    },
-    extra_tissue() {
-      addTrack(this.assoc_plot, this.assoc_sources, this.anchor_gene, this.extra_tissue, this.region_data.symbol);
-    },
   },
   components: {
     LzPlot,
     SearchBox,
+    SelectAnchors,
   },
 };
 </script>
@@ -623,7 +665,7 @@ export default {
     <div class="row">
       <div class="col-sm-12">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
-          <span id="header-symbol">{{ region_data.symbol }}</span> (chr{{ region_data.chrom }}:{{ region_data.start && region_data.start.toLocaleString()}}-{{ region_data.end && region_data.end.toLocaleString() }})
+          {{ region_data.symbol }} <small>(chr{{ region_data.chrom }}:{{ region_data.start && region_data.start.toLocaleString()}}-{{ region_data.end && region_data.end.toLocaleString() }})</small>
         </strong></h1>
       </div>
     </div>
@@ -631,44 +673,41 @@ export default {
     <div class="row">
       <div class="col-sm-12">
             <lz-plot :base_layout="base_plot_layout"
-             :base_sources="base_plot_sources"
-             :chr="chrom"
-             :start="start"
-             :end="end"
-             @connected="receivePlot" />
+                     :base_sources="base_plot_sources"
+                     :chr="chrom"
+                     :start="start"
+                     :end="end"
+                     @region_changed="receivePlot"
+                     @connected="receivePlot" />
       </div>
     </div>
 
     <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        Set a default gene or tissue as the anchor<br>
 
-        <label>Choose a gene to serve as an anchor:
-          <select v-model="anchor_gene" >
+        <select-anchors @navigate="changeAnchors"
+          :gene_list="region_data.gene_list"
+          :tissue_list="region_data.tissue_list"/>
+
+        <br>
+
+        <!-- TODO: Improve UI here -->
+        <label>Add a gene
+          <select class="form-control"
+            @change="addTrack('gene', $event.target.value)">
+            <option disabled selected value="">(select a gene)</option>
             <option v-for="(a_symbol, a_geneid) in region_data.gene_list" :key="a_geneid"
                     :value="a_geneid">{{a_symbol}}</option>
           </select>
         </label>
         <br>
 
-        <label>Choose a tissue to serve as an anchor:
-          <select v-model="anchor_tissue" >
-            <option v-for="a_tissue in region_data.tissue_list" :key="a_tissue"
-                    :value="a_tissue">{{a_tissue}}</option>
-          </select>
-        </label><br>
-
-        <label>Add an eQTL plot for a gene in the current anchor tissue
-          <select v-model="extra_gene" >
-            <option v-for="(a_symbol, a_geneid) in region_data.gene_list" :key="a_geneid"
-                    :value="a_geneid">{{a_symbol}}</option>
-          </select>
-        </label>
-        <br>
-
-        <label>Add a new tissue with the current anchor gene:
-          <select v-model="extra_tissue">
+        <!-- TODO: Improve UI here -->
+        <label>Add a tissue
+          <select class="form-control"
+            @change="addTrack('tissue', $event.target.value)">
+            <option disabled selected value="">(select a tissue)</option>
             <option v-for="a_tissue in region_data.tissue_list" :key="a_tissue"
                     :value="a_tissue">{{a_tissue}}</option>
           </select>
@@ -725,42 +764,42 @@ export default {
               <div class="card-body">
                 <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
                   title="External links for more information about this gene">
-                <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span
+                <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
                   class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> More info about {{ region_data.symbol }} </button>
                 </span>
 
                 <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/gene/${ short_gene_id }`"
-                   target="_blank" class="btn btn-secondary btn-sm" role="button"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top" data-html=true
                    title="Gene information from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
                   BRAVO <span class="fa fa-external-link-alt"></span> </a>
                 <a :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`" target="_blank"
-                   class="btn btn-secondary btn-sm" role="button" aria-pressed="true"
+                   class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
                    data-toggle="tooltip" data-placement="top" data-html=true
                    title="Detailed information from the GTEx Portal, including both gene and exon expression, along with single-tissue eQTLs and sQTLs.">
                   GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
                 <a :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
-                   target="_blank" class="btn btn-secondary btn-sm" role="button"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
                   gnomAD <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
-                   target="_blank" class="btn btn-secondary btn-sm" role="button"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
                   MGI <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
-                   target="_blank" class="btn btn-secondary btn-sm"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1"
                    role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
                   UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
-                   target="_blank" class="btn btn-secondary btn-sm" role="button"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
                   UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
-                   target="_blank" class="btn btn-secondary btn-sm" role="button"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
                    title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
                    Expression Atlas <span class="fa fa-external-link-alt"></span></a>

@@ -12,12 +12,7 @@ module.exports = {
   },
   rules: {
     'camelcase': 'off',
-    'max-len': ['warn', {
-      code: 120,
-      ignoreComments: true,
-      ignoreStrings: true,
-      ignoreTemplateLiterals: true
-    }],
+    'max-len': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-param-reassign': [2, { 'props': false }],
