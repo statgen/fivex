@@ -43,7 +43,7 @@ function getPlotLayout(chrom, pos, initialState = {}) {
       ],
     },
     panels: [
-      (function () {
+      ((() => {
         const panel = LocusZoom.Layouts.get('panel', 'phewas', {
           unnamespaced: true,
           min_height: 500,
@@ -63,7 +63,7 @@ function getPlotLayout(chrom, pos, initialState = {}) {
             hidden: true,
           },
           data_layers: [
-            (function () {
+            ((() => {
               const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
               base.fields = [
                 '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
@@ -172,14 +172,14 @@ function getPlotLayout(chrom, pos, initialState = {}) {
               base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
               base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
               return base;
-            }()),
+            })()),
             // TODO: Must decide on an appropriate significance threshold for this use case
             LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
           ],
         });
         panel.axes.y1.label_offset = 38;
         return panel;
-      }()),
+      })()),
       LocusZoom.Layouts.get('panel', 'genes', {
         unnamespaced: true,
         margin: { bottom: 40 },
@@ -193,7 +193,7 @@ function getPlotLayout(chrom, pos, initialState = {}) {
           },
         },
         data_layers: [
-          (function () {
+          ((() => {
             const base = LocusZoom.Layouts.get('data_layer', 'genes', {
               unnamespaced: true,
               exon_height: 8,
@@ -216,7 +216,7 @@ function getPlotLayout(chrom, pos, initialState = {}) {
               receive: '{{namespace[genes]}}gene_name',
             };
             return base;
-          }()),
+          })()),
           {
             id: 'variant',
             type: 'orthogonal_line',
@@ -273,21 +273,9 @@ function switchY(plot, yfield) {
   const scatter_config = plot.layout.panels[0].data_layers[0];
   if (yfield === 'log_pvalue') {
     scatter_config.legend = [
-      {
-        shape: 'circle',
-        size: 40,
-        label: 'Non-significant effect',
-        class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-down',
-        size: 40,
-        label: 'Negative effect',
-        class: 'lz-data_layer-scatter',
-      },
+      { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-down', size: 40, label: 'Negative effect', class: 'lz-data_layer-scatter' },
     ];
     delete scatter_config.y_axis.ceiling;
     delete plot.layout.panels[0].axes.y1.ticks;
@@ -315,21 +303,9 @@ function switchY(plot, yfield) {
     };
   } else if (yfield === 'beta') {
     scatter_config.legend = [
-      {
-        shape: 'circle',
-        size: 40,
-        label: 'Non-significant effect',
-        class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-down',
-        size: 40,
-        label: 'Negative effect',
-        class: 'lz-data_layer-scatter',
-      },
+      { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-down', size: 40, label: 'Negative effect', class: 'lz-data_layer-scatter' },
     ];
     delete scatter_config.y_axis.floor;
     delete scatter_config.y_axis.min_extent;
@@ -357,21 +333,11 @@ function switchY(plot, yfield) {
     scatter_config.y_axis.lower_buffer = 0.15;
   } else if (yfield === 'pip') {
     scatter_config.legend = [
-      {
-        shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter',
-      },
-      {
-        shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter',
-      },
+      { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+      { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+      { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
     ];
     plot.panels.phewas.legend.show();
     scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
@@ -379,9 +345,7 @@ function switchY(plot, yfield) {
     scatter_config.y_axis.ceiling = 0.2;
     scatter_config.y_axis.lower_buffer = 0;
     scatter_config.point_shape = [
-      {
-        scale_function: 'pip_cluster',
-      },
+      { scale_function: 'pip_cluster' },
       'circle',
     ];
     plot.layout.panels[0].axes.y1.label = 'Posterior Inclusion Probability (PIP)';
@@ -445,16 +409,8 @@ const TABLE_BASE_COLUMNS = [
   },
   { title: 'Tissue', field: 'phewas:tissue', headerFilter: true },
   { title: 'System', field: 'phewas:system', headerFilter: true },
-  {
-    title: '-log<sub>10</sub>(p)',
-    field: 'phewas:log_pvalue',
-    formatter: two_digit_fmt2,
-    sorter: 'number',
-  },
-  // A large effect size in either direction is good, so sort by abs value
-  {
-    title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number',
-  },
+  { title: '-log<sub>10</sub>(p)', field: 'phewas:log_pvalue', formatter: two_digit_fmt2, sorter: 'number' },
+  { title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number' },
   { title: 'SE (Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
   { title: 'PIP', field: 'phewas:pip', formatter: pip_fmt },
 ];
@@ -479,10 +435,10 @@ export default {
       is_inside_gene: null,
 
       // Data that controls the view (user-selected options)
-      y_field: 'log_pvalue',
-      group: 'tissue',
-      n_labels: 0,
-      tss_distance: 1000000,
+      y_field: null,
+      group: null,
+      n_labels: null,
+      tss_distance: null,
       base_plot_sources: null,
       base_plot_layout: null,
 
@@ -501,7 +457,13 @@ export default {
       return this.pos + this.tss_distance;
     },
     table_sort() {
+      // Update how tabulator is drawn, whenever y_field changes
       return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
+    },
+    query_params() {
+      // Re-calculate the URL query string whenever dependent information changes.
+      const { group, n_labels, tss_distance, y_field } = this;
+      return $.param({ group, n_labels, tss_distance, y_field });
     },
   },
   beforeCreate() {
@@ -513,7 +475,6 @@ export default {
     this.assoc_sources = null;
 
     this.variants_table = null;
-    this.tmp_table_callback = null;
 
     // Make some constants available to the Vue instance for use as props in rendering
     this.table_base_columns = TABLE_BASE_COLUMNS;
@@ -522,26 +483,24 @@ export default {
   // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
   beforeRouteEnter(to, from, next) {
     // First navigation to route
-    // TODO: Catch navigation failures (eg bad api call, no data, etc)
     getData(to.params.variant)
       .then((data) => {
-        next((vm) => vm.setData(data));
+        next((vm) => {
+          vm.setQuery(to.query);
+          vm.setData(data);
+        });
       });
   },
   beforeRouteUpdate(to, from, next) {
     // When going from one variant page to another (component is reused, only variable part of route changes)
-    this.setData();
-    this.assoc_plot = null;
-    this.assoc_sources = null;
+    this.reset();
 
     getData(to.params.id).then((data) => {
+      this.setQuery(to.query);
       this.setData(data);
       next();
     });
   },
-  // beforeRouteLeave(to, from, next) {
-  // TODO: Clean up event listeners
-  // }
   updated() {
     // Popper tooltips depend on dynamic data. They must be initialized after the component
     //   has finished rendering.
@@ -552,26 +511,22 @@ export default {
     });
   },
   methods: {
+    setQuery(params = {}) {
+      // Set initial display based on the URL query string, or defaults, as appropriate
+      const { group, n_labels, tss_distance, y_field } = params;
+      this.group = group || 'tissue';
+      this.n_labels = +n_labels || 0;
+      this.tss_distance = +tss_distance || 1000000;
+      this.y_field = y_field || 'log_pvalue';
+    },
     setData(data = {}) {
-      const {
-        chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene,
-      } = data;
+      const { chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene } = data;
       // Bulk assign all properties from data to the viewmodel. If there is no data, this
       //  sets all values to undefined.
-      Object.assign(this, {
-        chrom,
-        pos,
-        ref,
-        alt,
-        top_gene,
-        top_tissue,
-        ac,
-        af,
-        an,
-        rsid,
-        nearest_genes,
-        is_inside_gene,
-      });
+      Object.assign(
+        this,
+        { chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene },
+      );
 
       //  When the page is first loaded, create the plot instance
       this.base_plot_layout = getPlotLayout(
@@ -589,7 +544,6 @@ export default {
         },
       );
       this.base_plot_sources = getPlotSources(this.chrom, this.pos);
-      this.table_data = [];
 
       // If used in reset mode, set loading to true
       this.loading_done = !!data;
@@ -607,28 +561,52 @@ export default {
       );
     },
   },
+  reset() {
+    this.setQuery();
+    this.setData();
+
+    this.assoc_plot = null;
+    this.assoc_sources = null;
+
+    this.variants_table = null;
+    this.table_data = [];
+  },
   watch: {
+    // FIXME: The current logic may be a little inefficient on loading, eg if 4 query params
+    //    change at once, all 4 watchers trigger a re-render at about the same time
     group() {
       // Clear "same match" highlighting when re-rendering.
-      groupByThing(this.assoc_plot.layout, this.group);
-      this.assoc_plot.applyState({ lz_match_value: null });
+      this.$nextTick(() => {
+        groupByThing(this.assoc_plot.layout, this.group);
+        this.assoc_plot.applyState({ lz_match_value: null });
+      });
     },
     tss_distance() {
-      const { assoc_plot, tss_distance } = this;
-      this.assoc_plot.applyState({
-        maximum_tss_distance: tss_distance,
-        minimum_tss_distance: -tss_distance,
-        // TODO: Can we do away with plot.state.position in favor of vm.pos? (track state in fewer places)
-        start: Math.max(assoc_plot.state.position - tss_distance, 1),
-        end: assoc_plot.state.position + tss_distance,
+      this.$nextTick(() => {
+        const { assoc_plot, tss_distance } = this;
+        this.assoc_plot.applyState({
+          maximum_tss_distance: tss_distance,
+          minimum_tss_distance: -tss_distance,
+          // TODO: Can we do away with plot.state.position in favor of vm.pos? (track state in fewer places)
+          start: Math.max(assoc_plot.state.position - tss_distance, 1),
+          end: assoc_plot.state.position + tss_distance,
+        });
       });
     },
     y_field() {
-      switchY(this.assoc_plot, this.y_field);
+      this.$nextTick(() => switchY(this.assoc_plot, this.y_field));
     },
     n_labels() {
-      this.assoc_plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
-      this.assoc_plot.applyState();
+      this.$nextTick(() => {
+        this.assoc_plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
+        this.assoc_plot.applyState();
+      });
+    },
+    query_params() {
+      // Update the URL whenever anything would change the query params
+      // We intentionally bypass the Vue router functions here, because we are re-drawing the page
+      //  but don't want to trigger a new view. The emphasis is on bookmarking the current view
+      window.history.replaceState({}, document.title, `?${this.query_params}`);
     },
   },
   components: {
@@ -749,7 +727,7 @@ export default {
             </label>
             <label :class="{ 'active': n_labels === 50 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
                    data-html="true"
-                   title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are most significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+                   title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="50"> Top 50
             </label>
           </div>

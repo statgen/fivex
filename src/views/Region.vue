@@ -143,9 +143,7 @@ function getBasicLayout(initial_state = {}, track_panels = []) {
 
     panels: [
       ...track_panels,
-      LocusZoom.Layouts.get('panel', 'genes', {
-        data_layers: [gene_track],
-      }),
+      LocusZoom.Layouts.get('panel', 'genes', { data_layers: [gene_track] }),
     ],
   });
   base_layout.dashboard.components.push(LocusZoom.Layouts.get('dashboard_components', 'ldlz2_pop_selector'));
@@ -390,77 +388,20 @@ function switchY_region(plot, yfield) {
           { position: 'left', text: '1e-5', y: -5 },
           { position: 'left', text: '≤1e-6', y: -6 },
         ];
-        scatter_layout.point_shape = [
-          {
-            scale_function: 'pip_cluster',
-          },
-          'circle',
-        ];
+        scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
         scatter_layout.legend = [
-          {
-            shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'diamond',
-            color: '#9632b8',
-            size: 40,
-            label: 'LD Ref Var',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#d43f3a',
-            size: 40,
-            label: '1.0 > r² ≥ 0.8',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#eea236',
-            size: 40,
-            label: '0.8 > r² ≥ 0.6',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#5cb85c',
-            size: 40,
-            label: '0.6 > r² ≥ 0.4',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#46b8da',
-            size: 40,
-            label: '0.4 > r² ≥ 0.2',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#357ebd',
-            size: 40,
-            label: '0.2 > r² ≥ 0.0',
-            class: 'lz-data_layer-scatter',
-          },
-          {
-            shape: 'circle',
-            color: '#B8B8B8',
-            size: 40,
-            label: 'no r² data',
-            class: 'lz-data_layer-scatter',
-          },
+          { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+          { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+          { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+          { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
+          { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+          { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
         ];
         significance_line_layout.offset = -1000;
         significance_line_layout.style = {
@@ -513,13 +454,9 @@ export default {
     },
     query_params() {
       // Re-calculate the URL query string whenever dependent information changes.
-      const {
-        chrom, start, end, gene_id, tissue, y_field, extra_genes, extra_tissues,
-      } = this;
+      const { chrom, start, end, gene_id, tissue, y_field, extra_genes, extra_tissues } = this;
 
-      const options = {
-        chrom, start, end, gene_id, tissue, y_field,
-      };
+      const options = { chrom, start, end, gene_id, tissue, y_field };
 
       if (extra_genes.length) {
         options.extra_genes = extra_genes;
@@ -578,9 +515,7 @@ export default {
       const { chrom, start, end } = this;
       this.$router.push({
         name: 'region',
-        query: {
-          chrom, start, end, gene_id, tissue,
-        },
+        query: { chrom, start, end, gene_id, tissue },
       });
     },
     setQuery(params) {
@@ -600,13 +535,9 @@ export default {
       this.region_data = data;
 
       if (data) {
-        const {
-          chrom: chr, start, end, gene_id, tissue, symbol,
-        } = data;
+        const { chrom: chr, start, end, gene_id, tissue, symbol } = data;
         const { y_field } = this;
-        const initialState = {
-          chr, start, end, y_field,
-        };
+        const initialState = { chr, start, end, y_field };
         this.chrom = chr;
         this.start = start;
         this.end = end;
@@ -673,18 +604,18 @@ export default {
         }
         addTrack(this.assoc_plot, this.assoc_sources, track_id, this.tissue, extra_gene_symbol);
         this.extra_genes.push(track_id);
-      }
-
-      if (type === 'tissue') {
+      } else if (type === 'tissue') {
         addTrack(this.assoc_plot, this.assoc_sources, this.gene_id, track_id, this.region_data.symbol);
         this.extra_tissues.push(track_id);
+      } else {
+        throw new Error('Unrecognized type of track');
       }
     },
   },
   watch: {
     y_field() {
       // This param might be set when the page first loads, but the associated function
-      //   requires a reference to the plot. nextTick says "don't fire this watcher
+      //   requires a reference to the plot. `nextTick` says "don't fire this watcher
       //   until after the plot has been created"
       this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
     },

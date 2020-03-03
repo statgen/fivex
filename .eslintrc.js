@@ -15,28 +15,20 @@ module.exports = {
     'max-len': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-param-reassign': [2, { 'props': false }],
+    'no-param-reassign': ['error', { 'props': false }],
     'no-underscore-dangle': 'off',
-    "no-unused-vars": [
-      "error",
-      { "args": "none" }
-    ],
+    "no-unused-vars": ["error", { "args": "none" }],
+    'object-curly-newline': ['error', { 'multiline': true }],
     'quotes': [
-      2,
+      'error',
       "single",
       {
         "avoidEscape": true,
         "allowTemplateLiterals": true
       }
     ],
-    "linebreak-style": [
-      2,
-      "unix"
-    ],
-    "semi": [
-      2,
-      "always"
-    ],
+    "linebreak-style": ['error', "unix"],
+    "semi": ['error', "always"],
   },
   overrides: [
     {

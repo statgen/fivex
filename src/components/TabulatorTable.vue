@@ -24,6 +24,7 @@ export default {
   },
   watch: {
     table_data: {
+      // Update the data used to draw the table
       handler(value) {
         this.tabulator.setData(value);
       },
@@ -45,8 +46,17 @@ export default {
   mounted() {
     const {
       table_data: data,
-      columns, height, sort: initialSort, layout, layoutColumnsOnNewData,
-      pagination, paginationSize, placeholder, tooltips, tooltipGenerationMode, tooltipsHeader,
+      columns,
+      height,
+      sort: initialSort,
+      layout,
+      layoutColumnsOnNewData,
+      pagination,
+      paginationSize,
+      placeholder,
+      tooltips,
+      tooltipGenerationMode,
+      tooltipsHeader,
     } = this;
     this.tabulator = new Tabulator(
       this.$refs.table,
