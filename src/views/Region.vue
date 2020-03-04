@@ -20,7 +20,7 @@ function getData(queryParams) {
   //  but currently get passed anyway. That's mildly silly and will break if Vue and the API use
   //  the same parameter to mean different things.
   const params = $.param(queryParams);
-  return fetch(`/backend/views/region/?${params}`)
+  return fetch(`/api/views/region/?${params}`)
     .then(handleErrors)
     .then((resp) => resp.json());
 }
@@ -35,7 +35,7 @@ function getTrackSources(gene_id, tissue) {
   const geneid_short = gene_id.split('.')[0];
   return [
     [`assoc_${tissue}_${geneid_short}`, ['assocGET', {
-      url: '/backend/api/region/',
+      url: '/api/data/region/',
       params: { gene_id, tissue },
     }]],
   ];

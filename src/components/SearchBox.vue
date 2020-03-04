@@ -41,7 +41,7 @@ function getOmniSearch(searchText) {
 //  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact
 //  range queries
 function getBestRange(chrom, start, end, gene_id = null) {
-  let bestURL = `/backend/api/region/${chrom}/${start}-${end}/best/`;
+  let bestURL = `/api/data/region/${chrom}/${start}-${end}/best/`;
   if (gene_id !== null) {
     bestURL += `?gene_id=${gene_id}`;
   }

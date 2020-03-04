@@ -13,7 +13,7 @@ import SearchBox from '@/components/SearchBox.vue';
 import TabulatorTable from '@/components/TabulatorTable.vue';
 
 function getData(variant) {
-  return fetch(`/backend/views/variant/${variant}/`)
+  return fetch(`/api/views/variant/${variant}/`)
     .then(handleErrors)
     .then((resp) => resp.json());
 }
@@ -21,7 +21,7 @@ function getData(variant) {
 
 function getPlotSources(chrom, pos) {
   return [
-    ['phewas', ['PheGET', { url: `/backend/api/variant/${chrom}_${pos}/` }]],
+    ['phewas', ['PheGET', { url: `/api/data/variant/${chrom}_${pos}/` }]],
     ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
     ['constraint', ['GeneConstraintLZ', { url: 'https://gnomad.broadinstitute.org/api', params: { build: 'GRCh38' } }]],
   ];

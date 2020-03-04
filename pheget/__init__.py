@@ -13,8 +13,12 @@ def create_app(settings_module="pheget.settings.dev"):
     app = flask.Flask(__name__)
     app.config.from_object(settings_module)
 
-    app.register_blueprint(api_blueprint, url_prefix="/api")
+    # This flask app implements a JSON API, and is presented via proxy as, eg `/api/data` and `/api/views`
+    # In prod, the proxy is handled by apache. In development, vue handles it. This means that for development,
+    #   you will need to run both the Vue and Flask servers, and access the API via the Vue CLI server URL.
+    app.register_blueprint(api_blueprint, url_prefix="/data")
     app.register_blueprint(views_blueprint, url_prefix="/views")
+
     # Flask debug toolbar: only enabled when debug mode is active
     DebugToolbarExtension(app)
 
