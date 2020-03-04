@@ -7,9 +7,4 @@ Vue.config.productionTip = false;
 new Vue({
   router,
   render: (h) => h(App),
-  watch: {
-    $route(to, from) {
-      document.title = to.meta.title || 'PheGET';
-    },
-  },
 }).$mount('#app');

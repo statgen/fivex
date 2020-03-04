@@ -71,9 +71,7 @@ function parseSearchText(text) {
   if (cMatch !== null && searchText === cMatch[0]) {
     const chrom = cMatch[2];
     const pos = +cMatch[3];
-    return Promise.resolve({
-      type: 'variant', chrom, start: pos, end: pos,
-    });
+    return Promise.resolve({ type: 'variant', chrom, start: pos, end: pos });
   }
 
   if (cMatchRange !== null && searchText === cMatchRange[0]) {
@@ -86,9 +84,7 @@ function parseSearchText(text) {
     return getBestRange(chrom, start, end)
       .then((result) => {
         const { gene_id, symbol, tissue } = result;
-        return {
-          type: 'range', chrom, start, end, gene_id, symbol, tissue,
-        };
+        return { type: 'range', chrom, start, end, gene_id, symbol, tissue };
       });
   }
   if (cMatchRS !== null && searchText === cMatchRS[0]) {
@@ -99,9 +95,7 @@ function parseSearchText(text) {
           throw new Error(`Omnisearch was unable to find the variant with rs number "${searchText}"`);
         } else {
           const { chrom, start, end } = result;
-          return {
-            type: 'variant', chrom, start, end,
-          };
+          return { type: 'variant', chrom, start, end };
         }
       });
   }
@@ -118,9 +112,7 @@ function parseSearchText(text) {
       const { chrom, gene_id } = result;
       const start = Math.max(result.start - 500000, 1);
       const end = result.end + 500000;
-      return {
-        chrom, start, end, gene_id,
-      };
+      return { chrom, start, end, gene_id };
     })
     .then((omni) => {
       // If omnisearch finds a gene_id, then return the range of the gene +/- 500000 and
@@ -128,7 +120,7 @@ function parseSearchText(text) {
       if (!omni) {
         // TODO: If the input is not recognizable as any format, and is not a gene, then we
         //  should show a user error message that the requested entity was not found
-        throw new Error('Sorry, we were unable to parse your query.');
+        throw new Error('Invalid query.');
       }
       const { chrom, start, end } = omni;
       const { gene_id } = omni;
@@ -137,9 +129,7 @@ function parseSearchText(text) {
           const { symbol, tissue } = bestRangeResult;
           // eslint-disable-next-line no-shadow
           const { chrom, start, end } = omni;
-          return {
-            type: 'range', chrom, start, end, gene_id, symbol, tissue,
-          };
+          return { type: 'range', chrom, start, end, gene_id, symbol, tissue };
         })
         .catch(() => getBestRange(chrom, start, end)
           .then((bestRangeResult) => {
@@ -149,9 +139,7 @@ function parseSearchText(text) {
             const { chrom, start, end } = omni;
 
             this.showMessage('No significant eQTLs found for the query gene, redirecting to next best match.');
-            return {
-              type: 'range', chrom, start, end, gene_id, symbol, tissue,
-            };
+            return { type: 'range', chrom, start, end, gene_id, symbol, tissue };
           }));
     });
 }
@@ -176,7 +164,7 @@ export default {
           if ((omniresult === undefined || omniresult.type === 'other')
             && omniresult.chrom === null && omniresult.start === null
             && omniresult.end === null) {
-            throw new Error('Sorry, we are unable to parse your query.');
+            throw new Error('Invalid query.');
           } else {
             return (omniresult);
           }
@@ -186,9 +174,7 @@ export default {
           if (result.type === 'variant') {
             this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
           } else if (result.type === 'range') {
-            const {
-              start, end, gene_id, tissue, symbol,
-            } = result;
+            const { start, end, gene_id, tissue, symbol } = result;
             this.$router.push({
               name: 'region',
               query: {
@@ -204,7 +190,6 @@ export default {
         })
         .catch((err) => {
           this.showMessage(err.message);
-          console.error(err);
         });
     },
   },

@@ -486,7 +486,7 @@ export default {
           vm.setQuery(to.query);
           vm.setData(data);
         });
-      });
+      }).catch((err) => this.$router.replace({ name: 'error' }));
   },
   beforeRouteUpdate(to, from, next) {
     // When going from one variant page to another (component is reused, only variable part of route changes)
@@ -498,7 +498,7 @@ export default {
       this.setQuery(to.query);
       this.setData(data);
       next();
-    });
+    }).catch((err) => this.$router.replace({ name: 'error' }));
   },
   updated() {
     // Popper tooltips depend on dynamic data. They must be initialized after the component

@@ -27,12 +27,12 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home,
-    meta: { title: 'Home | PheGET: eQTL browser' },
+    meta: { title: 'Home' },
   },
   {
     path: '/variant/:variant/',
     name: 'variant',
-    meta: { title: 'Variant | PheGET: eQTL browser' },
+    meta: { title: 'Variant' },
     // route level code-splitting
     // this generates a separate chunk (variant.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -41,13 +41,19 @@ const routes = [
   {
     path: '/region/',
     name: 'region',
-    meta: { title: 'Region | PheGET: eQTL browser' },
+    meta: { title: 'Region' },
     component: () => import(/* webpackChunkName: "region" */ '../views/Region.vue'),
+  },
+  {
+    path: '/error/',
+    name: 'error',
+    meta: { title: 'Error' },
+    component: () => import(/* webpackChunkName: "errors" */ '../views/Error.vue'),
   },
   {
     path: '*',
     name: '404',
-    meta: { title: 'Not found | PheGET: eQTL browser' },
+    meta: { title: 'Not found' },
     component: () => import(/* webpackChunkName: "errors" */ '../views/NotFound.vue'),
   },
 ];
@@ -56,6 +62,12 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const base = to.meta.title || 'Explore';
+  document.title = `${base} | PheGET: eQTL browser`;
+  next();
 });
 
 export default router;

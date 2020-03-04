@@ -15,7 +15,8 @@ import TabulatorTable from '@/components/TabulatorTable.vue';
 function getData(variant) {
   return fetch(`/api/views/variant/${variant}/`)
     .then(handleErrors)
-    .then((resp) => resp.json());
+    .then((resp) => resp.json())
+    .catch((err) => this.$router.replace({ name: 'error' }));
 }
 
 
@@ -489,7 +490,7 @@ export default {
           vm.setQuery(to.query);
           vm.setData(data);
         });
-      });
+      }).catch((err) => next({ name: 'error' }));
   },
   beforeRouteUpdate(to, from, next) {
     // When going from one variant page to another (component is reused, only variable part of route changes)
@@ -499,7 +500,7 @@ export default {
       this.setQuery(to.query);
       this.setData(data);
       next();
-    });
+    }).catch((err) => next({ name: 'error' }));
   },
   updated() {
     // Popper tooltips depend on dynamic data. They must be initialized after the component
