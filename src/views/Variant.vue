@@ -361,7 +361,6 @@ function switchY(plot, yfield) {
     ];
     plot.layout.panels[0].data_layers[1].offset = -1000;
   }
-  plot.applyState({ y_field: yfield });
 }
 
 
@@ -465,6 +464,14 @@ export default {
       // Re-calculate the URL query string whenever dependent information changes.
       const { group, n_labels, tss_distance, y_field } = this;
       return $.param({ group, n_labels, tss_distance, y_field });
+    },
+    all_options() {
+      // Sometimes (eg pageload), we change multiple options, but only want to re-render LZ once
+      // This can be done by watching a synthetic compound property.
+      // The value doesn't matter, only that it is different every time this runs
+      // eslint-disable-next-line no-unused-vars
+      const { group, n_labels, tss_distance, y_field } = this;
+      return Date.now();
     },
   },
   beforeCreate() {
@@ -579,19 +586,6 @@ export default {
       // Clear "same match" highlighting when re-rendering.
       this.$nextTick(() => {
         groupByThing(this.assoc_plot.layout, this.group);
-        this.assoc_plot.applyState({ lz_match_value: null });
-      });
-    },
-    tss_distance() {
-      this.$nextTick(() => {
-        const { assoc_plot, tss_distance } = this;
-        this.assoc_plot.applyState({
-          maximum_tss_distance: tss_distance,
-          minimum_tss_distance: -tss_distance,
-          // TODO: Can we do away with plot.state.position in favor of vm.pos? (track state in fewer places)
-          start: Math.max(assoc_plot.state.position - tss_distance, 1),
-          end: assoc_plot.state.position + tss_distance,
-        });
       });
     },
     y_field() {
@@ -600,9 +594,26 @@ export default {
     n_labels() {
       this.$nextTick(() => {
         this.assoc_plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
-        this.assoc_plot.applyState();
       });
     },
+    all_options() {
+      // Sometimes, an action will change more than one option (especially happens on first page
+      //  load, as we sync the plot with query params)
+      // A synthetic watcher lets us re-render the plot only once total, no matter how many options
+      //  are changed. Not all the watched variables used, but it triggers dependency tracking.
+      this.$nextTick(() => {
+        const { assoc_plot, tss_distance, y_field } = this;
+        assoc_plot.applyState({
+          lz_match_value: null,
+          maximum_tss_distance: tss_distance,
+          minimum_tss_distance: -tss_distance,
+          start: Math.max(assoc_plot.state.position - tss_distance, 1),
+          end: assoc_plot.state.position + tss_distance,
+          y_field,
+        });
+      });
+    },
+
     query_params() {
       // Update the URL whenever anything would change the query params
       // We intentionally bypass the Vue router functions here, because we are re-drawing the page
