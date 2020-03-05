@@ -500,16 +500,6 @@ export default {
       next();
     }).catch((err) => this.$router.replace({ name: 'error' }));
   },
-  updated() {
-    // Popper tooltips depend on dynamic data. They must be initialized after the component
-    //   has finished rendering.
-    // TODO: This would reinitialize tooltips every time a radio button is selected, which seems slightly wasteful.
-    //   Vue bootstrap addon has some nicer features to massage the differences between Vue and BS
-    this.$nextTick(() => {
-      $('[data-toggle="tooltip"]').tooltip();
-      $('[data-toggle-second="tooltip"]').tooltip();
-    });
-  },
   methods: {
     changeAnchors(tissue, gene_id) {
       const { chrom, start, end } = this;
@@ -667,7 +657,7 @@ export default {
     <div class="row">
       <div class="col-sm-12">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
-          {{ region_data.symbol }} <small>(chr{{ region_data.chrom }}:{{ region_data.start && region_data.start.toLocaleString()}}-{{ region_data.end && region_data.end.toLocaleString() }})</small>
+          {{ region_data.symbol }} <small>(chr{{ chrom }}:{{ start && start.toLocaleString()}}-{{ end && end.toLocaleString() }})</small>
         </strong></h1>
       </div>
     </div>
@@ -730,27 +720,29 @@ export default {
                   Since we plan to change this UI, the weird code will go away soon. (or else consider things like vue-bootstrap that massage away the differences)
             -->
             <div class="btn-group btn-group-toggle">
-              <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
-                  title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
+              <span class="d-inline-block" tabindex="0"
+                    v-b-tooltip.html
+                    title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
                 <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Y-Axis: </button>
               </span>
-              <label class="btn btn-secondary" data-toggle="tooltip"
+              <label class="btn btn-secondary"
                      :class="{ 'active': y_field === 'log_pvalue' }"
-                     data-placement="top" data-html="true" title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+                     v-b-tooltip.top.html
+                     title="Display -log<sub>10</sub>(P-values) on the Y-axis">
                 <input type="radio" name="y-options" id="show-log-pvalue"
                        v-model="y_field" value="log_pvalue"> P-value
               </label>
-              <label class="btn btn-secondary" data-toggle="tooltip"
+              <label class="btn btn-secondary"
                      :class="{ 'active': y_field === 'beta' }"
-                     data-placement="top" data-html="true"
-                  title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
+                     v-b-tooltip.top.html
+                     title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
                 <input type="radio" name="y-options" id="show-beta"
                        v-model="y_field" value="beta"> Effect Size
               </label>
               <label class="btn btn-secondary"
                      :class="{ 'active': y_field === 'pip' }"
-                     data-toggle="tooltip" data-placement="top" data-html="true"
-                  title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
+                     v-b-tooltip.top.html
+                    title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
                 <input type="radio" name="y-options" id="show-pip"
                        v-model="y_field" value="pip"> PIP
               </label>
@@ -766,45 +758,51 @@ export default {
           <div class="row">
             <div class="col">
               <div class="card-body">
-                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
-                  title="External links for more information about this gene">
+                <span class="d-inline-block" tabindex="0"
+                      v-b-tooltip.top.html
+                      title="External links for more information about this gene">
                 <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
                   class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> More info about {{ region_data.symbol }} </button>
                 </span>
 
                 <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/gene/${ short_gene_id }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" data-toggle="tooltip" data-placement="top" data-html=true
+                   aria-pressed="true"
+                   v-b-tooltip.top.html
                    title="Gene information from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
                   BRAVO <span class="fa fa-external-link-alt"></span> </a>
                 <a :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`" target="_blank"
                    class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   data-toggle="tooltip" data-placement="top" data-html=true
+                   v-b-tooltip.top.html
                    title="Detailed information from the GTEx Portal, including both gene and exon expression, along with single-tissue eQTLs and sQTLs.">
                   GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
                 <a :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" data-toggle="tooltip" data-placement="top"
+                   aria-pressed="true"
+                   v-b-tooltip.top
                    title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
                   gnomAD <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" data-toggle="tooltip" data-placement="top"
+                   aria-pressed="true" v-b-tooltip.top
                    title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
                   MGI <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1"
-                   role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
+                   role="button" aria-pressed="true"
+                   v-b-tooltip.top
                    title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
                   UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" data-toggle="tooltip" data-placement="top"
+                   aria-pressed="true"
+                   v-b-tooltip.top
                    title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
                   UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" data-toggle="tooltip" data-placement="top"
+                   aria-pressed="true"
+                   v-b-tooltip.top
                    title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
                    Expression Atlas <span class="fa fa-external-link-alt"></span></a>
               </div>
@@ -816,8 +814,9 @@ export default {
 
     <div class="row">
       <div class="col-sm-12">
-        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
-          title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
+        <span class="d-inline-block" tabindex="0"
+              v-b-tooltip.top.html
+              title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
           <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
           <span class="fa fa-lightbulb-o"></span> Credits
         </span>

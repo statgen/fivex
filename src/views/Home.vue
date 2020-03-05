@@ -41,9 +41,7 @@ import SearchBox from '../components/SearchBox.vue';
 
 export default {
   name: 'Home',
-  components: {
-    SearchBox,
-  },
+  components: { SearchBox },
 };
 </script>
 

@@ -509,15 +509,6 @@ export default {
       next();
     }).catch((err) => next({ name: 'error' }));
   },
-  updated() {
-    // Popper tooltips depend on dynamic data. They must be initialized after the component
-    //   has finished rendering.
-    // TODO: This would reinitialize tooltips every time a radio button is selected, which seems slightly wasteful
-    this.$nextTick(() => {
-      $('[data-toggle="tooltip"]').tooltip();
-      $('[data-toggle-second="tooltip"]').tooltip();
-    });
-  },
   methods: {
     setQuery(params = {}) {
       // Set initial display based on the URL query string, or defaults, as appropriate
@@ -666,23 +657,27 @@ export default {
             <!-- TODO: The dynamic :class binding code is a weird hack- using data-toggle=buttons directly causes vue and bootstrap to fight over who control of rendering
                   Since we plan to change this UI, the weird code will go away soon. (or else consider things like vue-bootstrap that massage away the differences)
             -->
-            <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
-                  title="Reorder the x-axis by one of these listed categories" data-placement="top">
+            <span class="d-inline-block" tabindex="0"
+                  v-b-tooltip.top
+                  title="Reorder the x-axis by one of these listed categories">
               <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">
                 <span class="fa fa-exchange-alt"></span> Group by:
               </button>
             </span>
-            <label :class="{ 'active': group === 'tissue' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': group === 'tissue' }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    title="Group eQTLs by tissues, sorted alphabetically">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="tissue"> Tissue
             </label>
-            <label :class="{ 'active': group === 'system' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': group === 'system' }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="system"> System
             </label>
-            <label :class="{ 'active': group === 'symbol' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': group === 'symbol' }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    title="Group eQTLs by gene, sorted by the position of the genes' transcription start sites">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="symbol"> Gene
@@ -694,24 +689,25 @@ export default {
       <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
         <form class="yaxis-display" id="transform-y">
           <div class="btn-group btn-group-toggle">
-            <span class="d-inline-block" data-html="true" data-toggle="tooltip" tabindex="0"
+            <span class="d-inline-block" tabindex="0"
+                  v-b-tooltip.top.html
                   title="Switches the variable plotted on the Y-axis between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05."
             >
               <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span
                 class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
             </span>
-            <label :class="{ 'active': y_field === 'log_pvalue' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                   data-html="true"
+            <label :class="{ 'active': y_field === 'log_pvalue' }" class="btn btn-secondary"
+                   v-b-tooltip.top.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
               <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> P-value
             </label>
-            <label :class="{ 'active': y_field === 'beta' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                   data-html="true"
+            <label :class="{ 'active': y_field === 'beta' }" class="btn btn-secondary"
+                   v-b-tooltip.top.html
                    title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
               <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect Size
             </label>
-            <label :class="{ 'active': y_field === 'pip' }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                   data-html="true"
+            <label :class="{ 'active': y_field === 'pip' }" class="btn btn-secondary"
+                   v-b-tooltip.top.html
                    title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
               <input type="radio" name="y-options" v-model="y_field" value="pip"> PIP
             </label>
@@ -722,23 +718,24 @@ export default {
       <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
         <form class="label-display" id="toggle-labels">
           <div class="btn-group btn-group-toggle">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
-                data-html="true"
+          <span class="d-inline-block" tabindex="0"
+                v-b-tooltip.top.html
                 title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 50 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
             <button type="button" class="btn btn-outline-secondary"
                     style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
           </span>
-            <label :class="{ 'active': n_labels === 0 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': n_labels === 0 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    title="Turn off all labels">
               <input type="radio" name="label-options" v-model="n_labels" :value="0"> None
             </label>
-            <label :class="{ 'active': n_labels === 5 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                   data-html="true"
+            <label :class="{ 'active': n_labels === 5 }" class="btn btn-secondary"
+                   v-b-tooltip.top.html
                    title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
             </label>
-            <label :class="{ 'active': n_labels === 50 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                   data-html="true"
+            <label :class="{ 'active': n_labels === 50 }" class="btn btn-secondary"
+                   v-b-tooltip.top.html
                    title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="50"> Top 50
             </label>
@@ -751,38 +748,45 @@ export default {
       <div class="col-12" style="margin-bottom:0.8em">
         <form class="tss-range" id="tss-both-range">
           <div class="btn-group btn-group-toggle">
-            <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true"
+            <span class="d-inline-block" tabindex="0"
+                  v-b-tooltip.top.html
                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
               <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">
                 <span class="fa fa-arrows-alt-h"></span> Filter by TSS Distance
               </button>
             </span>
-            <label :class="{ 'active': tss_distance === 20000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 20000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${chrom}:${Math.max(pos - 20000, 1).toLocaleString()}-${(pos + 20000).toLocaleString()}`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="20000"> ±20kb
             </label>
-            <label :class="{ 'active': tss_distance === 50000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 50000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 50000, 1).toLocaleString() }-${ (pos + 50000).toLocaleString() }`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="50000"> ±50kb
             </label>
-            <label :class="{ 'active': tss_distance === 100000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 100000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 100000, 1).toLocaleString() }-${ (pos + 100000).toLocaleString() }`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="100000"> ±100kb
             </label>
-            <label :class="{ 'active': tss_distance === 200000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 200000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 200000, 1).toLocaleString() }-${ (pos + 200000).toLocaleString() }`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="200000"> ±200kb
             </label>
-            <label :class="{ 'active': tss_distance === 500000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 500000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 500000, 1).toLocaleString() }-${ (pos + 500000).toLocaleString() }`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="500000"> ±500kb
             </label>
-            <label :class="{ 'active': tss_distance === 1000000 }" class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+            <label :class="{ 'active': tss_distance === 1000000 }" class="btn btn-secondary"
+                   v-b-tooltip.top
                    :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 1000000, 1).toLocaleString() }-${ (pos + 1000000).toLocaleString() }`">
               <input type="radio" name="tss-options" autocomplete=off
                      v-model="tss_distance" :value="1000000"> ±1mb
@@ -800,8 +804,9 @@ export default {
              @connected="receivePlot" />
 
     <div class="row justify-content-center">
-      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
-        title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
+      <span class="d-inline-block" tabindex="0"
+            v-b-tooltip.top
+            title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-question"></span> Red dotted line </span>
       </span>
     </div>
@@ -879,48 +884,53 @@ export default {
 
           <div class="card">
             <div class="card-body">
-              <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top"
+              <span class="d-inline-block" tabindex="0"
+                    v-b-tooltip.top
                     title="External links for more information about this variant">
-                <button class="btn btn-sm btn-secondary" style="pointer-events: none;"><span
+                <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
                     class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> Variant info </button>
               </span>
               <template v-if="ref!==null && alt !== null">
-                <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`" target="_blank"
-                    class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
-                    data-placement="top" data-html=true
-                    title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
+                <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                   v-b-tooltip.top.html
+                   title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
                   BRAVO <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`" target="_blank"
-                    class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
-                    data-placement="top"
-                    title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
+                <a :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                   v-b-tooltip.top
+                   title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
                   GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`" target="_blank"
-                    class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
-                    data-placement="top" title="The UC Santa Cruz Genome Browser"> UCSC <span
-                    class="fa fa-external-link-alt"></span></a>
-                <a :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`" target="_blank"
-                    class="btn btn-secondary btn-sm" role="button" aria-pressed="true" data-toggle="tooltip"
-                    data-placement="top"
+                <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                   v-b-tooltip.top
+                   title="The UC Santa Cruz Genome Browser"> UCSC <span
+                   class="fa fa-external-link-alt"></span></a>
+                <a :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                    v-b-tooltip.top
                     title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
                   gnomAD <span class="fa fa-external-link-alt"></span></a>
               </template>
               <template v-if="rsid !==null">
-                <a :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
-                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
-                    title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
+                <a :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`" target="_blank"
+                   class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true" v-b-tooltip.top
+                   title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
                   <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
-                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
-                    title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
+                <a :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                   v-b-tooltip.top
+                   title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
                   MGI <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm"
-                    role="button" aria-pressed="true" data-toggle="tooltip" data-placement="top"
-                    title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
+                <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                   v-b-tooltip.top
+                   title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
                   UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`" target="_blank" class="btn btn-secondary btn-sm" role="button"
-                    aria-pressed="true" data-toggle="tooltip" data-placement="top"
-                    title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
+                <a :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`"
+                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+                   aria-pressed="true" v-b-tooltip.top
+                   title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
                   UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
               </template>
             </div>
@@ -940,15 +950,17 @@ export default {
     <div class="card">
       <div class="card-body">
         <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary"
-           data-toggle="tooltip" data-placement="top"
+           v-b-tooltip.top
            title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data">
           <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link-alt"></span> </a>
-        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
+        <span class="d-inline-block" tabindex="0"
+              v-b-tooltip.top.html
               title="Normalized Effect Sizes (NES) are defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Go <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>here</a> for more details from the GTEx Portal. <br>
                      Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
           <span class="fa fa-info-circle"></span> Definitions </span> </span>
-        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" data-html="true"
+        <span class="d-inline-block" tabindex="0"
+              v-b-tooltip.top.html
               title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span
             class="fa fa-lightbulb"></span> Credits</span>
@@ -963,10 +975,6 @@ export default {
   .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
     white-space: normal;
     text-overflow: clip;
-  }
-
-  .tooltip a {
-    text-decoration: underline;
   }
 
   /* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
