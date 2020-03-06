@@ -44,9 +44,12 @@ Make sure to activate your virtualenv at the start of every new terminal session
 The following command will start a basic flask app server that reloads whenever code is changed:
 `$ ./run-development.sh`
 
-Then follow the instructions printed to the console to visit the app in your web browser.
+Flask powers the backend. The frontend uses Vue.js, and you will need to start the Vue CLI development server in order
+ to make UI changes. This will cause your HTML to continuously rebuild, making it easier to modify the code 
+ for your site:
+`$ npm run serve`
 
-In a separate terminal, you will also want to run `vue serve` to build front-end assets
+Then follow the instructions printed to the vue-server console, to visit the app in your web browser.
 
 ### Additional production options
 You may configure Sentry error monitoring by setting the config option `SENTRY_DSN` in your `.env` file.
