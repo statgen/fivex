@@ -170,11 +170,12 @@ function getPlotLayout(chrom, pos, initialState = {}) {
                 receive: '{{namespace[phewas]}}tissue',
               };
               base.label.text = '{{{{namespace[phewas]}}tissue}}';
-              base.label.filters[0].field = '{{namespace[phewas]}}log_pvalue';
-              base.label.filters.push({ field: 'phewas:top_value_rank', operator: '<=', value: 5 });
+              base.label.filters = [
+                { field: '{{namespace[phewas]}}log_pvalue', operator: '>=', value: 10 },
+                { field: '{{namespace[phewas]}}:top_value_rank', operator: '<=', value: 5 },
+              ];
               return base;
             })()),
-            // TODO: Must decide on an appropriate significance threshold for this use case
             LocusZoom.Layouts.get('data_layer', 'significance', { unnamespaced: true }),
           ],
         });
@@ -273,6 +274,7 @@ function groupByThing(layout, thing) {
 function switchY(plot, yfield) {
   const scatter_config = plot.layout.panels[0].data_layers[0];
   if (yfield === 'log_pvalue') {
+    scatter_config.label.filters[0] = { field: 'phewas:log_pvalue', operator: '>=', value: 10 };
     scatter_config.legend = [
       { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
       { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
@@ -303,6 +305,7 @@ function switchY(plot, yfield) {
       'stroke-dasharray': '10px 10px',
     };
   } else if (yfield === 'beta') {
+    scatter_config.label.filters[0] = { field: 'phewas:log_pvalue', operator: '>=', value: 10 };
     scatter_config.legend = [
       { shape: 'circle', size: 40, label: 'Non-significant effect', class: 'lz-data_layer-scatter' },
       { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
@@ -333,6 +336,7 @@ function switchY(plot, yfield) {
     };
     scatter_config.y_axis.lower_buffer = 0.15;
   } else if (yfield === 'pip') {
+    scatter_config.label.filters[0] = { field: 'phewas:log_pvalue', operator: '>=', value: 0 };
     scatter_config.legend = [
       { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
       { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
@@ -720,7 +724,7 @@ export default {
           <div class="btn-group btn-group-toggle">
           <span class="d-inline-block" tabindex="0"
                 v-b-tooltip.top.html
-                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-20</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 50 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
+                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-10</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 20 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
             <button type="button" class="btn btn-outline-secondary"
                     style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
           </span>
@@ -731,13 +735,13 @@ export default {
             </label>
             <label :class="{ 'active': n_labels === 5 }" class="btn btn-secondary"
                    v-b-tooltip.top.html
-                   title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+                   title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
             </label>
             <label :class="{ 'active': n_labels === 50 }" class="btn btn-secondary"
                    v-b-tooltip.top.html
-                   title="If viewing P-values, add labels to the 50 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-20</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 50 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" v-model="n_labels" :value="50"> Top 50
+                   title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+              <input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20
             </label>
           </div>
         </form>
