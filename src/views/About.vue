@@ -1,0 +1,23 @@
+<template>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12">
+        <h1>About</h1>
+        <p>Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang.
+          Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.</p>
+
+        <p>&copy; The University of Michigan, Center for Statistical Genetics</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'About',
+};
+</script>
+
+<style scoped>
+
+</style>

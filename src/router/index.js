@@ -9,9 +9,11 @@ import Vue from 'vue';
 import { BootstrapVue } from 'bootstrap-vue';
 
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
 
 import '@/assets/common.css';
+
+import About from '@/views/About.vue';
+import Home from '@/views/Home.vue';
 
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
@@ -28,6 +30,12 @@ const routes = [
     name: 'home',
     component: Home,
     meta: { title: 'Home' },
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About,
+    meta: { title: 'About' },
   },
   {
     path: '/variant/:variant/',

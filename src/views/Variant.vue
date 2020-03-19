@@ -249,17 +249,7 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-
-    <div class="row padtop">
-      <div class="col-sm-10">
-        <!-- FIXME: This link positioning is wrong. Sorry! -->
-        <router-link :to="{ name: 'home' }" class="btn btn-secondary btn-sm" role="button">
-          <span class="fa fa-home" aria-hidden="true"></span>
-          <span class="sr-only">Home</span>
-        </router-link>
-        <search-box></search-box>
-      </div>
-    </div>
+    <search-box></search-box>
 
     <div class="row padtop">
       <div class="col-sm-12">
@@ -577,12 +567,6 @@ export default {
                      Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
         <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
           <span class="fa fa-info-circle"></span> Definitions </span> </span>
-        <span class="d-inline-block" tabindex="0"
-              v-b-tooltip.top.html
-              title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
-        <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span
-            class="fa fa-lightbulb"></span> Credits</span>
-      </span>
       </div>
     </div>
   </div>

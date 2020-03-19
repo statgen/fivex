@@ -97,7 +97,7 @@ export default {
           vm.setQuery(to.query);
           vm.setData(data);
         });
-      }).catch((err) => next({ name: 'error' }));
+      }).catch(() => next({ name: 'error' }));
   },
   beforeRouteUpdate(to, from, next) {
     // When going from one variant page to another (component is reused, only variable part of route changes)
@@ -220,19 +220,13 @@ export default {
       this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
     },
     query_params() {
-      // Update the URL whenever anything would change the query params
-      //  (including at first page load, if the server, eg, fills in best gene/tissue for region)
+      // Update the URL so that it always reflects the current view- change when the query params
+      //  would change. (including at first page load, if the server, eg, auto-suggests a best
+      //  gene/tissue for region)
 
       // We're very intentionally bypassing the Vue router functions here. Those would trigger
       //   a full page reload whenever params change, but we want to do incremental things
       //   (like adding plot panels) that would not benefit from a reload.
-
-      // TODO: For now, we replaceState (eg, clicking the back button does not skip to the exact last region/ set of panels)
-      //   instead of history.pushState.
-      // This is because vue router assumes that the URL defines the total state of the application,
-      //    and tries to forcibly reload the whole page when URL changes (eg back button). This is
-      //    more re-rendering than we want. We will prioritize bookmarking the current view,
-      //    at the expense of the back button.
       window.history.replaceState({}, document.title, `?${this.query_params}`);
     },
   },
@@ -253,22 +247,79 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-    <div class="row padtop">
-      <div class="col-sm-10">
-        <!-- FIXME: This link positioning is wrong. Sorry! -->
-        <router-link :to="{ name: 'home' }" class="btn btn-secondary btn-sm" role="button">
-          <span class="fa fa-home" aria-hidden="true"></span>
-          <span class="sr-only">Home</span>
-        </router-link>
-        <search-box></search-box>
-      </div>
-    </div>
+    <search-box></search-box>
 
     <div class="row">
       <div class="col-sm-12">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
-          {{ region_data.symbol }} <small>(chr{{ chrom }}:{{ start && start.toLocaleString()}}-{{ end && end.toLocaleString() }})</small>
+          {{ region_data.symbol }} <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
         </strong></h1>
+      </div>
+    </div>
+
+    <div class="row justify-content-start">
+      <div class="col-sm-12">
+        <b-dropdown class="m-2">
+          <template v-slot:button-content>
+            Select anchors <span class="fa fa-info-circle"
+                                  v-b-tooltip.top.html
+                                  title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
+              <span class="sr-only">Info</span>
+            </span>
+          </template>
+          <select-anchors class="px-3"
+                          @navigate="changeAnchors"
+                          :current_gene="gene_id"
+                          :current_tissue="tissue"
+                          :gene_list="region_data.gene_list"
+                          :tissue_list="region_data.tissue_list"/>
+        </b-dropdown>
+
+        <b-dropdown text="Add tracks" class="m-2">
+          <b-dropdown-text>
+            <label>Add a gene
+              <select class="form-control"
+                @change="addTrack('gene', $event.target.value)">
+                <option disabled selected value="">(select a gene)</option>
+                <option v-for="(a_symbol, a_geneid) in region_data.gene_list" :key="a_geneid"
+                        :value="a_geneid">{{a_symbol}}</option>
+              </select>
+            </label> &times; {{ region_data.tissue }}<br>
+
+            <label>Add a tissue
+              <select class="form-control"
+                @change="addTrack('tissue', $event.target.value)">
+                <option disabled selected value="">(select a tissue)</option>
+                <option v-for="a_tissue in region_data.tissue_list" :key="a_tissue"
+                        :value="a_tissue">{{a_tissue}}</option>
+              </select>
+              &times; {{ region_data.symbol }}
+            </label>
+          </b-dropdown-text>
+        </b-dropdown>
+
+        <b-dropdown text="Display options" class="m-2">
+          <b-dropdown-text>
+            Change y-axis:<br>
+            <label v-b-tooltip.right.html
+                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+              <input type="radio" name="y-options" id="show-log-pvalue"
+                     v-model="y_field" value="log_pvalue"> -log<sub>10</sub> p
+            </label>
+
+            <label v-b-tooltip.right.html
+                   title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
+              <input type="radio" name="y-options" id="show-beta"
+                     v-model="y_field" value="beta"> Effect Size
+            </label>
+
+            <label v-b-tooltip.right.html
+                   title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
+              <input type="radio" name="y-options" id="show-pip"
+                     v-model="y_field" value="pip"> PIP
+            </label>
+          </b-dropdown-text>
+        </b-dropdown>
       </div>
     </div>
 
@@ -284,153 +335,53 @@ export default {
       </div>
     </div>
 
-    <!-- Bootstrap dropdown menu to choose an additional tissue to plot -->
-    <div class="row justify-content-start">
-      <div class="col-sm-12">
-
-        <select-anchors @navigate="changeAnchors"
-                        :current_gene="gene_id"
-                        :current_tissue="tissue"
-                        :gene_list="region_data.gene_list"
-                        :tissue_list="region_data.tissue_list"/>
-
-        <br>
-
-        <!-- TODO: Improve UI here -->
-        <label>Add a gene
-          <select class="form-control"
-            @change="addTrack('gene', $event.target.value)">
-            <option disabled selected value="">(select a gene)</option>
-            <option v-for="(a_symbol, a_geneid) in region_data.gene_list" :key="a_geneid"
-                    :value="a_geneid">{{a_symbol}}</option>
-          </select>
-        </label>
-        <br>
-
-        <!-- TODO: Improve UI here -->
-        <label>Add a tissue
-          <select class="form-control"
-            @change="addTrack('tissue', $event.target.value)">
-            <option disabled selected value="">(select a tissue)</option>
-            <option v-for="a_tissue in region_data.tissue_list" :key="a_tissue"
-                    :value="a_tissue">{{a_tissue}}</option>
-          </select>
-        </label>
-        <br>
-      </div>
-    </div>
-
-    <div class="row">
-      <!--     Convert: below this line-->
-      <div class="col-sm-12">
-        Change the plotted values
-        <div class="btn-group pr-1">
-          <form class="yaxis-display" id="transform-y">
-            <!-- TODO: The dynamic :class binding code is a weird hack- using data-toggle=buttons directly causes vue and bootstrap to fight over who control of rendering
-                  Since we plan to change this UI, the weird code will go away soon. (or else consider things like vue-bootstrap that massage away the differences)
-            -->
-            <div class="btn-group btn-group-toggle">
-              <span class="d-inline-block" tabindex="0"
-                    v-b-tooltip.html
-                    title="Switches the y variable between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05.">
-                <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span class="fa fa-arrows-alt-v"></span> Y-Axis: </button>
-              </span>
-              <label class="btn btn-secondary"
-                     :class="{ 'active': y_field === 'log_pvalue' }"
-                     v-b-tooltip.top.html
-                     title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-                <input type="radio" name="y-options" id="show-log-pvalue"
-                       v-model="y_field" value="log_pvalue"> P-value
-              </label>
-              <label class="btn btn-secondary"
-                     :class="{ 'active': y_field === 'beta' }"
-                     v-b-tooltip.top.html
-                     title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-                <input type="radio" name="y-options" id="show-beta"
-                       v-model="y_field" value="beta"> Effect Size
-              </label>
-              <label class="btn btn-secondary"
-                     :class="{ 'active': y_field === 'pip' }"
-                     v-b-tooltip.top.html
-                    title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
-                <input type="radio" name="y-options" id="show-pip"
-                       v-model="y_field" value="pip"> PIP
-              </label>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
     <div class="row">
       <div class="col-sm-12">
         <div class="card">
-          <div class="row">
-            <div class="col">
-              <div class="card-body">
-                <span class="d-inline-block" tabindex="0"
-                      v-b-tooltip.top.html
-                      title="External links for more information about this gene">
-                <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
-                  class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> More info about {{ region_data.symbol }} </button>
-                </span>
-
-                <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/gene/${ short_gene_id }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true"
-                   v-b-tooltip.top.html
-                   title="Gene information from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
-                  BRAVO <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`" target="_blank"
-                   class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top.html
-                   title="Detailed information from the GTEx Portal, including both gene and exon expression, along with single-tissue eQTLs and sQTLs.">
-                  GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true"
-                   v-b-tooltip.top
-                   title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
-                  gnomAD <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" v-b-tooltip.top
-                   title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
-                  MGI <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1"
-                   role="button" aria-pressed="true"
-                   v-b-tooltip.top
-                   title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
-                  UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true"
-                   v-b-tooltip.top
-                   title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
-                  UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true"
-                   v-b-tooltip.top
-                   title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
-                   Expression Atlas <span class="fa fa-external-link-alt"></span></a>
-              </div>
-            </div>
+          <div class="card-body">
+            External links:
+            <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/gene/${ short_gene_id }`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top.html
+               title="Gene information from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
+              BRAVO <span class="fa fa-external-link-alt"></span> </a>
+            <a :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`" target="_blank"
+               class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+               v-b-tooltip.top.html
+               title="Detailed information from the GTEx Portal, including both gene and exon expression, along with single-tissue eQTLs and sQTLs.">
+              GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
+            <a :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top
+               title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
+              gnomAD <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true" v-b-tooltip.top
+               title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
+              MGI <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1"
+               role="button" aria-pressed="true"
+               v-b-tooltip.top
+               title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
+              UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top
+               title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
+              UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top
+               title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
+               Expression Atlas <span class="fa fa-external-link-alt"></span></a>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-12">
-        <span class="d-inline-block" tabindex="0"
-              v-b-tooltip.top.html
-              title="Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang. Source code can be found on <a href=https://github.com/statgen/pheget/>GitHub</a>.">
-          <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
-          <span class="fa fa-lightbulb-o"></span> Credits
-        </span>
-      </span>
       </div>
     </div>
   </div>

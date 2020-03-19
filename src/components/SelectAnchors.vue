@@ -25,26 +25,24 @@ export default {
 
 <template>
   <div>
-    Select anchors (<span class="fa fa-info-circle"
-                          v-b-tooltip.top.html
-                          title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
-      <span class="sr-only">Info</span>
-    </span>):<br>
-    <form @submit.prevent="selectAnchor" class="form-inline">
-      <label class="mr-2">Gene
-        <select v-model="anchor_gene" class="form-control">
-          <option v-for="(a_symbol, a_geneid) in gene_list" :key="a_geneid"
-                  :value="a_geneid">{{a_symbol}}</option>
-        </select>
-      </label>
+    <form @submit.prevent="selectAnchor">
+      <div class="form-group">
+        <label class="mr-2">Gene
+          <select v-model="anchor_gene" class="form-control">
+            <option v-for="(a_symbol, a_geneid) in gene_list" :key="a_geneid"
+                    :value="a_geneid">{{a_symbol}}</option>
+          </select>
+        </label>
+      </div>
 
-      <label class="mr-2">Tissue
-        <select v-model="anchor_tissue" class="form-control">
-          <option v-for="a_tissue in tissue_list" :key="a_tissue"
-                  :value="a_tissue">{{a_tissue}}</option>
-        </select>
-      </label>
-
+      <div class="form-group">
+        <label class="mr-2">Tissue
+          <select v-model="anchor_tissue" class="form-control">
+            <option v-for="a_tissue in tissue_list" :key="a_tissue"
+                    :value="a_tissue">{{a_tissue}}</option>
+          </select>
+        </label>
+      </div>
       <button type="submit" class="btn btn-secondary">Go</button>
     </form>
   </div>
