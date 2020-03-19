@@ -74,7 +74,7 @@ def get_variant_info(chrom: str, pos: int):
         # It's possible that the user will request a variant for which no annotations are available,
         #  even if the variant is present in GTEx
         data = next(reader.fetch("chr" + chrom, pos - 1, pos + 1))
-    except StopIteration:
+    except (ValueError, StopIteration):
         data = InfoContainer()
 
     return data

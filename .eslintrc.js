@@ -18,7 +18,7 @@ module.exports = {
     'no-param-reassign': ['error', { 'props': false }],
     'no-underscore-dangle': 'off',
     "no-unused-vars": ["error", { "args": "none" }],
-    'object-curly-newline': ['error', { 'multiline': true }],
+    'object-curly-newline': ['error', { 'multiline': true, 'consistent': true }],
     'quotes': [
       'error',
       "single",

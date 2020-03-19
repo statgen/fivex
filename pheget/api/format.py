@@ -332,11 +332,11 @@ def query_variants(
         # Single variant query
         try:
             return reader.fetch(chrom, start - 1, start + 1)
-        except FileNotFoundError:
+        except (ValueError, FileNotFoundError):
             return []
     else:
         # Region query
         try:
             return reader.fetch(chrom, start - 1, end + 1)
-        except FileNotFoundError:
+        except (ValueError, FileNotFoundError):
             return []

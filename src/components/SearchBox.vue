@@ -24,7 +24,7 @@
  * Reusable code for searchbox widget
  */
 
-import { handleErrors } from '../util';
+import { handleErrors } from '@/util/common';
 
 
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
