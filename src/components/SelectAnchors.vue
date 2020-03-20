@@ -2,6 +2,8 @@
 
 /**
  * A simple component to select the anchor gene (and tissue) used to define a region plot page
+ * This exists mainly in case we wanted a "no anchors selected" landing page,
+ *  so we could re-use the rendered content as a component. (demonstration of the idea of code reuse)
  */
 export default {
   name: 'SelectAnchors',

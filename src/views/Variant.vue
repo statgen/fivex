@@ -249,7 +249,7 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-    <search-box></search-box>
+    <search-box/>
 
     <div class="row padtop">
       <div class="col-sm-12">
@@ -258,149 +258,83 @@ export default {
     </div>
 
     <div class="row justify-content-start">
-
-      <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form class="grouping" id="grouping-buttons">
-          <div class="btn-group btn-group-toggle">
-            <!-- TODO: The dynamic :class binding code is a weird hack- using data-toggle=buttons directly causes vue and bootstrap to fight over who control of rendering
-                  Since we plan to change this UI, the weird code will go away soon. (or else consider things like vue-bootstrap that massage away the differences)
-            -->
-            <span class="d-inline-block" tabindex="0"
-                  v-b-tooltip.top
-                  title="Reorder the x-axis by one of these listed categories">
-              <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">
-                <span class="fa fa-exchange-alt"></span> Group by:
-              </button>
-            </span>
-            <label :class="{ 'active': group === 'tissue' }" class="btn btn-secondary"
-                   v-b-tooltip.top
+      <div class="col-sm-12">
+        <b-dropdown text="Grouping" class="mr-2">
+          <b-dropdown-text>
+            <label v-b-tooltip.right
                    title="Group eQTLs by tissues, sorted alphabetically">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="tissue"> Tissue
             </label>
-            <label :class="{ 'active': group === 'system' }" class="btn btn-secondary"
-                   v-b-tooltip.top
+            <label v-b-tooltip.right
                    title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="system"> System
             </label>
-            <label :class="{ 'active': group === 'symbol' }" class="btn btn-secondary"
-                   v-b-tooltip.top
+            <label v-b-tooltip.right
                    title="Group eQTLs by gene, sorted by the position of the genes' transcription start sites">
               <input type="radio" name="group-options" autocomplete="off"
                      v-model="group" value="symbol"> Gene
             </label>
-          </div>
-        </form>
-      </div>
+          </b-dropdown-text>
+        </b-dropdown>
 
-      <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form class="yaxis-display" id="transform-y">
-          <div class="btn-group btn-group-toggle">
-            <span class="d-inline-block" tabindex="0"
-                  v-b-tooltip.top.html
-                  title="Switches the variable plotted on the Y-axis between -log<sub>10</sub>(P-value) and Normalized Effect Size (NES). Triangles indicate eQTLs for upregulation (pointing up) or downregulation (pointing down) of gene expression with P-values < 0.05."
-            >
-              <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;"> <span
-                class="fa fa-arrows-alt-v"></span> Show on Y-Axis: </button>
-            </span>
-            <label :class="{ 'active': y_field === 'log_pvalue' }" class="btn btn-secondary"
-                   v-b-tooltip.top.html
+        <b-dropdown text="Y-Axis" class="mr-2">
+          <b-dropdown-text>
+            <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
               <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> P-value
             </label>
-            <label :class="{ 'active': y_field === 'beta' }" class="btn btn-secondary"
-                   v-b-tooltip.top.html
+            <label v-b-tooltip.right.html
                    title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
               <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect Size
             </label>
-            <label :class="{ 'active': y_field === 'pip' }" class="btn btn-secondary"
-                   v-b-tooltip.top.html
+            <label v-b-tooltip.right.html
                    title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
               <input type="radio" name="y-options" v-model="y_field" value="pip"> PIP
             </label>
-          </div>
-        </form>
-      </div>
+          </b-dropdown-text>
+        </b-dropdown>
 
-      <div class="col-12 col-lg-4" style="margin-bottom:0.8em">
-        <form class="label-display" id="toggle-labels">
-          <div class="btn-group btn-group-toggle">
-          <span class="d-inline-block" tabindex="0"
-                v-b-tooltip.top.html
-                title="Toggles labels for the most significant eQTLs. Significance is determined by P-values. <b>Will only label variants more significant than 10<sup>-10</sup></b>. When viewing <b>Effect Size (NES)</b>, show either 5 or 20 eQTLs with the largest absolute effects <b>only</b> if they are also more significant than 10<sup>-20</sup></b>.">
-            <button type="button" class="btn btn-outline-secondary"
-                    style="pointer-events: none;"> <span class="fa fa-tag"></span> Label: </button>
-          </span>
-            <label :class="{ 'active': n_labels === 0 }" class="btn btn-secondary"
-                   v-b-tooltip.top
+        <b-dropdown text="Labels" class="mr-2">
+          <b-dropdown-text>
+            <label v-b-tooltip.right
                    title="Turn off all labels">
               <input type="radio" name="label-options" v-model="n_labels" :value="0"> None
             </label>
-            <label :class="{ 'active': n_labels === 5 }" class="btn btn-secondary"
-                   v-b-tooltip.top.html
+            <label v-b-tooltip.right.html
                    title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
             </label>
-            <label :class="{ 'active': n_labels === 50 }" class="btn btn-secondary"
-                   v-b-tooltip.top.html
+            <label v-b-tooltip.right.html
                    title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
               <input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20
             </label>
-          </div>
-        </form>
-      </div>
-    </div>
+          </b-dropdown-text>
+        </b-dropdown>
 
-    <div class="row justify-content-start">
-      <div class="col-12" style="margin-bottom:0.8em">
-        <form class="tss-range" id="tss-both-range">
-          <div class="btn-group btn-group-toggle">
-            <span class="d-inline-block" tabindex="0"
-                  v-b-tooltip.top.html
-                  title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
-              <button type="button" class="btn btn-outline-secondary" style="pointer-events: none;">
-                <span class="fa fa-arrows-alt-h"></span> Filter by TSS Distance
-              </button>
-            </span>
-            <label :class="{ 'active': tss_distance === 20000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${chrom}:${Math.max(pos - 20000, 1).toLocaleString()}-${(pos + 20000).toLocaleString()}`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="20000"> ±20kb
-            </label>
-            <label :class="{ 'active': tss_distance === 50000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 50000, 1).toLocaleString() }-${ (pos + 50000).toLocaleString() }`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="50000"> ±50kb
-            </label>
-            <label :class="{ 'active': tss_distance === 100000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 100000, 1).toLocaleString() }-${ (pos + 100000).toLocaleString() }`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="100000"> ±100kb
-            </label>
-            <label :class="{ 'active': tss_distance === 200000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 200000, 1).toLocaleString() }-${ (pos + 200000).toLocaleString() }`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="200000"> ±200kb
-            </label>
-            <label :class="{ 'active': tss_distance === 500000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 500000, 1).toLocaleString() }-${ (pos + 500000).toLocaleString() }`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="500000"> ±500kb
-            </label>
-            <label :class="{ 'active': tss_distance === 1000000 }" class="btn btn-secondary"
-                   v-b-tooltip.top
-                   :title="`Show eQTLs for genes with TSS in the range chr${ chrom }:${ Math.max(pos - 1000000, 1).toLocaleString() }-${ (pos + 1000000).toLocaleString() }`">
-              <input type="radio" name="tss-options" autocomplete=off
-                     v-model="tss_distance" :value="1000000"> ±1mb
-            </label>
-          </div>
-        </form>
+        <b-dropdown class="mr-2">
+          <template v-slot:button-content>
+            Max TSS Distance <span class="fa fa-info-circle"
+                                   v-b-tooltip.bottom.html
+                                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
+            <span class="sr-only">Info</span>
+          </span>
+          </template>
+          <b-dropdown-text>
+            <b-form-radio-group v-model="tss_distance"
+                                name="tss-options"
+                                :options="[
+                                  {text: '±20kb', value: 20000},
+                                  {text: '±50kb', value: 50000},
+                                  {text: '±100kb', value: 100000},
+                                  {text: '±200kb', value: 200000},
+                                  {text: '±50kb', value: 500000},
+                                  {text: '±1mb', value: 1000000},
+                                ]">
+            </b-form-radio-group>
+          </b-dropdown-text>
+        </b-dropdown>
       </div>
     </div>
 
@@ -411,21 +345,9 @@ export default {
              :end="pos_end"
              @connected="receivePlot" />
 
-    <div class="row justify-content-center">
-      <span class="d-inline-block" tabindex="0"
-            v-b-tooltip.top
-            title="The red dotted line indicates the current variant's position with respect to the scale on the gene track.">
-        <span class="badge badge-pill badge-secondary" style="pointer-events: none;"><span class="fa fa-question"></span> Red dotted line </span>
-      </span>
-    </div>
-
     <div class="row">
-      <div class="col">
-        <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#variantInformation"
-                aria-expanded="true" aria-controls="variantInformation">
-          Variant Information from Sequence Genotype <span class="fa fa-caret-down"></span>
-        </button>
-        <div class="collapse show" id="variantInformation">
+      <div class="col-sm-12">
+        <h2>Variant Information from Sequence Genotype </h2>
           <div class="card-group">
             <div class="card variant-information-grouped-card">
               <div class="card-body">
@@ -466,16 +388,10 @@ export default {
               <div class="card-body">
                 <dl class="variant-information-dl">
                   <template v-if="rsid !== null">
-                    <dt>
-                      rsid
-                    </dt>
-                    <dd>
-                      {{ rsid }}
-                    </dd>
+                    <dt>rsid</dt>
+                    <dd>{{ rsid }}</dd>
                   </template>
-                  <dt>
-                    {{is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)
-                  </dt>
+                  <dt>{{is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)</dt>
                   <dd>
                     <i>
                       <span v-for="(gene, index) in nearest_genes" :key="gene.ensg"
@@ -543,32 +459,16 @@ export default {
               </template>
             </div>
           </div>
-        </div>
       </div>
     </div>
 
-    <!--    TODO: Now insert table here-->
+    <h2>List of eQTLS for variant</h2>
     <tabulator-table :columns="table_base_columns"
                      :table_data="table_data"
                      :sort="table_sort"
                      :tooltips="tabulator_tooltip_maker"
                      tooltip-generation-mode="hover"
                      :tooltips-header="true" />
-
-    <div class="card">
-      <div class="card-body">
-        <a href="https://www.gtexportal.org/home/datasets" class="badge badge-pill badge-secondary"
-           v-b-tooltip.top
-           title="eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects with both genotypes and expression data">
-          <span class="fa fa-file-text-o"></span> Data source <span class="fa fa-external-link-alt"></span> </a>
-        <span class="d-inline-block" tabindex="0"
-              v-b-tooltip.top.html
-              title="Normalized Effect Sizes (NES) are defined as the effect of one allele on the inverse-normalized expression level of the associated gene. Go <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>here</a> for more details from the GTEx Portal. <br>
-                     Posterior Inclusion Probabilities (PIP) were calculated using DAP-G (Wen et al. 2017). See <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>the associated paper in PLoS Genetics</a> for details.">
-        <span class="badge badge-pill badge-secondary" style="pointer-events: none;">
-          <span class="fa fa-info-circle"></span> Definitions </span> </span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -576,7 +476,7 @@ export default {
 <style>
   .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
     white-space: normal;
-    text-overflow: clip;
+    text-overflow: fade;
   }
 
   /* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
