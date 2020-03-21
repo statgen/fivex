@@ -13,7 +13,7 @@ export function getTrackSources(gene_id, tissue) {
   const geneid_short = gene_id.split('.')[0];
   return [
     [`assoc_${tissue}_${geneid_short}`, ['assocGET', {
-      url: '/api/data/region/',
+      url: '/api/data/region',
       params: { gene_id, tissue },
     }]],
   ];
