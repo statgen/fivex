@@ -191,8 +191,6 @@ export default {
     this.table_data = [];
   },
   watch: {
-    // FIXME: The current logic may be a little inefficient on loading, eg if 4 query params
-    //    change at once, all 4 watchers trigger a re-render at about the same time
     group() {
       // Clear "same match" highlighting when re-rendering.
       this.$nextTick(() => {
@@ -211,7 +209,7 @@ export default {
       // Sometimes, an action will change more than one option (especially happens on first page
       //  load, as we sync the plot with query params)
       // A synthetic watcher lets us re-render the plot only once total, no matter how many options
-      //  are changed. Not all the watched variables used, but it triggers dependency tracking.
+      //  are changed. Not all the watched variables are *used*, but it triggers dependency tracking.
       this.$nextTick(() => {
         const { assoc_plot, tss_distance, y_field } = this;
         assoc_plot.applyState({

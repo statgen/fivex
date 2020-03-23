@@ -1,4 +1,7 @@
 <script>
+/**
+* A wrapper component that allows Tabulator and Vue to work together.
+*/
 import Tabulator from 'tabulator-tables';
 import 'tabulator-tables/dist/css/bootstrap/tabulator_bootstrap4.min.css';
 
@@ -23,6 +26,8 @@ export default {
     this.tabulator = null;
   },
   watch: {
+    // Normally, both tabulator and vue want to control the DOM. We use "watchers" to bridge the gap.
+    //   Vue will only render this once, and any changes will be handed off to Tabulator to act on
     table_data: {
       // Update the data used to draw the table
       handler(value) {
