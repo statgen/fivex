@@ -30,7 +30,6 @@ function getData(queryParams) {
     .then((resp) => resp.json());
 }
 
-
 export default {
   name: 'RegionView',
   data() {
@@ -39,14 +38,12 @@ export default {
       region_data: {},
 
       // Data that controls the view (user-selected options)
-      base_plot_sources: null,
-      base_plot_layout: null,
       chrom: null,
       start: null,
       end: null,
 
       // Fields whose values affect options and/or URL query params
-      y_field: 'log_pvalue',
+      y_field: null,
       gene_id: null,
       tissue: null,
 
@@ -54,6 +51,8 @@ export default {
       extra_tissues: [],
 
       // Internal state
+      base_plot_sources: null,
+      base_plot_layout: null,
       loading_done: false,
     };
   },
@@ -89,8 +88,7 @@ export default {
     this.assoc_sources = null;
   },
   beforeRouteEnter(to, from, next) {
-    // First navigation to route
-    // TODO: Catch navigation failures (eg bad api call, no data, etc)
+    // Fires on first navigation to route (from another route)
     getData(to.query)
       .then((data) => {
         next((vm) => {
@@ -100,7 +98,10 @@ export default {
       }).catch(() => next({ name: 'error' }));
   },
   beforeRouteUpdate(to, from, next) {
-    // When going from one variant page to another (component is reused, only variable part of route changes)
+    // When going from one Region page to another (component is reused, only variable part of route changes)
+
+    // Reset internal state (because we're reusing the same component)
+    this.setQuery();
     this.setData();
     this.assoc_plot = null;
     this.assoc_sources = null;
@@ -119,16 +120,20 @@ export default {
         query: { chrom, start, end, gene_id, tissue },
       });
     },
-    setQuery(params) {
+    setQuery(params = {}) {
       // Set some default query params
-      this.y_field = params.y_field || this.y_field;
+      this.y_field = params.y_field || 'log_pvalue';
       // Our url serializer (`$.param`) serializes array params as `key[]`; convert to `key` format
       const { 'extra_genes[]': extra_genes, 'extra_tissues[]': extra_tissues } = params;
       if (extra_genes) {
         this.extra_genes = Array.isArray(extra_genes) ? extra_genes : [extra_genes];
+      } else {
+        this.extra_genes = [];
       }
       if (extra_tissues) {
         this.extra_tissues = Array.isArray(extra_tissues) ? extra_tissues : [extra_tissues];
+      } else {
+        this.extra_tissues = [];
       }
     },
     setData(data) {
@@ -217,6 +222,10 @@ export default {
       // This param might be set when the page first loads, but the associated function
       //   requires a reference to the plot. `nextTick` says "don't fire this watcher
       //   until after the plot has been created"
+      if (!this.assoc_plot) {
+        return;
+      }
+
       this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
     },
     query_params() {

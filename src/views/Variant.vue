@@ -210,6 +210,10 @@ export default {
       //  load, as we sync the plot with query params)
       // A synthetic watcher lets us re-render the plot only once total, no matter how many options
       //  are changed. Not all the watched variables are *used*, but it triggers dependency tracking.
+
+      if (!this.assoc_plot) {
+        return;
+      }
       this.$nextTick(() => {
         const { assoc_plot, tss_distance, y_field } = this;
         assoc_plot.applyState({
