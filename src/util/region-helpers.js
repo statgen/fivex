@@ -269,7 +269,7 @@ export function switchY_region(plot, yfield) {
         panel.legend.orientation = 'horizontal';
         panel.legend.pad_from_bottom = 46;
         panel_base_y.field = `${panel.id}:pip|pip_yvalue`;
-        panel_base_y.floor = -6.1;
+        panel_base_y.floor = -4.1;
         panel_base_y.ceiling = 0.2;
         panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
         panel.axes.y1.ticks = [
@@ -277,9 +277,8 @@ export function switchY_region(plot, yfield) {
           { position: 'left', text: '0.1', y: -1 },
           { position: 'left', text: '0.01', y: -2 },
           { position: 'left', text: '1e-3', y: -3 },
-          { position: 'left', text: '1e-4', y: -4 },
-          { position: 'left', text: '1e-5', y: -5 },
-          { position: 'left', text: '≤1e-6', y: -6 },
+          { position: 'left', text: '≤1e-4', y: -4 },
+
         ];
         scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
         scatter_layout.legend = [

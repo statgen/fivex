@@ -350,7 +350,7 @@ export function switchY(plot, yfield) {
     ];
     plot.panels.phewas.legend.show();
     scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
-    scatter_config.y_axis.floor = -6.1;
+    scatter_config.y_axis.floor = -4.1;
     scatter_config.y_axis.ceiling = 0.2;
     scatter_config.y_axis.lower_buffer = 0;
     scatter_config.point_shape = [
@@ -363,9 +363,7 @@ export function switchY(plot, yfield) {
       { position: 'left', text: '0.1', y: -1 },
       { position: 'left', text: '0.01', y: -2 },
       { position: 'left', text: '1e-3', y: -3 },
-      { position: 'left', text: '1e-4', y: -4 },
-      { position: 'left', text: '1e-5', y: -5 },
-      { position: 'left', text: '≤1e-6', y: -6 },
+      { position: 'left', text: '≤1e-4', y: -4 },
     ];
     plot.layout.panels[0].data_layers[1].offset = -1000;
   }

@@ -24,7 +24,7 @@ function retrieveBySuffix(point_data, field_suffix) {
 /**
  * Convert Posterior incl probabilities to a (truncated) log scale for rendering
  */
-LocusZoom.TransformationFunctions.set('pip_yvalue', (x) => Math.max(Math.log10(x), -6));
+LocusZoom.TransformationFunctions.set('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
 
 /**
  * Assign point shape based on PIP cluster designation. Since there are always just a few clusters, and cluster 1
