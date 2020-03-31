@@ -317,7 +317,7 @@ export default {
 
         <b-dropdown class="mr-2">
           <template v-slot:button-content>
-            Max TSS Dist. (bp) <span class="fa fa-info-circle"
+            Max TSS dist. (bp) <span class="fa fa-info-circle"
                                    v-b-tooltip.bottom.html
                                    title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
             <span class="sr-only">Info</span>

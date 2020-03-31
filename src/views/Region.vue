@@ -272,7 +272,7 @@ export default {
           <template v-slot:button-content>
             Select anchors <span class="fa fa-info-circle"
                                   v-b-tooltip.top.html
-                                  title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
+                                  title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br><br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
               <span class="sr-only">Info</span>
             </span>
           </template>
@@ -284,7 +284,14 @@ export default {
                           :tissue_list="region_data.tissue_list"/>
         </b-dropdown>
 
-        <b-dropdown text="Add tracks" class="m-2">
+        <b-dropdown class="m-2">
+           <template v-slot:button-content>
+             Add tracks <span class="fa fa-info-circle"
+                               v-b-tooltip.top.html
+                               title="Add an additional track using a <b>new tissue or gene</b>.<br><br>If you add a <b>tissue</b>, the new track will show eQTLs between that tissue and the <b>anchor gene</b>.<br><br>If you add a <b>gene</b>, the new track will show eQTLs between that gene and the <b>anchor tissue</b>.">
+              <span class="sr-only">Info</span>
+             </span>
+            </template>
           <b-dropdown-text>
             <label>Add a gene
               <select class="form-control"
@@ -307,7 +314,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Y-axis:" class="m-2">
+        <b-dropdown text="Y-axis" class="m-2">
           <b-dropdown-text>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
