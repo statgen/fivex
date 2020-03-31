@@ -2,7 +2,6 @@
 Defines the PheGET web application
 """
 import flask
-from flask_debugtoolbar import DebugToolbarExtension  # type: ignore
 
 from pheget.api import api_blueprint
 from pheget.frontend import views_blueprint
@@ -18,9 +17,6 @@ def create_app(settings_module="pheget.settings.dev"):
     #   you will need to run both the Vue and Flask servers, and access the API via the Vue CLI server URL.
     app.register_blueprint(api_blueprint, url_prefix="/data")
     app.register_blueprint(views_blueprint, url_prefix="/views")
-
-    # Flask debug toolbar: only enabled when debug mode is active
-    DebugToolbarExtension(app)
 
     if app.config["SENTRY_DSN"]:
         # Only activate sentry if it is configured for this app
