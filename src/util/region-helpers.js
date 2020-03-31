@@ -40,7 +40,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
         <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
         <strong>SPIP</strong>: {{{{namespace[assoc]}}spip}} <br>
         <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster}} <br>
-        <a href='/variant/{{{{namespace[assoc]}}chromosome}}_{{{{namespace[assoc]}}position}}/'>Go to single-variant view</a>`;
+        <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a>`;
 
   const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
   const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {

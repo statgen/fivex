@@ -141,7 +141,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 <strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
 <strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
 <strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
-<a href='/region/?position={{{{namespace[phewas]}}position}}&chrom={{{{namespace[phewas]}}chromosome}}&gene_id={{{{namespace[phewas]}}gene_id}}&tissue={{{{namespace[phewas]}}tissue}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
+<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
 `;
               base.match = {
                 send: '{{namespace[phewas]}}tissue',
