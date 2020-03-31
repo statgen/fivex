@@ -261,7 +261,7 @@ export default {
     <div class="row">
       <div class="col-sm-12">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
-          {{ region_data.symbol }} <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
+          <i>{{ region_data.symbol }}</i> <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
         </strong></h1>
       </div>
     </div>
@@ -307,13 +307,12 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Display options" class="m-2">
+        <b-dropdown text="Y-axis:" class="m-2">
           <b-dropdown-text>
-            Change y-axis:<br>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
               <input type="radio" name="y-options" id="show-log-pvalue"
-                     v-model="y_field" value="log_pvalue"> -log<sub>10</sub> p
+                     v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
             </label>
 
             <label v-b-tooltip.right.html

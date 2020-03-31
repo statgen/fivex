@@ -261,7 +261,7 @@ export default {
 
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        <b-dropdown text="Grouping" class="mr-2">
+        <b-dropdown text="X-Axis Group" class="mr-2">
           <b-dropdown-text>
             <label v-b-tooltip.right
                    title="Group eQTLs by tissues, sorted alphabetically">
@@ -285,7 +285,7 @@ export default {
           <b-dropdown-text>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-              <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> P-value
+              <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
             </label>
             <label v-b-tooltip.right.html
                    title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
@@ -302,7 +302,7 @@ export default {
           <b-dropdown-text>
             <label v-b-tooltip.right
                    title="Turn off all labels">
-              <input type="radio" name="label-options" v-model="n_labels" :value="0"> None
+              <input type="radio" name="label-options" v-model="n_labels" :value="0"> No labels
             </label>
             <label v-b-tooltip.right.html
                    title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
@@ -317,7 +317,7 @@ export default {
 
         <b-dropdown class="mr-2">
           <template v-slot:button-content>
-            Max TSS Distance <span class="fa fa-info-circle"
+            Max TSS Dist. (bp) <span class="fa fa-info-circle"
                                    v-b-tooltip.bottom.html
                                    title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
             <span class="sr-only">Info</span>
@@ -327,12 +327,12 @@ export default {
             <b-form-radio-group v-model="tss_distance"
                                 name="tss-options"
                                 :options="[
-                                  {text: '±20kb', value: 20000},
-                                  {text: '±50kb', value: 50000},
-                                  {text: '±100kb', value: 100000},
-                                  {text: '±200kb', value: 200000},
-                                  {text: '±50kb', value: 500000},
-                                  {text: '±1mb', value: 1000000},
+                                  {text: '±20k', value: 20000},
+                                  {text: '±50k', value: 50000},
+                                  {text: '±100k', value: 100000},
+                                  {text: '±200k', value: 200000},
+                                  {text: '±500k', value: 500000},
+                                  {text: '±1m', value: 1000000},
                                 ]">
             </b-form-radio-group>
           </b-dropdown-text>
