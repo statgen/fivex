@@ -141,13 +141,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 <strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
 <strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
 <strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
-<form action="/region/" method="get">
-    <input name="chrom" type="hidden" value='{{{{namespace[phewas]}}chromosome}}'>
-    <input name="position" type="hidden" value='{{{{namespace[phewas]}}position}}'>
-    <input name="gene_id" type="hidden" value='{{{{namespace[phewas]}}gene_id}}'>
-    <input name="tissue" type="hidden" value='{{{{namespace[phewas]}}tissue}}'>
-    <input type="submit" class="linkButton" value="See region plot for {{{{namespace[phewas]}}tissue|htmlescape}} x {{{{namespace[phewas]}}symbol|htmlescape}}"/>
-</form>
+<a href='/region/?position={{{{namespace[phewas]}}position}}&chrom={{{{namespace[phewas]}}chromosome}}&gene_id={{{{namespace[phewas]}}gene_id}}&tissue={{{{namespace[phewas]}}tissue}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
 `;
               base.match = {
                 send: '{{namespace[phewas]}}tissue',

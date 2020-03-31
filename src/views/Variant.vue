@@ -289,7 +289,7 @@ export default {
             </label>
             <label v-b-tooltip.right.html
                    title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
-              <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect Size
+              <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect size
             </label>
             <label v-b-tooltip.right.html
                    title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">

@@ -325,7 +325,7 @@ export default {
             <label v-b-tooltip.right.html
                    title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
               <input type="radio" name="y-options" id="show-beta"
-                     v-model="y_field" value="beta"> Effect Size
+                     v-model="y_field" value="beta"> Effect size
             </label>
 
             <label v-b-tooltip.right.html
