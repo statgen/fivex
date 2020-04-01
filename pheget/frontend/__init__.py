@@ -1,9 +1,9 @@
 """
-Front end views: pages that are visited in the web browser and return HTML
+Front end views: provide the data needed by pages that are visited in the web browser
 """
 import sqlite3
 
-from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
@@ -13,12 +13,6 @@ from . import format
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 
 views_blueprint = Blueprint("frontend", __name__, template_folder="templates")
-
-
-@views_blueprint.route("/")
-def home():
-    """Site homepage"""
-    return render_template("frontend/index.html")
 
 
 @views_blueprint.route("/region/", methods=["GET"])
@@ -140,23 +134,23 @@ def region_view():
                 (f"chr{chrom}", start, end),
             )
         )
-    gene_list = dict()
-    for geneid in geneid_list:
-        gene_list[str(geneid[0])] = str(
-            gene_json.get(geneid[0].split(".")[0], "")
-        )
+    gene_list = {  # FIXME: Confusing name (it's not a list)
+        str(geneid[0]): str(gene_json.get(geneid[0].split(".")[0], ""))
+        for geneid in geneid_list
+    }
 
-    return render_template(
-        "frontend/region.html",
-        chrom=chrom,
-        start=start,
-        end=end,
-        center=center,
-        gene_id=gene_id,
-        tissue=tissue,
-        symbol=symbol,
-        tissue_list=tissue_list,
-        gene_list=gene_list,
+    return jsonify(
+        {
+            "chrom": chrom,
+            "start": start,
+            "end": end,
+            "center": center,
+            "gene_id": gene_id,
+            "tissue": tissue,
+            "symbol": symbol,
+            "tissue_list": list(tissue_list),
+            "gene_list": gene_list,
+        }
     )
 
 
@@ -177,18 +171,19 @@ def variant_view(chrom: str, pos: int):
         and nearest_genes[0]["start"] <= pos <= nearest_genes[0]["end"]
     )
 
-    return render_template(
-        "frontend/variant.html",
-        chrom=chrom,
-        pos=pos,
-        ref=annotations.ref_allele,
-        alt=annotations.alt_allele,
-        top_gene=annotations.top_gene,
-        top_tissue=annotations.top_tissue,
-        ac=annotations.ac,
-        af=annotations.af,
-        an=annotations.an,
-        rsid=annotations.rsid,
-        nearest_genes=nearest_genes,
-        is_inside_gene=is_inside_gene,
+    return jsonify(
+        dict(
+            chrom=chrom,
+            pos=pos,
+            ref=annotations.ref_allele,
+            alt=annotations.alt_allele,
+            top_gene=annotations.top_gene,
+            top_tissue=annotations.top_tissue,
+            ac=annotations.ac,
+            af=annotations.af,
+            an=annotations.an,
+            rsid=annotations.rsid,
+            nearest_genes=nearest_genes,
+            is_inside_gene=is_inside_gene,
+        )
     )

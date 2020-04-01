@@ -4,7 +4,7 @@ API endpoints (return JSON, not HTML)
 
 import sqlite3
 
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, jsonify, request
 
 from .. import model
 from .format import query_variants
@@ -122,8 +122,6 @@ def variant_query(chrom: str, pos: int):
         res.to_dict()
         for res in query_variants(chrom, pos, tissue=tissue, gene_id=gene_id)
     ]
-    if not data:
-        abort(404)
 
     for i, item in enumerate(data):
         # FIXME: replace this synthetic field with some other unqiue identifier (like a marker)
