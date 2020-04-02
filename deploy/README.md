@@ -4,7 +4,7 @@ This app is deployed using gunicorn and a reverse proxy. Sample files are provid
 
 You will need to read them carefully, and update paths as appropriate.
 
-## Steps
+## First time setup steps
 1. Follow the setup instructions in the README to check out the code and create a virtual environment.  
     * Note that some distros (such as Ubuntu 16.04 LTS) may come with an older Python version by default, but 
     Python >=3.6 is required.
@@ -24,3 +24,10 @@ You will need to read them carefully, and update paths as appropriate.
     - Follow the instructions to create an SSL certificate using [LetsEncrypt](https://certbot.eff.org/), 
         installing the certificate with `sudo certbot --apache`.
     - Test the site in your browser.
+
+
+## Subsequent deployments
+Once your app is configured, you can use the provided script `./deploy.sh` to run all the required steps. 
+This must be run from the project root folder, by a user with write access to all directories. 
+The static asset folder in the script should match your apache configuration (eg `/var/www/pheget`) and you should 
+have write access.
