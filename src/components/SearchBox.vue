@@ -172,10 +172,11 @@ export default {
         .then((result) => {
           const chrom = result.chrom.replace('chr', '');
           if (result.type === 'variant') {
-            this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
-          } else if (result.type === 'range') {
+            return this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
+          }
+          if (result.type === 'range') {
             const { start, end, gene_id, tissue, symbol } = result;
-            this.$router.push({
+            return this.$router.push({
               name: 'region',
               query: {
                 chrom,
@@ -187,9 +188,16 @@ export default {
               },
             });
           }
+          // If the result is not a variant or range, the search box doesn't know what to do
+          throw new Error('Unrecognized navigation request');
         })
         .catch((err) => {
-          this.showMessage(err.message);
+          // If nav fails because the user searched for the variant they were already looking at,
+          //  suppress the developer-focused error message and just treat as a search box
+          //  that has no effect
+          if (err.name !== 'NavigationDuplicated') {
+            this.showMessage(err.message);
+          }
         });
     },
   },

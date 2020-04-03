@@ -10,15 +10,15 @@
         <div class="text-center">
           Examples:
           <router-link
-            :to="{name: 'variant', params: {variant: '19_6718376'}}">chr19:6718376</router-link> -
+            :to="{name: 'variant', params: {variant: '19_6718376'}}">chr19:6718376</router-link> &bull;
           <router-link
-            :to="{name: 'variant', params: {variant: '15_78570111'}}">chr15:78570111</router-link> -
+            :to="{name: 'variant', params: {variant: '15_78570111'}}">chr15:78570111</router-link> &bull;
           <router-link
-            :to="{name: 'variant', params: {variant: '12_56007301'}}">chr12:56007301</router-link> -
+            :to="{name: 'variant', params: {variant: '12_56007301'}}">chr12:56007301</router-link> &bull;
           <router-link
-            :to="{name: 'variant', params: {variant: '19_488506'}}">chr19:488506</router-link> -
+            :to="{name: 'variant', params: {variant: '19_488506'}}">chr19:488506</router-link> &bull;
           <router-link
-            :to="{name: 'variant', params: {variant: '19_991063'}}">chr19:991063</router-link> -
+            :to="{name: 'variant', params: {variant: '19_991063'}}">chr19:991063</router-link> &bull;
           <router-link
             :to="{name: 'variant', params: {variant: '19_4425308'}}">chr19:4425308</router-link>
           <br>
