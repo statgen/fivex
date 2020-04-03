@@ -100,6 +100,26 @@ export default {
         }
       });
     },
+
+    /**
+     * Proxy a method from the component to the LZ instance
+     * This allows parent components to manipulate the LZ instance, via $refs, without
+     *  leaking a reference to component internal dom elements
+     *
+     * We previously leaked a reference to the plot via events, but this was leaking memory
+     * on component cleanup
+     */
+    callPlot(method_name, ...args) {
+      this.plot[method_name](...args);
+    },
+    /**
+     * Proxy a method from the component to the LZ datasources
+     * This allows parent components to manipulate the LZ instance, via $refs, without leaking
+     *  a reference to component internals
+     */
+    callSources(method_name, ...args) {
+      this.data_sources[method_name](...args);
+    },
   },
   watch: {
     region: {
