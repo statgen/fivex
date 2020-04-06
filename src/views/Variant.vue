@@ -95,15 +95,6 @@ export default {
     },
   },
   beforeCreate() {
-    // Preserve a reference to component widgets so that their methods can be accessed directly
-    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
-    //  bypass these problems by assigning them as static properties instead of nested
-    //  observables.
-    this.assoc_plot = null;
-    this.assoc_sources = null;
-
-    this.variants_table = null;
-
     // Make some constants available to the Vue instance for use as props in rendering
     this.table_base_columns = TABLE_BASE_COLUMNS;
     this.tabulator_tooltip_maker = tabulator_tooltip_maker;
@@ -121,9 +112,10 @@ export default {
   },
   beforeRouteUpdate(to, from, next) {
     // When going from one variant page to another (component is reused, only variable part of route changes)
-    this.reset();
+    // this.reset();
+    this.setData();
 
-    getData(to.params.id).then((data) => {
+    getData(to.params.variant).then((data) => {
       this.setQuery(to.query);
       this.setData(data);
       next();
@@ -147,31 +139,43 @@ export default {
         { chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene },
       );
 
-      //  When the page is first loaded, create the plot instance
-      this.base_plot_layout = getPlotLayout(
-        this.chrom,
-        this.pos,
-        {
-          variant: this.variant,
-          position: this.pos,
-          chr: this.chrom,
-          start: this.pos_start,
-          end: this.pos_end,
-          minimum_tss_distance: -this.tss_distance,
-          maximum_tss_distance: this.tss_distance,
-          y_field: this.y_field,
-        },
-      );
-      this.base_plot_sources = getPlotSources(this.chrom, this.pos);
+      const has_data = !!Object.keys(data).length;
+
+      if (has_data) {
+        //  When the page is first loaded, create the plot instance
+        this.base_plot_layout = getPlotLayout(
+          this.chrom,
+          this.pos,
+          {
+            variant: this.variant,
+            position: this.pos,
+            chr: this.chrom,
+            start: this.pos_start,
+            end: this.pos_end,
+            minimum_tss_distance: -this.tss_distance,
+            maximum_tss_distance: this.tss_distance,
+            y_field: this.y_field,
+          },
+        );
+        this.base_plot_sources = getPlotSources(this.chrom, this.pos);
+      }
 
       // If used in reset mode, set loading to true
-      this.loading_done = !!data;
+      this.loading_done = has_data;
     },
-    receivePlot(plot, data_sources) {
-      this.assoc_plot = plot;
-      this.assoc_sources = data_sources;
+    reset() {
+      this.loading_done = false;
 
-      plot.subscribeToData(
+      this.setQuery();
+      this.setData();
+
+      this.table_data = [];
+    },
+    onPlotConnected() {
+      // Connect (or disconnect) a plot instance as components are added/removed
+      // This allows the parent to manipulate LocusZoom... but also to avoid preserving a reference
+      this.$refs.phewas_plot.callPlot(
+        'subscribeToData',
         [
           'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
           'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
@@ -180,29 +184,28 @@ export default {
       );
     },
   },
-  reset() {
-    this.setQuery();
-    this.setData();
-
-    this.assoc_plot = null;
-    this.assoc_sources = null;
-
-    this.variants_table = null;
-    this.table_data = [];
-  },
   watch: {
     group() {
       // Clear "same match" highlighting when re-rendering.
+      if (!this.$refs.phewas_plot) {
+        return;
+      }
       this.$nextTick(() => {
-        groupByThing(this.assoc_plot.layout, this.group);
+        groupByThing(this.$refs.phewas_plot.plot.layout, this.group);
       });
     },
     y_field() {
-      this.$nextTick(() => switchY(this.assoc_plot, this.y_field));
+      if (!this.$refs.phewas_plot) {
+        return;
+      }
+      this.$nextTick(() => switchY(this.$refs.phewas_plot.plot, this.y_field));
     },
     n_labels() {
+      if (!this.$refs.phewas_plot) {
+        return;
+      }
       this.$nextTick(() => {
-        this.assoc_plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
+        this.$refs.phewas_plot.plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
       });
     },
     all_options() {
@@ -210,20 +213,23 @@ export default {
       //  load, as we sync the plot with query params)
       // A synthetic watcher lets us re-render the plot only once total, no matter how many options
       //  are changed. Not all the watched variables are *used*, but it triggers dependency tracking.
-
-      if (!this.assoc_plot) {
+      if (!this.$refs.phewas_plot) {
         return;
       }
       this.$nextTick(() => {
-        const { assoc_plot, tss_distance, y_field } = this;
-        assoc_plot.applyState({
-          lz_match_value: null,
-          maximum_tss_distance: tss_distance,
-          minimum_tss_distance: -tss_distance,
-          start: Math.max(assoc_plot.state.position - tss_distance, 1),
-          end: assoc_plot.state.position + tss_distance,
-          y_field,
-        });
+        // eslint-disable-next-line no-unused-vars
+        const { group, n_labels, tss_distance, y_field } = this;
+        this.$refs.phewas_plot.callPlot(
+          'applyState',
+          {
+            lz_match_value: null,
+            maximum_tss_distance: tss_distance,
+            minimum_tss_distance: -tss_distance,
+            start: this.pos_start,
+            end: this.pos_end,
+            y_field,
+          },
+        );
       });
     },
 
@@ -340,12 +346,13 @@ export default {
       </div>
     </div>
 
-    <lz-plot :base_layout="base_plot_layout"
+    <lz-plot ref="phewas_plot"
+             :base_layout="base_plot_layout"
              :base_sources="base_plot_sources"
              :chr="chrom"
              :start="pos_start"
              :end="pos_end"
-             @connected="receivePlot" />
+             @connected="onPlotConnected"/>
 
     <div class="row">
       <div class="col-sm-12">

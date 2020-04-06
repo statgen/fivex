@@ -21,13 +21,28 @@ export default {
     tooltipsHeader: null,
     height: { default: '100%' },
   },
+  methods: {
+    /**
+     * Proxy a method from the component to the tabulator instance
+     * This allows parent components to manipulate the table, via $refs, without leaking
+     *  a reference to component internals
+     */
+    callTable(method_name, ...args) {
+      this.tabulator[method_name](...args);
+    },
+  },
   beforeCreate() {
     // DOM-manipulating widgets should store reference statically, not dynamically
     this.tabulator = null;
   },
+  beforeDestroy() {
+    this.tabulator.destroy();
+    delete this.tabulator;
+  },
   watch: {
     // Normally, both tabulator and vue want to control the DOM. We use "watchers" to bridge the gap.
-    //   Vue will only render this once, and any changes will be handed off to Tabulator to act on
+    //   Vue will only control the initial render, and any changes will be handed off
+    //   to Tabulator handlers (while preserving the "ergonomics" of vue data binding)
     table_data: {
       // Update the data used to draw the table
       handler(value) {
@@ -43,7 +58,9 @@ export default {
     },
     sort: { // Change the sorting field(s)
       handler(value) {
-        this.tabulator.setSort(value);
+        // See note below: deepcopy to break shared mutable references
+        const no_refs = JSON.parse(JSON.stringify(value));
+        this.tabulator.setSort(no_refs);
       },
       deep: true,
     },
@@ -53,7 +70,6 @@ export default {
       table_data: data,
       columns,
       height,
-      sort: initialSort,
       layout,
       layoutColumnsOnNewData,
       pagination,
@@ -63,6 +79,13 @@ export default {
       tooltipGenerationMode,
       tooltipsHeader,
     } = this;
+
+    // "Fun" bug: tabulator as of 4.6 stores its state in the object passed as `initialSort`.
+    // We need to deepcopy the value, or else certain rerendering events will cause infinite
+    //   recursion issues in vue.
+    // So far, other non-primitive values (like `data`) don't seem to be affected by this.
+    const initialSort = JSON.parse(JSON.stringify(this.sort));
+
     this.tabulator = new Tabulator(
       this.$refs.table,
       {
@@ -88,8 +111,6 @@ export default {
 
 <template>
   <div>
-    <div ref="table">
-      <slot></slot>
-    </div>
+    <div ref="table"></div>
   </div>
 </template>
