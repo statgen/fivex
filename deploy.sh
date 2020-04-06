@@ -2,9 +2,14 @@
 
 # Sample production deployment script. Must be run by a user with write permissions on all relevant folders.
 
+# Stop on failure and echo each instruction run (to aid debugging deploy failures)
+set -e
+set -x
 
-## Update code manually: it doesn't make sense to run an old deployment script
-#git checkout master --force
+## For now, update code manually: it doesn't make sense to run a deployment script that is out of date
+# As we use this script for a while, we can consider automating the git steps too (once we know that deploy.sh won't
+#   change much)
+#git checkout master
 #git pull
 
 # Update dependencies (respecting package lock files where relevant)
