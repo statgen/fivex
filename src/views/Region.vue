@@ -268,7 +268,7 @@ export default {
 
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        <b-dropdown class="m-2">
+        <b-dropdown class="m-2" size="sm">
           <template v-slot:button-content>
             Select anchors <span class="fa fa-info-circle"
                                   v-b-tooltip.top.html
@@ -284,7 +284,7 @@ export default {
                           :tissue_list="region_data.tissue_list"/>
         </b-dropdown>
 
-        <b-dropdown class="m-2">
+        <b-dropdown class="m-2" size="sm">
            <template v-slot:button-content>
              Add tracks <span class="fa fa-info-circle"
                                v-b-tooltip.top.html
@@ -314,7 +314,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Y-axis" class="m-2">
+        <b-dropdown text="Y-axis" class="m-2" size="sm">
           <b-dropdown-text>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">

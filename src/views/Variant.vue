@@ -61,12 +61,18 @@ export default {
   computed: {
     variant_label() {
       const { chrom, pos, ref, alt, rsid } = this;
-      const fields = [`Variant: chr${chrom}:${pos}`];
-      if (ref && alt) {
-        fields.push(`${ref}/${alt}`);
-      }
+      const fields = ['cis-eQTLs associated with variant:'];
       if (rsid) {
-        fields.push(`(${rsid})`);
+        fields.push(`${rsid}`);
+        fields.push(`(chr${chrom}:${pos}`);
+        if (ref && alt) {
+          fields.push(`${ref}/${alt})`);
+        }
+      } else {
+        fields.push(`chr${chrom}:${pos}`);
+        if (ref && alt) {
+          fields.push(`${ref}/${alt}`);
+        }
       }
       return fields.join(' ');
     },
@@ -258,16 +264,18 @@ export default {
   </div>
   <div v-else class="container-fluid">
     <search-box/>
-
     <div class="row padtop">
       <div class="col-sm-12">
-        <h1>{{variant_label}}</h1>
+        <h1>
+          <strong>
+            {{variant_label}}
+          </strong>
+        </h1>
       </div>
     </div>
-
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        <b-dropdown text="X-Axis Group" class="mr-2">
+        <b-dropdown text="X-Axis Group" class="mr-2" size="sm">
           <b-dropdown-text>
             <label v-b-tooltip.right
                    title="Group eQTLs by tissues, sorted alphabetically">
@@ -287,7 +295,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Y-Axis" class="mr-2">
+        <b-dropdown text="Y-Axis" class="mr-2" size="sm">
           <b-dropdown-text>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
@@ -304,7 +312,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Labels" class="mr-2">
+        <b-dropdown text="Labels" class="mr-2" size="sm">
           <b-dropdown-text>
             <label v-b-tooltip.right
                    title="Turn off all labels">
@@ -321,7 +329,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown class="mr-2">
+        <b-dropdown class="mr-2" size="sm">
           <template v-slot:button-content>
             Max TSS dist. (bp) <span class="fa fa-info-circle"
                                    v-b-tooltip.bottom.html
@@ -353,7 +361,6 @@ export default {
              :start="pos_start"
              :end="pos_end"
              @connected="onPlotConnected"/>
-
     <div class="row">
       <div class="col-sm-12">
         <h2>Variant Information from Sequence Genotype </h2>
@@ -470,8 +477,7 @@ export default {
           </div>
       </div>
     </div>
-
-    <h2>List of eQTLS for variant</h2>
+    <h2>eQTLS</h2>
     <tabulator-table :columns="table_base_columns"
                      :table_data="table_data"
                      :sort="table_sort"
