@@ -216,6 +216,10 @@ export default {
         throw new Error('Unrecognized type of track');
       }
     },
+    goto(refName) {
+      const element = this.$refs[refName];
+      element.scrollIntoView({ behavior: 'smooth' });
+    },
   },
   watch: {
     y_field() {
@@ -256,10 +260,16 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-    <search-box></search-box>
-
+    <b-navbar class="py-0" type="light" variant="light" fixed="top">
+      <b-button class="btn btn-sm btn-secondary mr-3" style="pointer-events: none;">Go to:</b-button>
+      <b-button @click="goto('region-plot')" class="mr-2" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
+      <b-button @click="goto('external-links')" class="mr-2" size="sm">External links <span class="fas fa-level-down-alt"></span></b-button>
+      <b-navbar-nav class="ml-auto">
+        <search-box/>
+      </b-navbar-nav>
+    </b-navbar>
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12" ref="region-plot">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
           <i>{{ region_data.symbol }}</i> <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
         </strong></h1>
@@ -351,7 +361,7 @@ export default {
     </div>
 
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12" ref="external-links">
         <div class="card">
           <div class="card-body">
             External links:
