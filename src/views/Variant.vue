@@ -189,6 +189,10 @@ export default {
         (data) => { this.table_data = data; },
       );
     },
+    goto(refName) {
+      const element = this.$refs[refName];
+      element.scrollIntoView({ behavior: 'smooth' });
+    },
   },
   watch: {
     group() {
@@ -263,239 +267,234 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-    <search-box/>
-    <div class="row padtop">
-      <div class="col-sm-12">
-        <h1>
-          <strong>
-            {{variant_label}}
-          </strong>
-        </h1>
+    <b-navbar class="py-0" type="light" variant="light" fixed="top">
+      <b-button @click="goto('single-variant-eqtl-plot')" class="mr-2" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
+      <b-button @click="goto('genotype-infobox')" class="mr-2" size="sm">Variant Info <span class="fas fa-level-down-alt"></span></b-button>
+      <b-button @click="goto('eqtl-table')" class="mr-2" size="sm">eQTL Table <span class="fas fa-level-down-alt"></span></b-button>
+      <b-navbar-nav class="ml-auto">
+        <search-box/>
+      </b-navbar-nav>
+    </b-navbar>
+      <div class="row padtop" ref="single-variant-eqtl-plot">
+        <div class="col-sm-12">
+          <h1>
+            <strong>
+              {{variant_label}}
+            </strong>
+          </h1>
+        </div>
       </div>
-    </div>
-    <div class="row justify-content-start">
-      <div class="col-sm-12">
-        <b-dropdown text="X-Axis Group" class="mr-2" size="sm">
-          <b-dropdown-text>
-            <label v-b-tooltip.right
-                   title="Group eQTLs by tissues, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete="off"
-                     v-model="group" value="tissue"> Tissue
-            </label>
-            <label v-b-tooltip.right
-                   title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete="off"
-                     v-model="group" value="system"> System
-            </label>
-            <label v-b-tooltip.right
-                   title="Group eQTLs by gene, sorted by the position of the genes' transcription start sites">
-              <input type="radio" name="group-options" autocomplete="off"
-                     v-model="group" value="symbol"> Gene
-            </label>
-          </b-dropdown-text>
-        </b-dropdown>
+      <div class="row justify-content-start">
+        <div class="col-sm-12">
+          <b-dropdown text="X-Axis Group" class="mr-2" size="sm">
+            <b-dropdown-text>
+              <label v-b-tooltip.right
+                    title="Group eQTLs by tissues, sorted alphabetically">
+                <input type="radio" name="group-options" autocomplete="off"
+                      v-model="group" value="tissue"> Tissue
+              </label>
+              <label v-b-tooltip.right
+                    title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
+                <input type="radio" name="group-options" autocomplete="off"
+                      v-model="group" value="system"> System
+              </label>
+              <label v-b-tooltip.right
+                    title="Group eQTLs by gene, sorted by the position of the genes' transcription start sites">
+                <input type="radio" name="group-options" autocomplete="off"
+                      v-model="group" value="symbol"> Gene
+              </label>
+            </b-dropdown-text>
+          </b-dropdown>
 
-        <b-dropdown text="Y-Axis" class="mr-2" size="sm">
-          <b-dropdown-text>
-            <label v-b-tooltip.right.html
-                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
-              <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
-            </label>
-            <label v-b-tooltip.right.html
-                   title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
-              <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect size
-            </label>
-            <label v-b-tooltip.right.html
-                   title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
-              <input type="radio" name="y-options" v-model="y_field" value="pip"> PIP
-            </label>
-          </b-dropdown-text>
-        </b-dropdown>
+          <b-dropdown text="Y-Axis" class="mr-2" size="sm">
+            <b-dropdown-text>
+              <label v-b-tooltip.right.html
+                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+                <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
+              </label>
+              <label v-b-tooltip.right.html
+                    title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
+                <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect size
+              </label>
+              <label v-b-tooltip.right.html
+                    title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
+                <input type="radio" name="y-options" v-model="y_field" value="pip"> PIP
+              </label>
+            </b-dropdown-text>
+          </b-dropdown>
 
-        <b-dropdown text="Labels" class="mr-2" size="sm">
-          <b-dropdown-text>
-            <label v-b-tooltip.right
-                   title="Turn off all labels">
-              <input type="radio" name="label-options" v-model="n_labels" :value="0"> No labels
-            </label>
-            <label v-b-tooltip.right.html
-                   title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
-            </label>
-            <label v-b-tooltip.right.html
-                   title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20
-            </label>
-          </b-dropdown-text>
-        </b-dropdown>
+          <b-dropdown text="Labels" class="mr-2" size="sm">
+            <b-dropdown-text>
+              <label v-b-tooltip.right
+                    title="Turn off all labels">
+                <input type="radio" name="label-options" v-model="n_labels" :value="0"> No labels
+              </label>
+              <label v-b-tooltip.right.html
+                    title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+                <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
+              </label>
+              <label v-b-tooltip.right.html
+                    title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
+                <input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20
+              </label>
+            </b-dropdown-text>
+          </b-dropdown>
 
-        <b-dropdown class="mr-2" size="sm">
-          <template v-slot:button-content>
-            Max TSS dist. (bp) <span class="fa fa-info-circle"
-                                   v-b-tooltip.bottom.html
-                                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
-            <span class="sr-only">Info</span>
-          </span>
-          </template>
-          <b-dropdown-text>
-            <b-form-radio-group v-model="tss_distance"
-                                name="tss-options"
-                                :options="[
-                                  {text: '±20k', value: 20000},
-                                  {text: '±50k', value: 50000},
-                                  {text: '±100k', value: 100000},
-                                  {text: '±200k', value: 200000},
-                                  {text: '±500k', value: 500000},
-                                  {text: '±1m', value: 1000000},
-                                ]">
-            </b-form-radio-group>
-          </b-dropdown-text>
-        </b-dropdown>
+          <b-dropdown class="mr-2" size="sm">
+            <template v-slot:button-content>
+              Max TSS dist. (bp) <span class="fa fa-info-circle"
+                                    v-b-tooltip.bottom.html
+                                    title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
+              <span class="sr-only">Info</span>
+            </span>
+            </template>
+            <b-dropdown-text>
+              <b-form-radio-group v-model="tss_distance"
+                                  name="tss-options"
+                                  :options="[
+                                    {text: '±20k', value: 20000},
+                                    {text: '±50k', value: 50000},
+                                    {text: '±100k', value: 100000},
+                                    {text: '±200k', value: 200000},
+                                    {text: '±500k', value: 500000},
+                                    {text: '±1m', value: 1000000},
+                                  ]">
+              </b-form-radio-group>
+            </b-dropdown-text>
+          </b-dropdown>
+        </div>
       </div>
-    </div>
+      <lz-plot ref="phewas_plot"
+              :base_layout="base_plot_layout"
+              :base_sources="base_plot_sources"
+              :chr="chrom"
+              :start="pos_start"
+              :end="pos_end"
+              @connected="onPlotConnected"/>
+      <div class="row padtop" ref="genotype-infobox">
+        <div class="col-sm-12">
+          <h2>Variant Information from Sequence Genotype </h2>
+            <div class="card-group">
+              <div class="card variant-information-grouped-card">
+                <div class="card-body">
+                  <dl class="variant-information-dl">
+                    <template v-if="ac !== null && an !== null">
+                      <dt>Allele count / total</dt>
+                      <dd>{{ ac }} / {{ an }}</dd>
+                    </template>
+                    <template v-else>
+                      <dt>Note:</dt>
+                      <dd>Allele information not found</dd>
+                    </template>
 
-    <lz-plot ref="phewas_plot"
-             :base_layout="base_plot_layout"
-             :base_sources="base_plot_sources"
-             :chr="chrom"
-             :start="pos_start"
-             :end="pos_end"
-             @connected="onPlotConnected"/>
-    <div class="row">
-      <div class="col-sm-12">
-        <h2>Variant Information from Sequence Genotype </h2>
-          <div class="card-group">
-            <div class="card variant-information-grouped-card">
-              <div class="card-body">
-                <dl class="variant-information-dl">
-                  <template v-if="ac !== null && an !== null">
-                    <dt>Allele count / total</dt>
-                    <dd>{{ ac }} / {{ an }}</dd>
-                  </template>
-                  <template v-else>
-                    <dt>Note:</dt>
-                    <dd>Allele information not found</dd>
-                  </template>
+                    <template v-if="af !== null">
+                      <dt>Allele frequency</dt>
+                      <dd>{{ af }}</dd>
+                    </template>
+                  </dl>
+                </div>
+              </div>
 
-                  <template v-if="af !== null">
-                    <dt>Allele frequency</dt>
-                    <dd>{{ af }}</dd>
-                  </template>
-                </dl>
+              <div class="card variant-information-grouped-card">
+                <div class="card-body">
+                  <dl class="variant-info-middle">
+                    <template v-if="top_gene !== null">
+                      <dt>Top gene</dt>
+                      <dd><i>{{ top_gene }}</i></dd>
+                    </template>
+                    <template v-if="top_tissue !== null">
+                      <dt>Top tissue</dt>
+                      <dd>{{ top_tissue }}</dd>
+                    </template>
+                  </dl>
+                </div>
+              </div>
+
+              <div class="card variant-information-grouped-card">
+                <div class="card-body">
+                  <dl class="variant-information-dl">
+                    <template v-if="rsid !== null">
+                      <dt>rsid</dt>
+                      <dd>{{ rsid }}</dd>
+                    </template>
+                    <dt>{{is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)</dt>
+                    <dd>
+                      <i>
+                        <span v-for="(gene, index) in nearest_genes" :key="gene.ensg"
+                              class="text-with-definition" :title="gene.ensg">
+                          {{ gene.symbol }}<span v-if="nearest_genes && index === nearest_genes.length">,</span>
+                        </span>
+                        <span v-if="!nearest_genes || !nearest_genes.length">(no genes found)</span>
+                      </i>
+                    </dd>
+                  </dl>
+                </div>
               </div>
             </div>
 
-            <div class="card variant-information-grouped-card">
+            <div class="card">
               <div class="card-body">
-                <dl class="variant-info-middle">
-                  <template v-if="top_gene !== null">
-                    <dt>Top gene</dt>
-                    <dd><i>{{ top_gene }}</i></dd>
-                  </template>
-                  <template v-if="top_tissue !== null">
-                    <dt>Top tissue</dt>
-                    <dd>{{ top_tissue }}</dd>
-                  </template>
-                </dl>
-              </div>
-            </div>
-
-            <div class="card variant-information-grouped-card">
-              <div class="card-body">
-                <dl class="variant-information-dl">
-                  <template v-if="rsid !== null">
-                    <dt>rsid</dt>
-                    <dd>{{ rsid }}</dd>
-                  </template>
-                  <dt>{{is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)</dt>
-                  <dd>
-                    <i>
-                      <span v-for="(gene, index) in nearest_genes" :key="gene.ensg"
-                            class="text-with-definition" :title="gene.ensg">
-                        {{ gene.symbol }}<span v-if="nearest_genes && index === nearest_genes.length">,</span>
-                      </span>
-                      <span v-if="!nearest_genes || !nearest_genes.length">(no genes found)</span>
-                    </i>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <span class="d-inline-block" tabindex="0"
+                <span class="d-inline-block" tabindex="0"
+                      v-b-tooltip.top
+                      title="External links for more information about this variant">
+                  <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
+                      class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> Variant info </button>
+                </span>
+                <template v-if="ref!==null && alt !== null">
+                  <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                    v-b-tooltip.top.html
+                    title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
+                    BRAVO <span class="fa fa-external-link-alt"></span> </a>
+                  <a :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
                     v-b-tooltip.top
-                    title="External links for more information about this variant">
-                <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
-                    class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> Variant info </button>
-              </span>
-              <template v-if="ref!==null && alt !== null">
-                <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top.html
-                   title="Variant data from NHLBI's TOPMed program, containing 463 million variants observed in 62,784 individuals in data freeze 5. <b>Requires Google login</b>">
-                  BRAVO <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top
-                   title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
-                  GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top
-                   title="The UC Santa Cruz Genome Browser"> UCSC <span
-                   class="fa fa-external-link-alt"></span></a>
-                <a :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                    title="Variant data from the Genotype-Tissue Expression project, containing expression data, histology images, and in-depth expression data analysis">
+                    GTEx Portal <span class="fa fa-external-link-alt"></span> </a>
+                  <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
                     v-b-tooltip.top
-                    title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
-                  gnomAD <span class="fa fa-external-link-alt"></span></a>
-              </template>
-              <template v-if="rsid !==null">
-                <a :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`" target="_blank"
-                   class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true" v-b-tooltip.top
-                   title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
-                  <span class="fa fa-external-link-alt"></span> </a>
-                <a :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top
-                   title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
-                  MGI <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
-                   v-b-tooltip.top
-                   title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
-                  UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
-                <a :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`"
-                   target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" v-b-tooltip.top
-                   title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
-                  UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
-              </template>
+                    title="The UC Santa Cruz Genome Browser"> UCSC <span
+                    class="fa fa-external-link-alt"></span></a>
+                  <a :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                      v-b-tooltip.top
+                      title="The Genome Aggregation Database (v3) at the Broad Institute, containing variant data from 71,702 sequenced genomes">
+                    gnomAD <span class="fa fa-external-link-alt"></span></a>
+                </template>
+                <template v-if="rsid !==null">
+                  <a :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`" target="_blank"
+                    class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true" v-b-tooltip.top
+                    title="Reference SNP Report from the National Center for Biotechnology Information (NCBI)"> dbSNP
+                    <span class="fa fa-external-link-alt"></span> </a>
+                  <a :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                    v-b-tooltip.top
+                    title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative">
+                    MGI <span class="fa fa-external-link-alt"></span></a>
+                  <a :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
+                    v-b-tooltip.top
+                    title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software">
+                    UKB-SAIGE <span class="fa fa-external-link-alt"></span></a>
+                  <a :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`"
+                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+                    aria-pressed="true" v-b-tooltip.top
+                    title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software">
+                    UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
+                </template>
+              </div>
             </div>
-          </div>
+        </div>
       </div>
-    </div>
-    <h2>eQTLS</h2>
-    <tabulator-table :columns="table_base_columns"
-                     :table_data="table_data"
-                     :sort="table_sort"
-                     :tooltips="tabulator_tooltip_maker"
-                     tooltip-generation-mode="hover"
-                     :tooltips-header="true" />
+      <div ref="eqtl-table" class="padtop">
+        <h2>eQTLs</h2>
+        <tabulator-table :columns="table_base_columns"
+                        :table_data="table_data"
+                        :sort="table_sort"
+                        :tooltips="tabulator_tooltip_maker"
+                        tooltip-generation-mode="hover"
+                        :tooltips-header="true" />
+      </div>
   </div>
 </template>
-
-
-<style>
-  .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
-    white-space: normal;
-    text-overflow: fade;
-  }
-
-  /* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
-  .lz-data_layer-tooltip {
-    z-index: 2
-  }
-</style>

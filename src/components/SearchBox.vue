@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form @submit.prevent="parseSearch" class="mb-3">
+    <form @submit.prevent="parseSearch">
       <div class="input-group">
         <input v-model.trim="term"
                autocomplete="off" class="form-control" type="text"
