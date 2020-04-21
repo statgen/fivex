@@ -1,10 +1,10 @@
 <template>
   <div>
-    <form @submit.prevent="parseSearch" class="mb-3">
+    <form @submit.prevent="parseSearch">
       <div class="input-group">
         <input v-model.trim="term"
                autocomplete="off" class="form-control" type="text"
-               placeholder="Search for a variant, e.g. chr19:488506 or rs10424907" autofocus/>
+               placeholder="Search for a variant, region, or gene: chr19:488506, rs10424907, or SHC2" autofocus/>
         <div class="input-group-append">
           <button class="btn btn-secondary" type="submit">
             <span class="fa fa-search" aria-hidden="true"></span>

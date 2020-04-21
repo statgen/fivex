@@ -1,5 +1,5 @@
 .padtop {
-    padding-top: 20px;
+    padding-top: 40px;
 }
 
 .linkButton {
@@ -74,4 +74,18 @@ dl.variant-info-middle dd {
     height: auto;
     max-height: 400px;
     overflow-x: hidden;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+    white-space: normal;
+    text-overflow: fade;
+}
+
+/* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
+.lz-data_layer-tooltip {
+    z-index: 2;
+}
+
+.searchbox {
+    width: 600px;
 }

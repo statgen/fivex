@@ -216,6 +216,10 @@ export default {
         throw new Error('Unrecognized type of track');
       }
     },
+    goto(refName) {
+      const element = this.$refs[refName];
+      element.scrollIntoView({ behavior: 'smooth' });
+    },
   },
   watch: {
     y_field() {
@@ -256,10 +260,18 @@ export default {
     </div>
   </div>
   <div v-else class="container-fluid">
-    <search-box></search-box>
-
+    <b-navbar class="py-0" type="light" variant="light" fixed="top">
+      <b-collapse is-nav>
+        <h6 class="mr-2">Jump to:</h6>
+        <b-button @click="goto('region-plot')" class="mr-2 btn-light btn-link" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
+        <b-button @click="goto('external-links')" class="mr-2 btn-light btn-link" size="sm">External links <span class="fas fa-level-down-alt"></span></b-button>
+        <b-navbar-nav class="ml-auto">
+          <search-box class="searchbox"/>
+        </b-navbar-nav>
+      </b-collapse>
+    </b-navbar>
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12" ref="region-plot">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
           <i>{{ region_data.symbol }}</i> <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
         </strong></h1>
@@ -268,7 +280,7 @@ export default {
 
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        <b-dropdown class="m-2">
+        <b-dropdown class="m-2" size="sm">
           <template v-slot:button-content>
             Select anchors <span class="fa fa-info-circle"
                                   v-b-tooltip.top.html
@@ -284,7 +296,7 @@ export default {
                           :tissue_list="region_data.tissue_list"/>
         </b-dropdown>
 
-        <b-dropdown class="m-2">
+        <b-dropdown class="m-2" size="sm">
            <template v-slot:button-content>
              Add tracks <span class="fa fa-info-circle"
                                v-b-tooltip.top.html
@@ -314,7 +326,7 @@ export default {
           </b-dropdown-text>
         </b-dropdown>
 
-        <b-dropdown text="Y-axis" class="m-2">
+        <b-dropdown text="Y-axis" class="m-2" size="sm">
           <b-dropdown-text>
             <label v-b-tooltip.right.html
                    title="Display -log<sub>10</sub>(P-values) on the Y-axis">
@@ -351,7 +363,7 @@ export default {
     </div>
 
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12" ref="external-links">
         <div class="card">
           <div class="card-body">
             External links:
