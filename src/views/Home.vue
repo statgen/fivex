@@ -8,22 +8,22 @@
         <search-box></search-box>
         <br>
         <div class="text-center">
-          Search for: <b>variant by position:
+          Search for: <b>Variant by position:
           <router-link
             :to="{name: 'variant', params: {variant: '19_488506'}}">chr19:488506</router-link>
           &bull;
-          rsid:
+          Rsid:
           <router-link
             :to="{name: 'variant', params: {variant: '19_488506'}}">rs10424907</router-link>
           &bull;
-          region:
+          Region:
           <router-link
             :to="{name: 'region',
                   query: {chrom: '19', start: 448506, end: 528506,
                           tissue: 'Brain_Cortex', gene_id: 'ENSG00000129946.10' }}"
           >chr19:448506-528506</router-link>
           &bull;
-          gene:
+          Gene:
           <router-link
             :to="{name: 'region',
                   query: {chrom: '19', start: 448506, end: 528506,
