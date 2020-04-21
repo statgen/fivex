@@ -268,13 +268,15 @@ export default {
   </div>
   <div v-else class="container-fluid">
     <b-navbar class="py-0" type="light" variant="light" fixed="top">
-      <b-button class="btn btn-sm btn-secondary mr-3" style="pointer-events: none;">Go to:</b-button>
-      <b-button @click="goto('single-variant-eqtl-plot')" class="mr-2" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
-      <b-button @click="goto('genotype-infobox')" class="mr-2" size="sm">Variant Info <span class="fas fa-level-down-alt"></span></b-button>
-      <b-button @click="goto('eqtl-table')" class="mr-2" size="sm">eQTL Table <span class="fas fa-level-down-alt"></span></b-button>
-      <b-navbar-nav class="ml-auto">
-        <search-box/>
-      </b-navbar-nav>
+      <b-collapse is-nav>
+        <h6 class="mr-2">Jump to:</h6>
+        <b-button @click="goto('single-variant-eqtl-plot')" class="mr-2 btn-light btn-link" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
+        <b-button @click="goto('genotype-infobox')" class="mr-2 btn-light btn-link" size="sm">Variant Info <span class="fas fa-level-down-alt"></span></b-button>
+        <b-button @click="goto('eqtl-table')" class="mr-2 btn-light btn-link" size="sm">eQTL Table <span class="fas fa-level-down-alt"></span></b-button>
+        <b-navbar-nav class="ml-auto">
+          <search-box class="searchbox"/>
+        </b-navbar-nav>
+      </b-collapse>
     </b-navbar>
     <div class="row padtop" ref="single-variant-eqtl-plot">
       <div class="col-sm-12">

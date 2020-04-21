@@ -79,13 +79,13 @@ dl.variant-info-middle dd {
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
     white-space: normal;
     text-overflow: fade;
-  }
+}
 
-  /* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
-  .lz-data_layer-tooltip {
+/* Prevent Bootstrap buttons from covering LZ tooltips, by giving render preference to tooltips */
+.lz-data_layer-tooltip {
     z-index: 2;
-  }
+}
 
-  input.form-control {
+.searchbox {
     width: 600px;
-  }
+}
