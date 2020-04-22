@@ -273,7 +273,7 @@ export default {
     <div class="row">
       <div class="col-sm-12" ref="region-plot">
         <h1 style="margin-top: 1em;"><strong>Single-tissue eQTLs near
-          <i>{{ region_data.symbol }}</i> <small>(chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})</small>
+          <i>{{ region_data.symbol }}</i> (chr{{ chrom }}:{{ start.toLocaleString()}}-{{ end.toLocaleString() }})
         </strong></h1>
       </div>
     </div>
@@ -282,11 +282,12 @@ export default {
       <div class="col-sm-12">
         <b-dropdown class="m-2" size="sm">
           <template v-slot:button-content>
-            Select anchors <span class="fa fa-info-circle"
+            <span class="fa fa-info-circle"
                                   v-b-tooltip.top.html
                                   title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br><br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue.">
               <span class="sr-only">Info</span>
             </span>
+            Select anchors
           </template>
           <select-anchors class="px-3"
                           @navigate="changeAnchors"
@@ -298,11 +299,12 @@ export default {
 
         <b-dropdown class="m-2" size="sm">
            <template v-slot:button-content>
-             Add tracks <span class="fa fa-info-circle"
+             <span class="fa fa-info-circle"
                                v-b-tooltip.top.html
                                title="Add an additional track using a <b>new tissue or gene</b>.<br><br>If you add a <b>tissue</b>, the new track will show eQTLs between that tissue and the <b>anchor gene</b>.<br><br>If you add a <b>gene</b>, the new track will show eQTLs between that gene and the <b>anchor tissue</b>.">
               <span class="sr-only">Info</span>
              </span>
+             Add tracks
             </template>
           <b-dropdown-text>
             <label>Add a gene
@@ -313,7 +315,7 @@ export default {
                         :value="a_geneid">{{a_symbol}}</option>
               </select>
             </label> &times; {{ region_data.tissue }}<br>
-
+            <b-dropdown-divider/>
             <label>Add a tissue
               <select class="form-control"
                 @change="addTrack('tissue', $event.target.value)">

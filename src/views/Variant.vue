@@ -345,11 +345,12 @@ export default {
 
         <b-dropdown class="mr-2" size="sm">
           <template v-slot:button-content>
-            Max TSS dist. (bp) <span class="fa fa-info-circle"
+            <span class="fa fa-info-circle"
                                   v-b-tooltip.bottom.html
                                   title="Display eQTLs for genes <b>only</b> if their Transcription Start Sites (TSS's) are within the selected distance from this variant.">
             <span class="sr-only">Info</span>
           </span>
+            Max TSS dist. (bp)
           </template>
           <b-dropdown-text>
             <b-form-radio-group v-model="tss_distance"
@@ -437,12 +438,7 @@ export default {
 
           <div class="card">
             <div class="card-body">
-              <span class="d-inline-block" tabindex="0"
-                    v-b-tooltip.top
-                    title="External links for more information about this variant">
-                <button class="btn btn-sm btn-secondary mr-1" style="pointer-events: none;"><span
-                    class="fa fa-secondary-circle"></span><span class="fa fa-info-circle"></span> Variant info </button>
-              </span>
+              External links:
               <template v-if="ref!==null && alt !== null">
                 <a :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
