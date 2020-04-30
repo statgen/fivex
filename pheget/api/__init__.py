@@ -3,6 +3,7 @@ API endpoints (return JSON, not HTML)
 """
 
 import sqlite3
+from typing import List
 
 from flask import Blueprint, jsonify, request
 
@@ -129,3 +130,57 @@ def variant_query(chrom: str, pos: int):
 
     results = {"data": data}
     return jsonify(results)
+
+
+@api_blueprint.route(
+    "/region/<string:chrom>/<int:start>-<int:end>/top10pip/", methods=["GET"]
+)
+def region_query_toppip(chrom: str, start: int, end: int):
+    """
+    Given a region and optionally gene_id ('ENSG#'), returns the top 10 gene x
+    tissue combinations with the best independent PIP signals, along with gene
+    symbol, gene_id, p-value, effect size, and standard error of effect size in
+    the given genomic region.
+    """
+    gene_id = request.args.get("gene_id", None)
+    if chrom is not None and chrom[0:3] == "chr":
+        chrom = chrom[3:]
+    data = [
+        res.to_dict()
+        for res in query_variants(chrom, start, end=end, gene_id=gene_id)
+    ]
+    top10piplist = []  # key gene_id, tissue, pip_cluster
+    top10keylist = []
+    top10datalist = [[] for i in range(10)]  # type: List[list]
+    for i in range(1, 11):
+        top10keylist.append("Tissue:Gene:" + str(i))
+        top10piplist.append(float(i) * 1e-6)
+        # top10datalist.append([])
+    minPip = 1e-6
+    minPipIdx = 0
+    for datapoint in data:
+        newkey = ":".join(
+            [
+                datapoint["tissue"],
+                datapoint["gene_id"],
+                str(datapoint["pip_cluster"]),
+            ]
+        )
+        if (
+            newkey in top10keylist
+        ):  # If this tissue x gene x cluster combination is already in the list, compare PIPs, and if this PIP is bigger, replace the data, otherwise ignore
+            if datapoint["pip"] > top10piplist[top10keylist.index(newkey)]:
+                newidx = top10keylist.index(newkey)
+                top10piplist[newidx] = datapoint["pip"]
+                top10datalist[newidx] = datapoint
+                minPip = min(top10piplist)
+                minPipIdx = top10piplist.index(minPip)
+        elif (
+            datapoint["pip"] > minPip
+        ):  # If the current PIP is larger than the smallest of the 10 in our list, replace the smallest with our current point
+            top10piplist[minPipIdx] = datapoint["pip"]
+            top10keylist[minPipIdx] = newkey
+            top10datalist[minPipIdx] = datapoint
+            minPip = min(top10piplist)
+            minPipIdx = top10piplist.index(minPip)
+    return jsonify(top10datalist)
