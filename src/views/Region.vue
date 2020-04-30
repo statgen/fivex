@@ -6,6 +6,7 @@ import { handleErrors } from '@/util/common';
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import SelectAnchors from '@/components/SelectAnchors.vue';
+import TabulatorTable from '@/components/TabulatorTable.vue';
 
 import {
   addTrack,
@@ -15,6 +16,11 @@ import {
   getTrackSources,
   switchY_region,
 } from '@/util/region-helpers';
+
+import {
+  TABLE_BASE_COLUMNS,
+  tabulator_tooltip_maker,
+} from '@/util/variant-helpers';
 
 /**
  * Get the data required to render the template
@@ -29,6 +35,12 @@ function getData(queryParams) {
     .then(handleErrors)
     .then((resp) => resp.json());
 }
+
+// function getTopPipData(chrom, start, end) {
+//   return fetch(`/api/data/region/${chrom}/${start}-${end}/top10pip/`)
+//     .then(handleErrors)
+//     .then((resp) => resp.json());
+// }
 
 export default {
   name: 'RegionView',
@@ -49,6 +61,9 @@ export default {
 
       extra_genes: [],
       extra_tissues: [],
+
+      // Internal data passed between widgets
+      table_data: [],
 
       // Internal state
       base_plot_sources: null,
@@ -77,6 +92,10 @@ export default {
       }
       return $.param(options);
     },
+    table_sort() {
+      // Update how tabulator is drawn, whenever y_field changes
+      return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
+    },
   },
   beforeCreate() {
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
@@ -86,6 +105,10 @@ export default {
     //  observables.
     this.assoc_plot = null;
     this.assoc_sources = null;
+
+    // Make some constants available to the Vue instance for use as props in rendering
+    this.table_base_columns = TABLE_BASE_COLUMNS;
+    this.tabulator_tooltip_maker = tabulator_tooltip_maker;
   },
   beforeRouteEnter(to, from, next) {
     // Fires on first navigation to route (from another route)
@@ -247,6 +270,7 @@ export default {
     LzPlot,
     SearchBox,
     SelectAnchors,
+    TabulatorTable,
   },
 };
 </script>
@@ -417,6 +441,15 @@ export default {
           </div>
         </div>
       </div>
+    </div>
+    <div ref="eqtl-table" class="padtop">
+      <h2>Top PIP clusters</h2>
+      <tabulator-table :columns="table_base_columns"
+                       :table_data="table_data"
+                       :sort="table_sort"
+                       :tooltips="tabulator_tooltip_maker"
+                       tooltip-generation-mode="hover"
+                       :tooltips-header="true" />
     </div>
   </div>
 </template>
