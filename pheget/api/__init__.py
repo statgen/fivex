@@ -155,7 +155,6 @@ def region_query_toppip(chrom: str, start: int, end: int):
     for i in range(1, 11):
         top10keylist.append("Tissue:Gene:" + str(i))
         top10piplist.append(float(i) * 1e-6)
-        # top10datalist.append([])
     minPip = 1e-6
     minPipIdx = 0
     for datapoint in data:
@@ -183,4 +182,7 @@ def region_query_toppip(chrom: str, start: int, end: int):
             top10datalist[minPipIdx] = datapoint
             minPip = min(top10piplist)
             minPipIdx = top10piplist.index(minPip)
+    for i in range(9, -1, -1):  # Get rid of empty results
+        if top10datalist[i] == []:
+            top10datalist.pop(i)
     return jsonify(top10datalist)
