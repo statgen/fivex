@@ -96,6 +96,11 @@ export default {
       // Update how tabulator is drawn, whenever y_field changes
       return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
     },
+    ajax_url() {
+      // Re-calculate API URL when chrom, start, and/or end changes.
+      const { chrom, start, end } = this;
+      return `/api/data/region/${chrom}/${start}-${end}/top10pip/`;
+    },
   },
   beforeCreate() {
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
