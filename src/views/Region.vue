@@ -330,23 +330,24 @@ export default {
 
         <b-dropdown text="Y-axis" class="m-2" size="sm">
           <b-dropdown-text>
-            <label v-b-tooltip.right.html
-                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+            <label>
               <input type="radio" name="y-options" id="show-log-pvalue"
                      v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
             </label>
-
-            <label v-b-tooltip.right.html
-                   title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
+            <label>
               <input type="radio" name="y-options" id="show-beta"
-                     v-model="y_field" value="beta"> Effect size
+                     v-model="y_field" value="beta"> Effect size <span id="y-axis-radio-effectsize" class="fa fa-info-circle"></span>
             </label>
-
-            <label v-b-tooltip.right.html
-                   title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
+            <b-popover target="y-axis-radio-effectsize">
+              Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.
+            </b-popover>
+            <label>
               <input type="radio" name="y-options" id="show-pip"
-                     v-model="y_field" value="pip"> PIP
+                     v-model="y_field" value="pip"> PIP <span id="y-axis-radio-pip" class="fa fa-info-circle"></span>
             </label>
+            <b-popover target="y-axis-radio-pip">
+              Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.
+            </b-popover>
           </b-dropdown-text>
         </b-dropdown>
       </div>

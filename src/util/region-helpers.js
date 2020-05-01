@@ -37,9 +37,9 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
   }<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
         <strong>MAF</strong>: {{{{namespace[assoc]}}maf}} <br>
         <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
-        <strong>PIP</strong>: {{{{namespace[assoc]}}pip}} <br>
-        <strong>SPIP</strong>: {{{{namespace[assoc]}}spip}} <br>
-        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster}} <br>
+        <strong>PIP</strong>: {{{{namespace[assoc]}}pip|pip_display}} <br>
+        <strong>SPIP</strong>: {{{{namespace[assoc]}}spip|pip_display}} <br>
+        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster|pip_display}} <br>
         <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a>`;
 
   const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
