@@ -8,7 +8,8 @@ import 'tabulator-tables/dist/css/bootstrap/tabulator_bootstrap4.min.css';
 export default {
   name: 'TabulatorTable',
   props: {
-    table_data: Array,
+    ajaxURL: null,
+    table_data: { default() { return []; }, type: Array },
     columns: Array,
     sort: Array,
     layout: { default: 'fitData' },
@@ -64,9 +65,14 @@ export default {
       },
       deep: true,
     },
+    ajaxUrl(value) {
+      // Force reload of data when url changes
+      this.tabulator.setData(value);
+    },
   },
   mounted() {
     const {
+      ajaxURL,
       table_data: data,
       columns,
       height,
@@ -89,6 +95,7 @@ export default {
     this.tabulator = new Tabulator(
       this.$refs.table,
       {
+        ajaxURL,
         data,
         columns,
         height,

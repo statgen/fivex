@@ -96,7 +96,7 @@ export default {
       // Update how tabulator is drawn, whenever y_field changes
       return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
     },
-    ajax_url() {
+    top_hits_url() {
       // Re-calculate API URL when chrom, start, and/or end changes.
       const { chrom, start, end } = this;
       return `/api/data/region/${chrom}/${start}-${end}/top10pip/`;
@@ -450,7 +450,7 @@ export default {
     <div ref="eqtl-table" class="padtop">
       <h2>Top PIP clusters</h2>
       <tabulator-table :columns="table_base_columns"
-                       :table_data="table_data"
+                       :ajaxURL="top_hits_url"
                        :sort="table_sort"
                        :tooltips="tabulator_tooltip_maker"
                        tooltip-generation-mode="hover"
