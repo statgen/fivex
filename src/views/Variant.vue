@@ -4,7 +4,7 @@
  */
 import $ from 'jquery';
 import '@/lz-helpers';
-import { handleErrors } from '@/util/common';
+import { deNamespace, handleErrors } from '@/util/common';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
@@ -84,7 +84,7 @@ export default {
     },
     table_sort() {
       // Update how tabulator is drawn, whenever y_field changes
-      return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
+      return [{ column: this.y_field, dir: 'desc' }];
     },
     query_params() {
       // Re-calculate the URL query string whenever dependent information changes.
@@ -186,7 +186,12 @@ export default {
           'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
           'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
         ],
-        (data) => { this.table_data = data; },
+        (data) => {
+          // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
+          // using it in tabulator, so that tabulator layouts can be written that also work with
+          // data directly from the API (where there is no prefix)
+          this.table_data = data.map((item) => deNamespace(item));
+        },
       );
     },
     goto(refName) {

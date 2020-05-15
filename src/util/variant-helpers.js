@@ -399,21 +399,21 @@ export function tabulator_tooltip_maker(cell) {
 export const TABLE_BASE_COLUMNS = [
   {
     title: 'Gene',
-    field: 'phewas:symbol',
+    field: 'symbol',
     headerFilter: true,
     formatter(cell) {
-      return `<i>${cell.getValue()} (${cell.getData()['phewas:gene_id']}</i>)`;
+      return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
     },
   },
-  { title: 'Tissue', field: 'phewas:tissue', headerFilter: true },
-  { title: 'System', field: 'phewas:system', headerFilter: true },
+  { title: 'Tissue', field: 'tissue', headerFilter: true },
+  { title: 'System', field: 'system', headerFilter: true },
   {
     title: '-log<sub>10</sub>(p)',
-    field: 'phewas:log_pvalue',
+    field: 'log_pvalue',
     formatter: two_digit_fmt2,
     sorter: 'number',
   },
-  { title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number' },
-  { title: 'SE (Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
-  { title: 'PIP', field: 'phewas:pip', formatter: pip_fmt },
+  { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+  { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+  { title: 'PIP', field: 'pip', formatter: pip_fmt },
 ];

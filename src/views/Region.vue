@@ -17,10 +17,7 @@ import {
   switchY_region,
 } from '@/util/region-helpers';
 
-import {
-  TABLE_BASE_COLUMNS,
-  tabulator_tooltip_maker,
-} from '@/util/variant-helpers';
+import { TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
 
 /**
  * Get the data required to render the template
@@ -94,7 +91,7 @@ export default {
     },
     table_sort() {
       // Update how tabulator is drawn, whenever y_field changes
-      return [{ column: `phewas:${this.y_field}`, dir: 'desc' }];
+      return [{ column: this.y_field, dir: 'desc' }];
     },
     top_hits_url() {
       // Re-calculate API URL when chrom, start, and/or end changes.
