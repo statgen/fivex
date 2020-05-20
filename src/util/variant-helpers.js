@@ -138,9 +138,9 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
-<strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
-<strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
-<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
+<strong>PIP:</strong> {{{{namespace[phewas]}}pip|pip_display}}<br>
+<strong>SPIP:</strong> {{{{namespace[phewas]}}spip|pip_display}}<br>
+<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster|pip_display}}<br>
 <a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
 `;
               base.match = {

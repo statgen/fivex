@@ -297,54 +297,69 @@ export default {
       <div class="col-sm-12">
         <b-dropdown text="X-Axis Group" class="mr-2" size="sm">
           <b-dropdown-text>
-            <label v-b-tooltip.right
-                  title="Group eQTLs by tissues, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete="off"
-                    v-model="group" value="tissue"> Tissue
+            <label>
+              <span class=nobreak><input type="radio" name="group-options" autocomplete="off"
+                    v-model="group" value="tissue"> Tissue <span id="x-axis-radio-tissue" class="fa fa-info-circle"></span></span>
+              <b-popover target="x-axis-radio-tissue">
+                Group eQTLs by tissues, sorted alphabetically
+              </b-popover>
             </label>
-            <label v-b-tooltip.right
-                  title="Group eQTLs by systems as defined by the GTEx project, sorted alphabetically">
-              <input type="radio" name="group-options" autocomplete="off"
-                    v-model="group" value="system"> System
+            <label>
+              <span class=nobreak><input type="radio" name="group-options" autocomplete="off"
+                    v-model="group" value="system"> System <span id="x-axis-radio-system" class="fa fa-info-circle"></span></span>
+              <b-popover target="x-axis-radio-system">
+                Group eQTLs by systems as defined by the GTEx project, sorted alphabetically
+              </b-popover>
             </label>
-            <label v-b-tooltip.right
-                  title="Group eQTLs by gene, sorted by the position of the genes' transcription start sites">
-              <input type="radio" name="group-options" autocomplete="off"
-                    v-model="group" value="symbol"> Gene
+            <label>
+              <span class=nobreak><input type="radio" name="group-options" autocomplete="off"
+                    v-model="group" value="symbol"> Gene <span id="x-axis-radio-gene" class="fa fa-info-circle"></span></span>
+              <b-popover target="x-axis-radio-gene">
+                Group eQTLs by gene, sorted by the position of the genes' transcription start sites
+              </b-popover>
             </label>
           </b-dropdown-text>
         </b-dropdown>
 
         <b-dropdown text="Y-Axis" class="mr-2" size="sm">
           <b-dropdown-text>
-            <label v-b-tooltip.right.html
-                  title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+            <label>
               <input type="radio" name="y-options" v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
             </label>
-            <label v-b-tooltip.right.html
-                  title="Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.">
-              <input type="radio" name="y-options" v-model="y_field" value="beta"> Effect size
+            <label>
+              <span class=nobreak><input type="radio" name="y-options" v-model="y_field" value="beta"> Effect size <span id="y-axis-radio-effectsize" class="fa fa-info-circle"></span></span>
+              <b-popover target="y-axis-radio-effectsize">
+                Displays Normalized Effect Size (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage' target='_blank'>the GTEx Portal</a> for an explanation of NES.
+              </b-popover>
             </label>
-            <label v-b-tooltip.right.html
-                  title="Displays <a href='https://doi.org/10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
-              <input type="radio" name="y-options" v-model="y_field" value="pip"> PIP
+            <label>
+              <span class=nobreak><input type="radio" name="y-options" v-model="y_field" value="pip"> PIP <span id="y-axis-radio-pip" class="fa fa-info-circle"></span></span>
+              <b-popover target="y-axis-radio-pip">
+                Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.
+              </b-popover>
             </label>
           </b-dropdown-text>
         </b-dropdown>
 
         <b-dropdown text="Labels" class="mr-2" size="sm">
           <b-dropdown-text>
-            <label v-b-tooltip.right
-                  title="Turn off all labels">
-              <input type="radio" name="label-options" v-model="n_labels" :value="0"> No labels
+            <label>
+              <span class=nobreak><input type="radio" name="label-options" v-model="n_labels" :value="0"> No labels <span id="labels-radio-none" class="fa fa-info-circle"></span></span>
+              <b-popover target="labels-radio-none">
+               Turn off all labels
+               </b-popover>
             </label>
-            <label v-b-tooltip.right.html
-                  title="If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5
+            <label>
+              <span class=nobreak><input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5 <span id="labels-radio-5" class="fa fa-info-circle"></span></span>
+              <b-popover target="labels-radio-5">
+                If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.
+              </b-popover>
             </label>
-            <label v-b-tooltip.right.html
-                  title="If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.">
-              <input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20
+            <label>
+              <span class=nobreak><input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20 <span id="labels-radio-20" class="fa fa-info-circle"></span></span>
+              <b-popover target="labels-radio-20">
+                If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.
+              </b-popover>
             </label>
           </b-dropdown-text>
         </b-dropdown>

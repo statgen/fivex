@@ -27,6 +27,11 @@ function retrieveBySuffix(point_data, field_suffix) {
 LocusZoom.TransformationFunctions.set('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
 
 /**
+ * Convert displayed pip, spip, or pip_cluster to missing '-' if value is 0
+ */
+LocusZoom.TransformationFunctions.set('pip_display', (x) => (x ? x.toString() : '-'));
+
+/**
  * Assign point shape based on PIP cluster designation. Since there are always just a few clusters, and cluster 1
  *  is most significant, this hard-coding is a workable approach.
  */
