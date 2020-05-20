@@ -330,12 +330,13 @@ def query_variants(
     reader.add_filter(lambda result: result.maf > 0.0)
 
     # PIP === 0.0 only if the data point is missing in the DAP-G database.
-    # Using this filter returns only points which are found in the DAP-G database.
+    # Using this filter returns only points which are found in the DAP-G database,
+    # and only for points which are genomewide significant (p-value < 5e-8)
     if piponly:
         reader.add_filter("pip")
         reader.add_filter(lambda result: result.pip > 0.0)
         reader.add_filter("log_pvalue")
-        reader.add_filter(lambda result: result.log_pvalue > 3)
+        reader.add_filter(lambda result: result.log_pvalue > 7.30103)
 
     if end is None:
         # Single variant query

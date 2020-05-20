@@ -443,7 +443,7 @@ export default {
       </div>
     </div>
     <div ref="eqtl-table" class="padtop">
-      <h2>eQTLs in region</h2>
+      <h2>Significant eQTLs in region</h2>
       <tabulator-table :columns="table_base_columns"
                        :ajaxURL="range_data_url"
                        :sort="table_sort"
