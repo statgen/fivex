@@ -138,9 +138,9 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 <strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
 <strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
 <strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
-<strong>PIP:</strong> {{{{namespace[phewas]}}pip}}<br>
-<strong>SPIP:</strong> {{{{namespace[phewas]}}spip}}<br>
-<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster}}<br>
+<strong>PIP:</strong> {{{{namespace[phewas]}}pip|pip_display}}<br>
+<strong>SPIP:</strong> {{{{namespace[phewas]}}spip|pip_display}}<br>
+<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster|pip_display}}<br>
 <a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
 `;
               base.match = {
@@ -379,10 +379,19 @@ function two_digit_fmt2(cell) {
 function pip_fmt(cell) {
   const x = cell.getValue();
   if (x === 0) {
-    return '0';
+    return '-';
   }
   return x.toPrecision(2);
 }
+
+function pip_cluster_fmt(cell) {
+  const x = cell.getValue();
+  if (x === 0) {
+    return '-';
+  }
+  return x.toFixed(0);
+}
+
 
 export function tabulator_tooltip_maker(cell) {
   // Only show tooltips when an ellipsis ('...') is hiding part of the data.
@@ -399,21 +408,22 @@ export function tabulator_tooltip_maker(cell) {
 export const TABLE_BASE_COLUMNS = [
   {
     title: 'Gene',
-    field: 'phewas:symbol',
+    field: 'symbol',
     headerFilter: true,
     formatter(cell) {
-      return `<i>${cell.getValue()} (${cell.getData()['phewas:gene_id']}</i>)`;
+      return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
     },
   },
-  { title: 'Tissue', field: 'phewas:tissue', headerFilter: true },
-  { title: 'System', field: 'phewas:system', headerFilter: true },
+  { title: 'Tissue', field: 'tissue', headerFilter: true },
+  { title: 'System', field: 'system', headerFilter: true },
   {
     title: '-log<sub>10</sub>(p)',
-    field: 'phewas:log_pvalue',
+    field: 'log_pvalue',
     formatter: two_digit_fmt2,
     sorter: 'number',
   },
-  { title: 'Effect Size', field: 'phewas:beta', formatter: two_digit_fmt1, sorter: 'number' },
-  { title: 'SE (Effect Size)', field: 'phewas:stderr_beta', formatter: two_digit_fmt1 },
-  { title: 'PIP', field: 'phewas:pip', formatter: pip_fmt },
+  { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+  { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+  { title: 'PIP', field: 'pip', formatter: pip_fmt },
+  { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
 ];

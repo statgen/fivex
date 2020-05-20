@@ -89,3 +89,7 @@ dl.variant-info-middle dd {
 .searchbox {
     width: 600px;
 }
+
+.nobreak {
+    white-space: nowrap;
+}

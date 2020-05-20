@@ -6,6 +6,7 @@ import { handleErrors } from '@/util/common';
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import SelectAnchors from '@/components/SelectAnchors.vue';
+import TabulatorTable from '@/components/TabulatorTable.vue';
 
 import {
   addTrack,
@@ -15,6 +16,8 @@ import {
   getTrackSources,
   switchY_region,
 } from '@/util/region-helpers';
+
+import { TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
 
 /**
  * Get the data required to render the template
@@ -50,6 +53,9 @@ export default {
       extra_genes: [],
       extra_tissues: [],
 
+      // Internal data passed between widgets
+      table_data: [],
+
       // Internal state
       base_plot_sources: null,
       base_plot_layout: null,
@@ -77,6 +83,17 @@ export default {
       }
       return $.param(options);
     },
+    table_sort() {
+      // Update how tabulator is drawn, whenever y_field changes
+      return [{ column: this.y_field, dir: 'desc' }];
+    },
+    range_data_url() {
+      // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
+      // Add the option "?piponly=True" to the end of the url to return only points
+      // with non-missing PIP values, i.e. only points that are found in the DAP-G database
+      const { chrom, start, end } = this;
+      return `/api/data/region/${chrom}/${start}-${end}/`;
+    },
   },
   beforeCreate() {
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
@@ -86,6 +103,10 @@ export default {
     //  observables.
     this.assoc_plot = null;
     this.assoc_sources = null;
+
+    // Make some constants available to the Vue instance for use as props in rendering
+    this.table_base_columns = TABLE_BASE_COLUMNS;
+    this.tabulator_tooltip_maker = tabulator_tooltip_maker;
   },
   beforeRouteEnter(to, from, next) {
     // Fires on first navigation to route (from another route)
@@ -247,6 +268,7 @@ export default {
     LzPlot,
     SearchBox,
     SelectAnchors,
+    TabulatorTable,
   },
 };
 </script>
@@ -265,6 +287,7 @@ export default {
         <h6 class="mr-2">Jump to:</h6>
         <b-button @click="goto('region-plot')" class="mr-2 btn-light btn-link" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
         <b-button @click="goto('external-links')" class="mr-2 btn-light btn-link" size="sm">External links <span class="fas fa-level-down-alt"></span></b-button>
+        <b-button @click="goto('eqtl-table')" class="mr-2 btn-light btn-link" size="sm">eQTL Table <span class="fas fa-level-down-alt"></span></b-button>
         <b-navbar-nav class="ml-auto">
           <search-box class="searchbox"/>
         </b-navbar-nav>
@@ -330,23 +353,24 @@ export default {
 
         <b-dropdown text="Y-axis" class="m-2" size="sm">
           <b-dropdown-text>
-            <label v-b-tooltip.right.html
-                   title="Display -log<sub>10</sub>(P-values) on the Y-axis">
+            <label>
               <input type="radio" name="y-options" id="show-log-pvalue"
                      v-model="y_field" value="log_pvalue"> -log<sub>10</sub> P
             </label>
-
-            <label v-b-tooltip.right.html
-                   title="Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.">
-              <input type="radio" name="y-options" id="show-beta"
-                     v-model="y_field" value="beta"> Effect size
+            <label>
+              <span class=nobreak><input type="radio" name="y-options" id="show-beta"
+                     v-model="y_field" value="beta"> Effect size <span id="y-axis-radio-effectsize" class="fa fa-info-circle"></span></span>
             </label>
-
-            <label v-b-tooltip.right.html
-                   title="Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.">
-              <input type="radio" name="y-options" id="show-pip"
-                     v-model="y_field" value="pip"> PIP
+            <b-popover target="y-axis-radio-effectsize">
+              Displays Normalized Effect Sizes (NES) on the Y-axis. See <a href='https://www.gtexportal.org/home/documentationPage'>the GTEx Portal</a> for an explanation of NES.
+            </b-popover>
+            <label>
+              <span class=nobreak><input type="radio" name="y-options" id="show-pip"
+                     v-model="y_field" value="pip"> PIP <span id="y-axis-radio-pip" class="fa fa-info-circle"></span></span>
             </label>
+            <b-popover target="y-axis-radio-pip">
+              Displays <a href='https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646' target='_blank'>DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.
+            </b-popover>
           </b-dropdown-text>
         </b-dropdown>
       </div>
@@ -365,11 +389,11 @@ export default {
     </div>
 
     <div class="row">
-      <div class="col-sm-12" ref="external-links">
+      <div class="col-sm-12 padtop" ref="external-links">
         <div class="card">
           <div class="card-body">
             External links:
-            <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${ chrom }%3A${ start }-${ end }`"
+            <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${ chrom }%3A${ start }-${ end }&highlight=hg38.chr${ chrom }%3A${ start }-${ end }`"
                 target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
                 v-b-tooltip.top
                 title="The UC Santa Cruz Genome Browser"> UCSC <span
@@ -417,6 +441,15 @@ export default {
           </div>
         </div>
       </div>
+    </div>
+    <div ref="eqtl-table" class="padtop">
+      <h2>eQTLs in region</h2>
+      <tabulator-table :columns="table_base_columns"
+                       :ajaxURL="range_data_url"
+                       :sort="table_sort"
+                       :tooltips="tabulator_tooltip_maker"
+                       tooltip-generation-mode="hover"
+                       :tooltips-header="true" />
     </div>
   </div>
 </template>
