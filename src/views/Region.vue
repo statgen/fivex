@@ -92,7 +92,7 @@ export default {
       // Add the option "?piponly=True" to the end of the url to return only points
       // with non-missing PIP values, i.e. only points that are found in the DAP-G database
       const { chrom, start, end } = this;
-      return `/api/data/region/${chrom}/${start}-${end}/`;
+      return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
     },
   },
   beforeCreate() {
