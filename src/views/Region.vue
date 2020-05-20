@@ -397,7 +397,7 @@ export default {
         <div class="card">
           <div class="card-body">
             External links:
-            <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${ chrom }%3A${ start }-${ end }`"
+            <a :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${ chrom }%3A${ start }-${ end }&highlight=hg38.chr${ chrom }%3A${ start }-${ end }`"
                 target="_blank" class="btn btn-secondary btn-sm mr-1" role="button" aria-pressed="true"
                 v-b-tooltip.top
                 title="The UC Santa Cruz Genome Browser"> UCSC <span
