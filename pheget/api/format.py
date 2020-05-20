@@ -334,6 +334,8 @@ def query_variants(
     if piponly:
         reader.add_filter("pip")
         reader.add_filter(lambda result: result.pip > 0.0)
+        reader.add_filter("log_pvalue")
+        reader.add_filter(lambda result: result.log_pvalue > 3)
 
     if end is None:
         # Single variant query
