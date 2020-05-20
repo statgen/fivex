@@ -90,7 +90,7 @@ export default {
     range_data_url() {
       // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
       const { chrom, start, end } = this;
-      return `/api/data/region/${chrom}/${start}-${end}/data/`;
+      return `/api/data/region/${chrom}/${start}-${end}/`;
     },
   },
   beforeCreate() {

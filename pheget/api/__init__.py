@@ -129,24 +129,3 @@ def variant_query(chrom: str, pos: int):
 
     results = {"data": data}
     return jsonify(results)
-
-
-@api_blueprint.route(
-    "/region/<string:chrom>/<int:start>-<int:end>/data/", methods=["GET"]
-)
-def region_query_dataonly(chrom: str, start: int, end: int):
-    """
-    Given a region and optionally a gene_id,
-    return all eQTLs, optionally only for points with non-zero PIP values
-    """
-    gene_id = request.args.get("gene_id", None)
-    piponly = request.args.get("piponly", False)
-    if chrom is not None and chrom[0:3] == "chr":
-        chrom = chrom[3:]
-    data = [
-        res.to_dict()
-        for res in query_variants(
-            chrom, start, end=end, gene_id=gene_id, piponly=piponly
-        )
-    ]
-    return jsonify(data)

@@ -108,6 +108,9 @@ export default {
         tooltips,
         tooltipGenerationMode,
         tooltipsHeader,
+        ajaxResponse(url, params, response) {
+          return response.data;
+        },
       },
     );
     // Expose a reference to the raw table object, for advanced usages such as click events
