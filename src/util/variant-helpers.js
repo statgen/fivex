@@ -379,10 +379,19 @@ function two_digit_fmt2(cell) {
 function pip_fmt(cell) {
   const x = cell.getValue();
   if (x === 0) {
-    return '0';
+    return '-';
   }
   return x.toPrecision(2);
 }
+
+function pip_cluster_fmt(cell) {
+  const x = cell.getValue();
+  if (x === 0) {
+    return '-';
+  }
+  return x.toFixed(0);
+}
+
 
 export function tabulator_tooltip_maker(cell) {
   // Only show tooltips when an ellipsis ('...') is hiding part of the data.
@@ -416,4 +425,5 @@ export const TABLE_BASE_COLUMNS = [
   { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
   { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
   { title: 'PIP', field: 'pip', formatter: pip_fmt },
+  { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
 ];

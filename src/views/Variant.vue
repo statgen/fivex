@@ -185,6 +185,7 @@ export default {
         [
           'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
           'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
+          'phewas:pip_cluster',
         ],
         (data) => {
           // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before

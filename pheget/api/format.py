@@ -278,6 +278,7 @@ def query_variants(
     end: int = None,
     tissue: str = None,
     gene_id: str = None,
+    piponly: bool = False,
 ) -> ty.Iterable[VariantContainer]:
     """
     Fetch GTEx data for one or more variants, and apply optional filters
@@ -327,6 +328,10 @@ def query_variants(
 
     reader.add_filter("maf")
     reader.add_filter(lambda result: result.maf > 0.0)
+
+    if piponly:
+        reader.add_filter("pip")
+        reader.add_filter(lambda result: result.pip > 0.0)
 
     if end is None:
         # Single variant query

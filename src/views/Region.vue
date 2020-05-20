@@ -93,10 +93,10 @@ export default {
       // Update how tabulator is drawn, whenever y_field changes
       return [{ column: this.y_field, dir: 'desc' }];
     },
-    top_hits_url() {
-      // Re-calculate API URL when chrom, start, and/or end changes.
+    range_data_url() {
+      // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
       const { chrom, start, end } = this;
-      return `/api/data/region/${chrom}/${start}-${end}/top10pip/`;
+      return `/api/data/region/${chrom}/${start}-${end}/data/`;
     },
   },
   beforeCreate() {
@@ -291,6 +291,7 @@ export default {
         <h6 class="mr-2">Jump to:</h6>
         <b-button @click="goto('region-plot')" class="mr-2 btn-light btn-link" size="sm">Plot <span class="fas fa-level-down-alt"></span></b-button>
         <b-button @click="goto('external-links')" class="mr-2 btn-light btn-link" size="sm">External links <span class="fas fa-level-down-alt"></span></b-button>
+        <b-button @click="goto('eqtl-table')" class="mr-2 btn-light btn-link" size="sm">eQTL Table <span class="fas fa-level-down-alt"></span></b-button>
         <b-navbar-nav class="ml-auto">
           <search-box class="searchbox"/>
         </b-navbar-nav>
@@ -391,7 +392,7 @@ export default {
     </div>
 
     <div class="row">
-      <div class="col-sm-12" ref="external-links">
+      <div class="col-sm-12 padtop" ref="external-links">
         <div class="card">
           <div class="card-body">
             External links:
@@ -445,9 +446,9 @@ export default {
       </div>
     </div>
     <div ref="eqtl-table" class="padtop">
-      <h2>Top PIP clusters</h2>
+      <h2>eQTLs in region</h2>
       <tabulator-table :columns="table_base_columns"
-                       :ajaxURL="top_hits_url"
+                       :ajaxURL="range_data_url"
                        :sort="table_sort"
                        :tooltips="tabulator_tooltip_maker"
                        tooltip-generation-mode="hover"
