@@ -33,12 +33,6 @@ function getData(queryParams) {
     .then((resp) => resp.json());
 }
 
-// function getTopPipData(chrom, start, end) {
-//   return fetch(`/api/data/region/${chrom}/${start}-${end}/top10pip/`)
-//     .then(handleErrors)
-//     .then((resp) => resp.json());
-// }
-
 export default {
   name: 'RegionView',
   data() {
