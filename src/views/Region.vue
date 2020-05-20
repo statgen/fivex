@@ -89,6 +89,8 @@ export default {
     },
     range_data_url() {
       // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
+      // Add the option "?piponly=True" to the end of the url to return only points
+      // with non-missing PIP values, i.e. only points that are found in the DAP-G database
       const { chrom, start, end } = this;
       return `/api/data/region/${chrom}/${start}-${end}/`;
     },

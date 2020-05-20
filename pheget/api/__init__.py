@@ -24,11 +24,17 @@ def region_query(chrom, start, end):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    piponly = request.args.get("piponly", None)
 
     data = [
         res.to_dict()
         for res in query_variants(
-            chrom=chrom, start=start, end=end, tissue=tissue, gene_id=gene_id
+            chrom=chrom,
+            start=start,
+            end=end,
+            tissue=tissue,
+            gene_id=gene_id,
+            piponly=piponly,
         )
     ]
 
