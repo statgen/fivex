@@ -439,7 +439,19 @@ export default {
                aria-pressed="true"
                v-b-tooltip.top
                title="The Expression Atlas is a project from the European Bioinformatics Institute (EMBL-EBI), with results from over 3,000 experiments from 40 different organisms, which have been manually reviewed, curated, and standardized.">
-               Expression Atlas <span class="fa fa-external-link-alt"></span></a>
+              Expression Atlas <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`https://genetics.opentargets.org/gene/${short_gene_id}`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top
+               title="Open Target Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits">
+              Open Target Genetics <span class="fa fa-external-link-alt"></span></a>
+            <a :href="`https://www.ebi.ac.uk/gwas/genes/${region_data.symbol}`"
+               target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
+               aria-pressed="true"
+               v-b-tooltip.top
+               title="The NHGRI-EBI Catalog of published genome-wide association studies, providing an updated and professionally curated database of published GWAS.">
+              GWAS Catalog <span class="fa fa-external-link-alt"></span></a>
           </div>
         </div>
       </div>
