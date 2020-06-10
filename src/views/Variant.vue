@@ -346,13 +346,13 @@ export default {
             <label>
               <span class=nobreak><input type="radio" name="label-options" v-model="n_labels" :value="5"> Top 5 <span id="labels-radio-5" class="fa fa-info-circle"></span></span>
               <b-popover target="labels-radio-5">
-                If viewing P-values, Add labels to the 5 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.
+                If viewing P-values, add labels to the 5 most significant eQTLs by P-value <b>if they are more significant than 10<sup>-10</sup></b>.<br><br>If viewing Effect Sizes, choose the eQTLs with the 5 largest absolute effect sizes and only label those with P-values more significant than 10<sup>-20</sup>.
               </b-popover>
             </label>
             <label>
               <span class=nobreak><input type="radio" name="label-options" v-model="n_labels" :value="20"> Top 20 <span id="labels-radio-20" class="fa fa-info-circle"></span></span>
               <b-popover target="labels-radio-20">
-                If viewing P-values, add labels to the 20 eQTLs with the most significant P-values <b>if they are more significant than 10<sup>-10</sup></b>. If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-value more significant than 10<sup>-20</sup>.
+                If viewing P-values, add labels to the 20 most significant eQTLs by P-value <b>if they are more significant than 10<sup>-10</sup></b>.<br><br>If viewing Effect Sizes, choose the eQTLs with the 20 largest absolute effect sizes and only label those with P-values more significant than 10<sup>-20</sup>.
               </b-popover>
             </label>
           </b-dropdown-text>
