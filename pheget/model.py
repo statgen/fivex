@@ -55,3 +55,12 @@ def get_dapg_path():
         current_app.config["PHEGET_DATA_DIR"],
         "GTEx_v8_finemapping_DAPG.sqlite.db",
     )
+
+
+def get_gene_data_table(gene_id):
+    """Returns the path to the data to populate the table in region view"""
+    return os.path.join(
+        current_app.config["PHEGET_DATA_DIR"],
+        "piptables",
+        f"{gene_id}.eqtl.pip.txt.gz",
+    )

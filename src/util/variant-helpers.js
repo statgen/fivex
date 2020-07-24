@@ -427,3 +427,21 @@ export const TABLE_BASE_COLUMNS = [
   { title: 'PIP', field: 'pip', formatter: pip_fmt },
   { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
 ];
+
+export const REGION_TABLE_BASE_COLUMNS = [
+  { title: 'Chromosome', field: 'chromosome', headerFilter: false },
+  { title: 'Position', field: 'position', headerFilter: false },
+  { title: 'Ref', field: 'ref_allele', headerFilter: false },
+  { title: 'Alt', field: 'alt_allele', headerFilter: false },
+  { title: 'Tissue', field: 'tissue', headerFilter: true },
+  {
+    title: '-log<sub>10</sub>(p)',
+    field: 'log_pvalue',
+    formatter: two_digit_fmt2,
+    sorter: 'number',
+  },
+  { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+  { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+  { title: 'PIP', field: 'pip', formatter: pip_fmt },
+  { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
+];

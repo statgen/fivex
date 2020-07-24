@@ -17,7 +17,7 @@ import {
   switchY_region,
 } from '@/util/region-helpers';
 
-import { TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
+import { REGION_TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
 
 /**
  * Get the data required to render the template
@@ -87,12 +87,14 @@ export default {
       // Update how tabulator is drawn, whenever y_field changes
       return [{ column: this.y_field, dir: 'desc' }];
     },
-    range_data_url() {
+    gene_data_url() {
       // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
       // Add the option "?piponly=True" to the end of the url to return only points
       // with non-missing PIP values, i.e. only points that are found in the DAP-G database
-      const { chrom, start, end } = this;
-      return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
+      // const { chrom, start, end } = this;
+      // return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
+      const { gene_id } = this;
+      return `/api/data/gene/${gene_id}/`;
     },
   },
   beforeCreate() {
@@ -105,7 +107,7 @@ export default {
     this.assoc_sources = null;
 
     // Make some constants available to the Vue instance for use as props in rendering
-    this.table_base_columns = TABLE_BASE_COLUMNS;
+    this.table_base_columns = REGION_TABLE_BASE_COLUMNS;
     this.tabulator_tooltip_maker = tabulator_tooltip_maker;
   },
   beforeRouteEnter(to, from, next) {
@@ -445,7 +447,7 @@ export default {
     <div ref="eqtl-table" class="padtop">
       <h2>Significant eQTLs in region</h2>
       <tabulator-table :columns="table_base_columns"
-                       :ajaxURL="range_data_url"
+                       :ajaxURL="gene_data_url"
                        :sort="table_sort"
                        :tooltips="tabulator_tooltip_maker"
                        tooltip-generation-mode="hover"
