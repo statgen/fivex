@@ -272,7 +272,7 @@ export default {
       </div>
     </div>
   </div>
-  <div v-else class="container-fluid">
+  <div v-else class="container-fluid padsides">
     <b-navbar class="py-0" type="light" variant="light" fixed="top">
       <b-collapse is-nav>
         <h6 class="mr-2">Jump to:</h6>
@@ -389,6 +389,7 @@ export default {
         </b-dropdown>
       </div>
     </div>
+
     <lz-plot ref="phewas_plot"
              :base_layout="base_plot_layout"
              :base_sources="base_plot_sources"
@@ -396,6 +397,7 @@ export default {
              :start="pos_start"
              :end="pos_end"
              @connected="onPlotConnected"/>
+
     <div class="row padtop" ref="genotype-infobox">
       <div class="col-sm-12">
         <h2>Variant Information from Sequence Genotype </h2>

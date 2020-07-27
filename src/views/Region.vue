@@ -283,7 +283,7 @@ export default {
       </div>
     </div>
   </div>
-  <div v-else class="container-fluid">
+  <div v-else class="container-fluid padsides">
     <b-navbar class="py-0" type="light" variant="light" fixed="top">
       <b-collapse is-nav>
         <h6 class="mr-2">Jump to:</h6>
