@@ -5,6 +5,7 @@ API endpoints (return JSON, not HTML)
 import gzip
 import math
 import sqlite3
+
 from flask import Blueprint, jsonify, request
 
 from .. import model
@@ -143,7 +144,7 @@ def gene_data_for_region_table(gene_id: str):
     """
     Fetch the data for a single gene to populate the table in region view
     """
-    source = model.get_gene_data_table(gene_id)
+    source = model.get_gene_data_table(gene_id.split(".")[0])
     data = []
     with gzip.open(source) as f:
         for line in f:
