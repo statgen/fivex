@@ -10,25 +10,43 @@
         <div class="text-center">
           Search for: <b>Variant by position:
           <router-link
-            :to="{name: 'variant', params: {variant: '19_488506'}}">chr19:488506</router-link>
+            :to="{name: 'variant', params: {variant: '1_109274968'}}">chr1:109274968</router-link>
+          &bull;
+          <router-link
+            :to="{name: 'variant', params: {variant: '2_21044589'}}">chr2:21044589</router-link>
           &bull;
           Rsid:
           <router-link
-            :to="{name: 'variant', params: {variant: '19_488506'}}">rs10424907</router-link>
+            :to="{name: 'variant', params: {variant: '1_109274968'}}">rs12740374</router-link>
           &bull;
+          <router-link
+            :to="{name: 'variant', params: {variant: '2_21044589'}}">rs934197</router-link>
+          <br>
           Region:
           <router-link
             :to="{name: 'region',
-                  query: {chrom: '19', start: 448506, end: 528506,
-                          tissue: 'Brain_Cortex', gene_id: 'ENSG00000129946.10' }}"
-          >chr19:448506-528506</router-link>
+                  query: {chrom: '1', start: 108774968, end: 109774968,
+                          tissue: 'Liver', gene_id: 'ENSG00000134243' }}"
+          >chr1:108774968-109774968</router-link>
+          &bull;
+          <router-link
+            :to="{name: 'region',
+                  query: {chrom: '2', start: 20501429, end: 21544073,
+                          tissue: 'Esophagus_Gastroesophageal_Junction', gene_id: 'ENSG00000084674' }}"
+          >chr2:20501429-21544073</router-link>
           &bull;
           Gene:
           <router-link
             :to="{name: 'region',
-                  query: {chrom: '19', start: 448506, end: 528506,
-                          tissue: 'Brain_Cortex', gene_id: 'ENSG00000129946.10' }}"
-          ><i>SHC2</i></router-link></b>
+                  query: {chrom: '1', start: 108774968, end: 109774968,
+                          tissue: 'Liver', gene_id: 'ENSG00000134243' }}"
+          ><i>SORT1</i></router-link>
+          &bull;
+          <router-link
+            :to="{name: 'region',
+                  query: {chrom: '2', start: 20501429, end: 21544073,
+                          tissue: 'Esophagus_Gastroesophageal_Junction', gene_id: 'ENSG00000084674' }}"
+          ><i>APOB</i></router-link></b>
         </div>
       </div>
     </div>
