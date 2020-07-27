@@ -8,7 +8,7 @@ Visualize and query eQTL data in various ways
 This app can be installed and run on your local machine. It uses PySAM, and therefore may not install on Windows.
 
 ### Setup
-This code was written and tested against **Python 3.6-3.7**. We highly recommend developing in a virtual environment, 
+This code was written and tested against **Python 3.6-3.8**. We highly recommend developing in a virtual environment, 
     created using your tool of choice (many IDEs can create and manage the virtualenv for you). For the most basic use:
 
 `$ python3 -m virtualenv venv`
