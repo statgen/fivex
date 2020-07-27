@@ -2,7 +2,6 @@
 Front end views: provide the data needed by pages that are visited in the web browser
 """
 import sqlite3
-
 from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
@@ -130,7 +129,7 @@ def region_view():
     with conn:
         geneid_list = list(
             conn.execute(
-                f"SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
+                "SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
                 (f"chr{chrom}", start, end),
             )
         )

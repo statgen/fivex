@@ -5,7 +5,6 @@ API endpoints (return JSON, not HTML)
 import gzip
 import math
 import sqlite3
-
 from flask import Blueprint, jsonify, request
 
 from .. import model
@@ -68,12 +67,12 @@ def region_query_bestvar(chrom: str, start: int, end: int):
         cursor = conn.cursor()
         if gene_id is None:
             cursor.execute(
-                f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
+                "SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
                 ("chr" + chrom, start, end,),
             )
         else:
             cursor.execute(
-                f"SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
+                "SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
                 ("chr" + chrom, start, end, gene_id.split(".")[0] + "._%",),
             )
 
