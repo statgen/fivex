@@ -392,7 +392,6 @@ function pip_cluster_fmt(cell) {
   return x.toFixed(0);
 }
 
-
 export function tabulator_tooltip_maker(cell) {
   // Only show tooltips when an ellipsis ('...') is hiding part of the data.
   // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
@@ -429,7 +428,7 @@ export const TABLE_BASE_COLUMNS = [
 ];
 
 export const REGION_TABLE_BASE_COLUMNS = [
-  { title: 'Chromosome', field: 'chromosome', headerFilter: false },
+  { title: 'Chr', field: 'chromosome', headerFilter: false },
   { title: 'Position', field: 'position', headerFilter: false },
   { title: 'Ref', field: 'ref_allele', headerFilter: false },
   { title: 'Alt', field: 'alt_allele', headerFilter: false },
@@ -442,6 +441,7 @@ export const REGION_TABLE_BASE_COLUMNS = [
   },
   { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
   { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+  { title: 'SPIP', field: 'spip', formatter: pip_fmt },
   { title: 'PIP', field: 'pip', formatter: pip_fmt },
   { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
 ];
