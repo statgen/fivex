@@ -143,6 +143,7 @@ def variant_query(chrom: str, pos: int):
 def gene_data_for_region_table(gene_id: str):
     """
     Fetch the data for a single gene to populate the table in region view
+    Requires supporting data (see model.py for details).
     """
     source = model.get_gene_data_table(gene_id.split(".")[0])
     data = []

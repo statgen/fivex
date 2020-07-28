@@ -1,7 +1,9 @@
 """
 Front end views: provide the data needed by pages that are visited in the web browser
 """
+
 import sqlite3
+
 from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 

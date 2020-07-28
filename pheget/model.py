@@ -58,7 +58,12 @@ def get_dapg_path():
 
 
 def get_gene_data_table(gene_id):
-    """Returns the path to the data to populate the table in region view"""
+    """
+    Returns the path to the data to populate the table in region view
+    Required source data can be found in eqtl.pip.data.for.region.table.tar,
+    in the form of 35379 gene-specific data files, which need to be placed
+    in data/piptables/
+    """
     return os.path.join(
         current_app.config["PHEGET_DATA_DIR"],
         "piptables",
