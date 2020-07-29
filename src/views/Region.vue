@@ -448,7 +448,7 @@ export default {
       <h2>Significant eQTLs in <i>{{ region_data.symbol }}</i></h2>
       <tabulator-table :columns="table_base_columns"
                        :ajaxURL="gene_data_url"
-                       :sort="table_sort"
+                       :sort="[{column:'pip', dir:'desc'},]"
                        :tooltips="tabulator_tooltip_maker"
                        tooltip-generation-mode="hover"
                        :tooltips-header="true" />
