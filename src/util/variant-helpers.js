@@ -441,7 +441,7 @@ export const REGION_TABLE_BASE_COLUMNS = [
   },
   { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
   { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
-  { title: 'SPIP', field: 'spip', formatter: pip_fmt },
-  { title: 'PIP', field: 'pip', formatter: pip_fmt },
+  { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
   { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
+  { title: 'SPIP', field: 'spip', formatter: pip_fmt },
 ];
