@@ -97,3 +97,7 @@ dl.variant-info-middle dd {
 .nobreak {
     white-space: nowrap;
 }
+
+.form-control {
+    font-size: 75%;
+}

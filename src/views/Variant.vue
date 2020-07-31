@@ -62,14 +62,15 @@ export default {
     variant_label() {
       const { chrom, pos, ref, alt, rsid } = this;
       const fields = ['cis-eQTLs associated with variant:'];
+      const postext = parseInt(pos, 10).toLocaleString();
       if (rsid) {
         fields.push(`${rsid}`);
-        fields.push(`(chr${chrom}:${pos}`);
+        fields.push(`(chr${chrom}:${postext}`);
         if (ref && alt) {
           fields.push(`${ref}/${alt})`);
         }
       } else {
-        fields.push(`chr${chrom}:${pos}`);
+        fields.push(`chr${chrom}:${postext}`);
         if (ref && alt) {
           fields.push(`${ref}/${alt}`);
         }

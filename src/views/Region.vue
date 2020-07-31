@@ -335,7 +335,7 @@ export default {
             <label>Add a gene
               <select class="form-control"
                 @change="addTrack('gene', $event.target.value)">
-                <option disabled selected value="">(select a gene)</option>
+                <option disabled selected value="">...</option>
                 <option v-for="(a_symbol, a_geneid) in region_data.gene_list" :key="a_geneid"
                         :value="a_geneid">{{a_symbol}}</option>
               </select>
@@ -344,7 +344,7 @@ export default {
             <label>Add a tissue
               <select class="form-control"
                 @change="addTrack('tissue', $event.target.value)">
-                <option disabled selected value="">(select a tissue)</option>
+                <option disabled selected value="">...</option>
                 <option v-for="a_tissue in region_data.tissue_list" :key="a_tissue"
                         :value="a_tissue">{{a_tissue}}</option>
               </select>
