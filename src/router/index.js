@@ -74,7 +74,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const base = to.meta.title || 'Explore';
-  document.title = `${base} | PheGET: eQTL browser`;
+  document.title = `${base} | FIVEx: eQTL browser`;
   next();
 });
 

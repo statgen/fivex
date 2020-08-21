@@ -26,7 +26,6 @@
 
 import { handleErrors } from '@/util/common';
 
-
 // Returns the data from an omnisearch fetch if successful, return nothing otherwise
 function getOmniSearch(searchText) {
   const omniurl = `https://portaldev.sph.umich.edu/api/v1/annotation/omnisearch/?q=${searchText}&build=GRCh38`;
@@ -35,7 +34,6 @@ function getOmniSearch(searchText) {
     .then((response) => response.json())
     .then((myJson) => myJson.data[0]);
 }
-
 
 // Returns the data from our internal best range query API by searching for chrom:start-end
 //  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact
@@ -50,7 +48,6 @@ function getBestRange(chrom, start, end, gene_id = null) {
     .then((response) => response.json())
     .then((resp) => resp.data);
 }
-
 
 // Define a function that returns the search query type to the parseSearch function
 // We expect queries in the form of a single variant (chr:pos or rsnum), a range (chr:start-end),

@@ -15,8 +15,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", None)
 
 
 # Default data directory - this contains both variant-level (tabixed) data files and supporting databases
-PHEGET_DATA_DIR = os.getenv(
-    "PHEGET_DATA_DIR",
+FIVEX_DATA_DIR = os.getenv(
+    "FIVEX_DATA_DIR",
     os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data"
     ),

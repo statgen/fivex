@@ -2,10 +2,10 @@
 
 import pytest  # type: ignore  # noqa
 
-from pheget import create_app
+from fivex import create_app
 
 
 @pytest.fixture
 def app():
-    app = create_app("pheget.settings.test")
+    app = create_app("fivex.settings.test")
     return app

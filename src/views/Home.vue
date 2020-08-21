@@ -3,7 +3,7 @@
     <div class="row justify-content-center align-self-center">
       <div class="col-12">
         <h2 class="text-center">
-          PheGET: Visualization for Genotypes, Expressions, and Tissues
+          FIVEx: Visualization for Genotypes, Expressions, and Tissues
         </h2>
         <search-box></search-box>
         <br>

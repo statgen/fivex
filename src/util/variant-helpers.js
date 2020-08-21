@@ -4,7 +4,7 @@ import { PORTALDEV_URL } from '@/util/common';
 
 export function getPlotSources(chrom, pos) {
   return [
-    ['phewas', ['PheGET', { url: `/api/data/variant/${chrom}_${pos}/` }]],
+    ['phewas', ['FIVEx', { url: `/api/data/variant/${chrom}_${pos}/` }]],
     ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
     ['constraint', ['GeneConstraintLZ', {
       url: 'https://gnomad.broadinstitute.org/api',

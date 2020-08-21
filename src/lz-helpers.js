@@ -76,10 +76,9 @@ LocusZoom.ScaleFunctions.add('effect_direction', (parameters, input) => {
   return null;
 });
 
-
 // ----------------
 // Custom data sources for the variant view
-LocusZoom.Data.PheGET = LocusZoom.KnownDataSources.extend('PheWASLZ', 'PheGET', {
+LocusZoom.Data.FIVEx = LocusZoom.KnownDataSources.extend('PheWASLZ', 'FIVEx', {
   getURL(state, chain) {
     chain.header.maximum_tss_distance = state.maximum_tss_distance;
     chain.header.minimum_tss_distance = state.minimum_tss_distance;
@@ -192,7 +191,6 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
   },
 });
 
-
 LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
   if (Math.abs(x) > 0.1) {
     return x.toFixed(2);
@@ -202,7 +200,6 @@ LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
   }
   return x.toExponential(1);
 });
-
 
 LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
   getURL(state) {
@@ -224,7 +221,6 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
     return data;
   },
 });
-
 
 // eslint-disable-next-line import/prefer-default-export
 export { retrieveBySuffix };

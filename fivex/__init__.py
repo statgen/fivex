@@ -1,13 +1,13 @@
 """
-Defines the PheGET web application
+Defines the FIVEx web application
 """
 import flask
 
-from pheget.api import api_blueprint
-from pheget.frontend import views_blueprint
+from fivex.api import api_blueprint
+from fivex.frontend import views_blueprint
 
 
-def create_app(settings_module="pheget.settings.dev"):
+def create_app(settings_module="fivex.settings.dev"):
     """Application factory (allows different settings for dev, prod, or test environments)"""
     app = flask.Flask(__name__)
     app.config.from_object(settings_module)

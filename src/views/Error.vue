@@ -18,7 +18,6 @@ export default {
 };
 </script>
 
-
 <template>
   <div>
     <h1>An error has occurred</h1>
@@ -27,6 +26,5 @@ export default {
     <template v-if="previous">(<a :href="previous">back</a>)</template>
   </div>
 </template>
-
 
 <style scoped></style>

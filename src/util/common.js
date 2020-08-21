@@ -1,6 +1,5 @@
 const PORTALDEV_URL = 'https://portaldev.sph.umich.edu/api/v1/';
 
-
 /**
  * Handles bad requests - copied from https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
  * @param response
