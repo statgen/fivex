@@ -6,10 +6,10 @@ const PORTALDEV_URL = 'https://portaldev.sph.umich.edu/api/v1/';
  * @return {{ok}|*}
  */
 function handleErrors(response) {
-  if (!response.ok) {
-    throw Error(response.statusText);
-  }
-  return response;
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
 }
 
 /**
@@ -25,15 +25,14 @@ function handleErrors(response) {
  *  source will take precedence in the event of a conflict.
  */
 export function deNamespace(data, prefer) {
-  return Object.keys(data).reduce((acc, key) => {
-    const new_key = key.replace(/.*?:/, '');
-    if (!Object.prototype.hasOwnProperty.call(acc, new_key)
+    return Object.keys(data).reduce((acc, key) => {
+        const new_key = key.replace(/.*?:/, '');
+        if (!Object.prototype.hasOwnProperty.call(acc, new_key)
         || (!prefer || key.startsWith(prefer))) {
-      acc[new_key] = data[key];
-    }
-    return acc;
-  }, {});
+            acc[new_key] = data[key];
+        }
+        return acc;
+    }, {});
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export { handleErrors, PORTALDEV_URL };
