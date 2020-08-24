@@ -12,7 +12,7 @@ const MAX_EXTENT = 1000000;
 export function getTrackSources(gene_id, tissue) {
   const geneid_short = gene_id.split('.')[0];
   return [
-    [`assoc_${tissue}_${geneid_short}`, ['assocGET', {
+    [`assoc_${tissue}_${geneid_short}`, ['AssocFIVEx', {
       url: '/api/data/region',
       params: { gene_id, tissue },
     }]],
@@ -60,7 +60,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
 
   const layoutBase = LocusZoom.Layouts.get('panel', 'association', {
     id: `assoc_${tissue}_${geneid_short}`,
-    title: { // Remove this when LocusZoom update with the fix to dashboard titles is published
+    title: { // Remove this when LocusZoom update with the fix to toolbar titles is published
       text: `${genesymbol} in ${tissue}`,
       x: 60,
       y: 30,
@@ -75,7 +75,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
   layoutBase.axes.y1.label_offset = 36;
 
   /* Add this back in when LocusZoom update is published
-  layoutBase.dashboard.components.push(
+  layoutBase.toolbar.widgets.push(
       {
           type: 'title',
           title: `<i>${genesymbol}</i> in ${tissue}`,
@@ -109,8 +109,8 @@ export function getBasicLayout(initial_state = {}, track_panels = []) {
     state: initial_state,
     max_region_scale: MAX_EXTENT,
     responsive_resize: 'width_only',
-    dashboard: {
-      components: [
+    toolbar: {
+      widgets: [
         {
           color: 'gray',
           position: 'right',
@@ -124,7 +124,7 @@ export function getBasicLayout(initial_state = {}, track_panels = []) {
       LocusZoom.Layouts.get('panel', 'genes', { data_layers: [gene_track] }),
     ],
   });
-  base_layout.dashboard.components.push(LocusZoom.Layouts.get('dashboard_components', 'ldlz2_pop_selector'));
+  base_layout.toolbar.widgets.push(LocusZoom.Layouts.get('toolbar_widgets', 'ldlz2_pop_selector'));
   return base_layout;
 }
 
@@ -213,8 +213,8 @@ export function switchY_region(plot, yfield) {
           {
             scale_function: 'effect_direction',
             parameters: {
-              '+': 'triangle-up',
-              '-': 'triangle-down',
+              '+': 'triangle',
+              '-': 'triangledown',
             },
           },
           'circle',
@@ -249,8 +249,8 @@ export function switchY_region(plot, yfield) {
           {
             scale_function: 'effect_direction',
             parameters: {
-              '+': 'triangle-up',
-              '-': 'triangle-down',
+              '+': 'triangle',
+              '-': 'triangledown',
             },
           },
           'circle',
@@ -284,8 +284,8 @@ export function switchY_region(plot, yfield) {
         scatter_layout.legend = [
           { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
           { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
-          { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
-          { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+          { shape: 'triangle', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+          { shape: 'triangledown', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
           { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
           { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
           { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },

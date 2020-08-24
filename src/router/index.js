@@ -10,6 +10,7 @@ import { BootstrapVue } from 'bootstrap-vue';
 
 import VueRouter from 'vue-router';
 
+import 'locuszoom/dist/locuszoom.css';
 import '@/assets/common.css';
 
 import About from '@/views/About.vue';

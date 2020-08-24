@@ -4,7 +4,7 @@ import { PORTALDEV_URL } from '@/util/common';
 
 export function getPlotSources(chrom, pos) {
   return [
-    ['phewas', ['FIVEx', { url: `/api/data/variant/${chrom}_${pos}/` }]],
+    ['phewas', ['PheWASFIVEx', { url: `/api/data/variant/${chrom}_${pos}/` }]],
     ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
     ['constraint', ['GeneConstraintLZ', {
       url: 'https://gnomad.broadinstitute.org/api',
@@ -17,8 +17,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
   return LocusZoom.Layouts.get('plot', 'standard_phewas', {
     responsive_resize: 'width_only',
     state: initialState,
-    dashboard: {
-      components: [
+    toolbar: {
+      widgets: [
         {
           color: 'gray',
           position: 'right',
@@ -32,8 +32,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
         const panel = LocusZoom.Layouts.get('panel', 'phewas', {
           unnamespaced: true,
           min_height: 500,
-          dashboard: {
-            components: [
+          toolbar: {
+            widgets: [
               {
                 color: 'gray',
                 position: 'right',
@@ -77,13 +77,13 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                   class: 'lz-data_layer-scatter',
                 },
                 {
-                  shape: 'triangle-up',
+                  shape: 'triangle',
                   size: 40,
                   label: 'Positive effect',
                   class: 'lz-data_layer-scatter',
                 },
                 {
-                  shape: 'triangle-down',
+                  shape: 'triangledown',
                   size: 40,
                   label: 'Negative effect',
                   class: 'lz-data_layer-scatter',
@@ -121,8 +121,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                 {
                   scale_function: 'effect_direction',
                   parameters: {
-                    '+': 'triangle-up',
-                    '-': 'triangle-down',
+                    '+': 'triangle',
+                    '-': 'triangledown',
                   },
                 },
                 'circle',
@@ -260,9 +260,9 @@ export function switchY(plot, yfield) {
         label: 'Non-significant effect',
         class: 'lz-data_layer-scatter',
       },
-      { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
       {
-        shape: 'triangle-down',
+        shape: 'triangledown',
         size: 40,
         label: 'Negative effect',
         class: 'lz-data_layer-scatter',
@@ -279,8 +279,8 @@ export function switchY(plot, yfield) {
       {
         scale_function: 'effect_direction',
         parameters: {
-          '+': 'triangle-up',
-          '-': 'triangle-down',
+          '+': 'triangle',
+          '-': 'triangledown',
         },
       },
       'circle',
@@ -301,9 +301,9 @@ export function switchY(plot, yfield) {
         label: 'Non-significant effect',
         class: 'lz-data_layer-scatter',
       },
-      { shape: 'triangle-up', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle', size: 40, label: 'Positive effect', class: 'lz-data_layer-scatter' },
       {
-        shape: 'triangle-down',
+        shape: 'triangledown',
         size: 40,
         label: 'Negative effect',
         class: 'lz-data_layer-scatter',
@@ -321,8 +321,8 @@ export function switchY(plot, yfield) {
       {
         scale_function: 'effect_direction',
         parameters: {
-          '+': 'triangle-up',
-          '-': 'triangle-down',
+          '+': 'triangle',
+          '-': 'triangledown',
         },
       },
       'circle',
@@ -338,8 +338,8 @@ export function switchY(plot, yfield) {
     scatter_config.legend = [
       { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
       { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
-      { shape: 'triangle-up', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
-      { shape: 'triangle-down', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
+      { shape: 'triangle', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
+      { shape: 'triangledown', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
       { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
     ];
     plot.panels.phewas.legend.show();

@@ -24,7 +24,6 @@ export default {
 };
 </script>
 
-
 <template>
   <div>
     <form @submit.prevent="selectAnchor">
@@ -50,7 +49,4 @@ export default {
   </div>
 </template>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

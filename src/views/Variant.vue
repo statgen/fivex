@@ -507,12 +507,12 @@ export default {
                   UKB-Oxford BIG <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`https://genetics.opentargets.org/variant/${ chrom }_${ pos }_${ ref }_${ alt }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" v-b-tooltop.top
+                   aria-pressed="true" v-b-tooltip.top
                    title="Open Target Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits">
                   Open Targets Genetics <span class="fa fa-external-link-alt"></span></a>
                 <a :href="`https://www.ebi.ac.uk/gwas/search?query=${ rsid }`"
                    target="_blank" class="btn btn-secondary btn-sm mr-1" role="button"
-                   aria-pressed="true" v-b-tooltop.top
+                   aria-pressed="true" v-b-tooltip.top
                    title="The NHGRI-EBI Catalog of published genome-wide association studies, providing an updated and professionally curated database of published GWAS.">
                   GWAS Catalog <span class="fa fa-external-link-alt"></span></a>
               </template>

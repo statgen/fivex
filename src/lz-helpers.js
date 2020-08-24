@@ -6,9 +6,12 @@
  * It can be useful to define these in a single central file, so that changes to the display layer
  *  don't cause these things to be re-registered when the page reloads
  */
+// eslint-disable-next-line max-classes-per-file
 import $ from 'jquery';
 
 import LocusZoom from 'locuszoom';
+import { AssociationLZ, PheWASLZ } from 'locuszoom/esm/data/adapters';
+import { category_scatter } from 'locuszoom/esm/components/data_layer';
 
 /**
  * Helper method that fetches a desired field value regardless of namespacing
@@ -24,12 +27,12 @@ function retrieveBySuffix(point_data, field_suffix) {
 /**
  * Convert Posterior incl probabilities to a (truncated) log scale for rendering
  */
-LocusZoom.TransformationFunctions.set('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
+LocusZoom.TransformationFunctions.add('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
 
 /**
  * Convert displayed pip, spip, or pip_cluster to missing '-' if value is 0
  */
-LocusZoom.TransformationFunctions.set('pip_display', (x) => (x ? x.toString() : '-'));
+LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : '-'));
 
 /**
  * Assign point shape based on PIP cluster designation. Since there are always just a few clusters, and cluster 1
@@ -45,10 +48,10 @@ LocusZoom.ScaleFunctions.add('pip_cluster', (parameters, input) => {
       return 'square';
     }
     if (pip_cluster === 3) {
-      return 'triangle-up';
+      return 'triangle';
     }
     if (pip_cluster >= 4) {
-      return 'triangle-down';
+      return 'triangledown';
     }
   }
   return null;
@@ -78,13 +81,15 @@ LocusZoom.ScaleFunctions.add('effect_direction', (parameters, input) => {
 
 // ----------------
 // Custom data sources for the variant view
-LocusZoom.Data.FIVEx = LocusZoom.KnownDataSources.extend('PheWASLZ', 'FIVEx', {
+class PheWASFIVEx extends PheWASLZ {
   getURL(state, chain) {
     chain.header.maximum_tss_distance = state.maximum_tss_distance;
     chain.header.minimum_tss_distance = state.minimum_tss_distance;
     chain.header.y_field = state.y_field;
     return this.url;
-  },
+  }
+
+  // eslint-disable-next-line class-methods-use-this
   annotateData(records, chain) {
     // eslint-disable-next-line no-param-reassign
     records = records
@@ -121,15 +126,16 @@ LocusZoom.Data.FIVEx = LocusZoom.KnownDataSources.extend('PheWASLZ', 'FIVEx', {
       value.top_value_rank = index + 1;
     });
     return records;
-  },
-});
+  }
+}
+
+LocusZoom.Adapters.add('PheWASFIVEx', PheWASFIVEx);
 
 /**
  * A special modified datalayer, which sorts points in a unique way (descending), and allows tick marks to be defined
  *   separate from how things are grouped. Eg, we can sort by tss_distance, but label by gene name
  */
-LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
-  // Redefine the layout, in order to preserve CSS rules (which incorporate the name of the layer)
+class ScatterFivex extends category_scatter {
   _prepareData() {
     const xField = this.layout.x_axis.field || 'x';
     // The (namespaced) field from `this.data` that will be used to assign datapoints to a given category & color
@@ -188,8 +194,11 @@ LocusZoom.DataLayers.extend('category_scatter', 'category_scatter', {
       d[xField] = d[xField] || i;
     });
     return sourceData;
-  },
-});
+  }
+}
+
+// Redefine the layout base in-place, in order to preserve CSS rules (which incorporate the name of the layer)
+LocusZoom.DataLayers.add('category_scatter', ScatterFivex, true);
 
 LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
   if (Math.abs(x) > 0.1) {
@@ -201,7 +210,7 @@ LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
   return x.toExponential(1);
 });
 
-LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'assocGET', {
+class AssocFIVEx extends AssociationLZ {
   getURL(state) {
     const url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
     let params = {};
@@ -213,14 +222,18 @@ LocusZoom.Data.assocGET = LocusZoom.KnownDataSources.extend('AssociationLZ', 'as
     }
     params = $.param(params);
     return `${url}?${params}`;
-  },
+  }
+
+  // eslint-disable-next-line class-methods-use-this
   annotateData(data) {
     data.forEach((item) => {
       item.variant = `${item.chromosome}:${item.position}_${item.ref_allele}/${item.alt_allele}`;
     });
     return data;
-  },
-});
+  }
+}
+
+LocusZoom.Adapters.add('AssocFIVEx', AssocFIVEx);
 
 // eslint-disable-next-line import/prefer-default-export
 export { retrieveBySuffix };
