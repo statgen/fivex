@@ -1,6 +1,6 @@
-# PheGET
+# FIVEx
 
-**PheGET**: Phenotype / Gene-Expression-Tissue Browser
+**FIVEx**: Functional Interpretation and Visualization of Expression
 
 Visualize and query eQTL data in various ways
 
