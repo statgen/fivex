@@ -23,7 +23,7 @@ def test_loads_region_bestvar(client):
 
     assert response.status_code == 200
     content = response.get_json()
-    assert content["data"]["tissue"] == "Liver"
+    assert content["data"]["tissue"] == "Cells_Cultured_fibroblasts"
 
 
 def test_loads_region_bestvar_for_gene(client):
