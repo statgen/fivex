@@ -9,12 +9,14 @@ from flask import url_for
 # This is a safeguard against forgetting to provide sample data. URLs reference example views,
 # and may need to be updated if the homepage examples change
 def test_loads_region(client):
-    url = url_for("frontend.region_view", chrom="19", start=448506, end=528506)
+    url = url_for(
+        "frontend.region_view", chrom="1", start=108774968, end=109774968
+    )
     assert client.get(url).status_code == 200
 
 
 def test_loads_variant(client):
-    url = url_for("frontend.variant_view", chrom="19", pos=6718376)
+    url = url_for("frontend.variant_view", chrom="1", pos=109274968)
     assert client.get(url).status_code == 200
 
 
