@@ -93,38 +93,22 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
  * @returns {Object}
  */
 export function getBasicLayout(initial_state = {}, track_panels = []) {
-    const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes', { unnamespaced: true }).tooltip;
+    const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes_filtered', { unnamespaced: true }).tooltip;
     newgenestooltip.html += `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
-    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes', {
+    const gene_track = LocusZoom.Layouts.get('data_layer', 'genes_filtered', {
         unnamespaced: true,
         tooltip: newgenestooltip,
-        exon_height: 8,
-        bounding_box_padding: 5,
-        track_vertical_spacing: 5,
-        exon_label_spacing: 3,
     });
 
-    const base_layout = LocusZoom.Layouts.get('plot', 'standard_association', {
+    return LocusZoom.Layouts.get('plot', 'standard_association', {
         state: initial_state,
         max_region_scale: MAX_EXTENT,
-        responsive_resize: 'width_only',
-        toolbar: {
-            widgets: [
-                {
-                    color: 'gray',
-                    position: 'right',
-                    type: 'download',
-                },
-            ],
-        },
-
+        responsive_resize: true,
         panels: [
             ...track_panels,
             LocusZoom.Layouts.get('panel', 'genes', { data_layers: [gene_track] }),
         ],
     });
-    base_layout.toolbar.widgets.push(LocusZoom.Layouts.get('toolbar_widgets', 'ldlz2_pop_selector'));
-    return base_layout;
 }
 
 /**

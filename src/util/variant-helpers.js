@@ -15,7 +15,8 @@ export function getPlotSources(chrom, pos) {
 
 export function getPlotLayout(chrom, pos, initialState = {}) {
     return LocusZoom.Layouts.get('plot', 'standard_phewas', {
-        responsive_resize: 'width_only',
+        height: 600,
+        responsive_resize: true,
         state: initialState,
         toolbar: {
             widgets: [
@@ -31,7 +32,9 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
             ((() => {
                 const panel = LocusZoom.Layouts.get('panel', 'phewas', {
                     unnamespaced: true,
-                    min_height: 500,
+                    min_height: 450,
+                    height: 450,
+                    proportional_height: 0.75,
                     toolbar: {
                         widgets: [
                             {
@@ -162,7 +165,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
             })()),
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
-                margin: { bottom: 40 },
+                proportional_height: 0.25,
+                height: 150,
                 min_height: 150,
                 axes: {
                     x: {
@@ -174,12 +178,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                 },
                 data_layers: [
                     ((() => {
-                        const base = LocusZoom.Layouts.get('data_layer', 'genes', {
+                        const base = LocusZoom.Layouts.get('data_layer', 'genes_filtered', {
                             unnamespaced: true,
-                            exon_height: 8,
-                            bounding_box_padding: 5,
-                            track_vertical_spacing: 5,
-                            exon_label_spacing: 3,
                         });
                         base.color = [
                             {
