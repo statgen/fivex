@@ -3,7 +3,7 @@ import typing as ty
 
 from zorp import readers  # type: ignore
 
-from pheget import model
+from fivex import model
 
 try:
     # Optional speedup features

@@ -214,7 +214,7 @@ with open("run.extract.Makefile", "w") as w:
         + gff3
         + "\n\tpython "
         + scriptdir
-        + "generate.databases.for.pheget.py -i "
+        + "generate.databases.for.fivex.py -i "
         + gff3
         + " -o "
         + sqlite

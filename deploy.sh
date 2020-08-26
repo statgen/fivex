@@ -18,7 +18,7 @@ npm ci
 
 # Remove previous built assets and replace with the newest vue.js frontend code
 npm run build
-rm -rf /var/www/pheget/*
-cp -r dist/* /var/www/pheget
+rm -rf /var/www/fivex/*
+cp -r dist/* /var/www/fivex
 
-sudo service pheget restart
+sudo service fivex restart

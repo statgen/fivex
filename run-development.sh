@@ -1,8 +1,6 @@
 #!/bin/bash
 #
-# phegetrun
-#
-# Clean, build and start server
+# Clean, build and start server in a development environment
 
 
 # Stop on errors, print commands
@@ -10,7 +8,7 @@ set -e
 
 # Set environment variables
 export FLASK_DEBUG=True
-export FLASK_APP="pheget:create_app('pheget.settings.dev')"
+export FLASK_APP="fivex:create_app('fivex.settings.dev')"
 
 
 # Run the development server on port 8000
