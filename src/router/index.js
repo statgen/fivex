@@ -21,7 +21,7 @@ Vue.use(VueRouter);
 
 // Activate remote error monitoring (if a DSN is provided in the `.env` file that is shared by Flask and Vue)
 Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: process.env.VUE_APP_SENTRY_DSN,
     integrations: [new Integrations.Vue({ Vue, logErrors: true, attachProps: true })],
 });
 
