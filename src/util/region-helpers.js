@@ -3,6 +3,10 @@ import { PORTALDEV_URL } from '@/util/common';
 
 const MAX_EXTENT = 1000000;
 
+function sourceName(display_name) {
+    return display_name.replace(/[^A-Za-z0-9_]/g, '_');
+}
+
 /**
  * Get the datasources required for a single track
  * @param gene_id Full ENSG identifier (including version)
@@ -12,7 +16,7 @@ const MAX_EXTENT = 1000000;
 export function getTrackSources(gene_id, tissue) {
     const geneid_short = gene_id.split('.')[0];
     return [
-        [`assoc_${tissue}_${geneid_short}`, ['AssocFIVEx', {
+        [sourceName(`assoc_${tissue}_${geneid_short}`), ['AssocFIVEx', {
             url: '/api/data/region',
             params: { gene_id, tissue },
         }]],
@@ -41,7 +45,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
         <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster|pip_display}} <br>
         <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a>`;
 
-    const namespace = { assoc: `assoc_${tissue}_${geneid_short}` };
+    const namespace = { assoc: sourceName(`assoc_${tissue}_${geneid_short}`) };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
         unnamespaced: true,
         fields: [
@@ -58,7 +62,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
     });
 
     const layoutBase = LocusZoom.Layouts.get('panel', 'association', {
-        id: `assoc_${tissue}_${geneid_short}`,
+        id: sourceName(`assoc_${tissue}_${geneid_short}`),
         title: { // Remove this when LocusZoom update with the fix to toolbar titles is published
             text: `${symbol} in ${tissue}`,
             x: 60,
