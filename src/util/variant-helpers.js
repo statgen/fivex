@@ -404,17 +404,13 @@ export function tabulator_tooltip_maker(cell) {
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
 }
 
-// Old formatter
-// formatter(cell) {
-//     return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
-// },
 export const TABLE_BASE_COLUMNS = [
     {   title: 'Gene',
         field: 'symbol',
         headerFilter: true,
-        formatter: 'link',
-        formatterParams: {
-            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
+        formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
+        formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
+            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,  
             url: (cell) => {
                 const data = cell.getRow().getData();
                 const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}`;
@@ -437,7 +433,7 @@ export const TABLE_BASE_COLUMNS = [
 
 export const REGION_TABLE_BASE_COLUMNS = [
     { title: 'Chr', field: 'chromosome', headerFilter: false },
-    { title: 'Position', field: 'position', headerFilter: false,
+    { title: 'Position', field: 'position', headerFilter: false,  // Links from region view to a single variant view plot by using chromosome and position
         formatter: 'link', 
         formatterParams: {
             url: (cell) => {
