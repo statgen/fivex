@@ -409,9 +409,17 @@ export const TABLE_BASE_COLUMNS = [
         title: 'Gene',
         field: 'symbol',
         headerFilter: true,
-        formatter(cell) {
-            return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
-        },
+        // formatter: 'link',
+        // formatterParams: {
+        //     label: (cell) => `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`,
+        //     url: (cell) => {
+        //         const data = cell.getRow().getData();
+        //         data.symbol data.tissue
+        //     }
+        // },
+        // formatter(cell) {
+        //     return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
+        // },
     },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     { title: 'System', field: 'system', headerFilter: true },
@@ -429,7 +437,15 @@ export const TABLE_BASE_COLUMNS = [
 
 export const REGION_TABLE_BASE_COLUMNS = [
     { title: 'Chr', field: 'chromosome', headerFilter: false },
-    { title: 'Position', field: 'position', headerFilter: false },
+    { title: 'Position', field: 'position', headerFilter: false,
+        formatter: 'link', 
+        formatterParams: {
+            url: (cell) => {
+                const data = cell.getRow().getData();
+                const base = `/variant/${data.chromosome}_${data.position}`;
+                return base;
+            },
+        }},
     { title: 'Ref', field: 'ref_allele', headerFilter: false },
     { title: 'Alt', field: 'alt_allele', headerFilter: false },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
