@@ -404,23 +404,23 @@ export function tabulator_tooltip_maker(cell) {
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
 }
 
+// Old formatter
+// formatter(cell) {
+//     return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
+// },
 export const TABLE_BASE_COLUMNS = [
-    {
-        title: 'Gene',
+    {   title: 'Gene',
         field: 'symbol',
         headerFilter: true,
-        // formatter: 'link',
-        // formatterParams: {
-        //     label: (cell) => `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`,
-        //     url: (cell) => {
-        //         const data = cell.getRow().getData();
-        //         data.symbol data.tissue
-        //     }
-        // },
-        // formatter(cell) {
-        //     return `<i>${cell.getValue()} (${cell.getData().gene_id}</i>)`;
-        // },
-    },
+        formatter: 'link',
+        formatterParams: {
+            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
+            url: (cell) => {
+                const data = cell.getRow().getData();
+                const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}`;
+                return base;
+            },
+        }},
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     { title: 'System', field: 'system', headerFilter: true },
     {

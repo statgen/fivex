@@ -248,6 +248,7 @@ export default {
                     'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
                     'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
                     'phewas:pip_cluster',
+                    'phewas:chromosome', // Added this so we can link from the table in our single variant view to a region view page (the linking url requires chromosome, gene, and tissue)
                 ],
                 (data) => {
                     // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
