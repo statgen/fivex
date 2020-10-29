@@ -13,6 +13,9 @@
       <router-link :to="{ name: 'about' }">
         About
       </router-link> -
+      <router-link :to="{ name: 'tutorial' }">
+        Tutorial
+      </router-link> -
       <a href="https://github.com/statgen/fivex">Contribute</a>
     </footer>
   </div>
