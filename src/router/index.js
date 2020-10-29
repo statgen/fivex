@@ -15,6 +15,7 @@ import '@/assets/common.css';
 
 import About from '@/views/About.vue';
 import Home from '@/views/Home.vue';
+import Tutorial from '@/views/Tutorial.vue';
 
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
@@ -37,6 +38,12 @@ const routes = [
         name: 'about',
         component: About,
         meta: { title: 'About' },
+    },
+    {
+        path: '/tutorial/',
+        name: 'tutorial',
+        component: Tutorial,
+        meta: { title: 'Tutorial' },
     },
     {
         path: '/variant/:variant/',
