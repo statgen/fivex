@@ -17,7 +17,7 @@
               :to="{name: 'variant', params: {variant: '2_21044589'}}"
             >chr2:21044589</router-link>
             &bull;
-            Rsid:
+            rsID:
             <router-link
               :to="{name: 'variant', params: {variant: '1_109274968'}}"
             >rs12740374</router-link>
