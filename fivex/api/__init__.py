@@ -147,46 +147,53 @@ def gene_data_for_region_table(gene_id: str):
     """
     source = model.get_gene_data_table(gene_id.split(".")[0])
     data = []
-    with gzip.open(source) as f:
-        for line in f:
-            (
-                chromosome,
-                position,
-                ref_allele,
-                alt_allele,
-                tissue,
-                pip_cluster,
-                spip,
-                pip,
-                pval_nominal,
-                beta,
-                stderr_beta,
-            ) = (line.decode("utf-8").rstrip("\n").split("\t"))
-            chromosome = chromosome.replace("chr", "")
-            position = int(position)
-            pip_cluster = int(pip_cluster)
-            spip = float(spip)
-            pip = float(pip)
-            pval_nominal = float(pval_nominal)
-            if pval_nominal > 0:
-                log_pvalue = -math.log10(pval_nominal)
-            else:
-                log_pvalue = math.inf
-            beta = float(beta)
-            stderr_beta = float(stderr_beta)
-            tempDict = {
-                "chromosome": chromosome,
-                "position": position,
-                "ref_allele": ref_allele,
-                "alt_allele": alt_allele,
-                "tissue": tissue,
-                "pip_cluster": pip_cluster,
-                "spip": spip,
-                "pip": pip,
-                "log_pvalue": log_pvalue,
-                "beta": beta,
-                "stderr_beta": stderr_beta,
-            }
-            data.append(tempDict)
+    try:
+        with gzip.open(source) as f:
+            for line in f:
+                (
+                    chromosome,
+                    position,
+                    ref_allele,
+                    alt_allele,
+                    tissue,
+                    pip_cluster,
+                    spip,
+                    pip,
+                    pval_nominal,
+                    beta,
+                    stderr_beta,
+                ) = (line.decode("utf-8").rstrip("\n").split("\t"))
+                chromosome = chromosome.replace("chr", "")
+                position = int(position)
+                pip_cluster = int(pip_cluster)
+                spip = float(spip)
+                pip = float(pip)
+                pval_nominal = float(pval_nominal)
+                if pval_nominal > 0:
+                    log_pvalue = -math.log10(pval_nominal)
+                else:
+                    log_pvalue = math.inf
+                beta = float(beta)
+                stderr_beta = float(stderr_beta)
+                tempDict = {
+                    "chromosome": chromosome,
+                    "position": position,
+                    "ref_allele": ref_allele,
+                    "alt_allele": alt_allele,
+                    "tissue": tissue,
+                    "pip_cluster": pip_cluster,
+                    "spip": spip,
+                    "pip": pip,
+                    "log_pvalue": log_pvalue,
+                    "beta": beta,
+                    "stderr_beta": stderr_beta,
+                }
+                data.append(tempDict)
+    # Not being able to find a file is normal:
+    # Sometimes the listed gene has no variants with PIP > 1e-5 (the filtering criteria),
+    # in which case the corresponding gene-specific PIP file will not exist.
+    # When this happens, FIVEx should simply return an empty results json object to the page.
+    except FileNotFoundError:
+        pass
     results = {"data": data}
     return jsonify(results)
