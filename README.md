@@ -37,6 +37,13 @@ For the prototype, source data will live in the folder `data/`. Really large fil
 To change settings specific to an individual machine (such as the data directory), edit the contents of `.env` 
 in the root directory of your project. A `.env-sample` file is provided as a template.
 
+For University of Michigan internal development, files can be found at the following locations:
+
+Tutorial videos: /net/amd/amkwong/media/
+Data files: /net/amd/amkwong/FIVEx/data/
+
+Tutorial videos should be copied or linked to the `media/` directory, and 
+data files should be copied or linked to the `data/` directory.
 
 ### Running the development server
 Make sure to activate your virtualenv at the start of every new terminal session: `$ source venv/bin/activate` 
