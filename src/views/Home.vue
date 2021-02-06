@@ -51,6 +51,14 @@
                     query: {chrom: '2', start: 20501429, end: 21544073,
                             tissue: 'Esophagus_Gastroesophageal_Junction', gene_id: 'ENSG00000084674' }}"
             ><i>APOB</i></router-link></b>
+          <br>
+          First time?
+          <router-link
+            :to="{name: 'tutorial'} "
+          >
+            <b>View the tutorial here</b>
+          </router-link>
+          to see what FIVEx can do
         </div>
       </div>
     </div>
