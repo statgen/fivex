@@ -5,49 +5,55 @@
         <h1>Tutorial</h1>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_1.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_1.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_2.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_2.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_3.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_3.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_4.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_4.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_5.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_5.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
         <p>
           <video
-           controls
-           src="../../media/FIVEx_tutorial_6.mp4"
-           type="video/mp4">
+            controls
+            src="../../media/FIVEx_tutorial_6.mp4"
+            type="video/mp4"
+          >
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
