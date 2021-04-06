@@ -267,6 +267,25 @@ export default {
                 throw new Error('Unrecognized type of track');
             }
         },
+
+        // /**
+        //  * Add a track with arbitrary gene and tissue to the plot, after the plot has been created
+        //  * Unlike addTrack, we are not limited to using the anchor gene or tissue
+        //  * The way the URL stores extra tracks (extra genes and/or tissues, relative to the anchors)
+        //  *  cannot store extra plots not based on one of the anchors, and will need to be rewritten
+        //  *  to store both gene and tissue for all plots
+        //  */
+        // addPlot(gene, tissue) {
+        //     const { gene_list } = this.region_data;
+        //     let extra_gene_symbol;
+        //     if (!gene || !gene_list) {
+        //         extra_gene_symbol = null;
+        //     } else {
+        //         extra_gene_symbol = gene_list[gene];
+        //     }
+        //     addTrack(this.assoc_plot, this.assoc_sources, gene, tissue, extra_gene_symbol);
+        // },
+
         goto(refName) {
             const element = this.$refs[refName];
             element.scrollIntoView({ behavior: 'smooth' });
@@ -349,11 +368,11 @@ export default {
             <span
               v-b-tooltip.top.html
               class="fa fa-info-circle"
-              title="Choose a new <b>anchor tissue</b> or <b>gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br><br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue."
+              title="Choose the <b>anchor tissue and gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br><br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue."
             >
               <span class="sr-only">Info</span>
             </span>
-            Select anchors
+            Choose reference Gene and Tissue
           </template>
           <select-anchors
             class="px-3"
@@ -373,14 +392,14 @@ export default {
             <span
               v-b-tooltip.top.html
               class="fa fa-info-circle"
-              title="Add an additional track using a <b>new tissue or gene</b>.<br><br>If you add a <b>tissue</b>, the new track will show eQTLs between that tissue and the <b>anchor gene</b>.<br><br>If you add a <b>gene</b>, the new track will show eQTLs between that gene and the <b>anchor tissue</b>."
+              title="Add an additional plot for a <b>new gene</b>.<br><br>The new plot will show eQTLs between that gene and the <b>anchor tissue</b>."
             >
               <span class="sr-only">Info</span>
             </span>
-            Add tracks
+            Add gene plot
           </template>
           <b-dropdown-text>
-            <label>Add a gene
+            <label>
               <select
                 class="form-control"
                 @change="addTrack('gene', $event.target.value)"
@@ -396,9 +415,26 @@ export default {
                   :value="a_geneid"
                 >{{ a_symbol }}</option>
               </select>
-            </label> &times; {{ region_data.tissue }}<br>
-            <b-dropdown-divider />
-            <label>Add a tissue
+            </label> in {{ region_data.tissue }}<br>
+          </b-dropdown-text>
+        </b-dropdown>
+        <b-dropdown
+          class="m-2"
+          size="sm"
+        >
+          <template v-slot:button-content>
+            <span
+              v-b-tooltip.top.html
+              class="fa fa-info-circle"
+              title="Add an additional plot of a <b>new tissue</b>.<br><br>The new plot will show eQTLs between that tissue and the <b>anchor gene</b>."
+            >
+              <span class="sr-only">Info</span>
+            </span>
+            Add tissue plot
+          </template>
+          <b-dropdown-text>
+            <label>
+              {{ region_data.symbol }} in
               <select
                 class="form-control"
                 @change="addTrack('tissue', $event.target.value)"
@@ -414,7 +450,6 @@ export default {
                   :value="a_tissue"
                 >{{ a_tissue }}</option>
               </select>
-              &times; {{ region_data.symbol }}
             </label>
           </b-dropdown-text>
         </b-dropdown>

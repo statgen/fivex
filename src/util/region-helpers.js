@@ -37,13 +37,14 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set this variant as index for LD')
-    }<strong>Gene</strong>: <i>{{{{namespace[assoc]}}symbol}}</i> <br>
-        <strong>MAF</strong>: {{{{namespace[assoc]}}maf}} <br>
-        <strong>NES</strong>: {{{{namespace[assoc]}}beta}} <br>
-        <strong>PIP</strong>: {{{{namespace[assoc]}}pip|pip_display}} <br>
-        <strong>SPIP</strong>: {{{{namespace[assoc]}}spip|pip_display}} <br>
-        <strong>PIP cluster</strong>: {{{{namespace[assoc]}}pip_cluster|pip_display}} <br>
-        <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a>`;
+    }
+        <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
+        Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>
+        MAF: <strong>{{{{namespace[assoc]}}maf|twosigfigs}}</strong> <br>
+        Effect Size: <strong>{{{{namespace[assoc]}}beta|twosigfigs}}</strong> <br>
+        PIP: <strong>{{{{namespace[assoc]}}pip|pip_display}}</strong> <br>
+        Sum of PIP for cluster: <strong>{{{{namespace[assoc]}}spip|pip_display}}</strong> <br>
+        PIP cluster #: <strong>{{{{namespace[assoc]}}pip_cluster|pip_display}}</strong> <br>`;
 
     const namespace = { assoc: sourceName(`assoc_${tissue}_${geneid_short}`) };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
