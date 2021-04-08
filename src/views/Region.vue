@@ -307,13 +307,12 @@ export default {
   </div>
   <div
     v-else
-    class="container-fluid padsides"
+    class="container-fluid"
   >
     <b-navbar
       class="py-0"
       type="light"
-      variant="light"
-      fixed="top"
+      variant="white"
     >
       <b-collapse is-nav>
         <h6 class="mr-2">

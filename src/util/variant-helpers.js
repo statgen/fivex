@@ -15,7 +15,6 @@ export function getPlotSources(chrom, pos) {
 
 export function getPlotLayout(chrom, pos, initialState = {}) {
     return LocusZoom.Layouts.get('plot', 'standard_phewas', {
-        height: 600,
         responsive_resize: true,
         state: initialState,
         toolbar: {
@@ -24,6 +23,14 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     color: 'gray',
                     position: 'right',
                     type: 'download',
+                    group_position: 'end',
+                },
+                {
+                    color: 'gray',
+                    position: 'right',
+                    type: 'download_png',
+                    group_position: 'start',
+
                 },
 
             ],
@@ -34,7 +41,6 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     unnamespaced: true,
                     min_height: 450,
                     height: 450,
-                    proportional_height: 0.75,
                     toolbar: {
                         widgets: [
                             {
@@ -95,7 +101,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 
                             base.color = [
                                 {
-                                    field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                    field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                     scale_function: 'if',
                                     parameters: {
                                         field_value: true,
@@ -103,7 +109,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                     },
                                 },
                                 {
-                                    field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                    field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                     scale_function: 'if',
                                     parameters: {
                                         field_value: false,
@@ -165,7 +171,6 @@ PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong>
             })()),
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
-                proportional_height: 0.25,
                 height: 150,
                 min_height: 150,
                 axes: {
@@ -183,7 +188,7 @@ PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong>
                         });
                         base.color = [
                             {
-                                field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                 scale_function: 'if',
                                 parameters: {
                                     field_value: true,
@@ -410,7 +415,7 @@ export const TABLE_BASE_COLUMNS = [
         headerFilter: true,
         formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
         formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
-            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,  
+            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
             url: (cell) => {
                 const data = cell.getRow().getData();
                 const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}`;
@@ -434,7 +439,7 @@ export const TABLE_BASE_COLUMNS = [
 export const REGION_TABLE_BASE_COLUMNS = [
     { title: 'Chr', field: 'chromosome', headerFilter: false },
     { title: 'Position', field: 'position', headerFilter: false,  // Links from region view to a single variant view plot by using chromosome and position
-        formatter: 'link', 
+        formatter: 'link',
         formatterParams: {
             url: (cell) => {
                 const data = cell.getRow().getData();

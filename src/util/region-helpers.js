@@ -64,6 +64,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
 
     const layoutBase = LocusZoom.Layouts.get('panel', 'association', {
         id: sourceName(`assoc_${tissue}_${geneid_short}`),
+        height: 275,
         title: { // Remove this when LocusZoom update with the fix to toolbar titles is published
             text: `${symbol} in ${tissue}`,
             x: 60,

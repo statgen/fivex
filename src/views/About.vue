@@ -4,6 +4,11 @@
       <div class="col-sm-12">
         <h1>About</h1>
         <p>
+          FIVEx is a tool for browsing eQTL datasets. It provides a number of tools aimed at functional interpretation.
+          See our <a href="https://www.biorxiv.org/content/10.1101/2021.01.22.426874v1">preprint</a> for details.
+        </p>
+
+        <p>
           Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang.
           Source code can be found on <a href="https://github.com/statgen/fivex/">GitHub</a>.
         </p>
