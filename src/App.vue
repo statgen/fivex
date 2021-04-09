@@ -11,6 +11,7 @@
           <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto">
             <b-nav-item :to="{ name: 'about' }" right>About</b-nav-item>
+            <b-nav-item :to="{ name: 'help' }" right>Help</b-nav-item>
             <b-nav-item :to="{ name: 'tutorial' }" right>Tutorial</b-nav-item>
           </b-navbar-nav>
         </b-collapse>

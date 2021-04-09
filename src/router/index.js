@@ -14,6 +14,7 @@ import 'locuszoom/dist/locuszoom.css';
 import '@/assets/common.css';
 
 import About from '@/views/About.vue';
+import Help from '@/views/Help.vue';
 import Home from '@/views/Home.vue';
 import Tutorial from '@/views/Tutorial.vue';
 
@@ -38,6 +39,12 @@ const routes = [
         name: 'about',
         component: About,
         meta: { title: 'About' },
+    },
+    {
+        path: '/help/',
+        name: 'help',
+        component: Help,
+        meta: { title: 'Help' },
     },
     {
         path: '/tutorial/',
