@@ -1,3 +1,4 @@
+import dataclasses as dc
 import math
 import sqlite3
 import typing as ty
@@ -71,65 +72,42 @@ TISSUE_DATA = {
 }
 
 
+@dc.dataclass
 class VariantContainer:
     """
-    Represent the variant data in a standard manner that lets us access fields by name
-
-    This allows us to make changes to how the data is stored (eg column order), but because fields are looked up by
-        name, the code is isolated from the impact of changes.
+    Represent the data for a single variant
     """
+    gene_id: str
+    chromosome: str
+    position: int
+    ref_allele: str
+    alt_allele: str
 
-    def __init__(
-        self,
-        gene_id,
-        chrom,
-        pos,
-        ref,
-        alt,
-        build,
-        tss_distance,
-        ma_samples,
-        ma_count,
-        maf,
-        log_pvalue_nominal,
-        beta,
-        stderr_beta,
-        tissue,
-        symbol,
-        system,
-        sample_size,
-        *,
-        pip_cluster=None,
-        spip=None,
-        pip=None,
-    ):
-        self.gene_id = gene_id
-        self.chromosome = chrom
-        self.position = pos
-        self.ref_allele = ref
-        self.alt_allele = alt
+    build: str
+    tss_distance: int
+    ma_samples: int
+    ma_count: int
+    maf: float
 
-        self.build = build
-        self.tss_distance = tss_distance
-        self.ma_samples = ma_samples
-        self.ma_count = ma_count
-        self.maf = maf
+    log_pvalue: float  # note: log_pvalue_nominal?
+    beta: float
+    stderr_beta: float
+    tissue: str
+    symbol: str
+    system: str
 
-        self.log_pvalue = log_pvalue_nominal
-        self.beta = beta
-        self.stderr_beta = stderr_beta
-        self.tissue = tissue
-        self.symbol = symbol
+    samples: int  # TODO: rename to n_samples or sample_size for consistency with source data
+    # Additional optional args
+    pip_cluster: ty.Optional[int] = None,
+    spip: ty.Optional[float] = None
+    pip: ty.Optional[float] = None
 
-        self.system = system
-        self.samples = sample_size
-        self.pip_cluster = pip_cluster
-        self.spip = spip
-        self.pip = pip
+    # Computed properties
+    variant_id: str = dc.field(init=False)  # chrom:pos_ref/alt
 
-    @property
-    def id_field(self):
-        return f"{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}"
+    def __post_init__(self):
+        # Add calculated fields
+        self.variant_id = f"{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}"
 
     @property
     def pvalue(self):
@@ -142,7 +120,7 @@ class VariantContainer:
             return 10 ** -self.log_pvalue
 
     def to_dict(self):
-        return vars(self)
+        return dc.asdict(self)
 
 
 class PipAdder:
