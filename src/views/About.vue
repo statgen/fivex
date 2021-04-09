@@ -17,8 +17,6 @@
           eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects
           with both genotypes and expression data.
         </p>
-
-        <p><small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan, Center for Statistical Genetics</small></p>
       </div>
     </div>
   </div>

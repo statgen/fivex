@@ -318,7 +318,7 @@ export default {
     </b-navbar>
     <div
       ref="single-variant-eqtl-plot"
-      class="row padtop"
+      class="row pt-md-4"
     >
       <div class="col-sm-12">
         <h1>
@@ -530,7 +530,7 @@ export default {
 
     <div
       ref="genotype-infobox"
-      class="row padtop"
+      class="row pt-md-3"
     >
       <div class="col-sm-12">
         <h2>Variant Information from Sequence Genotype </h2>
@@ -710,12 +710,13 @@ export default {
     </div>
     <div
       ref="eqtl-table"
-      class="padtop"
+      class="pt-md-3"
     >
       <h2>eQTLs</h2>
       <tabulator-table
         :columns="table_base_columns"
         :table_data="table_data"
+        :height="'600px'"
         :sort="table_sort"
         :tooltips="tabulator_tooltip_maker"
         tooltip-generation-mode="hover"

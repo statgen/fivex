@@ -523,7 +523,7 @@ export default {
     <div class="row">
       <div
         ref="external-links"
-        class="col-sm-12 padtop"
+        class="col-sm-12 pt-md-1"
       >
         <div class="card">
           <div class="card-body">
@@ -635,12 +635,13 @@ export default {
     </div>
     <div
       ref="eqtl-table"
-      class="padtop"
+      class="pt-md-3"
     >
       <h2>Significant eQTLs in <i>{{ region_data.symbol }}</i></h2>
       <tabulator-table
         :columns="table_base_columns"
         :ajax-u-r-l="gene_data_url"
+        :height="'600px'"
         :sort="[{column:'pip', dir:'desc'},]"
         :tooltips="tabulator_tooltip_maker"
         tooltip-generation-mode="hover"

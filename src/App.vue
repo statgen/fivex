@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" style="position:relative" class="min-vh-100">
     <!-- Add any "base layout" stuff here (things to appear on every page) -->
     <div>
       <b-navbar toggleable="lg" type="light" variant="white">
@@ -17,7 +17,11 @@
       </b-navbar>
     </div>
 
-    <router-view />
+    <router-view class="pb-5" />
+
+    <footer class="footer">
+      <p><small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan - Center for Statistical Genetics</small></p>
+    </footer>
   </div>
 </template>
 

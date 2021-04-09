@@ -57,7 +57,6 @@
             Your browser does not support the HTML5 Video element.
           </video>
         </p>
-        <p><small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan, Center for Statistical Genetics</small></p>
       </div>
     </div>
   </div>
