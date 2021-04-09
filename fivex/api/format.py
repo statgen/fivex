@@ -72,11 +72,18 @@ TISSUE_DATA = {
 }
 
 
+def position_to_variant_id(
+    chromosome: str, position: int, ref_allele: str, alt_allele: str
+) -> str:
+    return f"{chromosome}:{position}_{ref_allele}/{alt_allele}"
+
+
 @dc.dataclass
 class VariantContainer:
     """
     Represent the data for a single variant
     """
+
     gene_id: str
     chromosome: str
     position: int
@@ -98,7 +105,7 @@ class VariantContainer:
 
     samples: int  # TODO: rename to n_samples or sample_size for consistency with source data
     # Additional optional args
-    pip_cluster: ty.Optional[int] = None,
+    pip_cluster: ty.Optional[int] = None
     spip: ty.Optional[float] = None
     pip: ty.Optional[float] = None
 
@@ -107,7 +114,9 @@ class VariantContainer:
 
     def __post_init__(self):
         # Add calculated fields
-        self.variant_id = f"{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}"
+        self.variant_id = position_to_variant_id(
+            self.chromosome, self.position, self.ref_allele, self.alt_allele
+        )
 
     @property
     def pvalue(self):

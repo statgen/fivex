@@ -14,7 +14,7 @@ import {
     getPlotSources,
     groupByThing,
     switchY,
-    TABLE_BASE_COLUMNS,
+    VARIANT_TABLE_BASE_COLUMNS,
     tabulator_tooltip_maker,
 } from '@/util/variant-helpers';
 
@@ -164,7 +164,7 @@ export default {
     },
     beforeCreate() {
     // Make some constants available to the Vue instance for use as props in rendering
-        this.table_base_columns = TABLE_BASE_COLUMNS;
+        this.table_base_columns = VARIANT_TABLE_BASE_COLUMNS;
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation

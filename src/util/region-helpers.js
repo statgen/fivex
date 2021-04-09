@@ -36,7 +36,7 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
     const geneid_short = gene_id.split('.')[0];
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
-    newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set this variant as index for LD')
+    newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')
     }
         <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
         Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>

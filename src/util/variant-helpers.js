@@ -409,7 +409,7 @@ export function tabulator_tooltip_maker(cell) {
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
 }
 
-export const TABLE_BASE_COLUMNS = [
+export const VARIANT_TABLE_BASE_COLUMNS = [
     {   title: 'Gene',
         field: 'symbol',
         headerFilter: true,
@@ -437,18 +437,22 @@ export const TABLE_BASE_COLUMNS = [
 ];
 
 export const REGION_TABLE_BASE_COLUMNS = [
-    { title: 'Chr', field: 'chromosome', headerFilter: false },
-    { title: 'Position', field: 'position', headerFilter: false,  // Links from region view to a single variant view plot by using chromosome and position
-        formatter: 'link',
+    {
+        title: 'Variant', field: 'variant_id', formatter: 'link',
+        sorter(a, b, aRow, bRow, column, dir, sorterParams) {
+            // Sort by chromosome, then position
+            const a_data = aRow.getData();
+            const b_data = bRow.getData();
+            return (a_data.chromosome).localeCompare(b_data.chromosome, undefined, {numeric: true})
+                || a_data.position - b_data.position;
+        },
         formatterParams: {
             url: (cell) => {
                 const data = cell.getRow().getData();
-                const base = `/variant/${data.chromosome}_${data.position}`;
-                return base;
+                return `/variant/${data.chromosome}_${data.position}`;
             },
-        }},
-    { title: 'Ref', field: 'ref_allele', headerFilter: false },
-    { title: 'Alt', field: 'alt_allele', headerFilter: false },
+        },
+    },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     {
         title: '-log<sub>10</sub>(p)',
