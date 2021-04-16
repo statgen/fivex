@@ -147,7 +147,11 @@ export function getBasicSources(track_sources = []) {
  * @param {Object[]} source_options
  */
 function addPanels(plot, data_sources, panel_options, source_options) {
-    source_options.forEach((source) => data_sources.add(...source));
+    source_options.forEach((source) => {
+        if (!data_sources.has(source[0])) {
+            data_sources.add(...source);
+        }
+    });
     panel_options.forEach((panel_layout) => {
         panel_layout.y_index = -1; // Make sure genes track is always the last one
         const panel = plot.addPanel(panel_layout);
@@ -185,7 +189,6 @@ export function switchY_region(plot, yfield) {
             if (yfield === 'beta') { // Settings for using beta as the y-axis variable
                 delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
-                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = 'Normalized Effect Size (NES)';
                 significance_line_layout.offset = 0; // Change dotted horizontal line to y=0
                 significance_line_layout.style = {
@@ -221,7 +224,6 @@ export function switchY_region(plot, yfield) {
             } else if (yfield === 'log_pvalue') { // Settings for using -log10(P-value) as the y-axis variable
                 delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
-                panel.legend.pad_from_top = 46;
                 panel.axes.y1.label = '-log 10 p-value';
                 significance_line_layout.offset = 7.301; // change dotted horizontal line to genomewide significant value 5e-8
                 significance_line_layout.style = {
@@ -256,10 +258,10 @@ export function switchY_region(plot, yfield) {
                 plot.panels[panel_id].legend.hide();
             } else if (yfield === 'pip') {
                 panel.legend.orientation = 'horizontal';
-                panel.legend.pad_from_bottom = 46;
                 panel_base_y.field = `${panel.id}:pip|pip_yvalue`;
                 panel_base_y.floor = -4.1;
                 panel_base_y.ceiling = 0.2;
+                panel_base_y.upper_buffer = 0.1;
                 panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
                 panel.axes.y1.ticks = [
                     { position: 'left', text: '1', y: 0 },

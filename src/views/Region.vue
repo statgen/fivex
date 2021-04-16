@@ -18,6 +18,7 @@ import {
 } from '@/util/region-helpers';
 
 import { REGION_TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
+import AddTrack from '@/components/AddTrack';
 
 /**
  * Get the data required to render the template
@@ -36,6 +37,7 @@ function getData(queryParams) {
 export default {
     name: 'RegionView',
     components: {
+        AddTrack,
         LzPlot,
         SearchBox,
         SelectAnchors,
@@ -56,8 +58,7 @@ export default {
             gene_id: null,
             tissue: null,
 
-            extra_genes: [],
-            extra_tissues: [],
+            extra_tracks: [],
 
             // Internal data passed between widgets
             table_data: [],
@@ -74,25 +75,24 @@ export default {
             const { gene_id } = this;
             return gene_id && gene_id.split('.')[0];
         },
+
         query_params() {
             // Re-calculate the URL query string whenever dependent information changes.
-            const { chrom, start, end, gene_id, tissue, y_field, extra_genes, extra_tissues } = this;
+            const { chrom, start, end, gene_id, tissue, y_field, extra_tracks } = this;
 
             const options = { chrom, start, end, gene_id, tissue, y_field };
 
-            if (extra_genes.length) {
-                options.extra_genes = extra_genes;
-            }
-
-            if (extra_tissues.length) {
-                options.extra_tissues = extra_tissues;
+            if (extra_tracks.length) {
+                options.extra_tracks = extra_tracks;
             }
             return $.param(options);
         },
+
         table_sort() {
             // Update how tabulator is drawn, whenever y_field changes
             return [{ column: this.y_field, dir: 'desc' }];
         },
+
         gene_data_url() {
             // Re-calculate URL to retrieve all variants when chrom, start, and/or end changes.
             // Add the option "?piponly=True" to the end of the url to return only points
@@ -114,6 +114,7 @@ export default {
 
             this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
         },
+
         query_params() {
             // Update the URL so that it always reflects the current view- change when the query params
             //  would change. (including at first page load, if the server, eg, auto-suggests a best
@@ -125,6 +126,7 @@ export default {
             window.history.replaceState({}, document.title, `?${this.query_params}`);
         },
     },
+
     beforeCreate() {
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
     // Preserve a reference to component widgets so that their methods can be accessed directly
@@ -138,6 +140,7 @@ export default {
         this.table_base_columns = REGION_TABLE_BASE_COLUMNS;
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
+
     beforeRouteEnter(to, from, next) {
     // Fires on first navigation to route (from another route)
         getData(to.query)
@@ -148,6 +151,7 @@ export default {
                 });
             }).catch(() => next({ name: 'error' }));
     },
+
     beforeRouteUpdate(to, from, next) {
     // When going from one Region page to another (component is reused, only variable part of route changes)
 
@@ -171,20 +175,17 @@ export default {
                 query: { chrom, start, end, gene_id, tissue },
             });
         },
+
         setQuery(params = {}) {
             // Set some default query params
             this.y_field = params.y_field || 'log_pvalue';
-            // Our url serializer (`$.param`) serializes array params as `key[]`; convert to `key` format
-            const { 'extra_genes[]': extra_genes, 'extra_tissues[]': extra_tissues } = params;
-            if (extra_genes) {
-                this.extra_genes = Array.isArray(extra_genes) ? extra_genes : [extra_genes];
+            // Convert jquery $.param format to that used internally in this page
+            //   Rename array params `key[]` -> `key`, and ensure that items are arrays, not single strings
+            const { 'extra_tracks[]': extra_tracks } = params;
+            if (extra_tracks) {
+                this.extra_tracks = Array.isArray(extra_tracks) ? extra_tracks : [extra_tracks];
             } else {
-                this.extra_genes = [];
-            }
-            if (extra_tissues) {
-                this.extra_tissues = Array.isArray(extra_tissues) ? extra_tissues : [extra_tissues];
-            } else {
-                this.extra_tissues = [];
+                this.extra_tracks = [];
             }
         },
         setData(data) {
@@ -193,7 +194,7 @@ export default {
 
             if (data) {
                 const { chrom: chr, start, end, gene_id, tissue, symbol } = data;
-                const { y_field } = this;
+                const { extra_tracks, y_field } = this;
                 const initialState = { chr, start, end, y_field };
                 this.chrom = chr;
                 this.start = start;
@@ -202,44 +203,49 @@ export default {
                 this.tissue = tissue;
 
                 // Create track layouts for the basic (anchor) track, plus any extra ones to be added to the plot
-                const gene_tracks = this.extra_genes.slice()
-                    .map((item) => getTrackLayout(item, tissue, initialState, data.gene_list[item]))
-                    .flat();
-                const tissue_tracks = this.extra_tissues.slice()
-                    .map((item) => getTrackLayout(gene_id, item, initialState, symbol))
-                    .flat();
+                //  In the URL, extra tracks are serialized as `gene_id$tissue_name`
+                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [gene_id, tissue_name] pairs
+                const unique_genes = new Set(track_identifiers.map((item) => item[0]));
+                unique_genes.add(gene_id);
+                const unique_tissues = new Set(track_identifiers.map((item) => item[1]));
+                unique_tissues.add(tissue);
+
+                const track_layouts = track_identifiers
+                    .map(([gene_id, tissue_name]) => {
+                        const gene_name = data.gene_list[gene_id];
+                        return getTrackLayout(gene_id, tissue_name, initialState, gene_name);
+                    }).flat();
+
+                // Anchor + extra tracks
                 const track_panels = [
                     ...getTrackLayout(gene_id, tissue, initialState, symbol),
-                    ...gene_tracks,
-                    ...tissue_tracks,
+                    ...track_layouts,
                 ];
                 this.base_plot_layout = getBasicLayout(initialState, track_panels);
 
+                const extra_sources = track_identifiers
+                    .map(([gene_id, tissue_name]) => getTrackSources(gene_id, tissue_name))
+                    .flat();
+
                 // Create data sources for the basic (anchor) track, plus any extra ones to be added to the plot
-                const gene_sources = this.extra_genes.slice()
-                    .map((item) => getTrackSources(item, tissue))
-                    .flat();
-                const tissue_sources = this.extra_tissues.slice()
-                    .map((item) => getTrackSources(gene_id, item))
-                    .flat();
                 const track_sources = [
                     ...getTrackSources(gene_id, tissue), // Plot the anchor gene and tissue first
-                    ...gene_sources, // ...then any extra tracks relative to those anchors
-                    ...tissue_sources,
+                    ...extra_sources,
                 ];
 
                 this.base_plot_sources = getBasicSources(track_sources);
             }
             this.loading_done = !!data;
         },
+
         receivePlot(plot, data_sources) {
             this.assoc_plot = plot;
             this.assoc_sources = data_sources;
         },
 
         /**
-     * Update the page when the plot region is changed
-     */
+         * Update the page when the plot region is changed
+         */
         changePlotRegion({ chr, start, end }) {
             this.chrom = chr;
             this.start = start;
@@ -247,44 +253,22 @@ export default {
         },
 
         /**
-     * Add a new gene or tissue track to the plot, after the plot has been created
-     */
-        addTrack(type, track_id) {
-            if (type === 'gene') {
-                const { gene_list } = this.region_data;
-                let extra_gene_symbol;
-                if (!track_id || !gene_list) {
-                    extra_gene_symbol = null;
-                } else {
-                    extra_gene_symbol = gene_list[track_id];
-                }
-                addTrack(this.assoc_plot, this.assoc_sources, track_id, this.tissue, extra_gene_symbol);
-                this.extra_genes.push(track_id);
-            } else if (type === 'tissue') {
-                addTrack(this.assoc_plot, this.assoc_sources, this.gene_id, track_id, this.region_data.symbol);
-                this.extra_tissues.push(track_id);
-            } else {
-                throw new Error('Unrecognized type of track');
+         * Add a new gene or tissue track to the plot, after the plot has been created
+         */
+        addTrack(gene_id, tissue_name) {
+            // FIXME: Known issue: "add tissue" mode has a bug where panel titles show gene id instead of name
+            //   Root cause: anchor gene ID strips version IDs, so when tissue is added relative to anchor,
+            //   Recommended fix: harmonize how we present gene IDs in the backend data store, rather than cleaning it up
+            //   in many places throughout the app
+            const { gene_list } = this.region_data;
+            const gene_symbol = gene_list[gene_id];
+            const key = `${gene_id}$${tissue_name}`;
+
+            if (!this.extra_tracks.includes(key)) {
+                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, gene_symbol);
+                this.extra_tracks.push(key);
             }
         },
-
-        // /**
-        //  * Add a track with arbitrary gene and tissue to the plot, after the plot has been created
-        //  * Unlike addTrack, we are not limited to using the anchor gene or tissue
-        //  * The way the URL stores extra tracks (extra genes and/or tissues, relative to the anchors)
-        //  *  cannot store extra plots not based on one of the anchors, and will need to be rewritten
-        //  *  to store both gene and tissue for all plots
-        //  */
-        // addPlot(gene, tissue) {
-        //     const { gene_list } = this.region_data;
-        //     let extra_gene_symbol;
-        //     if (!gene || !gene_list) {
-        //         extra_gene_symbol = null;
-        //     } else {
-        //         extra_gene_symbol = gene_list[gene];
-        //     }
-        //     addTrack(this.assoc_plot, this.assoc_sources, gene, tissue, extra_gene_symbol);
-        // },
 
         goto(refName) {
             const element = this.$refs[refName];
@@ -362,17 +346,8 @@ export default {
         <b-dropdown
           class="m-2"
           size="sm"
+          text="Choose reference Gene and Tissue"
         >
-          <template v-slot:button-content>
-            <span
-              v-b-tooltip.top.html
-              class="fa fa-info-circle"
-              title="Choose the <b>anchor tissue and gene</b>. All other added plots will be based on these anchors: when you add a <b>new gene</b>, the eQTLs plotted will be between that gene and the <b>anchor tissue</b>; when you add a <b>new tissue</b>, the eQTLs plotted will be between that tissue and the <b>anchor gene</b>. <br><br>Changing either anchor will delete all other plots and generate a single new plot, with eQTLs for the anchor gene in the anchor tissue."
-            >
-              <span class="sr-only">Info</span>
-            </span>
-            Choose reference Gene and Tissue
-          </template>
           <select-anchors
             class="px-3"
             :current_gene="gene_id"
@@ -386,71 +361,19 @@ export default {
         <b-dropdown
           class="m-2"
           size="sm"
+          text="Add track"
+          menu-class="adder-dropdown"
         >
-          <template v-slot:button-content>
-            <span
-              v-b-tooltip.top.html
-              class="fa fa-info-circle"
-              title="Add an additional plot for a <b>new gene</b>.<br><br>The new plot will show eQTLs between that gene and the <b>anchor tissue</b>."
-            >
-              <span class="sr-only">Info</span>
-            </span>
-            Add gene plot
-          </template>
-          <b-dropdown-text>
-            <label>
-              <select
-                class="form-control"
-                @change="addTrack('gene', $event.target.value)"
-              >
-                <option
-                  disabled
-                  selected
-                  value=""
-                >...</option>
-                <option
-                  v-for="(a_symbol, a_geneid) in region_data.gene_list"
-                  :key="a_geneid"
-                  :value="a_geneid"
-                >{{ a_symbol }}</option>
-              </select>
-            </label> in {{ region_data.tissue }}<br>
-          </b-dropdown-text>
-        </b-dropdown>
-        <b-dropdown
-          class="m-2"
-          size="sm"
-        >
-          <template v-slot:button-content>
-            <span
-              v-b-tooltip.top.html
-              class="fa fa-info-circle"
-              title="Add an additional plot of a <b>new tissue</b>.<br><br>The new plot will show eQTLs between that tissue and the <b>anchor gene</b>."
-            >
-              <span class="sr-only">Info</span>
-            </span>
-            Add tissue plot
-          </template>
-          <b-dropdown-text>
-            <label>
-              {{ region_data.symbol }} in
-              <select
-                class="form-control"
-                @change="addTrack('tissue', $event.target.value)"
-              >
-                <option
-                  disabled
-                  selected
-                  value=""
-                >...</option>
-                <option
-                  v-for="a_tissue in region_data.tissue_list"
-                  :key="a_tissue"
-                  :value="a_tissue"
-                >{{ a_tissue }}</option>
-              </select>
-            </label>
-          </b-dropdown-text>
+          <b-dropdown-form @submit.prevent>
+            <add-track
+              :gene_list="region_data.gene_list"
+              :tissue_list="region_data.tissue_list"
+              :current_gene_symbol="region_data.symbol"
+              :current_gene_id="gene_id"
+              :current_tissue="tissue"
+              @add-track="addTrack"
+            />
+          </b-dropdown-form>
         </b-dropdown>
 
         <b-dropdown
@@ -458,7 +381,7 @@ export default {
           class="m-2"
           size="sm"
         >
-          <b-dropdown-text>
+          <b-dropdown-form>
             <label>
               <input
                 id="show-log-pvalue"
@@ -501,7 +424,7 @@ export default {
                 target="_blank"
               >DAP-G</a> Posterior Inclusion Probabilities (PIP) on the Y-axis.<br>Cluster 1 denotes the cluster of variants (in LD with each other) with the strongest signal; cluster 2 denotes the set of variants with the next strongest signal; and so on.
             </b-popover>
-          </b-dropdown-text>
+          </b-dropdown-form>
         </b-dropdown>
       </div>
     </div>
@@ -650,3 +573,9 @@ export default {
     </div>
   </div>
 </template>
+
+<style>
+  .adder-dropdown {
+      min-width: 350px;
+  }
+</style>

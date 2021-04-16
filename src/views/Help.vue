@@ -9,8 +9,7 @@
         </p>
 
         <p>
-          To address this question, FIVEx incorporates results from DAP-G, a fine-mapping procedure designed to highlight variants of particular
-        significance. [<a href="https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646">1</a>][<a href="https://www.biorxiv.org/content/10.1101/316471v1">2</a>][<a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_v8_finemapping_DAPG.tar">3</a>] DAP-G provides two useful pieces of information:
+          To address this question, FIVEx incorporates results from DAP-G, a fine-mapping procedure designed to highlight variants of particular significance. [<a href="https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646">1</a>][<a href="https://www.biorxiv.org/content/10.1101/316471v1">2</a>][<a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_v8_finemapping_DAPG.tar">3</a>] DAP-G provides two useful pieces of information:
         </p>
 
         <ol>

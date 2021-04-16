@@ -78,7 +78,11 @@ export default {
             //   so we will deep-copy to ensure this is just pure JS primitives
             const layout = JSON.parse(JSON.stringify(base_layout));
             const data_sources = new LocusZoom.DataSources();
-            base_sources.forEach(([name, config]) => data_sources.add(name, config));
+            base_sources.forEach(([name, config]) => {
+                if (!data_sources.has(name)) {
+                    data_sources.add(name, config);
+                }
+            });
             const plot = LocusZoom.populate(`#${this.dom_id}`, data_sources, layout);
 
             if (this.show_loading) {
