@@ -78,10 +78,6 @@ dl.variant-info-middle dd {
     width: 600px;
 }
 
-.nobreak {
-    white-space: nowrap;
-}
-
 .form-control {
     font-size: 75%;
 }
