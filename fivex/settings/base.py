@@ -18,11 +18,12 @@ SECRET_KEY = os.getenv("SECRET_KEY", None)
 FIVEX_DATA_DIR = os.getenv(
     "FIVEX_DATA_DIR",
     os.path.join(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data"
+        os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        ),
+        "data",
     ),
 )
-
-LOCUSZOOM_VERSION = "0.10.2"
 
 # .env file can optionally provide a Sentry key for automatic error reporting
 # TODO: add for frontend and backend
