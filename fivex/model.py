@@ -3,22 +3,52 @@ Models/ datastores
 """
 import gzip
 import json
+import math
 import os
 
 from flask import current_app
 
 
-def locate_data(chrom):
+# def locate_data(chrom):
+#     return os.path.join(
+#         current_app.config["FIVEX_DATA_DIR"],
+#         f"{chrom}.All_Tissues.sorted.txt.gz",
+#     )
+
+#
+def locate_data(chrom, startpos):
+    start = math.floor(startpos / 1000000) * 1000000 + 1
+    end = start + 999999
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
-        f"{chrom}.All_Tissues.sorted.txt.gz",
+        "ebi_ge", f"{chrom}", f"all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz",
+    )
+
+# def locate_tissue_data(tissue):
+#     return os.path.join(
+#         current_app.config["FIVEX_DATA_DIR"],
+#         f"{tissue}.allpairs.sorted.txt.gz",
+#     )
+
+def locate_study_tissue_data(study, tissue):
+    return os.path.join(
+        current_app.config["FIVEX_DATA_DIR"],
+        "ebi_original", f"{study}", "ge", f"{study}_ge_{tissue}.all.tsv.gz",
     )
 
 
-def locate_tissue_data(tissue):
+# def locate_tissue_to_system():
+#     return os.path.join(
+#         current_app.config["FIVEX_DATA_DIR"],
+#         "tissue.to.system.json.gz",
+#     )
+
+
+def locate_tss_data():
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
-        f"{tissue}.allpairs.sorted.txt.gz",
+        "gencode",
+        "tss.json.gz",
     )
 
 

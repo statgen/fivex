@@ -26,6 +26,7 @@ def region_query(chrom, start, end):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    study = request.args.get("study", None)
     piponly = request.args.get("piponly", None)
 
     data = [
@@ -33,9 +34,11 @@ def region_query(chrom, start, end):
         for res in query_variants(
             chrom=chrom,
             start=start,
+            rowstoskip=1,  # Region query uses the original EBi data files, which all have a header row
             end=end,
             tissue=tissue,
             gene_id=gene_id,
+            study=study,
             piponly=piponly,
         )
     ]
@@ -125,14 +128,15 @@ def variant_query(chrom: str, pos: int):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    study = request.args.get("study", None)  # We now have data from multiple studies from EBI
 
     data = [
         res.to_dict()
-        for res in query_variants(chrom, pos, tissue=tissue, gene_id=gene_id)
+        for res in query_variants(chrom=chrom, start=pos, rowstoskip=0, end=None, tissue=tissue, study=study, gene_id=gene_id)
     ]
 
     for i, item in enumerate(data):
-        # FIXME: replace this synthetic field with some other unqiue identifier (like a marker)
+        # FIXME: replace this synthetic field with some other unique identifier (like a marker)
         item["id"] = i
 
     results = {"data": data}
