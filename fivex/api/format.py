@@ -339,6 +339,8 @@ class VariantParser:
         self.tissue = tissue
         self.study = study
         self.pipDict = pipDict
+        with gzip.open(model.locate_tss_data(), 'rb') as f:
+            self.tss_dict = json.load(f)
 
     def __call__(self, row: str) -> VariantContainer:
 
@@ -405,9 +407,7 @@ class VariantParser:
         build = 'GRCh38'
 
         # Append tss_distance
-        with gzip.open(model.locate_tss_data(), 'rb') as f:
-            tss_dict = json.load(f)
-        gene_tss = tss_dict.get(fields[18].split(".")[0], float('nan'))
+        gene_tss = self.tss_dict.get(fields[18].split(".")[0], float('nan'))
         tss_distance = fields[4] - gene_tss
 
         # Append gene symbol
