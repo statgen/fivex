@@ -361,7 +361,7 @@ export default {
         <b-dropdown
           class="m-2"
           size="sm"
-          text="Add track"
+          text="Add plot"
           menu-class="adder-dropdown"
         >
           <b-dropdown-form @submit.prevent>
@@ -381,7 +381,7 @@ export default {
           class="m-2"
           size="sm"
         >
-          <b-dropdown-form>
+          <b-dropdown-form style="width: 180px;">
             <label>
               <input
                 id="show-log-pvalue"

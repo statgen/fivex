@@ -335,7 +335,7 @@ export default {
           class="mr-2"
           size="sm"
         >
-          <b-dropdown-form>
+          <b-dropdown-form style="width: 180px;">
             <b-form-radio-group
               v-model="group"
               :options="[
