@@ -66,11 +66,11 @@ export default {
         delete window[this.plot_id];
     },
     methods: {
-    /**
-     * Create an LZ plot
-     * @param {object} base_layout
-     * @param {Array[]} base_sources
-     */
+        /**
+         * Create an LZ plot
+         * @param {object} base_layout
+         * @param {Array[]} base_sources
+         */
         createLZ(base_layout, base_sources) {
             // Create and populate the plot
             // The layout comes from properties assigned to a vue instance, which are automatically
@@ -78,7 +78,11 @@ export default {
             //   so we will deep-copy to ensure this is just pure JS primitives
             const layout = JSON.parse(JSON.stringify(base_layout));
             const data_sources = new LocusZoom.DataSources();
-            base_sources.forEach(([name, config]) => data_sources.add(name, config));
+            base_sources.forEach(([name, config]) => {
+                if (!data_sources.has(name)) {
+                    data_sources.add(name, config);
+                }
+            });
             const plot = LocusZoom.populate(`#${this.dom_id}`, data_sources, layout);
 
             if (this.show_loading) {
@@ -98,10 +102,10 @@ export default {
             this.$emit('connected', plot, data_sources);
         },
         /**
-     * The component should re-emit (most) plot-level event hooks built in to LocusZoom
-     * @private
-     * @param plot
-     */
+         * The component should re-emit (most) plot-level event hooks built in to LocusZoom
+         * @private
+         * @param plot
+         */
         connectListeners(plot) {
             Object.keys(plot.event_hooks)
                 .forEach((name) => plot.on(name, (event) => this.$emit(name, event)));
@@ -123,21 +127,21 @@ export default {
         },
 
         /**
-     * Proxy a method from the component to the LZ instance
-     * This allows parent components to manipulate the LZ instance, via $refs, without
-     *  leaking a reference to component internal dom elements
-     *
-     * We previously leaked a reference to the plot via events, but this was leaking memory
-     * on component cleanup
-     */
+         * Proxy a method from the component to the LZ instance
+         * This allows parent components to manipulate the LZ instance, via $refs, without
+         *  leaking a reference to component internal dom elements
+         *
+         * We previously leaked a reference to the plot via events, but this was leaking memory
+         * on component cleanup
+         */
         callPlot(method_name, ...args) {
             this.plot[method_name](...args);
         },
         /**
-     * Proxy a method from the component to the LZ datasources
-     * This allows parent components to manipulate the LZ instance, via $refs, without leaking
-     *  a reference to component internals
-     */
+         * Proxy a method from the component to the LZ datasources
+         * This allows parent components to manipulate the LZ instance, via $refs, without leaking
+         *  a reference to component internals
+         */
         callSources(method_name, ...args) {
             this.data_sources[method_name](...args);
         },

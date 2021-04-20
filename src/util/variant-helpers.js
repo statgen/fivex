@@ -15,7 +15,6 @@ export function getPlotSources(chrom, pos) {
 
 export function getPlotLayout(chrom, pos, initialState = {}) {
     return LocusZoom.Layouts.get('plot', 'standard_phewas', {
-        height: 600,
         responsive_resize: true,
         state: initialState,
         toolbar: {
@@ -24,6 +23,14 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     color: 'gray',
                     position: 'right',
                     type: 'download',
+                    group_position: 'end',
+                },
+                {
+                    color: 'gray',
+                    position: 'right',
+                    type: 'download_png',
+                    group_position: 'start',
+
                 },
 
             ],
@@ -34,7 +41,6 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     unnamespaced: true,
                     min_height: 450,
                     height: 450,
-                    proportional_height: 0.75,
                     toolbar: {
                         widgets: [
                             {
@@ -95,7 +101,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
 
                             base.color = [
                                 {
-                                    field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                    field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                     scale_function: 'if',
                                     parameters: {
                                         field_value: true,
@@ -103,7 +109,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                     },
                                 },
                                 {
-                                    field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                    field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                     scale_function: 'if',
                                     parameters: {
                                         field_value: false,
@@ -132,19 +138,19 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             ];
 
                             base.tooltip.html = `
-<strong>Variant:</strong> {{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}<br>
-<strong>Gene ID:</strong> {{{{namespace[phewas]}}gene_id|htmlescape}}<br>
-<strong>Gene name:</strong> <i>{{{{namespace[phewas]}}symbol|htmlescape}}</i><br>
-<strong>Tissue (sample size):</strong> {{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})<br>
-<strong>-Log10(P-value):</strong> {{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}<br>
-<strong>NES (SE):</strong> {{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})<br>
-<strong>MAF:</strong> {{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}<br>
-<strong>TSS distance:</strong> {{{{namespace[phewas]}}tss_distance|htmlescape}}<br>
-<strong>System:</strong> {{{{namespace[phewas]}}system|htmlescape}}<br>
-<strong>PIP:</strong> {{{{namespace[phewas]}}pip|pip_display}}<br>
-<strong>SPIP:</strong> {{{{namespace[phewas]}}spip|pip_display}}<br>
-<strong>PIP cluster:</strong> {{{{namespace[phewas]}}pip_cluster|pip_display}}<br>
-<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a>
+<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
+Variant: <strong>{{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}</strong><br>
+Gene ID: <strong>{{{{namespace[phewas]}}gene_id|htmlescape}}</strong><br>
+Gene name: <strong><i>{{{{namespace[phewas]}}symbol|htmlescape}}</i></strong><br>
+Tissue (sample size): <strong>{{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})</strong><br>
+-Log10(P-value): <strong>{{{{namespace[phewas]}}log_pvalue|twosigfigs|htmlescape}}</strong><br>
+Effect Size (SE): <strong>{{{{namespace[phewas]}}beta|twosigfigs|htmlescape}} ({{{{namespace[phewas]}}stderr_beta|twosigfigs|htmlescape}})</strong><br>
+MAF: <strong>{{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}</strong><br>
+TSS distance: <strong>{{{{namespace[phewas]}}tss_distance|htmlescape}}</strong><br>
+System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
+PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
+Sum of PIP for cluster: <strong>{{{{namespace[phewas]}}spip|pip_display}}</strong><br>
+PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong>
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',
@@ -165,7 +171,6 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
             })()),
             LocusZoom.Layouts.get('panel', 'genes', {
                 unnamespaced: true,
-                proportional_height: 0.25,
                 height: 150,
                 min_height: 150,
                 axes: {
@@ -183,7 +188,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                         });
                         base.color = [
                             {
-                                field: 'lz_highlight_match', // Special field name whose presence triggers custom rendering
+                                field: 'lz_is_match', // Special field name whose presence triggers custom rendering
                                 scale_function: 'if',
                                 parameters: {
                                     field_value: true,
@@ -404,13 +409,13 @@ export function tabulator_tooltip_maker(cell) {
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
 }
 
-export const TABLE_BASE_COLUMNS = [
+export const VARIANT_TABLE_BASE_COLUMNS = [
     {   title: 'Gene',
         field: 'symbol',
         headerFilter: true,
         formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
         formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
-            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,  
+            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
             url: (cell) => {
                 const data = cell.getRow().getData();
                 const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}`;
@@ -432,18 +437,22 @@ export const TABLE_BASE_COLUMNS = [
 ];
 
 export const REGION_TABLE_BASE_COLUMNS = [
-    { title: 'Chr', field: 'chromosome', headerFilter: false },
-    { title: 'Position', field: 'position', headerFilter: false,  // Links from region view to a single variant view plot by using chromosome and position
-        formatter: 'link', 
+    {
+        title: 'Variant', field: 'variant_id', formatter: 'link',
+        sorter(a, b, aRow, bRow, column, dir, sorterParams) {
+            // Sort by chromosome, then position
+            const a_data = aRow.getData();
+            const b_data = bRow.getData();
+            return (a_data.chromosome).localeCompare(b_data.chromosome, undefined, {numeric: true})
+                || a_data.position - b_data.position;
+        },
         formatterParams: {
             url: (cell) => {
                 const data = cell.getRow().getData();
-                const base = `/variant/${data.chromosome}_${data.position}`;
-                return base;
+                return `/variant/${data.chromosome}_${data.position}`;
             },
-        }},
-    { title: 'Ref', field: 'ref_allele', headerFilter: false },
-    { title: 'Alt', field: 'alt_allele', headerFilter: false },
+        },
+    },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     {
         title: '-log<sub>10</sub>(p)',
