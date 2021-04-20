@@ -68,7 +68,6 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}top_value_rank',
                                 '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                                 '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
-                                '{{namespace[phewas]}}ma_samples', '{{namespace[phewas]}}ac',
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
