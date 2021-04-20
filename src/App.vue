@@ -1,22 +1,27 @@
 <template>
-  <div id="app">
+  <div id="app" style="position:relative" class="min-vh-100">
     <!-- Add any "base layout" stuff here (things to appear on every page) -->
-    <router-view />
+    <div>
+      <b-navbar toggleable="lg" type="light" variant="white">
+        <b-navbar-brand :to="{ name: 'home' }"><i class="fas fa-dna"></i> FIVEx</b-navbar-brand>
 
-    <footer
-      style="text-align: center; background: #eeeeee;"
-      class="mt-3"
-    >
-      <router-link :to="{ name: 'home' }">
-        Home
-      </router-link> -
-      <router-link :to="{ name: 'about' }">
-        About
-      </router-link> -
-      <router-link :to="{ name: 'tutorial' }">
-        Tutorial
-      </router-link> -
-      <a href="https://github.com/statgen/fivex">Contribute</a>
+        <b-navbar-toggle target="nav-collapse" />
+
+        <b-collapse id="nav-collapse" is-nav>
+          <!-- Right aligned nav items -->
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item :to="{ name: 'about' }" right>About</b-nav-item>
+            <b-nav-item :to="{ name: 'help' }" right>Help</b-nav-item>
+            <b-nav-item :to="{ name: 'tutorial' }" right>Tutorial</b-nav-item>
+          </b-navbar-nav>
+        </b-collapse>
+      </b-navbar>
+    </div>
+
+    <router-view class="pb-5" />
+
+    <footer class="footer">
+      <p><small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan - Center for Statistical Genetics</small></p>
     </footer>
   </div>
 </template>

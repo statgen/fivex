@@ -12,7 +12,7 @@
         >
         <div class="input-group-append">
           <button
-            class="btn btn-secondary"
+            class="btn btn-secondary input-group-text"
             type="submit"
           >
             <span

@@ -1,3 +1,4 @@
+import dataclasses as dc
 import gzip
 import json
 import math
@@ -75,171 +76,159 @@ except ImportError:
 # }
 
 TISSUE_DATA = {
-    "adipose_naive":"Adipose",
-    "adipose_subcutaneous":"Adipose",
-    "adipose_visceral":"Adipose",
-    "adrenal_gland":"Adrenal Gland",
-    "artery_aorta":"Blood Vessel",
-    "artery_coronary":"Blood Vessel",
-    "artery_tibial":"Blood Vessel",
-    "B-cell_naive":"Immune",
-    "blood":"Blood",
-    "brain":"Brain",
-    "brain_amygdala":"Brain",
-    "brain_anterior_cingulate_cortex":"Brain",
-    "brain_caudate":"Brain",
-    "brain_cerebellar_hemisphere":"Brain",
-    "brain_cerebellum":"Brain",
-    "brain_cortex":"Brain",
-    "brain_frontal_cortex":"Brain",
-    "brain_hippocampus":"Brain",
-    "brain_hypothalamus":"Brain",
-    "brain_naive":"Brain",
-    "brain_nucleus_accumbens":"Brain",
-    "brain_putamen":"Brain",
-    "brain_spinal_cord":"Brain",
-    "brain_substantia_nigra":"Brain",
-    "breast":"Mammary",
-    "CD4_T-cell_anti-CD3-CD28":"Immune",
-    "CD4_T-cell_naive":"Immune",
-    "CD8_T-cell_anti-CD3-CD28":"Immune",
-    "CD8_T-cell_naive":"Immune",
-    "colon_sigmoid":"Colon",
-    "colon_transverse":"Colon",
-    "esophagus_gastroesophageal_junction":"Esophagus",
-    "esophagus_mucosa":"Esophagus",
-    "esophagus_muscularis":"Esophagus",
-    "fat":"Adipose",
-    "fibroblast":"Skin",
-    "heart_atrial_appendage":"Heart",
-    "heart_left_ventricle":"Heart",
-    "iPSC":"Cell Culture",
-    "kidney_cortex":"Kidney",
-    "LCL":"Cell Culture",
-    "liver":"Liver",
-    "lung":"Lung",
-    "macrophage_IFNg":"Immune",
-    "macrophage_IFNg+Salmonella":"Immune",
-    "macrophage_Listeria":"Immune",
-    "macrophage_naive":"Immune",
-    "macrophage_Salmonella":"Immune",
-    "minor_salivary_gland":"Minor Salivary Gland",
-    "monocyte":"Immune",
-    "monocyte_CD16_naive":"Immune",
-    "monocyte_IAV":"Immune",
-    "monocyte_LPS":"Immune",
-    "monocyte_naive":"Immune",
-    "monocyte_Pam3CSK4":"Immune",
-    "monocyte_R848":"Immune",
-    "muscle":"Muscle",
-    "muscle_naive":"Muscle",
-    "nerve_tibial":"Nerve",
-    "neutrophil":"Immune",
-    "NK-cell_naive":"Immune",
-    "ovary":"Reproductive",
-    "pancreas":"Pancreas",
-    "pancreatic_islet":"Pancreas",
-    "pituitary":"Pituitary",
-    "prostate":"Reproductive",
-    "sensory_neuron":"Nerve",
-    "skin":"Skin",
-    "skin_not_sun_exposed":"Skin",
-    "skin_sun_exposed":"Skin",
-    "small_intestine":"Small Intestine",
-    "spleen":"Spleen",
-    "stomach":"Stomach",
-    "T-cell":"Immune",
-    "testis":"Reproductive",
-    "Tfh_memory":"Immune",
-    "Th1-17_memory":"Immune",
-    "Th17_memory":"Immune",
-    "Th1_memory":"Immune",
-    "Th2_memory":"Immune",
-    "thyroid":"Thyroid",
-    "Treg_memory":"Immune",
-    "Treg_naive":"Immune",
-    "uterus":"Reproductive",
-    "vagina":"Reproductive",
+    "adipose_naive": "Adipose",
+    "adipose_subcutaneous": "Adipose",
+    "adipose_visceral": "Adipose",
+    "adrenal_gland": "Adrenal Gland",
+    "artery_aorta": "Blood Vessel",
+    "artery_coronary": "Blood Vessel",
+    "artery_tibial": "Blood Vessel",
+    "B-cell_naive": "Immune",
+    "blood": "Blood",
+    "brain": "Brain",
+    "brain_amygdala": "Brain",
+    "brain_anterior_cingulate_cortex": "Brain",
+    "brain_caudate": "Brain",
+    "brain_cerebellar_hemisphere": "Brain",
+    "brain_cerebellum": "Brain",
+    "brain_cortex": "Brain",
+    "brain_frontal_cortex": "Brain",
+    "brain_hippocampus": "Brain",
+    "brain_hypothalamus": "Brain",
+    "brain_naive": "Brain",
+    "brain_nucleus_accumbens": "Brain",
+    "brain_putamen": "Brain",
+    "brain_spinal_cord": "Brain",
+    "brain_substantia_nigra": "Brain",
+    "breast": "Mammary",
+    "CD4_T-cell_anti-CD3-CD28": "Immune",
+    "CD4_T-cell_naive": "Immune",
+    "CD8_T-cell_anti-CD3-CD28": "Immune",
+    "CD8_T-cell_naive": "Immune",
+    "colon_sigmoid": "Colon",
+    "colon_transverse": "Colon",
+    "esophagus_gastroesophageal_junction": "Esophagus",
+    "esophagus_mucosa": "Esophagus",
+    "esophagus_muscularis": "Esophagus",
+    "fat": "Adipose",
+    "fibroblast": "Skin",
+    "heart_atrial_appendage": "Heart",
+    "heart_left_ventricle": "Heart",
+    "iPSC": "Cell Culture",
+    "kidney_cortex": "Kidney",
+    "LCL": "Cell Culture",
+    "liver": "Liver",
+    "lung": "Lung",
+    "macrophage_IFNg": "Immune",
+    "macrophage_IFNg+Salmonella": "Immune",
+    "macrophage_Listeria": "Immune",
+    "macrophage_naive": "Immune",
+    "macrophage_Salmonella": "Immune",
+    "minor_salivary_gland": "Minor Salivary Gland",
+    "monocyte": "Immune",
+    "monocyte_CD16_naive": "Immune",
+    "monocyte_IAV": "Immune",
+    "monocyte_LPS": "Immune",
+    "monocyte_naive": "Immune",
+    "monocyte_Pam3CSK4": "Immune",
+    "monocyte_R848": "Immune",
+    "muscle": "Muscle",
+    "muscle_naive": "Muscle",
+    "nerve_tibial": "Nerve",
+    "neutrophil": "Immune",
+    "NK-cell_naive": "Immune",
+    "ovary": "Reproductive",
+    "pancreas": "Pancreas",
+    "pancreatic_islet": "Pancreas",
+    "pituitary": "Pituitary",
+    "prostate": "Reproductive",
+    "sensory_neuron": "Nerve",
+    "skin": "Skin",
+    "skin_not_sun_exposed": "Skin",
+    "skin_sun_exposed": "Skin",
+    "small_intestine": "Small Intestine",
+    "spleen": "Spleen",
+    "stomach": "Stomach",
+    "T-cell": "Immune",
+    "testis": "Reproductive",
+    "Tfh_memory": "Immune",
+    "Th1-17_memory": "Immune",
+    "Th17_memory": "Immune",
+    "Th1_memory": "Immune",
+    "Th2_memory": "Immune",
+    "thyroid": "Thyroid",
+    "Treg_memory": "Immune",
+    "Treg_naive": "Immune",
+    "uterus": "Reproductive",
+    "vagina": "Reproductive",
     }
 
 
+def position_to_variant_id(
+    chromosome: str, position: int, ref_allele: str, alt_allele: str
+) -> str:
+    return f"{chromosome}:{position}_{ref_allele}/{alt_allele}"
+
+
+@dc.dataclass
 class VariantContainer:
     """
-    Represent the variant data in a standard manner that lets us access fields by name
-
-    This allows us to make changes to how the data is stored (eg column order), but because fields are looked up by
-        name, the code is isolated from the impact of changes.
+    Represent the data for a single variant
     """
+    # The fields from here to rsid are read from tabix-indexed files
 
-    def __init__(
-        self,
-        study,  # the fields from here to rsid are read from tabix-indexed files
-        tissue,  # study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
-        molecular_trait_id,
-        chrom,
-        pos,
-        ref,
-        alt,
-        variant,  # this is not used since it is redundant information
-        ma_samples,
-        maf,
-        log_pvalue_nominal,
-        beta,
-        stderr_beta,
-        vartype,
-        ac,
-        an,
-        r2,
-        molecular_trait_object_id,
-        gene_id,
-        median_tpm,
-        rsid,  # everything from study to here are read from tabix-indexed files
-        build,
-        tss_distance,
-        symbol,
-        system,
-        *,
-        pip_cluster=None,
-        spip=None,
-        pip=None,
-    ):
-        self.study = study
-        self.tissue = tissue
-        self.molecular_trait_id = molecular_trait_id
-        self.chromosome = chrom
-        self.position = pos
+    # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
+    study: str
+    tissue: str
+    molecular_trait_id: str
 
-        self.ref_allele = ref
-        self.alt_allele = alt
-        self.ma_samples = ma_samples
-        self.maf = maf
-        self.log_pvalue = log_pvalue_nominal
+    chromosome: str
+    position: int
+    ref_allele: str
+    alt_allele: str
 
-        self.beta = beta
-        self.stderr_beta = stderr_beta
-        self.vartype = vartype
-        self.ac = ac
-        self.an = an
+    variant: str  # In EBI format but not used since it is redundant information - @amkwong
+    ma_samples: int
+    maf: float
+    log_pvalue: float  # log_pvalue_nominal
 
-        self.samples = int(an / 2)
-        self.r2 = r2
-        self.molecular_trait_object_id = molecular_trait_object_id
-        self.gene_id = gene_id
-        self.median_tpm = median_tpm
+    beta: float
+    stderr_beta: float
 
-        self.rsid = rsid
-        self.build = 'GRCh38'
-        self.tss_distance = tss_distance
-        self.symbol = symbol
-        self.system = system
+    vartype: str
+    ac: int
+    an: int
 
-        self.pip_cluster = pip_cluster
-        self.spip = spip
-        self.pip = pip
+    r2: float
+    molecular_trait_object_id: str
 
-    @property
-    def id_field(self):
-        return f"{self.chromosome}:{self.position}_{self.ref_allele}/{self.alt_allele}"
+    gene_id: str
+    median_tpm: float
+    rsid: str
+    # end fields that are read from tabix index
+
+    # Begin fields added by parser
+    build: str
+    tss_distance: int
+    symbol: str
+    system: str
+
+    # Additional optional args
+    pip_cluster: ty.Optional[int] = None
+    spip: ty.Optional[float] = None
+    pip: ty.Optional[float] = None
+
+    # Computed properties, not passed as param to init
+    variant_id: str = dc.field(init=False)  # chrom:pos_ref/alt
+    samples: int = dc.field(init=False)
+
+    def __post_init__(self):
+        # Add calculated fields
+        self.variant_id = position_to_variant_id(
+            self.chromosome, self.position, self.ref_allele, self.alt_allele
+        )
+        self.samples = self.an / 2
+        self.build = 'GRCh38'  # FIXME: why do we accept constructor arg if never used?
 
     @property
     def pvalue(self):
@@ -252,7 +241,7 @@ class VariantContainer:
             return 10 ** -self.log_pvalue
 
     def to_dict(self):
-        return vars(self)
+        return dc.asdict(self)
 
 
 class PipAdder:
@@ -356,7 +345,7 @@ class VariantParser:
         # Revise if data format changes!
         # fields[1] = fields[1].replace("chr", "")  # chrom
         if self.tissue and self.study:
-            # Tissue-and-study-specific files have two fewer columns (study and tissue), 
+            # Tissue-and-study-specific files have two fewer columns (study and tissue),
             # and so the fields must be appended to match the number of fields in the all-tissue file
             tissuevar = self.tissue
             fields = [self.study, tissuevar] + fields
@@ -400,7 +389,8 @@ class VariantParser:
         try:
             fields[16] = float(fields[16])  # r2
         except ValueError:
-            fields[16] = float('nan')
+            # TODO: Make the "NA" -> None check more explicit
+            fields[16] = None
         fields[19] = float(fields[19])  # median_tpm
 
         # Append build

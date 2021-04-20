@@ -9,7 +9,7 @@ import sqlite3
 from flask import Blueprint, jsonify, request
 
 from .. import model
-from .format import query_variants
+from .format import position_to_variant_id, query_variants
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -184,6 +184,9 @@ def gene_data_for_region_table(gene_id: str):
                     "position": position,
                     "ref_allele": ref_allele,
                     "alt_allele": alt_allele,
+                    "variant_id": position_to_variant_id(
+                        chromosome, position, ref_allele, alt_allele
+                    ),
                     "tissue": tissue,
                     "pip_cluster": pip_cluster,
                     "spip": spip,
