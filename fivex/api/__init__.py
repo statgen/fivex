@@ -128,11 +128,21 @@ def variant_query(chrom: str, pos: int):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
-    study = request.args.get("study", None)  # We now have data from multiple studies from EBI
+    study = request.args.get(
+        "study", None
+    )  # We now have data from multiple studies from EBI
 
     data = [
         res.to_dict()
-        for res in query_variants(chrom=chrom, start=pos, rowstoskip=0, end=None, tissue=tissue, study=study, gene_id=gene_id)
+        for res in query_variants(
+            chrom=chrom,
+            start=pos,
+            rowstoskip=0,
+            end=None,
+            tissue=tissue,
+            study=study,
+            gene_id=gene_id,
+        )
     ]
 
     for i, item in enumerate(data):

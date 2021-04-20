@@ -8,7 +8,6 @@ import os
 
 from flask import current_app
 
-
 # def locate_data(chrom):
 #     return os.path.join(
 #         current_app.config["FIVEX_DATA_DIR"],
@@ -21,8 +20,11 @@ def locate_data(chrom, startpos):
     end = start + 999999
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
-        "ebi_ge", f"{chrom}", f"all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz",
+        "ebi_ge",
+        f"{chrom}",
+        f"all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz",
     )
+
 
 # def locate_tissue_data(tissue):
 #     return os.path.join(
@@ -30,10 +32,14 @@ def locate_data(chrom, startpos):
 #         f"{tissue}.allpairs.sorted.txt.gz",
 #     )
 
+
 def locate_study_tissue_data(study, tissue):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
-        "ebi_original", f"{study}", "ge", f"{study}_ge_{tissue}.all.tsv.gz",
+        "ebi_original",
+        f"{study}",
+        "ge",
+        f"{study}_ge_{tissue}.all.tsv.gz",
     )
 
 
@@ -46,9 +52,7 @@ def locate_study_tissue_data(study, tissue):
 
 def locate_tss_data():
     return os.path.join(
-        current_app.config["FIVEX_DATA_DIR"],
-        "gencode",
-        "tss.json.gz",
+        current_app.config["FIVEX_DATA_DIR"], "gencode", "tss.json.gz",
     )
 
 

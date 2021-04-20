@@ -161,7 +161,7 @@ TISSUE_DATA = {
     "Treg_naive": "Immune",
     "uterus": "Reproductive",
     "vagina": "Reproductive",
-    }
+}
 
 
 def position_to_variant_id(
@@ -175,6 +175,7 @@ class VariantContainer:
     """
     Represent the data for a single variant
     """
+
     # The fields from here to rsid are read from tabix-indexed files
 
     # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
@@ -228,7 +229,8 @@ class VariantContainer:
             self.chromosome, self.position, self.ref_allele, self.alt_allele
         )
         self.samples = self.an / 2
-        self.build = 'GRCh38'  # FIXME: why do we accept constructor arg if never used?
+        # FIXME: why do we accept constructor arg if never used?
+        self.build = "GRCh38"
 
     @property
     def pvalue(self):
@@ -328,7 +330,7 @@ class VariantParser:
         self.tissue = tissue
         self.study = study
         self.pipDict = pipDict
-        with gzip.open(model.locate_tss_data(), 'rb') as f:
+        with gzip.open(model.locate_tss_data(), "rb") as f:
             self.tss_dict = json.load(f)
 
     def __call__(self, row: str) -> VariantContainer:
@@ -394,18 +396,20 @@ class VariantParser:
         fields[19] = float(fields[19])  # median_tpm
 
         # Append build
-        build = 'GRCh38'
+        build = "GRCh38"
 
         # Append tss_distance
-        gene_tss = self.tss_dict.get(fields[18].split(".")[0], float('nan'))
+        gene_tss = self.tss_dict.get(fields[18].split(".")[0], float("nan"))
         tss_distance = fields[4] - gene_tss
 
         # Append gene symbol
-        geneSymbol = self.gene_json.get(fields[18].split(".")[0], "Unknown_Gene")
+        geneSymbol = self.gene_json.get(
+            fields[18].split(".")[0], "Unknown_Gene"
+        )
 
         # Add tissue grouping and sample size from GTEx
-        #tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
-        #fields.extend(tissue_data)
+        # tissue_data = TISSUE_DATA.get(tissuevar, ("Unknown_Tissue", None))
+        # fields.extend(tissue_data)
 
         # Append system information
         tissueSystem = TISSUE_DATA.get(tissuevar, "Unknown")
@@ -445,7 +449,9 @@ def query_variants(
     # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(
         # The new EBI data format has no header row for the merged files, but a header row for the original data
-        source, parser=VariantParser(tissue=tissue, study=study), skip_rows=rowstoskip
+        source,
+        parser=VariantParser(tissue=tissue, study=study),
+        skip_rows=rowstoskip,
     )
 
     # Add posterior incl probability annotations to the parsed data.
