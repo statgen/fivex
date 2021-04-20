@@ -130,20 +130,27 @@ export default {
          * Proxy a method from the component to the LZ instance
          * This allows parent components to manipulate the LZ instance, via $refs, without
          *  leaking a reference to component internal dom elements
-         *
-         * We previously leaked a reference to the plot via events, but this was leaking memory
-         * on component cleanup
+
+         /**
+         * Proxy a method from the component to the LZ instance
+         * This allows parent components to manipulate the LZ instance, via $refs, without
+         *  leaking a reference to component internal dom elements
+         * @param {function} callback A callback that receives the plot object and acts upon it.
          */
-        callPlot(method_name, ...args) {
-            this.plot[method_name](...args);
+        callPlot(callback) {
+            // Consume return values with caution to avoid leaking internals
+            return callback(this.plot);
         },
+
         /**
          * Proxy a method from the component to the LZ datasources
          * This allows parent components to manipulate the LZ instance, via $refs, without leaking
          *  a reference to component internals
+         * @param {function} callback A callback that receives the datasources object and acts upon it.
          */
-        callSources(method_name, ...args) {
-            this.data_sources[method_name](...args);
+        callSources(callback) {
+            // Consume return values with caution to avoid leaking internals
+            return callback(this.data_sources);
         },
     },
 };

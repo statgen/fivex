@@ -141,16 +141,15 @@ export default {
             this.$nextTick(() => {
                 // eslint-disable-next-line no-unused-vars
                 const { group, n_labels, tss_distance, y_field } = this;
-                this.$refs.phewas_plot.callPlot(
-                    'applyState',
-                    {
+                this.$refs.phewas_plot.callPlot((plot) =>
+                    plot.applyState({
                         lz_match_value: null,
                         maximum_tss_distance: tss_distance,
                         minimum_tss_distance: -tss_distance,
                         start: this.pos_start,
                         end: this.pos_end,
                         y_field,
-                    },
+                    }),
                 );
             });
         },
@@ -242,20 +241,21 @@ export default {
         onPlotConnected() {
             // Connect (or disconnect) a plot instance as components are added/removed
             // This allows the parent to manipulate LocusZoom... but also to avoid preserving a reference
-            this.$refs.phewas_plot.callPlot(
-                'subscribeToData',
-                [
-                    'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
-                    'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
-                    'phewas:pip_cluster',
-                    'phewas:chromosome', // Added this so we can link from the table in our single variant view to a region view page (the linking url requires chromosome, gene, and tissue)
-                ],
-                (data) => {
-                    // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
-                    // using it in tabulator, so that tabulator layouts can be written that also work with
-                    // data directly from the API (where there is no prefix)
-                    this.table_data = data.map((item) => deNamespace(item));
-                },
+            this.$refs.phewas_plot.callPlot((plot) =>
+                plot.subscribeToData(
+                    [
+                        'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
+                        'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
+                        'phewas:pip_cluster',
+                        'phewas:chromosome', // Added this so we can link from the table in our single variant view to a region view page (the linking url requires chromosome, gene, and tissue)
+                    ],
+                    (data) => {
+                        // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
+                        // using it in tabulator, so that tabulator layouts can be written that also work with
+                        // data directly from the API (where there is no prefix)
+                        this.table_data = data.map((item) => deNamespace(item));
+                    },
+                ),
             );
         },
         goto(refName) {
