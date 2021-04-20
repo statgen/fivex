@@ -193,8 +193,8 @@ export default {
         setQuery(params = {}) {
             // Set initial display based on the URL query string, or defaults, as appropriate
             const { group, n_labels, tss_distance, y_field } = params;
-            this.group = group || 'tissue';
-            this.n_labels = +n_labels || 0;
+            this.group = group || 'symbol';
+            this.n_labels = +n_labels || 5;
             this.tss_distance = +tss_distance || 1000000;
             this.y_field = y_field || 'log_pvalue';
         },
