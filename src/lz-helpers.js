@@ -219,6 +219,11 @@ class AssocFIVEx extends AssociationLZ {
         if (this.params.tissue) {
             params.tissue = this.params.tissue;
         }
+        // if (this.params.study) {
+        //     params.study = //this.params.study;
+        // }
+        params.study = 'GTEx';
+
         params = $.param(params);
         return `${url}?${params}`;
     }
