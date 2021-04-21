@@ -15,67 +15,9 @@ try:
 except ImportError:
     pass
 
-# with gzip.open(model.locate_tissue_to_system(), 'rb') as f:
-#     TISSUE_DATA = json.load(f)
-
-# A convenient lookup used to group multiple tissue types into a smaller number of systems
-# For each tissue, provide 1) a related grouping name, and 2) the sample size (from GTEx v8)
-# TISSUE_DATA = {
-#     "Adipose_Subcutaneous": ("Adipose Tissue", 581),
-#     "Adipose_Visceral_Omentum": ("Adipose Tissue", 469),
-#     "Adrenal_Gland": ("Adrenal Gland", 233),
-#     "Artery_Aorta": ("Blood Vessel", 387),
-#     "Artery_Coronary": ("Blood Vessel", 213),
-#     "Artery_Tibial": ("Blood Vessel", 584),
-#     "Brain_Amygdala": ("Brain", 129),
-#     "Brain_Anterior_cingulate_cortex_BA24": ("Brain", 147),
-#     "Brain_Caudate_basal_ganglia": ("Brain", 194),
-#     "Brain_Cerebellar_Hemisphere": ("Brain", 175),
-#     "Brain_Cerebellum": ("Brain", 209),
-#     "Brain_Cortex": ("Brain", 205),
-#     "Brain_Frontal_Cortex_BA9": ("Brain", 175),
-#     "Brain_Hippocampus": ("Brain", 165),
-#     "Brain_Hypothalamus": ("Brain", 170),
-#     "Brain_Nucleus_accumbens_basal_ganglia": ("Brain", 202),
-#     "Brain_Putamen_basal_ganglia": ("Brain", 170),
-#     "Brain_Spinal_cord_cervical_c-1": ("Brain", 126),
-#     "Brain_Substantia_nigra": ("Brain", 114),
-#     "Breast_Mammary_Tissue": ("Breast - Mammary Tissue", 396),
-#     "Cells_Cultured_fibroblasts": ("Skin", 483),
-#     "Cells_EBV-transformed_lymphocytes": ("Blood Vessel", 147),
-#     "Colon_Sigmoid": ("Colon", 318),
-#     "Colon_Transverse": ("Colon", 368),
-#     "Esophagus_Gastroesophageal_Junction": ("Esophagus", 330),
-#     "Esophagus_Mucosa": ("Esophagus", 497),
-#     "Esophagus_Muscularis": ("Esophagus", 465),
-#     "Heart_Atrial_Appendage": ("Heart", 372),
-#     "Heart_Left_Ventricle": ("Heart", 386),
-#     "Kidney_Cortex": ("Kidney - Cortex", 73),
-#     "Liver": ("Liver", 208),
-#     "Lung": ("Lung", 515),
-#     "Minor_Salivary_Gland": ("Minor Salivary Gland", 144),
-#     "Muscle_Skeletal": ("Muscle - Skeletal", 706),
-#     "Nerve_Tibial": ("Nerve - Tibial", 532),
-#     "Ovary": ("Ovary", 167),
-#     "Pancreas": ("Pancreas", 305),
-#     "Pituitary": ("Pituitary", 237),
-#     "Prostate": ("Prostate", 221),
-#     "Skin_Not_Sun_Exposed_Suprapubic": ("Skin", 517),
-#     "Skin_Sun_Exposed_Lower_leg": ("Skin", 605),
-#     "Small_Intestine_Terminal_Ileum": (
-#         "Small Intestine - Terminal Ileum",
-#         174,
-#     ),
-#     "Spleen": ("Spleen", 227),
-#     "Stomach": ("Stomach", 324),
-#     "Testis": ("Testis", 322),
-#     "Thyroid": ("Thyroid", 574),
-#     "Uterus": ("Uterus", 129),
-#     "Vagina": ("Vagina", 141),
-#     "Whole_Blood": ("Whole Blood", 670),
-# }
-
-TISSUE_DATA = {
+# A mapping of all possible tissue names (across studies) to grouped "system" names. Generated manually by @amkwong.
+# TODO: Where did the system names come from- is this a standard enum? (@abought)
+TISSUES_TO_SYSTEMS = {
     "adipose_naive": "Adipose",
     "adipose_subcutaneous": "Adipose",
     "adipose_visceral": "Adipose",
@@ -163,9 +105,142 @@ TISSUE_DATA = {
     "vagina": "Reproductive",
 }
 
+# A list of the tissue names associated with each study
+# TODO: It would be nice if there were a list-of-studies API that showed context / metadata, so people knew what they were looking at.
+#   This is something that SQL would be good at, + a custom endpoint
+TISSUES_PER_STUDY = {
+    "Alasoo_2018": [
+        "macrophage_IFNg",
+        "macrophage_IFNg+Salmonella",
+        "macrophage_naive",
+        "macrophage_Salmonella"
+    ],
+    "BLUEPRINT": [
+        "monocyte",
+        "neutrophil",
+        "T-cell"
+    ],
+    "BrainSeq": [
+        "brain"
+    ],
+    "FUSION": [
+        "adipose_naive",
+        "muscle_naive"
+    ],
+    "GENCORD": [
+        "fibroblast",
+        "LCL",
+        "T-cell"
+    ],
+    "GEUVADIS": [
+        "LCL"
+    ],
+    "GTEx": [
+        "adipose_subcutaneous",
+        "adipose_visceral",
+        "adrenal_gland",
+        "artery_aorta",
+        "artery_coronary",
+        "artery_tibial",
+        "blood",
+        "brain_amygdala",
+        "brain_anterior_cingulate_cortex",
+        "brain_caudate",
+        "brain_cerebellar_hemisphere",
+        "brain_cerebellum",
+        "brain_cortex",
+        "brain_frontal_cortex",
+        "brain_hippocampus",
+        "brain_hypothalamus",
+        "brain_nucleus_accumbens",
+        "brain_putamen",
+        "brain_spinal_cord",
+        "brain_substantia_nigra",
+        "breast",
+        "colon_sigmoid",
+        "colon_transverse",
+        "esophagus_gej",
+        "esophagus_mucosa",
+        "esophagus_muscularis",
+        "fibroblast",
+        "heart_atrial_appendage",
+        "heart_left_ventricle",
+        "kidney_cortex",
+        "LCL",
+        "liver",
+        "lung",
+        "minor_salivary_gland",
+        "muscle",
+        "nerve_tibial",
+        "ovary",
+        "pancreas",
+        "pituitary",
+        "prostate",
+        "skin_not_sun_exposed",
+        "skin_sun_exposed",
+        "small_intestine",
+        "spleen",
+        "stomach",
+        "testis",
+        "thyroid",
+        "uterus",
+        "vagina"
+    ],
+    "HipSci": [
+        "iPSC"
+    ],
+    "Lepik_2017": [
+        "blood"
+    ],
+    "Nedelec_2016": [
+        "macrophage_Listeria",
+        "macrophage_naive",
+        "macrophage_Salmonella"
+    ],
+    "Quach_2016": [
+        "monocyte_IAV",
+        "monocyte_LPS",
+        "monocyte_naive",
+        "monocyte_Pam3CSK4",
+        "monocyte_R848"
+    ],
+    "ROSMAP": [
+        "brain_naive"
+    ],
+    "Schmiedel_2018": [
+        "B-cell_naive",
+        "CD4_T-cell_anti-CD3-CD28",
+        "CD4_T-cell_naive",
+        "CD8_T-cell_anti-CD3-CD28",
+        "CD8_T-cell_naive",
+        "monocyte_CD16_naive",
+        "monocyte_naive",
+        "NK-cell_naive",
+        "Tfh_memory",
+        "Th1-17_memory",
+        "Th17_memory",
+        "Th1_memory",
+        "Th2_memory",
+        "Treg_memory",
+        "Treg_naive"
+    ],
+    "Schwartzentruber_2018": [
+        "sensory_neuron"
+    ],
+    "TwinsUK": [
+        "blood",
+        "fat",
+        "LCL",
+        "skin"
+    ],
+    "van_de_Bunt_2015": [
+        "pancreatic_islet"
+    ]
+}
+
 
 def position_to_variant_id(
-    chromosome: str, position: int, ref_allele: str, alt_allele: str
+        chromosome: str, position: int, ref_allele: str, alt_allele: str
 ) -> str:
     return f"{chromosome}:{position}_{ref_allele}/{alt_allele}"
 
@@ -252,14 +327,14 @@ class PipAdder:
     """
 
     def __init__(
-        self,
-        db_path: str,
-        chrom: str,
-        start: int,
-        *,
-        end=None,
-        tissue=None,
-        gene_id=None,
+            self,
+            db_path: str,
+            chrom: str,
+            start: int,
+            *,
+            end=None,
+            tissue=None,
+            gene_id=None,
     ):
         # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
         # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
@@ -284,7 +359,7 @@ class PipAdder:
                 arglist.extend([start, end])
 
             # Generate the list of results based on the query request
-            dapg = list(conn.execute(sqlcommand, tuple(arglist),))
+            dapg = list(conn.execute(sqlcommand, tuple(arglist), ))
 
         # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
         for line in dapg:
@@ -354,7 +429,7 @@ class VariantParser:
         else:
             tissuevar = fields[1]
 
-        # Field numbers
+        # Field numbers. See also: https://github.com/eQTL-Catalogue/eQTL-Catalogue-resources/blob/master/tabix/Columns.md
         # 0: study
         # 1: tissue
         # 2: molecular_trait_id
@@ -393,7 +468,7 @@ class VariantParser:
         except ValueError:
             # TODO: Make the "NA" -> None check more explicit
             fields[16] = None
-        fields[19] = float(fields[19])  # median_tpm
+        fields[19] = float(fields[19])  # median_tpm  # FIXME: Handle NA case
 
         # Append build
         build = "GRCh38"
@@ -412,20 +487,20 @@ class VariantParser:
         # fields.extend(tissue_data)
 
         # Append system information
-        tissueSystem = TISSUE_DATA.get(tissuevar, "Unknown")
+        tissueSystem = TISSUES_TO_SYSTEMS.get(tissuevar, "Unknown")
         fields.extend([build, tss_distance, geneSymbol, tissueSystem])
         return VariantContainer(*fields)
 
 
 def query_variants(
-    chrom: str,
-    start: int,
-    rowstoskip: int,
-    end: int = None,
-    tissue: str = None,
-    study: str = None,
-    gene_id: str = None,
-    piponly: bool = False,
+        chrom: str,
+        start: int,
+        rowstoskip: int,
+        end: int = None,
+        tissue: str = None,
+        study: str = None,
+        gene_id: str = None,
+        piponly: bool = False,
 ) -> ty.Iterable[VariantContainer]:
     """
     Fetch expression data for one or more variants, and apply optional filters

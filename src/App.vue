@@ -21,7 +21,7 @@
     <router-view class="pb-5" />
 
     <footer class="footer">
-      <p><small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan - Center for Statistical Genetics</small></p>
+      <small>&copy; {{ (new Date()).getFullYear() }} - The University of Michigan - Center for Statistical Genetics</small>
     </footer>
   </div>
 </template>

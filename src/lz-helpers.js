@@ -213,16 +213,14 @@ class AssocFIVEx extends AssociationLZ {
     getURL(state) {
         const url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
         let params = {};
+        // TODO: Is there ever a case where a LZ panel data source is allowed to omit gene/tissue/study info? If not, add validation.
         if (this.params.gene_id) {
             params.gene_id = this.params.gene_id;
         }
         if (this.params.tissue) {
             params.tissue = this.params.tissue;
         }
-        // if (this.params.study) {
-        //     params.study = //this.params.study;
-        // }
-        params.study = 'GTEx';
+        params.study = this.params.study;
 
         params = $.param(params);
         return `${url}?${params}`;

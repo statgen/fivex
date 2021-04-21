@@ -8,7 +8,7 @@ from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
-from ..api.format import TISSUE_DATA
+from ..api.format import TISSUES_PER_STUDY, TISSUES_TO_SYSTEMS
 from . import format
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
@@ -53,6 +53,9 @@ def region_view():
         end = int(end)
 
     tissue = request.args.get("tissue", None)
+    # FIXME: Hardcoded default for now since GTEx has by far the most tissues, and makes a broader basis for comparison. Should we auto-choose best study?
+    #   In the near future, we should implement fetching data from the correct study
+    study = request.args.get('study', 'GTEx')
 
     # One of these params is needed (TODO: Pick one of these and resolve differences via omnisearch)
     gene_id = request.args.get("gene_id", None)
@@ -117,7 +120,7 @@ def region_view():
     center = (end + start) // 2
 
     # Get the full tissue list from TISSUE_DATA
-    tissue_list = TISSUE_DATA.keys()
+    tissue_list = TISSUES_TO_SYSTEMS.keys()
 
     # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
     gene_json = model.get_gene_names_conversion()
@@ -147,9 +150,11 @@ def region_view():
             "end": end,
             "center": center,
             "gene_id": gene_id,
+            "study": study,
             "tissue": tissue,
             "symbol": symbol,
             "tissue_list": list(tissue_list),
+            "tissues_per_study": TISSUES_PER_STUDY,
             "gene_list": gene_list,
         }
     )

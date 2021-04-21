@@ -57,6 +57,7 @@ export default {
             y_field: null,
             gene_id: null,
             tissue: null,
+            study: null,
 
             extra_tracks: [],
 
@@ -78,9 +79,9 @@ export default {
 
         query_params() {
             // Re-calculate the URL query string whenever dependent information changes.
-            const { chrom, start, end, gene_id, tissue, y_field, extra_tracks } = this;
+            const { chrom, start, end, gene_id, tissue, study, y_field, extra_tracks } = this;
 
-            const options = { chrom, start, end, gene_id, tissue, y_field };
+            const options = { chrom, start, end, gene_id, tissue, study, y_field };
 
             if (extra_tracks.length) {
                 options.extra_tracks = extra_tracks;
@@ -101,6 +102,20 @@ export default {
             // return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
             const { gene_id } = this;
             return `/api/data/gene/${gene_id}/`;
+        },
+
+        tissues_per_study() {
+            // Reformat the API tissues-per-study information to work with bootstrap-vue select boxes
+            const { tissues_per_study } = this.region_data;
+            // Backend sends { [study_name]: list_of_tissues }
+            const choices = [];
+            Object.entries(tissues_per_study).forEach(([study_name, tissue_list]) => {
+                choices.push({
+                    label: study_name,
+                    options: tissue_list.map((tissue_name) => ({text: tissue_name, value: {study_name, tissue_name}})),
+                });
+            });
+            return choices;
         },
     },
     watch: {
@@ -128,11 +143,11 @@ export default {
     },
 
     beforeCreate() {
-    // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
-    // Preserve a reference to component widgets so that their methods can be accessed directly
-    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
-    //  bypass these problems by assigning them as static properties instead of nested
-    //  observables.
+        // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
+        // Preserve a reference to component widgets so that their methods can be accessed directly
+        //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
+        //  bypass these problems by assigning them as static properties instead of nested
+        //  observables.
         this.assoc_plot = null;
         this.assoc_sources = null;
 
@@ -142,7 +157,7 @@ export default {
     },
 
     beforeRouteEnter(to, from, next) {
-    // Fires on first navigation to route (from another route)
+        // Fires on first navigation to route (from another route)
         getData(to.query)
             .then((data) => {
                 next((vm) => {
@@ -153,7 +168,7 @@ export default {
     },
 
     beforeRouteUpdate(to, from, next) {
-    // When going from one Region page to another (component is reused, only variable part of route changes)
+        // When going from one Region page to another (component is reused, only variable part of route changes)
 
         // Reset internal state (because we're reusing the same component)
         this.setQuery();
@@ -168,11 +183,11 @@ export default {
         }).catch(() => next({ name: 'error' }));
     },
     methods: {
-        changeAnchors(tissue, gene_id) {
+        changeAnchors(study, tissue, gene_id) {
             const { chrom, start, end } = this;
             this.$router.push({
                 name: 'region',
-                query: { chrom, start, end, gene_id, tissue },
+                query: { chrom, start, end, study, gene_id, tissue },
             });
         },
 
@@ -193,7 +208,7 @@ export default {
             this.region_data = data;
 
             if (data) {
-                const { chrom: chr, start, end, gene_id, tissue, symbol } = data;
+                const { chrom: chr, start, end, gene_id, tissue, study, symbol } = data;
                 const { extra_tracks, y_field } = this;
                 const initialState = { chr, start, end, y_field };
                 this.chrom = chr;
@@ -201,35 +216,32 @@ export default {
                 this.end = end;
                 this.gene_id = gene_id;
                 this.tissue = tissue;
+                this.study = study;
 
                 // Create track layouts for the basic (anchor) track, plus any extra ones to be added to the plot
                 //  In the URL, extra tracks are serialized as `gene_id$tissue_name`
-                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [gene_id, tissue_name] pairs
-                const unique_genes = new Set(track_identifiers.map((item) => item[0]));
-                unique_genes.add(gene_id);
-                const unique_tissues = new Set(track_identifiers.map((item) => item[1]));
-                unique_tissues.add(tissue);
+                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [study_name, gene_id, tissue_name] triplets
 
                 const track_layouts = track_identifiers
-                    .map(([gene_id, tissue_name]) => {
+                    .map(([study_name, gene_id, tissue_name]) => {
                         const gene_name = data.gene_list[gene_id];
-                        return getTrackLayout(gene_id, tissue_name, initialState, gene_name);
+                        return getTrackLayout(gene_id, study_name, tissue_name, initialState, gene_name);
                     }).flat();
 
                 // Anchor + extra tracks
                 const track_panels = [
-                    ...getTrackLayout(gene_id, tissue, initialState, symbol),
+                    ...getTrackLayout(gene_id, study, tissue, initialState, symbol),
                     ...track_layouts,
                 ];
                 this.base_plot_layout = getBasicLayout(initialState, track_panels);
 
                 const extra_sources = track_identifiers
-                    .map(([gene_id, tissue_name]) => getTrackSources(gene_id, tissue_name))
+                    .map(([study_name, gene_id, tissue_name]) => getTrackSources(gene_id, study_name, tissue_name))
                     .flat();
 
                 // Create data sources for the basic (anchor) track, plus any extra ones to be added to the plot
                 const track_sources = [
-                    ...getTrackSources(gene_id, tissue), // Plot the anchor gene and tissue first
+                    ...getTrackSources(gene_id, study, tissue), // Plot the anchor gene and tissue first
                     ...extra_sources,
                 ];
 
@@ -255,17 +267,17 @@ export default {
         /**
          * Add a new gene or tissue track to the plot, after the plot has been created
          */
-        addTrack(gene_id, tissue_name) {
+        addTrack(study_name, tissue_name, gene_id) {
             // FIXME: Known issue: "add tissue" mode has a bug where panel titles show gene id instead of name
             //   Root cause: anchor gene ID strips version IDs, so when tissue is added relative to anchor,
             //   Recommended fix: harmonize how we present gene IDs in the backend data store, rather than cleaning it up
             //   in many places throughout the app
             const { gene_list } = this.region_data;
             const gene_symbol = gene_list[gene_id];
-            const key = `${gene_id}$${tissue_name}`;
+            const key = `${study_name}$${gene_id}$${tissue_name}`;
 
             if (!this.extra_tracks.includes(key)) {
-                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, gene_symbol);
+                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, study_name, gene_symbol);
                 this.extra_tracks.push(key);
             }
         },
@@ -351,9 +363,10 @@ export default {
           <select-anchors
             class="px-3"
             :current_gene="gene_id"
+            :current_study="study"
             :current_tissue="tissue"
             :gene_list="region_data.gene_list"
-            :tissue_list="region_data.tissue_list"
+            :tissues_per_study="tissues_per_study"
             @navigate="changeAnchors"
           />
         </b-dropdown>
@@ -367,9 +380,10 @@ export default {
           <b-dropdown-form @submit.prevent>
             <add-track
               :gene_list="region_data.gene_list"
-              :tissue_list="region_data.tissue_list"
+              :tissues_per_study="tissues_per_study"
               :current_gene_symbol="region_data.symbol"
               :current_gene_id="gene_id"
+              :current_study="study"
               :current_tissue="tissue"
               @add-track="addTrack"
             />

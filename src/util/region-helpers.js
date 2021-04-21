@@ -10,15 +10,16 @@ function sourceName(display_name) {
 /**
  * Get the datasources required for a single track
  * @param gene_id Full ENSG identifier (including version)
- * @param tissue The name of the associated tissue
+ * @param {string} study_name The name of the study containing the dataset. Each study has their own unique list of tissues available, and the tissue and study are typically specified together (both fields are required to identify the specific tissue data of interest)
+ * @param {string} tissue The name of the associated tissue
  * @returns {Array[]} Array of configuration options for all required data sources
  */
-export function getTrackSources(gene_id, tissue) {
+export function getTrackSources(gene_id, study_name, tissue) {
     const geneid_short = gene_id.split('.')[0];
     return [
-        [sourceName(`assoc_${tissue}_${geneid_short}`), ['AssocFIVEx', {
+        [sourceName(`assoc_${tissue}_${study_name}_${geneid_short}`), ['AssocFIVEx', {
             url: '/api/data/region',
-            params: { gene_id, tissue },
+            params: { gene_id, tissue, study: study_name },
         }]],
     ];
 }
@@ -31,14 +32,14 @@ export function getTrackSources(gene_id, tissue) {
  * @param {String} genesymbol
  * @returns {[*]}
  */
-export function getTrackLayout(gene_id, tissue, state, genesymbol) {
+export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
     const symbol = genesymbol || gene_id;
     const geneid_short = gene_id.split('.')[0];
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
-    newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')
-    }
+    newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')}
         <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
+        Study: <strong><i>{{{{namespace[assoc]}}study}}</i></strong> <br>
         Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>
         MAF: <strong>{{{{namespace[assoc]}}maf|twosigfigs}}</strong> <br>
         Effect Size: <strong>{{{{namespace[assoc]}}beta|twosigfigs}}</strong> <br>
@@ -46,11 +47,12 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
         Sum of PIP for cluster: <strong>{{{{namespace[assoc]}}spip|pip_display}}</strong> <br>
         PIP cluster #: <strong>{{{{namespace[assoc]}}pip_cluster|pip_display}}</strong> <br>`;
 
-    const namespace = { assoc: sourceName(`assoc_${tissue}_${geneid_short}`) };
+    const namespace = { assoc: sourceName(`assoc_${tissue}_${study_name}_${geneid_short}`) };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
         unnamespaced: true,
         fields: [
             '{{namespace[assoc]}}chromosome', '{{namespace[assoc]}}position',
+            '{{namespace[assoc]}}study',
             '{{namespace[assoc]}}ref_allele',
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
@@ -63,10 +65,10 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
     });
 
     const layoutBase = LocusZoom.Layouts.get('panel', 'association', {
-        id: sourceName(`assoc_${tissue}_${geneid_short}`),
+        id: sourceName(`assoc_${tissue}_${study_name}_${geneid_short}`),
         height: 275,
         title: { // Remove this when LocusZoom update with the fix to toolbar titles is published
-            text: `${symbol} in ${tissue}`,
+            text: `${symbol} in ${tissue} (${study_name})`,
             x: 60,
             y: 30,
         },
@@ -78,17 +80,6 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
         ],
     });
     layoutBase.axes.y1.label_offset = 36;
-
-    /* Add this back in when LocusZoom update is published
-  layoutBase.toolbar.widgets.push(
-      {
-          type: 'title',
-          title: `<i>${symbol}</i> in ${tissue}`,
-          position: 'left'
-      }
-  );
-  */
-
     return [layoutBase];
 }
 
@@ -100,7 +91,8 @@ export function getTrackLayout(gene_id, tissue, state, genesymbol) {
  */
 export function getBasicLayout(initial_state = {}, track_panels = []) {
     const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes_filtered', { unnamespaced: true }).tooltip;
-    newgenestooltip.html += `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
+    // FIXME: tooltip link does not work in principle (relies on a global variable and function isn't defined globally)
+    // newgenestooltip.html += `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
     const gene_track = LocusZoom.Layouts.get('data_layer', 'genes_filtered', {
         unnamespaced: true,
         tooltip: newgenestooltip,
@@ -165,11 +157,12 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @param {LocusZoom.DataSources} datasources
  * @param {string} gene_id
  * @param {string} tissue
+ * @param {string} study_name
  * @param {string} genesymbol
  */
-export function addTrack(plot, datasources, gene_id, tissue, genesymbol) {
-    const track_layout = getTrackLayout(gene_id, tissue, plot.state, genesymbol);
-    const track_sources = getTrackSources(gene_id, tissue);
+export function addTrack(plot, datasources, gene_id, tissue, study_name, genesymbol) {
+    const track_layout = getTrackLayout(gene_id, study_name, tissue, plot.state, genesymbol);
+    const track_sources = getTrackSources(gene_id, study_name, tissue);
     addPanels(plot, datasources, track_layout, track_sources);
 }
 

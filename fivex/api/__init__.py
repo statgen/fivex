@@ -26,6 +26,7 @@ def region_query(chrom, start, end):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    # FIXME: Should study be required for this query? (to avoid ambiguity if two studies use same tissue names)
     study = request.args.get("study", None)
     piponly = request.args.get("piponly", None)
 
@@ -163,6 +164,7 @@ def gene_data_for_region_table(gene_id: str):
     data = []
     try:
         with gzip.open(source) as f:
+            # FIXME: Add a "study" column to this file, then serialize in API to feed the table
             for line in f:
                 (
                     chromosome,
