@@ -48,6 +48,16 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 position: 'right',
                                 type: 'toggle_legend',
                             },
+                            {
+                                type: 'filter_field',
+                                position: 'right',
+                                layer_name: 'phewaspvalues',
+                                field: 'phewas:symbol',
+                                field_display_html: 'Gene name',
+                                operator: 'match',
+                                input_size: 8,
+                                data_type: 'string',
+                            },
                         ],
                     },
                     legend: {
