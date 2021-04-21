@@ -41,6 +41,7 @@ export default {
             alt: null,
             top_gene: null,
             top_tissue: null,
+            study_names: [], // list of all available studies within FIVEx
             ac: null,
             af: null,
             an: null,
@@ -49,10 +50,13 @@ export default {
             is_inside_gene: null,
 
             // Data that controls the view (user-selected options)
-            y_field: null,
-            group: null,
-            n_labels: null,
-            tss_distance: null,
+            study: [], // List of all currently selected studies (may be none, or multiple)
+            y_field: null,  // Field to show on plot y-axis
+            group: null, // how to group results on plot x-axis
+            n_labels: null, // How many item labels to show
+            tss_distance: null, // How far away can a variant be from the TSS for its nearest gene?
+
+            // Calculated from options; controls plot display
             base_plot_sources: null,
             base_plot_layout: null,
 
@@ -94,15 +98,15 @@ export default {
         },
         query_params() {
             // Re-calculate the URL query string whenever dependent information changes.
-            const { group, n_labels, tss_distance, y_field } = this;
-            return $.param({ group, n_labels, tss_distance, y_field });
+            const { group, n_labels, study, tss_distance, y_field } = this;
+            return $.param({ group, n_labels, study, tss_distance, y_field });
         },
         all_options() {
             // Sometimes (eg pageload), we change multiple options, but only want to re-render LZ once
             // This can be done by watching a synthetic compound property.
             // The value doesn't matter, only that it is different every time this runs
             // eslint-disable-next-line no-unused-vars
-            const { group, n_labels, tss_distance, y_field } = this;
+            const { group, n_labels, study, tss_distance, y_field } = this;
             return Date.now();
         },
     },
@@ -140,10 +144,11 @@ export default {
             }
             this.$nextTick(() => {
                 // eslint-disable-next-line no-unused-vars
-                const { group, n_labels, tss_distance, y_field } = this;
+                const { group, n_labels, study, tss_distance, y_field } = this;
                 this.$refs.phewas_plot.callPlot((plot) =>
                     plot.applyState({
                         lz_match_value: null,
+                        fivex_studies: study,
                         maximum_tss_distance: tss_distance,
                         minimum_tss_distance: -tss_distance,
                         start: this.pos_start,
@@ -192,18 +197,27 @@ export default {
         setQuery(params = {}) {
             // Set initial display based on the URL query string, or defaults, as appropriate
             const { group, n_labels, tss_distance, y_field } = params;
+
+            // Convert jquery $.param format to that used internally in this page
+            //   Rename array params `key[]` -> `key`, and ensure that items are arrays, not single strings
+            const { 'study[]': study } = params;
+            if (study) {
+                this.study = Array.isArray(study) ? study : [study];
+            } else {
+                this.study = ['GTEx'];  // Limit view to GTEx by default, since this is a large and coherent eQTL dataset
+            }
             this.group = group || 'symbol';
             this.n_labels = +n_labels || 5;
-            this.tss_distance = +tss_distance || 1000000;
+            this.tss_distance = +tss_distance || 200000;
             this.y_field = y_field || 'log_pvalue';
         },
         setData(data = {}) {
-            const { chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene } = data;
+            const { chrom, pos, ref, alt, top_gene, top_tissue, study_names, ac, af, an, rsid, nearest_genes, is_inside_gene } = data;
             // Bulk assign all properties from data to the viewmodel. If there is no data, this
             //  sets all values to undefined.
             Object.assign(
                 this,
-                { chrom, pos, ref, alt, top_gene, top_tissue, ac, af, an, rsid, nearest_genes, is_inside_gene },
+                { chrom, pos, ref, alt, top_gene, top_tissue, study_names, ac, af, an, rsid, nearest_genes, is_inside_gene },
             );
 
             const has_data = !!Object.keys(data).length;
@@ -244,10 +258,10 @@ export default {
             this.$refs.phewas_plot.callPlot((plot) =>
                 plot.subscribeToData(
                     [
-                        'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system',
+                        'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:study',
                         'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
                         'phewas:pip_cluster',
-                        'phewas:chromosome', // Added this so we can link from the table in our single variant view to a region view page (the linking url requires chromosome, gene, and tissue)
+                        'phewas:chromosome',
                     ],
                     (data) => {
                         // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
@@ -354,9 +368,9 @@ export default {
           class="mr-2"
           size="sm"
         >
-          <b-dropdown-item>
+          <b-dropdown-text>
             Change value on y-axis
-          </b-dropdown-item>
+          </b-dropdown-text>
           <b-dropdown-form>
             <b-form-radio-group
               v-model="y_field"
@@ -411,6 +425,27 @@ export default {
                 {text: '±1m', value: 1000000},
               ]"
               stacked
+            />
+          </b-dropdown-form>
+        </b-dropdown>
+
+        <b-dropdown
+          class="m-2"
+          size="sm"
+          text="Choose study"
+        >
+          <b-dropdown-text>
+            (shift-click to select multiple)
+          </b-dropdown-text>
+          <b-dropdown-form
+            style="width: 20rem;"
+          >
+            <b-form-select
+              v-model="study"
+              name="study-selector"
+              multiple
+              :options="study_names"
+              :select-size="10"
             />
           </b-dropdown-form>
         </b-dropdown>

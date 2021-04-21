@@ -185,6 +185,7 @@ def variant_view(chrom: str, pos: int):
             alt=annotations.alt_allele,
             top_gene=annotations.top_gene,
             top_tissue=annotations.top_tissue,
+            study_names=list(TISSUES_PER_STUDY.keys()),
             ac=annotations.ac,
             af=annotations.af,
             an=annotations.an,

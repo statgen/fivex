@@ -61,7 +61,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
                             base.fields = [
                                 '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
-                                '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue',
+                                '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue', '{{namespace[phewas]}}study',
                                 '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                                 '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
                                 '{{namespace[phewas]}}tss_distance',
@@ -139,6 +139,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             base.tooltip.html = `
 <a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
 Variant: <strong>{{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}</strong><br>
+Study: <strong>{{{{namespace[phewas]}}study|htmlescape}}</strong><br>
 Gene ID: <strong>{{{{namespace[phewas]}}gene_id|htmlescape}}</strong><br>
 Gene name: <strong><i>{{{{namespace[phewas]}}symbol|htmlescape}}</i></strong><br>
 Tissue (sample size): <strong>{{{{namespace[phewas]}}tissue|htmlescape}} ({{{{namespace[phewas]}}samples|htmlescape}})</strong><br>
@@ -421,6 +422,7 @@ export const VARIANT_TABLE_BASE_COLUMNS = [
                 return base;
             },
         }},
+    { title: 'Study', field: 'study' },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     { title: 'System', field: 'system', headerFilter: true },
     {
@@ -452,6 +454,7 @@ export const REGION_TABLE_BASE_COLUMNS = [
             },
         },
     },
+    { title: 'Study', field: 'study' },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     {
         title: '-log<sub>10</sub>(p)',
