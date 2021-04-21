@@ -43,7 +43,7 @@ export default {
         <label class="mr-2">Gene
           <b-form-select
             v-model="anchor_gene"
-            :options="gene_list">
+            :options="Object.entries(gene_list).map(([value, text]) => ({ value, text }))">
             <template #first>
               <b-form-select-option :value="null" disabled>Select gene:</b-form-select-option>
             </template>

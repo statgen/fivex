@@ -63,6 +63,9 @@ export default {
         this.createLZ(this.base_layout, this.base_sources);
     },
     beforeDestroy() {
+        // Clean up plot and event listeners to prevent memory leaks
+        this.plot.destroy();
+        delete this.plot;
         delete window[this.plot_id];
     },
     methods: {

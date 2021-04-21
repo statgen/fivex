@@ -85,15 +85,22 @@ class PheWASFIVEx extends PheWASLZ {
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
         chain.header.minimum_tss_distance = state.minimum_tss_distance;
         chain.header.y_field = state.y_field;
+        chain.header.fivex_studies = new Set(state.fivex_studies || []);
         return this.url;
     }
 
     annotateData(records, chain) {
-        const filtered = records
+        let filtered = records
             .filter((record) => (
                 record.tss_distance <= chain.header.maximum_tss_distance
               && record.tss_distance >= chain.header.minimum_tss_distance
             ));
+
+        const study_names = chain.header.fivex_studies;
+        if (chain.header.fivex_studies.size) {
+            filtered = filtered.filter((record) => study_names.has(record.study));
+        }
+
         // Add a synthetic field `top_value_rank`, where the best value for a given field gets rank 1.
         // This is used to show labels for only a few points with the strongest (y_field) value.
         // As this is a source designed to power functionality on one specific page, we can hardcode specific behavior

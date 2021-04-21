@@ -89,7 +89,7 @@ export default {
       label="Tissue:"
     >
       <template v-if="select_mode === MODES.GENE">
-        <em>{{ current_tissue }}</em>
+        <em>{{ current_tissue }} ({{ current_study }})</em>
       </template>
       <template v-else>
         <b-form-select
