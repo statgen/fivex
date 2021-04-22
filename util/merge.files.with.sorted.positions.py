@@ -1,5 +1,5 @@
-import sys
 import subprocess as sp
+import sys
 
 
 def parse_a_line(s):
