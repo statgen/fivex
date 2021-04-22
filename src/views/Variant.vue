@@ -34,7 +34,7 @@ export default {
     },
     data() {
         return {
-            // Data from the api (describes the variant)
+            // Data sent from the api (describes the variant)
             chrom: null,
             pos: null,
             ref: null,
@@ -50,7 +50,7 @@ export default {
             is_inside_gene: null,
 
             // Data that controls the view (user-selected options)
-            study: [], // List of all currently selected studies (may be none, or multiple)
+            study: [], // List of all currently selected studies (may be none, or multiple; default to "show all")
             y_field: null,  // Field to show on plot y-axis
             group: null, // how to group results on plot x-axis
             n_labels: null, // How many item labels to show
@@ -167,13 +167,13 @@ export default {
         },
     },
     beforeCreate() {
-    // Make some constants available to the Vue instance for use as props in rendering
+        // Make some constants available to the Vue instance for use as props in rendering
         this.table_base_columns = VARIANT_TABLE_BASE_COLUMNS;
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
     // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
     beforeRouteEnter(to, from, next) {
-    // First navigation to route
+        // First navigation to route
         getData(to.params.variant)
             .then((data) => {
                 next((vm) => {
@@ -183,8 +183,8 @@ export default {
             }).catch((err) => next({ name: 'error' }));
     },
     beforeRouteUpdate(to, from, next) {
-    // When going from one variant page to another (component is reused, only variable part of route changes)
-    // this.reset();
+        // When going from one variant page to another (component is reused, only variable part of route changes)
+        // this.reset();
         this.setData();
 
         getData(to.params.variant).then((data) => {
@@ -204,7 +204,7 @@ export default {
             if (study) {
                 this.study = Array.isArray(study) ? study : [study];
             } else {
-                this.study = ['GTEx'];  // Limit view to GTEx by default, since this is a large and coherent eQTL dataset
+                this.study = [];
             }
             this.group = group || 'symbol';
             this.n_labels = +n_labels || 5;
@@ -224,6 +224,10 @@ export default {
 
             if (has_data) {
                 //  When the page is first loaded, create the plot instance
+                if (!this.study.length) {
+                    // One of our URL query params cannot be set until after the data is fetched: default to "show all studies"
+                    this.study = study_names;
+                }
                 this.base_plot_layout = getPlotLayout(
                     this.chrom,
                     this.pos,
@@ -233,11 +237,13 @@ export default {
                         chr: this.chrom,
                         start: this.pos_start,
                         end: this.pos_end,
+                        fivex_studies: this.study,
                         minimum_tss_distance: -this.tss_distance,
                         maximum_tss_distance: this.tss_distance,
                         y_field: this.y_field,
                     },
                 );
+
                 this.base_plot_sources = getPlotSources(this.chrom, this.pos);
             }
 
