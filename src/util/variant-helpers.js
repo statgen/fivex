@@ -81,6 +81,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
+                                '{{namespace[phewas]}}study',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -160,7 +161,7 @@ TSS distance: <strong>{{{{namespace[phewas]}}tss_distance|htmlescape}}</strong><
 System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
 PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
 Sum of PIP for cluster: <strong>{{{{namespace[phewas]}}spip|pip_display}}</strong><br>
-PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong>
+PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong><br>
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',

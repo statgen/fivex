@@ -377,7 +377,7 @@ export default {
           <b-dropdown-text>
             Change value on y-axis
           </b-dropdown-text>
-          <b-dropdown-form>
+          <b-dropdown-form style="width: 220px;">
             <b-form-radio-group
               v-model="y_field"
               :options="[

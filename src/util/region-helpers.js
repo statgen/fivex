@@ -39,13 +39,14 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')}
         <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
-        Study: <strong><i>{{{{namespace[assoc]}}study}}</i></strong> <br>
+        Study: <strong>{{{{namespace[assoc]}}study}}</strong> <br>
         Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>
         MAF: <strong>{{{{namespace[assoc]}}maf|twosigfigs}}</strong> <br>
         Effect Size: <strong>{{{{namespace[assoc]}}beta|twosigfigs}}</strong> <br>
         PIP: <strong>{{{{namespace[assoc]}}pip|pip_display}}</strong> <br>
         Sum of PIP for cluster: <strong>{{{{namespace[assoc]}}spip|pip_display}}</strong> <br>
-        PIP cluster #: <strong>{{{{namespace[assoc]}}pip_cluster|pip_display}}</strong> <br>`;
+        PIP cluster #: <strong>{{{{namespace[assoc]}}pip_cluster|pip_display}}</strong> <br>
+        rsid: <strong>{{{{namespace[assoc]}}rsid}}</strong> <br>`;
 
     const namespace = { assoc: sourceName(`assoc_${tissue}_${study_name}_${geneid_short}`) };
     const assoc_layer = LocusZoom.Layouts.get('data_layer', 'association_pvalues', {
@@ -60,6 +61,7 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
             '{{namespace[assoc]}}spip', '{{namespace[assoc]}}pip_cluster',
+            '{{namespace[assoc]}}rsid',
         ],
         tooltip: newscattertooltip,
     });
