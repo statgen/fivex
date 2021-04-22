@@ -39,7 +39,7 @@ module.exports = {
     'object-curly-newline': ['error', { consistent: true }],
     'prefer-template': 'error',
     'quotes': [
-        'error',
+        'warn',
         'single',
         {
             'avoidEscape': true,
@@ -50,8 +50,8 @@ module.exports = {
         'error',
         'always'
     ],
-    'space-before-blocks': 'error',
-    'space-infix-ops': 'error',
+    'space-before-blocks': 'warn',
+    'space-infix-ops': 'warn',
     'vue/prop-name-casing': 'off',
   },
   overrides: [
