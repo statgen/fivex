@@ -55,7 +55,7 @@ def region_view():
     tissue = request.args.get("tissue", None)
     # FIXME: Hardcoded default for now since GTEx has by far the most tissues, and makes a broader basis for comparison. Should we auto-choose best study?
     #   In the near future, we should implement fetching data from the correct study
-    study = request.args.get('study', 'GTEx')
+    study = request.args.get("study", "GTEx")
 
     # One of these params is needed (TODO: Pick one of these and resolve differences via omnisearch)
     gene_id = request.args.get("gene_id", None)

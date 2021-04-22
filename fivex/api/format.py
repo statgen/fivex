@@ -113,28 +113,13 @@ TISSUES_PER_STUDY = {
         "macrophage_IFNg",
         "macrophage_IFNg+Salmonella",
         "macrophage_naive",
-        "macrophage_Salmonella"
+        "macrophage_Salmonella",
     ],
-    "BLUEPRINT": [
-        "monocyte",
-        "neutrophil",
-        "T-cell"
-    ],
-    "BrainSeq": [
-        "brain"
-    ],
-    "FUSION": [
-        "adipose_naive",
-        "muscle_naive"
-    ],
-    "GENCORD": [
-        "fibroblast",
-        "LCL",
-        "T-cell"
-    ],
-    "GEUVADIS": [
-        "LCL"
-    ],
+    "BLUEPRINT": ["monocyte", "neutrophil", "T-cell",],
+    "BrainSeq": ["brain"],
+    "FUSION": ["adipose_naive", "muscle_naive"],
+    "GENCORD": ["fibroblast", "LCL", "T-cell"],
+    "GEUVADIS": ["LCL"],
     "GTEx": [
         "adipose_subcutaneous",
         "adipose_visceral",
@@ -184,29 +169,23 @@ TISSUES_PER_STUDY = {
         "testis",
         "thyroid",
         "uterus",
-        "vagina"
+        "vagina",
     ],
-    "HipSci": [
-        "iPSC"
-    ],
-    "Lepik_2017": [
-        "blood"
-    ],
+    "HipSci": ["iPSC"],
+    "Lepik_2017": ["blood"],
     "Nedelec_2016": [
         "macrophage_Listeria",
         "macrophage_naive",
-        "macrophage_Salmonella"
+        "macrophage_Salmonella",
     ],
     "Quach_2016": [
         "monocyte_IAV",
         "monocyte_LPS",
         "monocyte_naive",
         "monocyte_Pam3CSK4",
-        "monocyte_R848"
+        "monocyte_R848",
     ],
-    "ROSMAP": [
-        "brain_naive"
-    ],
+    "ROSMAP": ["brain_naive"],
     "Schmiedel_2018": [
         "B-cell_naive",
         "CD4_T-cell_anti-CD3-CD28",
@@ -222,25 +201,16 @@ TISSUES_PER_STUDY = {
         "Th1_memory",
         "Th2_memory",
         "Treg_memory",
-        "Treg_naive"
+        "Treg_naive",
     ],
-    "Schwartzentruber_2018": [
-        "sensory_neuron"
-    ],
-    "TwinsUK": [
-        "blood",
-        "fat",
-        "LCL",
-        "skin"
-    ],
-    "van_de_Bunt_2015": [
-        "pancreatic_islet"
-    ]
+    "Schwartzentruber_2018": ["sensory_neuron"],
+    "TwinsUK": ["blood", "fat", "LCL", "skin"],
+    "van_de_Bunt_2015": ["pancreatic_islet"],
 }
 
 
 def position_to_variant_id(
-        chromosome: str, position: int, ref_allele: str, alt_allele: str
+    chromosome: str, position: int, ref_allele: str, alt_allele: str
 ) -> str:
     return f"{chromosome}:{position}_{ref_allele}/{alt_allele}"
 
@@ -327,14 +297,14 @@ class PipAdder:
     """
 
     def __init__(
-            self,
-            db_path: str,
-            chrom: str,
-            start: int,
-            *,
-            end=None,
-            tissue=None,
-            gene_id=None,
+        self,
+        db_path: str,
+        chrom: str,
+        start: int,
+        *,
+        end=None,
+        tissue=None,
+        gene_id=None,
     ):
         # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
         # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
@@ -359,7 +329,7 @@ class PipAdder:
                 arglist.extend([start, end])
 
             # Generate the list of results based on the query request
-            dapg = list(conn.execute(sqlcommand, tuple(arglist), ))
+            dapg = list(conn.execute(sqlcommand, tuple(arglist),))
 
         # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
         for line in dapg:
@@ -475,7 +445,7 @@ class VariantParser:
 
         # Append tss_distance
         gene_tss = self.tss_dict.get(fields[18].split(".")[0], float("nan"))
-        tss_distance = abs(fields[4]) - (sign(fields[4]) * gene_tss)
+        tss_distance = math.copysign(1, gene_tss) * (fields[4] - abs(gene_tss))
 
         # Append gene symbol
         geneSymbol = self.gene_json.get(
@@ -493,14 +463,14 @@ class VariantParser:
 
 
 def query_variants(
-        chrom: str,
-        start: int,
-        rowstoskip: int,
-        end: int = None,
-        tissue: str = None,
-        study: str = None,
-        gene_id: str = None,
-        piponly: bool = False,
+    chrom: str,
+    start: int,
+    rowstoskip: int,
+    end: int = None,
+    tissue: str = None,
+    study: str = None,
+    gene_id: str = None,
+    piponly: bool = False,
 ) -> ty.Iterable[VariantContainer]:
     """
     Fetch expression data for one or more variants, and apply optional filters
