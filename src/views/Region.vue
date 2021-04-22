@@ -237,10 +237,10 @@ export default {
 
                 // Create track layouts for the basic (anchor) track, plus any extra ones to be added to the plot
                 //  In the URL, extra tracks are serialized as `gene_id$tissue_name`
-                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [study_name, gene_id, tissue_name] triplets
+                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [study_name, tissue_name, gene_id] triplets
 
                 const track_layouts = track_identifiers
-                    .map(([study_name, gene_id, tissue_name]) => {
+                    .map(([study_name, tissue_name, gene_id]) => {
                         const gene_name = data.gene_list[gene_id];
                         return getTrackLayout(gene_id, study_name, tissue_name, initialState, gene_name);
                     }).flat();
@@ -253,7 +253,7 @@ export default {
                 this.base_plot_layout = getBasicLayout(initialState, track_panels);
 
                 const extra_sources = track_identifiers
-                    .map(([study_name, gene_id, tissue_name]) => getTrackSources(gene_id, study_name, tissue_name))
+                    .map(([study_name, tissue_name, gene_id]) => getTrackSources(gene_id, study_name, tissue_name))
                     .flat();
 
                 // Create data sources for the basic (anchor) track, plus any extra ones to be added to the plot
@@ -291,7 +291,7 @@ export default {
             //   in many places throughout the app
             const { gene_list } = this.api_data;
             const gene_symbol = gene_list[gene_id];
-            const key = `${study_name}$${gene_id}$${tissue_name}`;
+            const key = `${study_name}$${tissue_name}$${gene_id}`;
 
             if (!this.extra_tracks.includes(key)) {
                 addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, study_name, gene_symbol);
@@ -413,34 +413,16 @@ export default {
           size="sm"
         >
           <b-dropdown-form style="width: 180px;">
-            <label>
-              <input
-                id="show-log-pvalue"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="log_pvalue"
-              > -log<sub>10</sub> P
-            </label>
-            <label>
-              <input
-                id="show-beta"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="beta"
-              > Effect size (NES)
-            </label>
-
-            <label>
-              <input
-                id="show-pip"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="pip"
-              > PIP
-            </label>
+            <b-radio-group
+              v-model="y_field"
+              name="y-options"
+              :options="[
+                { value: 'log_pvalue', html: '-log<sub>10</sub> P' },
+                { value: 'beta', text: 'Effect size (NES)' },
+                { value: 'pip', text: 'PIP' }
+              ]"
+              stacked
+            />
           </b-dropdown-form>
         </b-dropdown>
       </div>
