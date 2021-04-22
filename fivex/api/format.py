@@ -475,7 +475,7 @@ class VariantParser:
 
         # Append tss_distance
         gene_tss = self.tss_dict.get(fields[18].split(".")[0], float("nan"))
-        tss_distance = fields[4] - gene_tss
+        tss_distance = abs(fields[4]) - (sign(fields[4]) * gene_tss)
 
         # Append gene symbol
         geneSymbol = self.gene_json.get(
