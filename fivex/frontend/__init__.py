@@ -8,7 +8,11 @@ from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
-from ..api.format import TISSUES_PER_STUDY, TISSUES_TO_SYSTEMS
+from ..api.format import (
+    TISSUES_PER_STUDY,
+    TISSUES_TO_SYSTEMS,
+    position_to_variant_id,
+)
 from . import format
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
@@ -183,6 +187,9 @@ def variant_view(chrom: str, pos: int):
             pos=pos,
             ref=annotations.ref_allele,
             alt=annotations.alt_allele,
+            variant_id=position_to_variant_id(
+                chrom, pos, annotations.ref_allele, annotations.alt_allele
+            ),
             top_gene=annotations.top_gene,
             top_tissue=annotations.top_tissue,
             study_names=list(TISSUES_PER_STUDY.keys()),

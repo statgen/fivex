@@ -22,6 +22,7 @@ function getData(variant) {
     return fetch(`/api/views/variant/${variant}/`)
         .then(handleErrors)
         .then((resp) => resp.json())
+        // FIXME: More nuanced errors
         .catch((err) => this.$router.replace({ name: 'error' }));
 }
 
@@ -34,22 +35,26 @@ export default {
     },
     data() {
         return {
-            // Data sent from the api (describes the variant)
-            chrom: null,
-            pos: null,
-            ref: null,
-            alt: null,
-            top_gene: null,
-            top_tissue: null,
-            study_names: [], // list of all available studies within FIVEx
-            ac: null,
-            af: null,
-            an: null,
-            rsid: null,
-            nearest_genes: null,
-            is_inside_gene: null,
+            // Data sent from the api when the page is first loaded (basic info needed for the view).
+            // The default values here will be overridden in almost any usage, but they exist to help define the expected contract between page and API.
+            api_data: {
+                chrom: '',
+                pos: null,
+                ref: '',
+                alt: '',
+                variant_id: '',
+                top_gene: '',
+                top_tissue: '',
+                study_names: [],
+                ac: null,
+                af: null,
+                an: null,
+                rsid: null,
+                nearest_genes: [],
+                is_inside_gene: null,
+            },
 
-            // Data that controls the view (user-selected options)
+            // Params that control the view (user-selected options). These are serialized as query params to create persistent links.
             study: [], // List of all currently selected studies (may be none, or multiple; default to "show all")
             y_field: null,  // Field to show on plot y-axis
             group: null, // how to group results on plot x-axis
@@ -68,29 +73,11 @@ export default {
         };
     },
     computed: {
-        variant_label() {
-            const { chrom, pos, ref, alt, rsid } = this;
-            const fields = ['cis-eQTLs associated with variant:'];
-            const postext = parseInt(pos, 10).toLocaleString();
-            if (rsid) {
-                fields.push(`${rsid}`);
-                fields.push(`(chr${chrom}:${postext}`);
-                if (ref && alt) {
-                    fields.push(`${ref}/${alt})`);
-                }
-            } else {
-                fields.push(`chr${chrom}:${postext}`);
-                if (ref && alt) {
-                    fields.push(`${ref}/${alt}`);
-                }
-            }
-            return fields.join(' ');
-        },
         pos_start() {
-            return Math.max(this.pos - this.tss_distance, 1);
+            return Math.max(this.api_data.pos - this.tss_distance, 1);
         },
         pos_end() {
-            return this.pos + this.tss_distance;
+            return this.api_data.pos + this.tss_distance;
         },
         table_sort() {
             // Update how tabulator is drawn, whenever y_field changes
@@ -171,7 +158,6 @@ export default {
         this.table_base_columns = VARIANT_TABLE_BASE_COLUMNS;
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
-    // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
     beforeRouteEnter(to, from, next) {
         // First navigation to route
         getData(to.params.variant)
@@ -180,17 +166,18 @@ export default {
                     vm.setQuery(to.query);
                     vm.setData(data);
                 });
+                // FIXME: More granular error handling
             }).catch((err) => next({ name: 'error' }));
     },
     beforeRouteUpdate(to, from, next) {
         // When going from one variant page to another (component is reused, only variable part of route changes)
-        // this.reset();
         this.setData();
 
         getData(to.params.variant).then((data) => {
             this.setQuery(to.query);
             this.setData(data);
             next();
+            // FIXME: More granular error handling
         }).catch((err) => next({ name: 'error' }));
     },
     methods: {
@@ -211,30 +198,21 @@ export default {
             this.tss_distance = +tss_distance || 200000;
             this.y_field = y_field || 'log_pvalue';
         },
-        setData(data = {}) {
-            const { chrom, pos, ref, alt, top_gene, top_tissue, study_names, ac, af, an, rsid, nearest_genes, is_inside_gene } = data;
-            // Bulk assign all properties from data to the viewmodel. If there is no data, this
-            //  sets all values to undefined.
-            Object.assign(
-                this,
-                { chrom, pos, ref, alt, top_gene, top_tissue, study_names, ac, af, an, rsid, nearest_genes, is_inside_gene },
-            );
-
-            const has_data = !!Object.keys(data).length;
-
-            if (has_data) {
+        setData(api_data) {
+            this.api_data = api_data;
+            if (api_data) {
                 //  When the page is first loaded, create the plot instance
                 if (!this.study.length) {
                     // One of our URL query params cannot be set until after the data is fetched: default to "show all studies"
-                    this.study = study_names;
+                    this.study = api_data.study_names;
                 }
                 this.base_plot_layout = getPlotLayout(
-                    this.chrom,
-                    this.pos,
+                    this.api_data.chrom,
+                    this.api_data.pos,
                     {
-                        variant: this.variant,
-                        position: this.pos,
-                        chr: this.chrom,
+                        variant: api_data.variant,
+                        position: api_data.pos,
+                        chr: api_data.chrom,
                         start: this.pos_start,
                         end: this.pos_end,
                         fivex_studies: this.study,
@@ -244,11 +222,11 @@ export default {
                     },
                 );
 
-                this.base_plot_sources = getPlotSources(this.chrom, this.pos);
+                this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos);
             }
 
             // If used in reset mode, set loading to true
-            this.loading_done = has_data;
+            this.loading_done = !!api_data;
         },
         reset() {
             this.loading_done = false;
@@ -343,7 +321,7 @@ export default {
       <div class="col-sm-12">
         <h1>
           <strong>
-            {{ variant_label }}
+            cis-eQTLs associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
           </strong>
         </h1>
       </div>
@@ -450,7 +428,7 @@ export default {
               v-model="study"
               name="study-selector"
               multiple
-              :options="study_names"
+              :options="api_data.study_names"
               :select-size="10"
             />
           </b-dropdown-form>
@@ -462,7 +440,7 @@ export default {
       ref="phewas_plot"
       :base_layout="base_plot_layout"
       :base_sources="base_plot_sources"
-      :chr="chrom"
+      :chr="api_data.chrom"
       :start="pos_start"
       :end="pos_end"
       @connected="onPlotConnected"
@@ -478,18 +456,18 @@ export default {
           <div class="card variant-information-grouped-card">
             <div class="card-body">
               <dl class="variant-information-dl">
-                <template v-if="ac !== null && an !== null">
+                <template v-if="api_data.ac !== null && api_data.an !== null">
                   <dt>Allele count / total</dt>
-                  <dd>{{ ac }} / {{ an }}</dd>
+                  <dd>{{ api_data.ac }} / {{ api_data.an }}</dd>
                 </template>
                 <template v-else>
                   <dt>Note:</dt>
                   <dd>Allele information not found</dd>
                 </template>
 
-                <template v-if="af !== null">
+                <template v-if="api_data.af !== null">
                   <dt>Allele frequency</dt>
-                  <dd>{{ af }}</dd>
+                  <dd>{{ api_data.af }}</dd>
                 </template>
               </dl>
             </div>
@@ -498,13 +476,13 @@ export default {
           <div class="card variant-information-grouped-card">
             <div class="card-body">
               <dl class="variant-info-middle">
-                <template v-if="top_gene !== null">
+                <template v-if="api_data.top_gene !== null">
                   <dt>Top gene</dt>
-                  <dd><i>{{ top_gene }}</i></dd>
+                  <dd><i>{{ api_data.top_gene }}</i></dd>
                 </template>
-                <template v-if="top_tissue !== null">
+                <template v-if="api_data.top_tissue !== null">
                   <dt>Top tissue</dt>
-                  <dd>{{ top_tissue }}</dd>
+                  <dd>{{ api_data.top_tissue }}</dd>
                 </template>
               </dl>
             </div>
@@ -513,22 +491,22 @@ export default {
           <div class="card variant-information-grouped-card">
             <div class="card-body">
               <dl class="variant-information-dl">
-                <template v-if="rsid !== null">
+                <template v-if="api_data.rsid !== null">
                   <dt>rsid</dt>
-                  <dd>{{ rsid }}</dd>
+                  <dd>{{ api_data.rsid }}</dd>
                 </template>
-                <dt>{{ is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)</dt>
+                <dt>{{ api_data.is_inside_gene ? "Overlapping" : "Nearest" }} gene(s)</dt>
                 <dd>
                   <i>
                     <span
-                      v-for="(gene, index) in nearest_genes"
+                      v-for="(gene, index) in api_data.nearest_genes"
                       :key="gene.ensg"
                       class="text-with-definition"
                       :title="gene.ensg"
                     >
-                      {{ gene.symbol }}<span v-if="nearest_genes && index === nearest_genes.length">,</span>
+                      {{ gene.symbol }}<span v-if="api_data.nearest_genes && index === api_data.nearest_genes.length">,</span>
                     </span>
-                    <span v-if="!nearest_genes || !nearest_genes.length">(no genes found)</span>
+                    <span v-if="!api_data.nearest_genes || !api_data.nearest_genes.length">(no genes found)</span>
                   </i>
                 </dd>
               </dl>
@@ -539,10 +517,10 @@ export default {
         <div class="card">
           <div class="card-body">
             External links:
-            <template v-if="ref!==null && alt !== null">
+            <template v-if="api_data.ref!==null && api_data.alt !== null">
               <a
                 v-b-tooltip.top.html
-                :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ chrom }-${ pos }-${ ref }-${ alt }`"
+                :href="`https://bravo.sph.umich.edu/freeze5/hg38/variant/${ api_data.chrom }-${ api_data.pos }-${ api_data.ref }-${ api_data.alt }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -552,7 +530,7 @@ export default {
                 BRAVO <span class="fa fa-external-link-alt" /> </a>
               <a
                 v-b-tooltip.top
-                :href="`https://gtexportal.org/home/snp/chr${ chrom }_${ pos }_${ ref }_${ alt }_b38`"
+                :href="`https://gtexportal.org/home/snp/chr${ api_data.chrom }_${ api_data.pos }_${ api_data.ref }_${ api_data.alt }_b38`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -562,7 +540,7 @@ export default {
                 GTEx Portal <span class="fa fa-external-link-alt" /> </a>
               <a
                 v-b-tooltip.top
-                :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ chrom }%3A${ pos }-${ pos }&position=chr${ chrom }%3A${ pos - 25 }-${ pos + 25 }`"
+                :href="`http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&highlight=hg38.chr${ api_data.chrom }%3A${ api_data.pos }-${ api_data.pos }&position=chr${ api_data.chrom }%3A${ api_data.pos - 25 }-${ api_data.pos + 25 }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -573,7 +551,7 @@ export default {
               /></a>
               <a
                 v-b-tooltip.top
-                :href="`https://gnomad.broadinstitute.org/variant/chr${ chrom }-${ pos }-${ ref }-${ alt }?dataset=gnomad_r3`"
+                :href="`https://gnomad.broadinstitute.org/variant/chr${ api_data.chrom }-${ api_data.pos }-${ api_data.ref }-${ api_data.alt }?dataset=gnomad_r3`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -582,10 +560,10 @@ export default {
               >
                 gnomAD <span class="fa fa-external-link-alt" /></a>
             </template>
-            <template v-if="rsid !==null">
+            <template v-if="api_data.rsid !==null">
               <a
                 v-b-tooltip.top
-                :href="`https://www.ncbi.nlm.nih.gov/snp/${ rsid }`"
+                :href="`https://www.ncbi.nlm.nih.gov/snp/${ api_data.rsid }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -595,7 +573,7 @@ export default {
                 <span class="fa fa-external-link-alt" /> </a>
               <a
                 v-b-tooltip.top
-                :href="`http://pheweb.sph.umich.edu/go?query=${ rsid }`"
+                :href="`http://pheweb.sph.umich.edu/go?query=${ api_data.rsid }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -605,7 +583,7 @@ export default {
                 MGI <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
-                :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ rsid }`"
+                :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ api_data.rsid }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -615,7 +593,7 @@ export default {
                 UKB-SAIGE <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
-                :href="`http://big.stats.ox.ac.uk/go?query=${ rsid }`"
+                :href="`http://big.stats.ox.ac.uk/go?query=${ api_data.rsid }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -625,7 +603,7 @@ export default {
                 UKB-Oxford BIG <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
-                :href="`https://genetics.opentargets.org/variant/${ chrom }_${ pos }_${ ref }_${ alt }`"
+                :href="`https://genetics.opentargets.org/variant/${ api_data.chrom }_${ api_data.pos }_${ api_data.ref }_${ api_data.alt }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
@@ -635,7 +613,7 @@ export default {
                 Open Targets Genetics <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
-                :href="`https://www.ebi.ac.uk/gwas/search?query=${ rsid }`"
+                :href="`https://www.ebi.ac.uk/gwas/search?query=${ api_data.rsid }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"

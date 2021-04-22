@@ -212,7 +212,8 @@ TISSUES_PER_STUDY = {
 def position_to_variant_id(
     chromosome: str, position: int, ref_allele: str, alt_allele: str
 ) -> str:
-    return f"{chromosome}:{position}_{ref_allele}/{alt_allele}"
+    """EPACTS-format variant ID, with human-readable comma delimiters"""
+    return f"{chromosome}:{position:,}_{ref_allele}/{alt_allele}"
 
 
 @dc.dataclass

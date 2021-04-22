@@ -45,10 +45,25 @@ export default {
     },
     data() {
         return {
-            // Data from the api (describes the variant)
-            region_data: {},
+            // Data sent from the api when the page is first loaded (basic info needed for the view).
+            // The default values here will be overridden in almost any usage, but they exist to help define the expected contract between page and API.
+            // Some of these fields can be set by either the page query params ("what tracks should we show")
+            //  or else filled in by the API ("if nothing requested, show something interesting")
+            api_data: {
+                chrom: '',
+                start: null,
+                end: null,
+                center: null,
+                gene_id: '',
+                study: '',
+                tissue: '',
+                symbol: '',
+                tissue_list: [],
+                tissues_per_study: {},
+                gene_list: [],
+            },
 
-            // Data that controls the view (user-selected options)
+            // Data that controls the view (user-selected options that may change while in the page)
             chrom: null,
             start: null,
             end: null,
@@ -106,7 +121,7 @@ export default {
 
         tissues_per_study() {
             // Reformat the API tissues-per-study information to work with bootstrap-vue select boxes
-            const { tissues_per_study } = this.region_data;
+            const { tissues_per_study } = this.api_data;
             // Backend sends { [study_name]: list_of_tissues }
             const choices = [];
             Object.entries(tissues_per_study).forEach(([study_name, tissue_list]) => {
@@ -164,6 +179,7 @@ export default {
                     vm.setQuery(to.query);
                     vm.setData(data);
                 });
+                // FIXME: more nuanced errors
             }).catch(() => next({ name: 'error' }));
     },
 
@@ -180,6 +196,7 @@ export default {
             this.setQuery(to.query);
             this.setData(data);
             next();
+            // FIXME: more nuanced errors
         }).catch(() => next({ name: 'error' }));
     },
     methods: {
@@ -205,7 +222,7 @@ export default {
         },
         setData(data) {
             // Convert passed params to instance variables. Also create plot and do other reactive things.
-            this.region_data = data;
+            this.api_data = data;
 
             if (data) {
                 const { chrom: chr, start, end, gene_id, tissue, study, symbol } = data;
@@ -272,7 +289,7 @@ export default {
             //   Root cause: anchor gene ID strips version IDs, so when tissue is added relative to anchor,
             //   Recommended fix: harmonize how we present gene IDs in the backend data store, rather than cleaning it up
             //   in many places throughout the app
-            const { gene_list } = this.region_data;
+            const { gene_list } = this.api_data;
             const gene_symbol = gene_list[gene_id];
             const key = `${study_name}$${gene_id}$${tissue_name}`;
 
@@ -347,7 +364,7 @@ export default {
       >
         <h1 style="margin-top: 1em;">
           <strong>Single-tissue eQTLs near
-            <i>{{ region_data.symbol }}</i> (chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})
+            <i>{{ api_data.symbol }}</i> (chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})
           </strong>
         </h1>
       </div>
@@ -365,7 +382,7 @@ export default {
             :current_gene="gene_id"
             :current_study="study"
             :current_tissue="tissue"
-            :gene_list="region_data.gene_list"
+            :gene_list="api_data.gene_list"
             :tissues_per_study="tissues_per_study"
             @navigate="changeAnchors"
           />
@@ -379,9 +396,9 @@ export default {
         >
           <b-dropdown-form @submit.prevent>
             <add-track
-              :gene_list="region_data.gene_list"
+              :gene_list="api_data.gene_list"
               :tissues_per_study="tissues_per_study"
-              :current_gene_symbol="region_data.symbol"
+              :current_gene_symbol="api_data.symbol"
               :current_gene_id="gene_id"
               :current_study="study"
               :current_tissue="tissue"
@@ -474,7 +491,7 @@ export default {
               BRAVO <span class="fa fa-external-link-alt" /> </a>
             <a
               v-b-tooltip.top.html
-              :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`"
+              :href="`https://gtexportal.org/home/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -484,7 +501,7 @@ export default {
               GTEx Portal <span class="fa fa-external-link-alt" /> </a>
             <a
               v-b-tooltip.top
-              :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
+              :href="`https://gnomad.broadinstitute.org/gene/${ api_data.symbol }?dataset=gnomad_r3`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -494,7 +511,7 @@ export default {
               gnomAD <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
+              :href="`http://pheweb.sph.umich.edu/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -504,7 +521,7 @@ export default {
               MGI <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
+              :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -514,7 +531,7 @@ export default {
               UKB-SAIGE <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
+              :href="`http://big.stats.ox.ac.uk/gene/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -524,7 +541,7 @@ export default {
               UKB-Oxford BIG <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
+              :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${api_data.symbol}'}]`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -544,7 +561,7 @@ export default {
               Open Target Genetics <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`https://www.ebi.ac.uk/gwas/genes/${region_data.symbol}`"
+              :href="`https://www.ebi.ac.uk/gwas/genes/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -560,7 +577,7 @@ export default {
       ref="eqtl-table"
       class="pt-md-3"
     >
-      <h2>Significant eQTLs in <i>{{ region_data.symbol }}</i></h2>
+      <h2>Significant eQTLs in <i>{{ api_data.symbol }}</i></h2>
       <tabulator-table
         :columns="table_base_columns"
         :ajax-u-r-l="gene_data_url"
