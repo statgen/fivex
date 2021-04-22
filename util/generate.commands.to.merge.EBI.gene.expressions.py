@@ -5,30 +5,30 @@ import sys
 
 # Indicates the number of megabases each chromosome has -- used for making merged files into 1MB chunks
 chrDict = {
-    '1': 249,
-    '2': 243,
-    '3': 199,
-    '4': 191,
-    '5': 182,
-    '6': 171,
-    '7': 160,
-    '8': 146,
-    '9': 139,
-    '10': 134,
-    '11': 136,
-    '12': 134,
-    '13': 115,
-    '14': 108,
-    '15': 102,
-    '16': 91,
-    '17': 84,
-    '18': 81,
-    '19': 59,
-    '20': 65,
-    '21': 47,
-    '22': 51,
+    "1": 249,
+    "2": 243,
+    "3": 199,
+    "4": 191,
+    "5": 182,
+    "6": 171,
+    "7": 160,
+    "8": 146,
+    "9": 139,
+    "10": 134,
+    "11": 136,
+    "12": 134,
+    "13": 115,
+    "14": 108,
+    "15": 102,
+    "16": 91,
+    "17": 84,
+    "18": 81,
+    "19": 59,
+    "20": 65,
+    "21": 47,
+    "22": 51,
 }
-    
+
 # omitted: 'X':157}
 
 # The base directory containing EBI gene expression files.
@@ -67,13 +67,13 @@ with open(indexFile, "w") as w:
 with open(outputCommandFile, "w") as w:
     for chrom in chrDict:
         temp = subprocess.run(
-            ['mkdir', '-p', os.path.join(geDirectory, chrom)]
+            ["mkdir", "-p", os.path.join(geDirectory, chrom)]
         )
         for i in range(chrDict[chrom]):
             end = (i + 1) * 1000000
             start = (i * 1000000) + 1
             w.write(
-                f'python3 {scriptPath} {indexFile} {chrom} {start} {end} {geDirectory}/{chrom}/all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz\n'
+                f"python3 {scriptPath} {indexFile} {chrom} {start} {end} {geDirectory}/{chrom}/all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz\n"
             )
     for chrom in chrDict:
         for i in range(chrDict[chrom]):
