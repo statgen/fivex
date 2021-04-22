@@ -79,7 +79,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                                 '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
-                                '{{namespace[phewas]}}pip_cluster', '{{namespace[phewas]}}spip',
+                                '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
                                 '{{namespace[phewas]}}study',
                             ];
@@ -160,8 +160,8 @@ MAF: <strong>{{{{namespace[phewas]}}maf|twosigfigs|htmlescape}}</strong><br>
 TSS distance: <strong>{{{{namespace[phewas]}}tss_distance|htmlescape}}</strong><br>
 System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
 PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
-Sum of PIP for cluster: <strong>{{{{namespace[phewas]}}spip|pip_display}}</strong><br>
-PIP cluster #: <strong>{{{{namespace[phewas]}}pip_cluster|pip_display}}</strong><br>
+Credible set label: <strong>{{{{namespace[phewas]}}cs_index}}</strong><br>
+Size of credible set: <strong>{{{{namespace[phewas]}}cs_size}}</strong><br>
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',
@@ -400,13 +400,13 @@ function pip_fmt(cell) {
     return x.toPrecision(2);
 }
 
-function pip_cluster_fmt(cell) {
-    const x = cell.getValue();
-    if (x === 0) {
-        return '-';
-    }
-    return x.toFixed(0);
-}
+// function pip_cluster_fmt(cell) {
+//     const x = cell.getValue();
+//     if (x === 0) {
+//         return '-';
+//     }
+//     return x.toFixed(0);
+// }
 
 export function tabulator_tooltip_maker(cell) {
     // Only show tooltips when an ellipsis ('...') is hiding part of the data.
@@ -445,7 +445,8 @@ export const VARIANT_TABLE_BASE_COLUMNS = [
     { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
     { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
     { title: 'PIP', field: 'pip', formatter: pip_fmt },
-    { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
+    { title: 'CS label', field: 'cs_index' },
+    { title: 'CS size', field: 'cs_size' },
 ];
 
 export const REGION_TABLE_BASE_COLUMNS = [
@@ -476,6 +477,6 @@ export const REGION_TABLE_BASE_COLUMNS = [
     { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
     { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
     { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
-    { title: 'PIP cluster', field: 'pip_cluster', formatter: pip_cluster_fmt },
-    { title: 'SPIP', field: 'spip', formatter: pip_fmt },
+    { title: 'CS Label', field: 'cs_index' },
+    { title: 'CS Size', field: 'cs_size' },
 ];

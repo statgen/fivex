@@ -15,19 +15,19 @@ api_blueprint = Blueprint("api", __name__)
 
 
 @api_blueprint.route(
-    "/region/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
+    "/region/<string:chrom>/<int:start>-<int:end>/<string:study>/<string:tissue>/", methods=["GET"]
 )
-def region_query(chrom, start, end):
+def region_query(chrom, start, end, study, tissue):
     """
     Fetch the eQTL data for a given region, optionally filtering by tissue and gene_id
 
     In its current form, this allows fetching ALL points across any gene and tissue. We may wish to revisit this
     due to performance considerations. (FIXME)
     """
-    tissue = request.args.get("tissue", None)
+    # tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
     # FIXME: Should study be required for this query? (to avoid ambiguity if two studies use same tissue names)
-    study = request.args.get("study", None)
+    # study = request.args.get("study", None)
     piponly = request.args.get("piponly", None)
 
     data = [
@@ -37,9 +37,9 @@ def region_query(chrom, start, end):
             start=start,
             rowstoskip=1,  # Region query uses the original EBi data files, which all have a header row
             end=end,
+            study=study,
             tissue=tissue,
             gene_id=gene_id,
-            study=study,
             piponly=piponly,
         )
     ]

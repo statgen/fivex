@@ -88,6 +88,24 @@ def get_dapg_path():
     )
 
 
+# If requesting a single variant, then return the merged credible_sets file for a single chromosome
+# Otherwise, return the study-specific, tissue-specific file that contains genomewide information
+def get_credible_interval_path(chrom, study=None, tissue=None):
+    if (study, tissue) == (None, None):
+        return os.path.join(
+            current_app.config["FIVEX_DATA_DIR"],
+            "credible_sets",
+            f"chr{chrom}.ge.credible_set.tsv.gz",
+        )
+    else:
+        return os.path.join(
+            current_app.config["FIVEX_DATA_DIR"],
+            "credible_sets",
+            f"{study}",
+            f"{study}.{tissue}_ge.purity_filtered.sorted.txt.gz",
+        )
+
+
 def get_gene_data_table(gene_id):
     """
     Returns the path to the data to populate the table in region view

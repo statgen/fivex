@@ -44,8 +44,8 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
         MAF: <strong>{{{{namespace[assoc]}}maf|twosigfigs}}</strong> <br>
         Effect Size: <strong>{{{{namespace[assoc]}}beta|twosigfigs}}</strong> <br>
         PIP: <strong>{{{{namespace[assoc]}}pip|pip_display}}</strong> <br>
-        Sum of PIP for cluster: <strong>{{{{namespace[assoc]}}spip|pip_display}}</strong> <br>
-        PIP cluster #: <strong>{{{{namespace[assoc]}}pip_cluster|pip_display}}</strong> <br>
+        Credible set label: <strong>{{{{namespace[assoc]}}cs_index}}</strong> <br>
+        Credible set size: <strong>{{{{namespace[assoc]}}cs_size}}</strong> <br>
         rsid: <strong>{{{{namespace[assoc]}}rsid}}</strong> <br>`;
 
     const namespace = { assoc: sourceName(`assoc_${tissue}_${study_name}_${geneid_short}`) };
@@ -60,7 +60,7 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
             '{{namespace[assoc]}}stderr_beta', '{{namespace[assoc]}}maf',
             '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
-            '{{namespace[assoc]}}spip', '{{namespace[assoc]}}pip_cluster',
+            '{{namespace[assoc]}}cs_size', '{{namespace[assoc]}}cs_index',
             '{{namespace[assoc]}}rsid',
         ],
         tooltip: newscattertooltip,
@@ -266,7 +266,8 @@ export function switchY_region(plot, yfield) {
                     { position: 'left', text: '≤1e-4', y: -4 },
 
                 ];
-                scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
+                // Modified from using pip_cluster as the shape
+                scatter_layout.point_shape = [{ scale_function: 'cs_index' }, 'circle'];  
                 scatter_layout.legend = [
                     { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
                     { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },

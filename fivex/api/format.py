@@ -216,6 +216,49 @@ def position_to_variant_id(
 
 
 @dc.dataclass
+class CIContainer:
+    """
+    Represents the data for credible intervals
+    """
+    # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
+    study: str
+    tissue: str
+
+    # The rest of these fields are present in all credible interval files
+    gene_id: str  # this column is labeled "phenotype_id" in the original file
+    var_id: str  # in chrom_pos_ref_alt format -- not used
+
+    chromosome: str
+    position: int
+    ref_allele: str
+    alt_allele: str
+
+    cs_id: str
+    cs_index: str
+    finemapped_region: str
+    pip: float
+
+    z: float
+    cs_min_r2: float
+    cs_avg_r2: float
+    cs_size: int
+    posterior_mean: float
+
+    posterior_sd: float
+    cs_log10bf: float
+    variant_id: str = dc.field(init=False)
+
+    def __post_init__(self):
+        # Add calculated fields
+        self.variant_id = position_to_variant_id(
+            self.chromosome, self.position, self.ref_allele, self.alt_allele
+        )
+
+    def to_dict(self):
+        return dc.asdict(self)
+
+
+@dc.dataclass
 class VariantContainer:
     """
     Represent the data for a single variant
@@ -260,8 +303,12 @@ class VariantContainer:
     system: str
 
     # Additional optional args
-    pip_cluster: ty.Optional[int] = None
-    spip: ty.Optional[float] = None
+    # Old fields
+    # pip_cluster: ty.Optional[int] = None
+    # spip: ty.Optional[float] = None
+    # Updated fields from SuSie
+    cs_index: ty.Optional[str] = None
+    cs_size: ty.Optional[int] = None
     pip: ty.Optional[float] = None
 
     # Computed properties, not passed as param to init
@@ -290,82 +337,206 @@ class VariantContainer:
     def to_dict(self):
         return dc.asdict(self)
 
-
-class PipAdder:
+class CIAdder:
     """
-    Add Posterior Inclusion Probability information to a parsed variant container object
+    Add credible set statistics (SuSie PIPs) to a parsed variant container object
     """
-
     def __init__(
         self,
-        db_path: str,
+        credible_set_file: str,
         chrom: str,
         start: int,
         *,
         end=None,
+        study=None,
         tissue=None,
-        gene_id=None,
+        gene_id = None,
     ):
-        # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
-        # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
-        pip_data = {}
-        conn = sqlite3.connect(db_path)
+        ci_data = {}
+        if study is None:
+            rowstoskip = 0
+        else:
+            rowstoskip = 1
+        reader = readers.TabixReader(
+            source=credible_set_file,
+            parser=CIParser(study=study, tissue=tissue),
+            skip_rows=rowstoskip
+        )
 
-        with conn:
-            arglist = [chrom]
-            # Build up SQL request based on the query fields given
-            sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
-            if tissue is not None:
-                sqlcommand += " AND tissue=?"
-                arglist.append(tissue)
-            if gene_id is not None:
-                sqlcommand += " AND gene=?"
-                arglist.append(gene_id)
-            if end is None:
-                sqlcommand += " AND pos=?;"
-                arglist.append(start)
-            else:
-                sqlcommand += " AND pos BETWEEN ? AND ?;"
-                arglist.extend([start, end])
-
-            # Generate the list of results based on the query request
-            dapg = list(conn.execute(sqlcommand, tuple(arglist),))
-
-        # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
-        for line in dapg:
-            pip_data[":".join([str(x) for x in line[0:6]])] = line[6:]
-
-        self.pip_data = pip_data
+        # If the query is single variant, set end to (start + 1) 
+        # and use the trick from query_variants to get a single position
+        if end is None:
+            reader.add_filter("position", start)
+            ciRows = reader.fetch(chrom, start - 1, start + 1)
+        # If the query is regional, then filter for the gene of interest
+        # and get the study-, tissue-, and gene-specific data from the entire region
+        else:
+            reader.add_filter("gene_id", gene_id)
+            ciRows = reader.fetch(chrom, start - 1, end + 1)
+        for row in ciRows:
+            key = ":".join(
+                [
+                    row.chromosome,
+                    str(row.position),
+                    row.ref_allele,
+                    row.alt_allele,
+                    row.study,
+                    row.tissue,
+                    row.gene_id,
+                ]
+            )
+            # Dictionary Format: ci_Dict[chrom:pos:ref:alt:study:tissue:gene_id] = (cs_index, cs_size, pip)
+            ci_data[key] = (row.cs_index, row.cs_size, row.pip)
+        self.ci_data = ci_data
 
     def __call__(self, variant: VariantContainer) -> VariantContainer:
-        # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
-        # PIP is the Posterior Inclusion Probability for a single variant
-        # SPIP is the sum of PIPs for all variants belonging to the same cluster
-
-        default = (0, 0.0, 0.0)
-        if self.pip_data is None:
-            (cluster, spip, pip) = default
+        default = ("-", 0, 0.0)
+        if self.ci_data is None:
+            # cs_index is our new cluster (L1 or L2); we will repurpose spip with cs_size for the size of the cluster
+            (cs_index, cs_size, pip) = default
         else:
-            # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
-            #  and (cluster, spip, pip) is the value
-            (cluster, spip, pip) = self.pip_data.get(
+            (cs_index, cs_size, pip) = self.ci_data.get(
                 ":".join(
                     [
-                        "chr" + variant.chromosome,
+                        variant.chromosome,
                         str(variant.position),
                         variant.ref_allele,
                         variant.alt_allele,
+                        variant.study,
                         variant.tissue,
                         variant.gene_id,
                     ]
                 ),
                 default,  # Some variants may lack information
             )
-
-        variant.pip_cluster = cluster
-        variant.spip = spip
+        variant.cs_index = cs_index
+        variant.cs_size = cs_size
         variant.pip = pip
         return variant
+
+
+# class PipAdder:
+#     """
+#     Add Posterior Inclusion Probability information to a parsed variant container object
+#     """
+
+#     def __init__(
+#         self,
+#         db_path: str,
+#         chrom: str,
+#         start: int,
+#         *,
+#         end=None,
+#         study=None,
+#         tissue=None,
+#         gene_id=None,
+#     ):
+#         # Generate a dictionary to add Posterior Inclusion Probabilities (PIP) to each variant
+#         # This allows us to perform a single bulk DB lookup per region to reduce time spent on SQL queries
+#         # pip_data = {}
+#         # Get the correct tabix-indexed file:
+#         # merged chromosome-specific file for a single-variant query, or
+#         # study-specific and tissue-specific file for a regional query
+       
+
+#         conn = sqlite3.connect(db_path)
+
+#         with conn:
+#             arglist = [chrom]
+#             # Build up SQL request based on the query fields given
+#             sqlcommand = "SELECT * FROM dapg WHERE chrom=?"
+#             if tissue is not None:
+#                 sqlcommand += " AND tissue=?"
+#                 arglist.append(tissue)
+#             if gene_id is not None:
+#                 sqlcommand += " AND gene=?"
+#                 arglist.append(gene_id)
+#             if end is None:
+#                 sqlcommand += " AND pos=?;"
+#                 arglist.append(start)
+#             else:
+#                 sqlcommand += " AND pos BETWEEN ? AND ?;"
+#                 arglist.extend([start, end])
+
+#             # Generate the list of results based on the query request
+#             dapg = list(conn.execute(sqlcommand, tuple(arglist),))
+
+#         # Dictionary Format: pipDict[chrom:pos:ref:alt:tissue:gene_id] = (cluster, spip, pip)
+#         for line in dapg:
+#             pip_data[":".join([str(x) for x in line[0:6]])] = line[6:]
+
+#         self.pip_data = pip_data
+
+#     def __call__(self, variant: VariantContainer) -> VariantContainer:
+#         # Cluster is a numeric index for a group of variants in LD in the DAP-G model, and are specific to a gene
+#         # PIP is the Posterior Inclusion Probability for a single variant
+#         # SPIP is the sum of PIPs for all variants belonging to the same cluster
+
+#         default = (0, 0.0, 0.0)
+#         if self.pip_data is None:
+#             (cluster, spip, pip) = default
+#         else:
+#             # In the PIP dictionary, chrom:pos:ref:alt:tissue:gene (with version number) is used as the Python dict key,
+#             #  and (cluster, spip, pip) is the value
+#             (cluster, spip, pip) = self.pip_data.get(
+#                 ":".join(
+#                     [
+#                         "chr" + variant.chromosome,
+#                         str(variant.position),
+#                         variant.ref_allele,
+#                         variant.alt_allele,
+#                         variant.tissue,
+#                         variant.gene_id,
+#                     ]
+#                 ),
+#                 default,  # Some variants may lack information
+#             )
+
+#         variant.pip_cluster = cluster
+#         variant.spip = spip
+#         variant.pip = pip
+#         return variant
+
+
+class CIParser:
+    def __init__(self, study=None, tissue=None):
+        self.study = study
+        self.tissue = tissue
+    
+    def __call__(self, row: str) -> CIContainer:
+        # Columns in the raw credible_sets data:
+        # phenotype_id: this corresponds to genes in gene expression data
+        # variant_id: in chrom_pos_ref_alt format; we don't use this
+        # chr
+        # pos
+        # ref
+        # alt
+        # cs_id: this is simply {phenotype_id}_{cs_index}
+        # cs_index: credible set label, either L1 or L2
+        # finemapped_region: a range for region tested, in chrom:start-end format
+        # pip: generated using SuSie
+        # z: z-score
+        # cs_min_r2
+        # cs_avg_r2
+        # cs_size: credible set size, i.e. the number of variants contained in this credible set
+        # posterior_mean: posterior effect size
+        # posterior_sd: posterior standard deviation
+        # cs_log10bf: log10 of the Bayes Factor for this credible set
+        fields: ty.List[ty.Any] = row.split("\t")
+        if self.study and self.tissue:
+            # Tissue-and-study-specific files have two fewer columns (study and tissue),
+            # and so the fields must be appended to match the number of fields in the all-tissue file
+            fields = [self.study, self.tissue] + fields
+        fields[5] = int(fields[5])  # pos
+        fields[11] = float(fields[11])  # pip
+        fields[12] = float(fields[12])  # z
+        fields[13] = float(fields[13])  # cs_min_r2
+        fields[14] = float(fields[14])  # cs_avg_r2
+        fields[15] = int(fields[15])  # cs_size
+        fields[16] = float(fields[16])  # posterior_mean
+        fields[17] = float(fields[17])  # posteriof_sd
+        fields[18] = float(fields[18])  # cs_log10bf
+        return CIContainer(*fields)
 
 
 class VariantParser:
@@ -467,8 +638,8 @@ def query_variants(
     start: int,
     rowstoskip: int,
     end: int = None,
-    tissue: str = None,
     study: str = None,
+    tissue: str = None,
     gene_id: str = None,
     piponly: bool = False,
 ) -> ty.Iterable[VariantContainer]:
@@ -502,15 +673,29 @@ def query_variants(
     # Add posterior incl probability annotations to the parsed data.
     # (Writing as a transform allows us to replace the source of data or even manner of loading
     #   without writing a different parser)
-    pip_adder = PipAdder(
-        model.get_dapg_path(),
+    # pip_adder = PipAdder(
+    #     model.get_dapg_path(),
+    #     chrom,
+    #     start,
+    #     end=end,
+    #     tissue=tissue,
+    #     gene_id=gene_id,
+    # )
+    # reader.add_transform(pip_adder)
+
+    # If querying a single variant, then end, tissue, and gene_id should all be None
+    # if querying a range, then end, tissue, and gene_id must all be defined
+    # get_credible_interval_path will determine the correct file and feed it to CIAdder
+    ci_adder = CIAdder(
+        model.get_credible_interval_path(chrom, study, tissue),
         chrom,
         start,
         end=end,
+        study=study,
         tissue=tissue,
         gene_id=gene_id,
     )
-    reader.add_transform(pip_adder)
+    reader.add_transform(ci_adder)
 
     if gene_id:
         if "." in gene_id:
