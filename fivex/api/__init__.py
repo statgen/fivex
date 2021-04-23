@@ -15,7 +15,8 @@ api_blueprint = Blueprint("api", __name__)
 
 
 @api_blueprint.route(
-    "/region/<string:chrom>/<int:start>-<int:end>/<string:study>/<string:tissue>/", methods=["GET"]
+    "/region/<string:chrom>/<int:start>-<int:end>/<string:study>/<string:tissue>/",
+    methods=["GET"],
 )
 def region_query(chrom, start, end, study, tissue):
     """

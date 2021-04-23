@@ -9,9 +9,15 @@ from flask import url_for
 # and may need to be updated if the homepage examples change
 def test_loads_region(client):
     url = url_for(
-        "api.region_query", chrom="1", start=108774968, end=109774968
+        "api.region_query",
+        chrom="1",
+        start=108774968,
+        end=109774968,
+        study="GTEx",
+        tissue="Adipose_Subcutaneous",
     )
-    assert client.get(url).status_code == 200
+    response = client.get(url)
+    assert response.status_code == 200
 
 
 def test_loads_region_bestvar(client):
