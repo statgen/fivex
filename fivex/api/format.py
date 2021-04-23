@@ -2,7 +2,6 @@ import dataclasses as dc
 import gzip
 import json
 import math
-import sqlite3
 import typing as ty
 
 from zorp import parser_utils, readers  # type: ignore
@@ -221,6 +220,7 @@ class CIContainer:
     """
     Represents the data for credible intervals
     """
+
     # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
     study: str
     tissue: str
@@ -338,10 +338,12 @@ class VariantContainer:
     def to_dict(self):
         return dc.asdict(self)
 
+
 class CIAdder:
     """
     Add credible set statistics (SuSie PIPs) to a parsed variant container object
     """
+
     def __init__(
         self,
         credible_set_file: str,
@@ -351,7 +353,7 @@ class CIAdder:
         end=None,
         study=None,
         tissue=None,
-        gene_id = None,
+        gene_id=None,
     ):
         ci_data = {}
         if study is None:
@@ -361,10 +363,10 @@ class CIAdder:
         reader = readers.TabixReader(
             source=credible_set_file,
             parser=CIParser(study=study, tissue=tissue),
-            skip_rows=rowstoskip
+            skip_rows=rowstoskip,
         )
 
-        # If the query is single variant, set end to (start + 1) 
+        # If the query is single variant, set end to (start + 1)
         # and use the trick from query_variants to get a single position
         if end is None:
             reader.add_filter("position", start)
@@ -438,7 +440,7 @@ class CIAdder:
 #         # Get the correct tabix-indexed file:
 #         # merged chromosome-specific file for a single-variant query, or
 #         # study-specific and tissue-specific file for a regional query
-       
+
 
 #         conn = sqlite3.connect(db_path)
 
@@ -503,7 +505,7 @@ class CIParser:
     def __init__(self, study=None, tissue=None):
         self.study = study
         self.tissue = tissue
-    
+
     def __call__(self, row: str) -> CIContainer:
         # Columns in the raw credible_sets data:
         # phenotype_id: this corresponds to genes in gene expression data
