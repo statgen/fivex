@@ -14,7 +14,7 @@ def test_loads_region(client):
         start=108774968,
         end=109774968,
         study="GTEx",
-        tissue="Adipose_Subcutaneous",
+        tissue="adipose_subcutaneous",
     )
     response = client.get(url)
     assert response.status_code == 200
