@@ -31,7 +31,9 @@ indexFile = os.path.join(outDir, "all_EBI_credible_sets_data_index.tsv")
 csDirectory = os.path.join(outDir, "credible_sets")
 
 # This is the shell command file to sort, merge, and tabix the data files
-outputCommandFile = os.path.join(outDir, "sort.extract.and.tabix.credible_sets.sh")
+outputCommandFile = os.path.join(outDir,
+    "sort.extract.and.tabix.credible_sets.sh"
+)
 
 # Create index file for our merge.files.with.sorted.positions.py script
 fileList = glob.glob(os.path.join(rawDataDir, "*_ge.purity_filtered.txt.gz"))
@@ -42,12 +44,24 @@ with open(outputCommandFile, "w") as w, open(indexFile, "w") as wi:
     for filepath in fileList:
         dataset = os.path.basename(filepath).split(".")[0]
         studydir = os.path.join(csDirectory, dataset)
-        outfile = os.path.join(studydir, os.path.basename(filepath).replace("purity_filtered.txt.gz", "purity_filtered.sorted.txt.gz"))
+        outfile = os.path.join(
+            studydir,
+            os.path.basename(filepath).replace(
+                "purity_filtered.txt.gz",
+                "purity_filtered.sorted.txt.gz"
+            ),
+        )
         sortedFilelist.append(outfile)
-        w.write(f"mkdir -p {studydir}\n( ( echo -n '#' ; zcat {filepath} | head -n 1 ) ; zcat {filepath} | tail -n +2 | sort -k3,3V -k4,4n ) | bgzip -c > {outfile}\ntabix -s 3 -b 4 -e 4 {outfile}\n")
+        w.write(
+            f"mkdir -p {studydir}\n( ( echo -n '#' ; zcat {filepath} | head -n 1 ) ; zcat {filepath} | tail -n +2 | sort -k3,3V -k4,4n ) | bgzip -c > {outfile}\ntabix -s 3 -b 4 -e 4 {outfile}\n"
+        )
 
     for sortedFile in sortedFilelist:
-        tempSplit = os.path.basename(sortedFile).replace("_ge.purity_filtered.sorted.txt.gz", "").split(".")
+        tempSplit = (
+            os.path.basename(sortedFile)
+            .replace("_ge.purity_filtered.sorted.txt.gz", "")
+            .split(".")
+        )
         dataset = tempSplit[0]
         tissue = tempSplit[1]
         wi.write(f"{dataset}\t{tissue}\t{sortedFile}\n")
@@ -55,5 +69,9 @@ with open(outputCommandFile, "w") as w, open(indexFile, "w") as wi:
 # Generate commands to run merge.files.with.sorted.positions.py script, then tabix the results
 with open(outputCommandFile, "a") as w:
     for chrom in chrList:
-        w.write(f"python3 {scriptPath} {indexFile} {chrom} 1 ' ' {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz 3\n")
-        w.write(f"tabix -s 5 -b 6 -e 6 {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz\n")
+        w.write(
+            f"python3 {scriptPath} {indexFile} {chrom} 1 ' ' {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz 3\n"
+        )
+        w.write(
+            f"tabix -s 5 -b 6 -e 6 {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz\n"
+        )
