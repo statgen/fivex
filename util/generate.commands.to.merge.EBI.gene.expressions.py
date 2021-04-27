@@ -38,7 +38,7 @@ rawDataDir = sys.argv[1]
 
 # Output base directory for data
 # On the UM statgen cluster, this can be found at "/net/amd/amkwong/browseQTL/v2_data/"
-# Generally, you will want this to be set to FiVEx's base data directory, {FIVEX_DATA_DIR}
+# Generally, you will want this to be set to FIVEx's base data directory, {FIVEX_DATA_DIR}
 # typically located at {FIVEX_BASE_DIR}/data/
 outDir = sys.argv[2]
 
