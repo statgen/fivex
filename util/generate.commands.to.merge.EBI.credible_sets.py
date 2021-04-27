@@ -42,10 +42,10 @@ sortedFilelist = list()
 with open(outputCommandFile, "w") as w, open(indexFile, "w") as wi:
     for filepath in fileList:
         dataset = os.path.basename(filepath).split(".")[0]
-        outdir = os.path.join(csDirectory, dataset)
-        outfile = os.path.join(outdir, os.path.basename(filepath).replace("purity_filtered.txt.gz", "purity_filtered.sorted.txt.gz"))
+        studydir = os.path.join(csDirectory, dataset)
+        outfile = os.path.join(studydir, os.path.basename(filepath).replace("purity_filtered.txt.gz", "purity_filtered.sorted.txt.gz"))
         sortedFilelist.append(outfile)
-        w.write(f"mkdir -p {outdir}\n( ( echo -n '#' ; zcat {filepath} | head -n 1 ) ; zcat {filepath} | tail -n +2 | sort -k3,3V -k4,4n ) | bgzip -c > {outfile}\ntabix -s 3 -b 4 -e 4 {outfile}\n")
+        w.write(f"mkdir -p {studydir}\n( ( echo -n '#' ; zcat {filepath} | head -n 1 ) ; zcat {filepath} | tail -n +2 | sort -k3,3V -k4,4n ) | bgzip -c > {outfile}\ntabix -s 3 -b 4 -e 4 {outfile}\n")
 
     for sortedFile in sortedFilelist:
         tempSplit = os.path.basename(sortedFile).replace("_ge.purity_filtered.sorted.txt.gz", "").split(".")
