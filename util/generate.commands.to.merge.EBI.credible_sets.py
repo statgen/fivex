@@ -1,6 +1,5 @@
 import glob
 import os
-import subprocess
 import sys
 
 # List of chromosomes
@@ -58,4 +57,3 @@ with open(outputCommandFile, "a") as w:
     for chrom in chrList:
         w.write(f"python3 {scriptPath} {indexFile} {chrom} 1 ' ' {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz 3\n")
         w.write(f"tabix -s 5 -b 6 -e 6 {csDirectory}/chr{chrom}.ge.credible_set.tsv.gz\n")
-
