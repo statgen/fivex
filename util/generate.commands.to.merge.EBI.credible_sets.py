@@ -31,8 +31,8 @@ indexFile = os.path.join(outDir, "all_EBI_credible_sets_data_index.tsv")
 csDirectory = os.path.join(outDir, "credible_sets")
 
 # This is the shell command file to sort, merge, and tabix the data files
-outputCommandFile = os.path.join(outDir,
-    "sort.extract.and.tabix.credible_sets.sh"
+outputCommandFile = os.path.join(
+    outDir, "sort.extract.and.tabix.credible_sets.sh"
 )
 
 # Create index file for our merge.files.with.sorted.positions.py script
@@ -47,8 +47,7 @@ with open(outputCommandFile, "w") as w, open(indexFile, "w") as wi:
         outfile = os.path.join(
             studydir,
             os.path.basename(filepath).replace(
-                "purity_filtered.txt.gz",
-                "purity_filtered.sorted.txt.gz"
+                "purity_filtered.txt.gz", "purity_filtered.sorted.txt.gz"
             ),
         )
         sortedFilelist.append(outfile)
