@@ -39,18 +39,13 @@ LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : 
  */
 LocusZoom.ScaleFunctions.add('pip_cluster', (parameters, input) => {
     if (typeof input !== 'undefined') {
-        const pip_cluster = retrieveBySuffix(input, ':pip_cluster');
-        if (pip_cluster === 1) {
+        const pip_cluster = retrieveBySuffix(input, ':cs_index');
+        // Cluster names refer to SuSIE posterior probability clusters
+        if (pip_cluster === 'L1') {
             return 'cross';
         }
-        if (pip_cluster === 2) {
+        if (pip_cluster === 'L2') {
             return 'square';
-        }
-        if (pip_cluster === 3) {
-            return 'triangle';
-        }
-        if (pip_cluster >= 4) {
-            return 'triangledown';
         }
     }
     return null;

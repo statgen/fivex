@@ -354,8 +354,6 @@ export function switchY(plot, yfield) {
         scatter_config.legend = [
             { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
             { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
-            { shape: 'triangle', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
-            { shape: 'triangledown', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
             { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
         ];
         plot.panels.phewas.legend.show();

@@ -58,10 +58,10 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
             '{{namespace[assoc]}}variant', '{{namespace[assoc]}}symbol',
             '{{namespace[assoc]}}log_pvalue', '{{namespace[assoc]}}beta',
             '{{namespace[assoc]}}stderr_beta', '{{namespace[assoc]}}maf',
-            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
             '{{namespace[assoc]}}pip', '{{namespace[assoc]}}pip|pip_yvalue',
             '{{namespace[assoc]}}cs_size', '{{namespace[assoc]}}cs_index',
             '{{namespace[assoc]}}rsid',
+            '{{namespace[ld]}}state', '{{namespace[ld]}}isrefvar',
         ],
         tooltip: newscattertooltip,
     });
@@ -267,12 +267,10 @@ export function switchY_region(plot, yfield) {
 
                 ];
                 // Modified from using pip_cluster as the shape
-                scatter_layout.point_shape = [{ scale_function: 'cs_index' }, 'circle'];  
+                scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
                 scatter_layout.legend = [
                     { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
                     { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
-                    { shape: 'triangle', size: 40, label: 'Cluster 3', class: 'lz-data_layer-scatter' },
-                    { shape: 'triangledown', size: 40, label: 'Cluster 4+', class: 'lz-data_layer-scatter' },
                     { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
                     { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
                     { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },

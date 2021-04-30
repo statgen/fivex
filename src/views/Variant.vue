@@ -244,7 +244,7 @@ export default {
                     [
                         'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:study',
                         'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
-                        'phewas:pip_cluster',
+                        'phewas:cs_index',
                         'phewas:chromosome',
                     ],
                     (data) => {
