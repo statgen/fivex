@@ -46,9 +46,6 @@ export default {
                 top_gene: '',
                 top_tissue: '',
                 study_names: [],
-                ac: null,
-                af: null,
-                an: null,
                 rsid: null,
                 nearest_genes: [],
                 is_inside_gene: null,
@@ -453,26 +450,6 @@ export default {
       <div class="col-sm-12">
         <h2>Variant Information from Sequence Genotype </h2>
         <div class="card-group">
-          <div class="card variant-information-grouped-card">
-            <div class="card-body">
-              <dl class="variant-information-dl">
-                <template v-if="api_data.ac !== null && api_data.an !== null">
-                  <dt>Allele count / total</dt>
-                  <dd>{{ api_data.ac }} / {{ api_data.an }}</dd>
-                </template>
-                <template v-else>
-                  <dt>Note:</dt>
-                  <dd>Allele information not found</dd>
-                </template>
-
-                <template v-if="api_data.af !== null">
-                  <dt>Allele frequency</dt>
-                  <dd>{{ api_data.af }}</dd>
-                </template>
-              </dl>
-            </div>
-          </div>
-
           <div class="card variant-information-grouped-card">
             <div class="card-body">
               <dl class="variant-info-middle">
