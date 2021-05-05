@@ -1,10 +1,6 @@
 import math
 import typing as ty
 
-from zorp import readers  # type: ignore
-
-from fivex import model
-
 try:
     # Optional speedup features
     from fastnumbers import int  # type: ignore

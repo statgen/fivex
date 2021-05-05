@@ -7,8 +7,7 @@ import math
 import os
 import sqlite3
 
-from flask import current_app
-from zorp import parser_utils, readers  # type: ignore
+from flask import abort, current_app
 
 # def locate_data(chrom):
 #     return os.path.join(

@@ -8,12 +8,7 @@ from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
 
 from .. import model
-from ..api.format import (
-    TISSUES_PER_STUDY,
-    TISSUES_TO_SYSTEMS,
-    position_to_variant_id,
-)
-from . import format
+from ..api.format import TISSUES_PER_STUDY, TISSUES_TO_SYSTEMS
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 

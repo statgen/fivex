@@ -6,15 +6,10 @@ import gzip
 import math
 
 from flask import Blueprint, jsonify, request
-from zorp import parser_utils, readers  # type: ignore
+from zorp import readers  # type: ignore
 
 from .. import model
-from .format import (
-    CIContainer,
-    CIParser,
-    position_to_variant_id,
-    query_variants,
-)
+from .format import CIParser, position_to_variant_id, query_variants
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -140,7 +135,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     Retrieves all data from the chromosome-specific merged credible_sets file
     """
     source = model.get_credible_data_table(chrom)
-    reader = readers.TabixReader(            
+    reader = readers.TabixReader(
         source=source, parser=CIParser(study=None, tissue=None), skip_rows=0,
     )
     ciRows = reader.fetch(chrom, start - 1, end + 1)
@@ -169,7 +164,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     data = []
     for row in ciRows:
         data.append(row.to_dict())
-    results = { "data": data }
+    results = {"data": data}
     return jsonify(results)
 
 
