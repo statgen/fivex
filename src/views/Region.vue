@@ -115,8 +115,10 @@ export default {
             // with non-missing PIP values, i.e. only points that are found in the DAP-G database
             // const { chrom, start, end } = this;
             // return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
-            const { gene_id } = this;
-            return `/api/data/gene/${gene_id}/`;
+            // const { gene_id } = this;
+            // return `/api/data/gene/${gene_id}/`;
+            const { chrom, start, end } = this;
+            return `/api/data/cs/${chrom}/${start}-${end}/`;
         },
 
         tissues_per_study() {
