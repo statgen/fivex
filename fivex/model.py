@@ -78,6 +78,7 @@ def get_best_per_variant_lookup():
         "pip.best.variant.summary.sorted.indexed.sqlite3.db",
     )
 
+
 def get_best_study_tissue_gene(chrom, start, end):
     conn = sqlite3.connect(get_best_per_variant_lookup())
     with conn:
@@ -98,14 +99,15 @@ def get_best_study_tissue_gene(chrom, start, end):
                 cursor.execute(
                     "SELECT * FROM sig WHERE chrom=? AND pos BETWEEN ? AND ? ORDER BY pip DESC LIMIT 1;",
                     (f"{chrom}", start, end),
-                    )
-                )[
-                    0
-                ]
+                )
+            )[
+                0
+            ]
             bestVar = (gene_id, chrom, pos, ref, alt, pip, study, tissue)
             return bestVar
         except IndexError:
             return abort(400)
+
 
 def get_sig_lookup():
     """Get the path to an sqlite3 database file containing some data for eQTLs more significant than 1e-5"""
@@ -156,7 +158,6 @@ def get_credible_data_table(chrom):
         "credible_sets",
         f"chr{chrom}.ge.credible_set.tsv.gz",
     )
-
 
 
 def get_gene_data_table(gene_id):

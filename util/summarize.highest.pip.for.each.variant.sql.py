@@ -11,15 +11,17 @@ outfile = sys.argv[2]
 # Usage:
 # y = sorted(x, key=chrnum)
 def chrnum(txt):
-    additionalChr = {'x': 23, 'y': 24, 'mt': 25}
-    chrom = os.path.basename(txt).split(".")[0].replace("chr","")
+    additionalChr = {"x": 23, "y": 24, "mt": 25}
+    chrom = os.path.basename(txt).split(".")[0].replace("chr", "")
     if chrom.lower() in additionalChr:
         chrom = additionalChr[chrom.lower()]
     return int(chrom)
 
+
 filelist = sorted(
     glob.glob(os.path.join(csdir, "chr*.ge.credible_set.tsv.gz")), key=chrnum
 )
+
 
 def parseline(line):
     try:
@@ -42,8 +44,8 @@ def parseline(line):
             cs_size,
             posterior_mean,
             posterior_sd,
-            cs_log10bf
-        ) = line.decode('utf-8').rstrip('\n').split()
+            cs_log10bf,
+        ) = (line.decode('utf-8').rstrip('\n').split())
         return [
             float(pip),
             study,
@@ -54,7 +56,7 @@ def parseline(line):
             ref,
             alt,
             cs_index,
-            int(cs_size)
+            int(cs_size),
         ]
     except:
         return [
@@ -67,8 +69,9 @@ def parseline(line):
             "NO_REF",
             "NO_ALT",
             "L0",
-            0
+            0,
         ]
+
 
 # We will create an SQLite3 database to hold searchable best variant database
 # Column values are: PIP (float), study_name, tissue_name, gene_ID, chromosome, position (int), ref, alt, cluster_name (L1 or L2), cluster_size (int)
@@ -97,7 +100,7 @@ with conn:
                     )
                     bestList = currentList
             cursor.execute(
-                "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?)",tuple(bestList)
+                "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?)", tuple(bestList)
             )
     cursor.execute("CREATE INDEX idx_chrom_pos ON sig (chrom, pos)")
     cursor.execute("CREATE INDEX idx_study_tissue ON sig(study, tissue)")

@@ -7,9 +7,10 @@ import math
 import sqlite3
 
 from flask import Blueprint, jsonify, request
+from zorp import parser_utils, readers  # type: ignore
 
 from .. import model
-from .format import position_to_variant_id, query_variants
+from .format import position_to_variant_id, query_variants, CIContainer, CIParser
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -122,6 +123,23 @@ def variant_query(chrom: str, pos: int):
         # FIXME: replace this synthetic field with some other unique identifier (like a marker)
         item["id"] = i
 
+    results = {"data": data}
+    return jsonify(results)
+
+
+@api_blueprint.route("/cs/<string:chrom>/<int:start>-<int:end>", methods=["GET"])
+def region_data_for_region_table(chrom: str, start: int, end: int):
+    """
+    Fetch the data for a region to populate the table in region view
+    Retrieves all data from the chromosome-specific merged credible_sets file
+    """
+    source = model.get_credible_data_table(chrom, start, end)
+    reader = readers.TabixReader(            
+        source=source,
+        parser=CIParser(study=None, tissue=None),
+        skip_rows=0,
+    )
+    
     results = {"data": data}
     return jsonify(results)
 

@@ -144,7 +144,9 @@ def region_view():
             )
         )
     gene_list = {  # FIXME: Confusing name (it's not a list)
-        str(geneid[0]).split(".")[0]: str(gene_json.get(geneid[0].split(".")[0], ""))
+        str(geneid[0]).split(".")[0]: str(
+            gene_json.get(geneid[0].split(".")[0], "")
+        )
         for geneid in geneid_list
     }
 
@@ -188,13 +190,15 @@ def variant_view(chrom: str, pos: int):
                 ref,
                 alt,
                 cs_index,
-                cs_size
+                cs_size,
             ) = list(
                 conn.execute(
                     "SELECT * FROM sig WHERE chrom=? and pos=? ORDER BY pip DESC LIMIT 1;",
                     (f"{chrom}", pos),
                 )
-            )[0]
+            )[
+                0
+            ]
         except IndexError:
             return abort(400)
 
@@ -218,14 +222,11 @@ def variant_view(chrom: str, pos: int):
             # variant_id=position_to_variant_id(
             #     chrom, pos, annotations.ref_allele, annotations.alt_allele
             # ),
-            #top_gene=annotations.top_gene,
             top_gene=top_gene,
             top_gene_symbol=gene_symbol,
             top_study=top_study,
             top_tissue=top_tissue,
-            # top_tissue=annotations.top_tissue,
             study_names=list(TISSUES_PER_STUDY.keys()),
-            # rsid=annotations.rsid,
             nearest_genes=nearest_genes,
             is_inside_gene=is_inside_gene,
         )
