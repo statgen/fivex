@@ -20,6 +20,7 @@ gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 views_blueprint = Blueprint("frontend", __name__, template_folder="templates")
 
 
+# FIXME: Replace the database powering get_sig_lookup() (sig.lookup.db) completely
 @views_blueprint.route("/region/", methods=["GET"])
 def region_view():
     """Region view"""
@@ -143,7 +144,7 @@ def region_view():
             )
         )
     gene_list = {  # FIXME: Confusing name (it's not a list)
-        str(geneid[0]): str(gene_json.get(geneid[0].split(".")[0], ""))
+        str(geneid[0]).split(".")[0]: str(gene_json.get(geneid[0].split(".")[0], ""))
         for geneid in geneid_list
     }
 
@@ -167,12 +168,35 @@ def region_view():
 @views_blueprint.route("/variant/<string:chrom>_<int:pos>/")
 def variant_view(chrom: str, pos: int):
     """Single variant (PheWAS) view"""
-    annotations = format.get_variant_info(chrom, pos)
-
     try:
         nearest_genes = gl.at(chrom, pos)
     except (gene_exc.NoResultsFoundException, gene_exc.BadCoordinateException):
         nearest_genes = []
+
+    # Query the best variant SQLite3 database to retrieve the top gene by PIP
+    conn = sqlite3.connect(model.get_best_per_variant_lookup())
+    with conn:
+        cur = conn.cursor()
+        try:
+            (
+                pip,
+                top_study,
+                top_tissue,
+                top_gene,
+                chrom,
+                pos,
+                ref,
+                alt,
+                cs_index,
+                cs_size
+            ) = list(
+                conn.execute(
+                    "SELECT * FROM sig WHERE chrom=? and pos=? ORDER BY pip DESC LIMIT 1;",
+                    (f"{chrom}", pos),
+                )
+            )[0]
+        except IndexError:
+            return abort(400)
 
     # Are the "nearest genes" nearby, or is the variant actually inside the gene?
     # These rules are based on the defined behavior of the genes locator
@@ -181,19 +205,27 @@ def variant_view(chrom: str, pos: int):
         and nearest_genes[0]["start"] <= pos <= nearest_genes[0]["end"]
     )
 
+    # Retrieve gene_symbol from gene_id
+    gene_json = model.get_gene_names_conversion()
+    gene_symbol = gene_json.get(top_gene, "Unknown_gene")
+
     return jsonify(
         dict(
             chrom=chrom,
             pos=pos,
-            ref=annotations.ref_allele,
-            alt=annotations.alt_allele,
-            variant_id=position_to_variant_id(
-                chrom, pos, annotations.ref_allele, annotations.alt_allele
-            ),
-            top_gene=annotations.top_gene,
-            top_tissue=annotations.top_tissue,
+            # ref=annotations.ref_allele,
+            # alt=annotations.alt_allele,
+            # variant_id=position_to_variant_id(
+            #     chrom, pos, annotations.ref_allele, annotations.alt_allele
+            # ),
+            #top_gene=annotations.top_gene,
+            top_gene=top_gene,
+            top_gene_symbol=gene_symbol,
+            top_study=top_study,
+            top_tissue=top_tissue,
+            # top_tissue=annotations.top_tissue,
             study_names=list(TISSUES_PER_STUDY.keys()),
-            rsid=annotations.rsid,
+            # rsid=annotations.rsid,
             nearest_genes=nearest_genes,
             is_inside_gene=is_inside_gene,
         )

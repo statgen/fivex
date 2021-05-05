@@ -45,6 +45,7 @@ export default {
                 variant_id: '',
                 top_gene: '',
                 top_tissue: '',
+                top_study: '',
                 study_names: [],
                 rsid: null,
                 nearest_genes: [],
@@ -241,8 +242,7 @@ export default {
                     [
                         'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:study',
                         'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
-                        'phewas:cs_index',
-                        'phewas:chromosome',
+                        'phewas:cs_index', 'phewas:cs_size', 'phewas:chromosome', 'phewas:rsid',
                     ],
                     (data) => {
                         // Data sent from locuszoom contains a prefix (phewas:). We'll remove that prefix before
@@ -358,7 +358,7 @@ export default {
               :options="[
                 { value: 'log_pvalue', html: '-log<sub>10</sub> P' },
                 { value: 'beta', text: 'Effect size (NES)' },
-                { value: 'pip', text: 'PIP (DAP-G)' }
+                { value: 'pip', text: 'PIP (SuSiE)' }
               ]"
               name="y-options"
               stacked
@@ -455,11 +455,15 @@ export default {
               <dl class="variant-info-middle">
                 <template v-if="api_data.top_gene !== null">
                   <dt>Top gene</dt>
-                  <dd><i>{{ api_data.top_gene }}</i></dd>
+                  <dd><i>{{ api_data.top_gene_symbol }} ({{ api_data.top_gene }})</i></dd>
                 </template>
                 <template v-if="api_data.top_tissue !== null">
                   <dt>Top tissue</dt>
                   <dd>{{ api_data.top_tissue }}</dd>
+                </template>
+                <template v-if="api_data.top_study !== null">
+                  <dt>Top study</dt>
+                  <dd>{{ api_data.top_study }}</dd>
                 </template>
               </dl>
             </div>

@@ -54,7 +54,7 @@ def region_query(chrom, start, end, study, tissue):
 
 
 @api_blueprint.route(
-    "/region/<string:chrom>/<int:start>-<int:end>/best/", methods=["GET"]
+    "/best/region/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
 )
 def region_query_bestvar(chrom: str, start: int, end: int):
     """
@@ -67,58 +67,29 @@ def region_query_bestvar(chrom: str, start: int, end: int):
     if chrom is not None and chrom[0:3] == "chr":
         chrom = chrom[3:]
 
-    # FIXME: Move SQL work to models.py (out of view logic)
-    conn = sqlite3.connect(model.get_sig_lookup())
-    with conn:
-        cursor = conn.cursor()
-        if gene_id is None:
-            cursor.execute(
-                "SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
-                ("chr" + chrom, start, end,),
-            )
-        else:
-            cursor.execute(
-                "SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? AND gene_id LIKE ? ORDER BY pval LIMIT 1;",
-                ("chr" + chrom, start, end, gene_id.split(".")[0] + "._%",),
-            )
+    (
+        gene_id,
+        chrom,
+        pos,
+        ref,
+        alt,
+        pip,
+        study,
+        tissue,
+    ) = model.get_best_study_tissue_gene(chrom, start, end)
 
-        result = cursor.fetchone()
-
-        if result is None:
-            return (
-                jsonify(
-                    {
-                        "errors": [
-                            {
-                                "detail": "No variants found for specified region or gene"
-                            }
-                        ]
-                    },
-                ),
-                404,
-            )
-
-        (
-            sqlgene_id,
-            sqlchrom,
-            sqlpos,
-            sqlref,
-            sqlalt,
-            sqlval,
-            sqltissue,
-        ) = result
-
-        data = {
-            "chrom": sqlchrom,
-            "pos": sqlpos,
-            "ref": sqlref,
-            "alt": sqlalt,
-            "tissue": sqltissue,
-            "gene_id": sqlgene_id,
-            "symbol": gene_json.get(sqlgene_id.split(".")[0], ""),
-        }
-        results = {"data": data}
-        return jsonify(results)
+    data = {
+        "chrom": chrom,
+        "pos": pos,
+        "ref": ref,
+        "alt": alt,
+        "study": study,
+        "tissue": tissue,
+        "gene_id": gene_id,
+        "symbol": gene_json.get(gene_id, "Unknown_gene"),
+    }
+    results = {"data": data}
+    return jsonify(results)
 
 
 @api_blueprint.route("/variant/<string:chrom>_<int:pos>/", methods=["GET"])

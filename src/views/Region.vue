@@ -412,14 +412,14 @@ export default {
           class="m-2"
           size="sm"
         >
-          <b-dropdown-form style="width: 180px;">
+          <b-dropdown-form style="width: 200px;">
             <b-radio-group
               v-model="y_field"
               name="y-options"
               :options="[
                 { value: 'log_pvalue', html: '-log<sub>10</sub> P' },
                 { value: 'beta', text: 'Effect size (NES)' },
-                { value: 'pip', text: 'PIP' }
+                { value: 'pip', text: 'PIP (SuSiE)' }
               ]"
               stacked
             />
