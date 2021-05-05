@@ -4,13 +4,17 @@ API endpoints (return JSON, not HTML)
 
 import gzip
 import math
-import sqlite3
 
 from flask import Blueprint, jsonify, request
 from zorp import parser_utils, readers  # type: ignore
 
 from .. import model
-from .format import position_to_variant_id, query_variants, CIContainer, CIParser
+from .format import (
+    CIContainer,
+    CIParser,
+    position_to_variant_id,
+    query_variants,
+)
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -127,20 +131,45 @@ def variant_query(chrom: str, pos: int):
     return jsonify(results)
 
 
-@api_blueprint.route("/cs/<string:chrom>/<int:start>-<int:end>", methods=["GET"])
+@api_blueprint.route(
+    "/cs/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
+)
 def region_data_for_region_table(chrom: str, start: int, end: int):
     """
     Fetch the data for a region to populate the table in region view
     Retrieves all data from the chromosome-specific merged credible_sets file
     """
-    source = model.get_credible_data_table(chrom, start, end)
+    source = model.get_credible_data_table(chrom)
     reader = readers.TabixReader(            
-        source=source,
-        parser=CIParser(study=None, tissue=None),
-        skip_rows=0,
+        source=source, parser=CIParser(study=None, tissue=None), skip_rows=0,
     )
-    
-    results = {"data": data}
+    ciRows = reader.fetch(chrom, start - 1, end + 1)
+    # We want to retrieve the following data to fill the columns of our table:
+    # Variant (chr:pos_ref/alt), study, tissue, P-value, effect size, SD(effect size), PIP, cs_label, cs_size
+    # Each row holds the following data:
+    # study: str
+    # tissue: str
+    # gene_id: str  # this column is labeled "phenotype_id" in the original file
+    # var_id: str  # in chrom_pos_ref_alt format -- not used
+    # chromosome: str
+    # position: int
+    # ref_allele: str
+    # alt_allele: str
+    # cs_id: str
+    # cs_index: str
+    # finemapped_region: str
+    # pip: float
+    # z: float
+    # cs_min_r2: float
+    # cs_avg_r2: float
+    # cs_size: int
+    # posterior_mean: float
+    # posterior_sd: float
+    # cs_log10bf: float
+    data = []
+    for row in ciRows:
+        data.append(row.to_dict())
+    results = { "data": data }
     return jsonify(results)
 
 

@@ -45,7 +45,7 @@ def parseline(line):
             posterior_mean,
             posterior_sd,
             cs_log10bf,
-        ) = (line.decode('utf-8').rstrip('\n').split())
+        ) = (line.decode("utf-8").rstrip("\n").split())
         return [
             float(pip),
             study,
@@ -58,7 +58,7 @@ def parseline(line):
             cs_index,
             int(cs_size),
         ]
-    except:
+    except ValueError:
         return [
             0.0,
             "NO_STUDY",

@@ -178,7 +178,6 @@ def variant_view(chrom: str, pos: int):
     # Query the best variant SQLite3 database to retrieve the top gene by PIP
     conn = sqlite3.connect(model.get_best_per_variant_lookup())
     with conn:
-        cur = conn.cursor()
         try:
             (
                 pip,
