@@ -165,7 +165,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     for row in ciRows:
         data.append(
             {
-                'row': row.study,
+                'study': row.study,
                 'tissue': row.tissue,
                 'gene_id': row.gene_id,
                 'chromosome': row.chromosome,
@@ -175,6 +175,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
                 'cs_index': row.cs_index,
                 'pip': row.pip,
                 'cs_size': row.cs_size,
+                'variant_id': row.variant_id,
             }
         )
     results = {"data": data}
