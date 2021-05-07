@@ -476,12 +476,6 @@ export const REGION_TABLE_BASE_COLUMNS = [
     // { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
     // { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
     { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
-    {
-        title: 'CS -log<sub>10</sub>(BF)',
-        field: 'cs_log10bf',
-        formatter: two_digit_fmt2,
-        sorter: 'number',
-    },
     { title: 'CS Label', field: 'cs_index' },
     { title: 'CS Size', field: 'cs_size' },
 ];
