@@ -509,6 +509,7 @@ class CIParser:
     def __call__(self, row: str) -> CIContainer:
         # Columns in the raw credible_sets data:
         # phenotype_id: this corresponds to genes in gene expression data
+        #               and both gene and transcript in Txrevise data
         # variant_id: in chrom_pos_ref_alt format; we don't use this
         # chr
         # pos

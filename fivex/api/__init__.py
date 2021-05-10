@@ -165,17 +165,17 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     for row in ciRows:
         data.append(
             {
-                'study': row.study,
-                'tissue': row.tissue,
-                'gene_id': row.gene_id,
-                'chromosome': row.chromosome,
-                'position': row.position,
-                'ref_allele': row.ref_allele,
-                'alt_allele': row.alt_allele,
-                'cs_index': row.cs_index,
-                'pip': row.pip,
-                'cs_size': row.cs_size,
-                'variant_id': row.variant_id,
+                "study": row.study,
+                "tissue": row.tissue,
+                "gene_id": row.gene_id,
+                '"chromosome": row.chromosome,
+                "position": row.position,
+                "ref_allele": row.ref_allele,
+                "alt_allele": row.alt_allele,
+                "cs_index": row.cs_index,
+                "pip": row.pip,
+                "cs_size": row.cs_size,
+                "variant_id": row.variant_id,
             }
         )
     results = {"data": data}

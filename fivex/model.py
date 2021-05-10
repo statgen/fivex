@@ -38,6 +38,7 @@ def locate_study_tissue_data(study, tissue):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "ebi_original",
+        "ge",
         f"{study}",
         "ge",
         f"{study}_ge_{tissue}.all.tsv.gz",
