@@ -29,22 +29,25 @@ def test_loads_region_bestvar(client):
 
     assert response.status_code == 200
     content = response.get_json()
-    assert content["data"]["tissue"] == "Cells_Cultured_fibroblasts"
+    assert content["data"]["tissue"] == "thyroid"
+    assert content["data"]["study"] == "GTEx"
+    assert content["data"]["symbol"] == "GSTM1"
 
 
-def test_loads_region_bestvar_for_gene(client):
-    """What is an example of the gene id altering the query for best variant in a region?"""
-    url = url_for(
-        "api.region_query_bestvar",
-        chrom="1",
-        start=108774968,
-        end=109774968,
-        gene_id="ENSG00000134243",
-    )
-    response = client.get(url)
-    assert response.status_code == 200
-    content = response.get_json()
-    assert content["data"]["tissue"] == "Liver"
+# Temporarily removed this functionality (specifying a gene) from our bestvar query
+# def test_loads_region_bestvar_for_gene(client):
+#     """What is an example of the gene id altering the query for best variant in a region?"""
+#     url = url_for(
+#         "api.region_query_bestvar",
+#         chrom="1",
+#         start=108774968,
+#         end=109774968,
+#         gene_id="ENSG00000134243",
+#     )
+#     response = client.get(url)
+#     assert response.status_code == 200
+#     content = response.get_json()
+#     assert content["data"]["tissue"] == "Liver"
 
 
 def test_loads_variant(client):
