@@ -563,6 +563,7 @@ def query_variants(
     tissue: str = None,
     gene_id: str = None,
     piponly: bool = False,
+    datatype: str = "ge",
 ) -> ty.Iterable[VariantContainer]:
     """
     Fetch expression data for one or more variants, and apply optional filters
@@ -578,10 +579,10 @@ def query_variants(
 
     # If query is for a specific tissue in a certain study, use the study-specific tissue-specific files
     if study and tissue:
-        source = model.locate_study_tissue_data(study, tissue)
+        source = model.locate_study_tissue_data(study, tissue, datatype=datatype)
     # Otherwise, get the data for a single variant from the merged dataset, which is separated into 1MB chunks
     else:
-        source = model.locate_data(chrom, start)
+        source = model.locate_data(chrom, start, datatype=datatype)
 
     # Directly pass this PIP dictionary to VariantParser to add cluster, SPIP, and PIP values to data points
     reader = readers.TabixReader(

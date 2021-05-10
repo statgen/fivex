@@ -25,11 +25,10 @@ def region_query(chrom, start, end, study, tissue):
     In its current form, this allows fetching ALL points across any gene and tissue. We may wish to revisit this
     due to performance considerations. (FIXME)
     """
-    # tissue = request.args.get("tissue", None)
+    # Study and tissue are now both required parameters
     gene_id = request.args.get("gene_id", None)
-    # FIXME: Should study be required for this query? (to avoid ambiguity if two studies use same tissue names)
-    # study = request.args.get("study", None)
     piponly = request.args.get("piponly", None)
+    datatype = request.args.get("datatype", "ge")
 
     data = [
         res.to_dict()
@@ -42,6 +41,7 @@ def region_query(chrom, start, end, study, tissue):
             tissue=tissue,
             gene_id=gene_id,
             piponly=piponly,
+            datatype=datatype,
         )
     ]
 
@@ -101,6 +101,7 @@ def variant_query(chrom: str, pos: int):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    datatype = request.args.get("datatype", "ge")
     study = request.args.get(
         "study", None
     )  # We now have data from multiple studies from EBI
@@ -115,6 +116,7 @@ def variant_query(chrom: str, pos: int):
             tissue=tissue,
             study=study,
             gene_id=gene_id,
+            datatype=datatype,
         )
     ]
 
