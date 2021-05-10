@@ -168,7 +168,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
                 "study": row.study,
                 "tissue": row.tissue,
                 "gene_id": row.gene_id,
-                '"chromosome": row.chromosome,
+                "chromosome": row.chromosome,
                 "position": row.position,
                 "ref_allele": row.ref_allele,
                 "alt_allele": row.alt_allele,
