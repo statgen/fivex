@@ -16,14 +16,14 @@ from flask import abort, current_app
 #     )
 
 #
-def locate_data(chrom, startpos):
+def locate_data(chrom, startpos, datatype="ge"):
     start = math.floor(startpos / 1000000) * 1000000 + 1
     end = start + 999999
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
-        "ebi_ge",
+        f"ebi_{datatype}",
         f"{chrom}",
-        f"all.EBI.ge.data.chr{chrom}.{start}-{end}.tsv.gz",
+        f"all.EBI.{datatype}.data.chr{chrom}.{start}-{end}.tsv.gz",
     )
 
 
@@ -34,14 +34,13 @@ def locate_data(chrom, startpos):
 #     )
 
 
-def locate_study_tissue_data(study, tissue):
+def locate_study_tissue_data(study, tissue, datatype="ge"):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "ebi_original",
-        "ge",
+        f"{datatype}",
         f"{study}",
-        "ge",
-        f"{study}_ge_{tissue}.all.tsv.gz",
+        f"{study}_{datatype}_{tissue}.all.tsv.gz",
     )
 
 
@@ -135,28 +134,30 @@ def get_gene_names_conversion():
 
 # If requesting a single variant, then return the merged credible_sets file for a single chromosome
 # Otherwise, return the study-specific, tissue-specific file that contains genomewide information
-def get_credible_interval_path(chrom, study=None, tissue=None):
+def get_credible_interval_path(chrom, study=None, tissue=None, datatype="ge"):
     if (study, tissue) == (None, None):
         return os.path.join(
             current_app.config["FIVEX_DATA_DIR"],
             "credible_sets",
-            f"chr{chrom}.ge.credible_set.tsv.gz",
+            f"{datatype}",
+            f"chr{chrom}.{datatype}.credible_set.tsv.gz",
         )
     else:
         return os.path.join(
             current_app.config["FIVEX_DATA_DIR"],
             "credible_sets",
+            f"{datatype}",
             f"{study}",
-            f"{study}.{tissue}_ge.purity_filtered.sorted.txt.gz",
+            f"{study}.{tissue}_{datatype}.purity_filtered.sorted.txt.gz",
         )
 
 
 # Return the chromosome-specific filename for the merged credible sets data
-def get_credible_data_table(chrom):
+def get_credible_data_table(chrom, datatype="ge"):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
-        f"chr{chrom}.ge.credible_set.tsv.gz",
+        f"chr{chrom}.{datatype}.credible_set.tsv.gz",
     )
 
 
