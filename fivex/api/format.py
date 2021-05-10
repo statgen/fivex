@@ -579,7 +579,9 @@ def query_variants(
 
     # If query is for a specific tissue in a certain study, use the study-specific tissue-specific files
     if study and tissue:
-        source = model.locate_study_tissue_data(study, tissue, datatype=datatype)
+        source = model.locate_study_tissue_data(
+            study, tissue, datatype=datatype
+        )
     # Otherwise, get the data for a single variant from the merged dataset, which is separated into 1MB chunks
     else:
         source = model.locate_data(chrom, start, datatype=datatype)
@@ -591,19 +593,6 @@ def query_variants(
         parser=VariantParser(tissue=tissue, study=study),
         skip_rows=rowstoskip,
     )
-
-    # Add posterior incl probability annotations to the parsed data.
-    # (Writing as a transform allows us to replace the source of data or even manner of loading
-    #   without writing a different parser)
-    # pip_adder = PipAdder(
-    #     model.get_dapg_path(),
-    #     chrom,
-    #     start,
-    #     end=end,
-    #     tissue=tissue,
-    #     gene_id=gene_id,
-    # )
-    # reader.add_transform(pip_adder)
 
     # If querying a single variant, then end, tissue, and gene_id should all be None
     # if querying a range, then end, tissue, and gene_id must all be defined
