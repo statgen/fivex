@@ -136,7 +136,8 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     Fetch the data for a region to populate the table in region view
     Retrieves all data from the chromosome-specific merged credible_sets file
     """
-    source = model.get_credible_data_table(chrom)
+    datatype = request.args.get("datatype", "ge")
+    source = model.get_credible_data_table(chrom, datatype)
     reader = readers.TabixReader(
         source=source, parser=CIParser(study=None, tissue=None), skip_rows=0,
     )

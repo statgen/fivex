@@ -157,6 +157,7 @@ def get_credible_data_table(chrom, datatype="ge"):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
+        f"{datatype}",
         f"chr{chrom}.{datatype}.credible_set.tsv.gz",
     )
 
