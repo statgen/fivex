@@ -58,6 +58,7 @@ export default {
             group: null, // how to group results on plot x-axis
             n_labels: null, // How many item labels to show
             tss_distance: null, // How far away can a variant be from the TSS for its nearest gene?
+            tss_position: null, // actual chromosomal position of the TSS for that gene
 
             // Calculated from options; controls plot display
             base_plot_sources: null,

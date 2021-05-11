@@ -300,6 +300,7 @@ class VariantContainer:
     # Begin fields added by parser
     build: str
     tss_distance: int
+    tss_position: int
     symbol: str
     system: str
 
@@ -538,6 +539,7 @@ class VariantParser:
         # Append tss_distance
         gene_tss = self.tss_dict.get(fields[18].split(".")[0], float("nan"))
         tss_distance = math.copysign(1, gene_tss) * (fields[4] - abs(gene_tss))
+        tss_position = -abs(gene_tss)
 
         # Append gene symbol
         geneSymbol = self.gene_json.get(
@@ -550,7 +552,9 @@ class VariantParser:
 
         # Append system information
         tissueSystem = TISSUES_TO_SYSTEMS.get(tissuevar, "Unknown")
-        fields.extend([build, tss_distance, geneSymbol, tissueSystem])
+        fields.extend(
+            [build, tss_distance, tss_position, geneSymbol, tissueSystem]
+        )
         return VariantContainer(*fields)
 
 

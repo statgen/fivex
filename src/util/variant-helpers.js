@@ -75,7 +75,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue', '{{namespace[phewas]}}study',
                                 '{{namespace[phewas]}}system', '{{namespace[phewas]}}symbol',
                                 '{{namespace[phewas]}}beta', '{{namespace[phewas]}}stderr_beta',
-                                '{{namespace[phewas]}}tss_distance',
+                                '{{namespace[phewas]}}tss_distance', '{{namespace[phewas]}}tss_position',
                                 '{{namespace[phewas]}}top_value_rank',
                                 '{{namespace[phewas]}}chromosome', '{{namespace[phewas]}}position',
                                 '{{namespace[phewas]}}ref_allele', '{{namespace[phewas]}}alt_allele',
@@ -86,7 +86,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
-                            base.x_axis.category_order_field = 'phewas:tss_distance';
+                            base.x_axis.category_order_field = 'phewas:tss_position';
                             base.y_axis.min_extent = [0, 8];
 
                             base.legend = [
@@ -247,7 +247,7 @@ export function groupByThing(layout, thing) {
     } else if (thing === 'symbol') {
     // label by gene name, but arrange those genes based on position
         point_label_field = 'tissue';
-        scatter_config.x_axis.category_order_field = 'phewas:tss_distance';
+        scatter_config.x_axis.category_order_field = 'phewas:tss_position';
     } else if (thing === 'system') {
         point_label_field = 'symbol';
     } else if (thing === 'study') {
