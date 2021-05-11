@@ -219,8 +219,11 @@ export default {
                         y_field: this.y_field,
                     },
                 );
-
-                this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos);
+                // Change the third parameter to select what kind of data to show
+                // 'ge' = gene expression
+                // 'txrev' = Txrevise spliceQTL data
+                // TODO: Make this value part of base FIVEX (as current_app.config(["DATATYPE"]))
+                this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos, 'ge');
             }
 
             // If used in reset mode, set loading to true
@@ -334,6 +337,7 @@ export default {
             <b-form-radio-group
               v-model="group"
               :options="[
+                { value: 'study', text: 'Study' },
                 { value: 'tissue', text: 'Tissue' },
                 { value: 'system', text: 'Tissue system' },
                 { value: 'symbol', text: 'Gene' }
@@ -416,10 +420,12 @@ export default {
           text="Choose study"
         >
           <b-dropdown-text>
-            (shift-click to select multiple)
+            click to select a single study<br>
+            ctrl-click to add/remove individual studies<br>
+            ctrl-a to select all studies
           </b-dropdown-text>
           <b-dropdown-form
-            style="width: 20rem;"
+            style="width: 22rem;"
           >
             <b-form-select
               v-model="study"

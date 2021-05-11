@@ -25,6 +25,13 @@ FIVEX_DATA_DIR = os.getenv(
     ),
 )
 
+
+# Type of data to display in FIVEx
+# "ge" = gene expression
+# "txrev" = Txrevise data
+DATATYPE = "ge"
+
+
 # .env file can optionally provide a Sentry key for automatic error reporting
 # TODO: add for frontend and backend
 SENTRY_DSN = os.getenv("SENTRY_DSN", None)

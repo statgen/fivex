@@ -2,9 +2,10 @@ import LocusZoom from 'locuszoom';
 
 import { PORTALDEV_URL } from '@/util/common';
 
-export function getPlotSources(chrom, pos) {
+// Currently default to gene expression data if no parameter is passed, otherwise use indicated datatype
+export function getPlotSources(chrom, pos, datatype = 'ge') {
     return [
-        ['phewas', ['PheWASFIVEx', { url: `/api/data/variant/${chrom}_${pos}/` }]],
+        ['phewas', ['PheWASFIVEx', { url: `/api/data/variant/${chrom}_${pos}/?datatype=${datatype}` }]],
         ['gene', ['GeneLZ', { url: `${PORTALDEV_URL}annotation/genes/`, params: { build: 'GRCh38' } }]],
         ['constraint', ['GeneConstraintLZ', {
             url: 'https://gnomad.broadinstitute.org/api',
@@ -81,7 +82,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
-                                '{{namespace[phewas]}}study',
+                                '{{namespace[phewas]}}study', '{{namespace[phewas]}}molecular_trait_id',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -162,6 +163,7 @@ System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
 PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
 Credible set label: <strong>{{{{namespace[phewas]}}cs_index}}</strong><br>
 Size of credible set: <strong>{{{{namespace[phewas]}}cs_size}}</strong><br>
+Transcript: <strong>{{{{namespace[phewas]}}molecular_trait_id}}<strong><br>
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',
@@ -248,6 +250,8 @@ export function groupByThing(layout, thing) {
         scatter_config.x_axis.category_order_field = 'phewas:tss_distance';
     } else if (thing === 'system') {
         point_label_field = 'symbol';
+    } else if (thing === 'study') {
+        point_label_field = 'system';
     } else {
         throw new Error('Unrecognized grouping field');
     }
