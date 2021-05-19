@@ -9,13 +9,7 @@ import sqlite3
 
 from flask import abort, current_app
 
-# def locate_data(chrom):
-#     return os.path.join(
-#         current_app.config["FIVEX_DATA_DIR"],
-#         f"{chrom}.All_Tissues.sorted.txt.gz",
-#     )
 
-#
 def locate_data(chrom, startpos, datatype="ge"):
     start = math.floor(startpos / 1000000) * 1000000 + 1
     end = start + 999999
@@ -25,13 +19,6 @@ def locate_data(chrom, startpos, datatype="ge"):
         f"{chrom}",
         f"all.EBI.{datatype}.data.chr{chrom}.{start}-{end}.tsv.gz",
     )
-
-
-# def locate_tissue_data(tissue):
-#     return os.path.join(
-#         current_app.config["FIVEX_DATA_DIR"],
-#         f"{tissue}.allpairs.sorted.txt.gz",
-#     )
 
 
 def locate_study_tissue_data(study, tissue, datatype="ge"):
@@ -44,30 +31,20 @@ def locate_study_tissue_data(study, tissue, datatype="ge"):
     )
 
 
-# def locate_tissue_to_system():
-#     return os.path.join(
-#         current_app.config["FIVEX_DATA_DIR"],
-#         "tissue.to.system.json.gz",
-#     )
-
-
 def locate_tss_data():
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"], "gencode", "tss.json.gz",
     )
 
 
-# def get_best_per_variant_lookup():
-#     """Get the path to a file describing the best hits for a given variant"""
-#     return os.path.join(
-#         current_app.config["FIVEX_DATA_DIR"],
-#         "best.genes.tissues.allele.info.rsnum.txt.gz",
-#     )
-# New version of this file (sqlite3 database) contains the following columns:
-#  PIP (float), study_name, tissue_name, gene_ID, chromosome, position (int),
-#  ref, alt, cluster_name (L1 or L2), cluster_size (int)
-# We no longer need to look up rsid, allele frequency, allele count, or
-#  total number of alleles from this file
+def locate_gencode_data():
+    return os.path.join(
+        current_app.config["FIVEX_DATA_DIR"],
+        "gencode",
+        "gencode.v30.annotation.gtf.genes.bed.gz",
+    )
+
+
 def get_best_per_variant_lookup():
     """Get the path to an SQLite3 database file describing the best study,
     tissue, and gene for any given variant"""
@@ -78,39 +55,55 @@ def get_best_per_variant_lookup():
     )
 
 
-def get_best_study_tissue_gene(chrom, start, end):
+def get_best_study_tissue_gene(
+    chrom, start=None, end=None, study=None, tissue=None, gene_id=None
+):
     conn = sqlite3.connect(get_best_per_variant_lookup())
     with conn:
         try:
             cursor = conn.cursor()
-            (
-                pip,
-                study,
-                tissue,
-                gene_id,
-                chrom,
-                pos,
-                ref,
-                alt,
-                cs_index,
-                cs_size,
-            ) = list(
-                cursor.execute(
-                    "SELECT * FROM sig WHERE chrom=? AND pos BETWEEN ? AND ? ORDER BY pip DESC LIMIT 1;",
-                    (f"{chrom}", start, end),
-                )
-            )[
-                0
-            ]
+            sqlCommand = "SELECT * FROM sig WHERE chrom=?"
+            argsList = [f"{chrom}"]
+            if start is not None:
+                if end is not None:
+                    sqlCommand += " AND pos BETWEEN ? AND ?"
+                    argsList.extend([f"{start}", f"{end}"])
+                else:
+                    sqlCommand += " AND pos=?"
+                    argsList.append(f"{start}")
+            if study is not None:
+                sqlCommand += " AND study=?"
+                argsList.append(f"{study}")
+            if tissue is not None:
+                sqlCommand += " AND tissue=?"
+                argsList.append(f"{tissue}")
+            if gene_id is not None:
+                sqlCommand += " AND gene_id=?"
+                argsList.append(f"{gene_id}")
+            sqlCommand += " ORDER BY pip DESC LIMIT 1"
+            (pip, study, tissue, gene_id, chrom, pos, ref, alt, _, _,) = list(
+                cursor.execute(sqlCommand, tuple(argsList),)
+            )[0]
             bestVar = (gene_id, chrom, pos, ref, alt, pip, study, tissue)
             return bestVar
         except IndexError:
             return abort(400)
 
 
-def get_sig_lookup():
-    """Get the path to an sqlite3 database file containing some data for eQTLs more significant than 1e-5"""
-    return os.path.join(current_app.config["FIVEX_DATA_DIR"], "sig.lookup.db",)
+def get_gene_list_in_range(chrom, start, end):
+    conn = sqlite3.connect(get_best_per_variant_lookup())
+    with conn:
+        try:
+            cur = conn.cursor()
+            x = list(
+                cur.execute(
+                    "SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos>=? AND pos<=?",
+                    (f"{chrom}", start, end),
+                )
+            )
+            return [gene_id[0].split(".")[0] for gene_id in x]
+        except IndexError:
+            return abort(400)
 
 
 def get_gene_names_conversion():
@@ -122,14 +115,6 @@ def get_gene_names_conversion():
         "rb",
     ) as f:
         return json.loads(f.read().decode("utf-8"))
-
-
-# def get_dapg_path():
-#     """Return the path to the DAP-G database"""
-#     return os.path.join(
-#         current_app.config["FIVEX_DATA_DIR"],
-#         "GTEx_v8_finemapping_DAPG.sqlite.db",
-#     )
 
 
 # If requesting a single variant, then return the merged credible_sets file for a single chromosome
@@ -162,15 +147,20 @@ def get_credible_data_table(chrom, datatype="ge"):
     )
 
 
-def get_gene_data_table(gene_id):
-    """
-    Returns the path to the data to populate the table in region view
-    Required source data can be found in eqtl.pip.data.for.region.table.tar,
-    in the form of 35379 gene-specific data files, which need to be placed
-    in data/piptables/
-    """
-    return os.path.join(
-        current_app.config["FIVEX_DATA_DIR"],
-        "piptables",
-        f"{gene_id}.eqtl.pip.txt.gz",
+def return_rsid(chrom, pos):  # , ref, alt):
+    rsid_db = os.path.join(
+        current_app.config["FIVEX_DATA_DIR"], "rsid.sqlite3.db"
     )
+    conn = sqlite3.connect(rsid_db)
+    with conn:
+        try:
+            cursor = conn.cursor()
+            # return list(cursor.execute("SELECT * FROM rsidTable WHERE chrom=? AND pos=? AND ref=? AND alt=?", (f"{chrom}", pos, f"{ref}", f"{alt}"),))[0][4]
+            return list(
+                cursor.execute(
+                    "SELECT * FROM rsidTable WHERE chrom=? AND pos=?",
+                    (f"{chrom}", pos),
+                )
+            )[0]
+        except ValueError:
+            return [f"{chrom}", pos, "N", "N", "Unknown"]

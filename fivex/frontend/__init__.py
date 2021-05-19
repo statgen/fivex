@@ -1,21 +1,23 @@
 """
 Front end views: provide the data needed by pages that are visited in the web browser
 """
-
+import gzip
+import json
 import sqlite3
 
 from flask import Blueprint, abort, jsonify, redirect, request, url_for
 from genelocator import exception as gene_exc, get_genelocator  # type: ignore
+from zorp import readers  # type: ignore
 
 from .. import model
 from ..api.format import TISSUES_PER_STUDY, TISSUES_TO_SYSTEMS
+from .format import gencodeParser
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 
 views_blueprint = Blueprint("frontend", __name__, template_folder="templates")
 
 
-# FIXME: Replace the database powering get_sig_lookup() (sig.lookup.db) completely
 @views_blueprint.route("/region/", methods=["GET"])
 def region_view():
     """Region view"""
@@ -43,8 +45,10 @@ def region_view():
 
     # We allow a few different combinations of other missing data
     #  by looking up the best tissue, best gene, or proper range if they are missing
+    # We will use the new get_best_study_tissue_gene
+    # parameters: (chrom, start=None, end=None, study=None, tissue=None, gene_id=None)
 
-    # First, process start, end, tissue, and gene
+    # First, process start, end, tissue, study, and gene
     start = request.args.get("start", None)
     end = request.args.get("end", None)
     if start is not None:
@@ -61,89 +65,88 @@ def region_view():
     gene_id = request.args.get("gene_id", None)
     symbol = request.args.get("symbol", None)
 
-    # If there is a chromosome and tissue but no range, then try to fill in the range
-    if tissue and (start is None or end is None):
-        conn = sqlite3.connect(model.get_sig_lookup())
-        with conn:
-            try:
-                (
-                    sqlgene,
-                    sqlchrom,
-                    sqlpos,
-                    sqlref,
-                    sqlalt,
-                    sqlpval,
-                    sqltissue,
-                ) = list(
-                    conn.execute(
-                        "SELECT * FROM sig WHERE chrom=? AND tissue=? ORDER BY pval LIMIT 1;",
-                        (f"chr{chrom}", tissue),
-                    )
-                )[
-                    0
-                ]
-                start = max(int(sqlpos) - 500000, 1)
-                end = int(sqlpos + 500000)
-            except IndexError:
-                return abort(
-                    400
-                )  # This should never happen - all chromosome x tissue combo should have at least one point
-
-    # If there is a chromosome, start, and end, but no tissue or gene_id, then find out the best tissue and gene_id
-    if chrom and start and end and (tissue is None or gene_id is None):
-        conn = sqlite3.connect(model.get_sig_lookup())
-        with conn:
-            try:
-                (
-                    sqlgene_id,
-                    sqlchrom,
-                    sqlpos,
-                    sqlref,
-                    sqlalt,
-                    sqlval,
-                    sqltissue,
-                ) = list(
-                    conn.execute(
-                        "SELECT * FROM sig WHERE chrom=? AND pos >= ? AND pos <= ? ORDER BY pval LIMIT 1;",
-                        (f"chr{chrom}", start, end),
-                    )
-                )[
-                    0
-                ]
-                if tissue is None:
-                    tissue = sqltissue
-                if gene_id is None:
-                    gene_id = sqlgene_id
-            except IndexError:
-                return abort(400)
-
-    center = (end + start) // 2
-
-    # Get the full tissue list from TISSUE_DATA
-    tissue_list = TISSUES_TO_SYSTEMS.keys()
+    # If the request does not include a start or end position, then find the TSS and strand information,
+    # then generate a window based on this information
+    if start is None and end is None:
+        with gzip.open(model.locate_tss_data(), "rb") as f:
+            tss_dict = json.load(f)
+            # tss contains two pieces of information: the genomic position of the TSS, and the strand
+            # if it is the + strand, then the tss is positive; if it is the - strand, then the tss is negative
+        tss = tss_dict.get(gene_id, None)
+        if tss is None:
+            return abort(400)
+        else:
+            # We will generate a viewing window 250k around the TSS for simplicity
+            # TODO: actually retrieve the start and end positions from gencode and use those instead
+            #       (if it's not too wide)
+            start = max(abs(int(tss)) - 250000, 1)
+            end = start + 500000
 
     # First, load the gene_id -> gene_symbol conversion table (no version numbers at the end of ENSG's)
     gene_json = model.get_gene_names_conversion()
 
-    # If no symbol is entered but we have gene_id, try to look it up in gene_json
-    if symbol is None:
+    # If either gene_id or symbol is present, then fill in the other
+    if symbol is None and gene_id is not None:
         symbol = gene_json.get(gene_id.split(".")[0], None)
+    elif symbol is not None and gene_id is None:
+        gene_id = gene_json.get(symbol, None)
 
-    # Query the sqlite3 database for the range (chrom:start-end) and get the list of all genes
-    conn = sqlite3.connect(model.get_sig_lookup())
-    with conn:
-        geneid_list = list(
-            conn.execute(
-                "SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos >= ? AND pos <= ?;",
-                (f"chr{chrom}", start, end),
-            )
+    # We will use get_best_study_tissue_gene(chrom, start, end) to directly query for a recommendation
+    # Given only a chromosome or a range, this will return the following:
+    #  (gene_id, chrom, pos, ref, alt, pip, study, tissue)
+    # from which we will grab study, tissue, and gene_id as the recommended plot to show.
+    # The returned data is: (gene_id, chrom, pos, ref, alt, pip, study, tissue)
+
+    # Get the full tissue list from TISSUE_DATA
+    tissue_list = TISSUES_TO_SYSTEMS.keys()
+
+    # If there are missing pieces of data, try to fill it in using get_best_study_tissue_gene
+    if None in (study, tissue, gene_id):
+        # Retrieve the study x tissue x gene combination with highest PIP
+        (
+            gene_id,
+            chrom,
+            pos,
+            _,
+            _,
+            _,
+            study,
+            tissue,
+        ) = model.get_best_study_tissue_gene(
+            chrom,
+            start=start,
+            end=end,
+            study=study,
+            tissue=tissue,
+            gene_id=gene_id,
         )
-    gene_list = {  # FIXME: Confusing name (it's not a list)
-        str(geneid[0]).split(".")[0]: str(
-            gene_json.get(geneid[0].split(".")[0], "")
-        )
-        for geneid in geneid_list
+        center = pos
+    # If both start and end exist, calculate the center
+    if start and end:
+        center = (end + start) // 2
+
+    # TODO: Replace this with gencode
+    # gene_list = model.get_gene_list_in_range(chrom, start, end)
+    # gene_dict = {
+    #     str(geneid): str(gene_json.get(geneid, "")) for geneid in gene_list
+    # }
+
+    source = model.locate_gencode_data()
+    reader = readers.TabixReader(source, parser=gencodeParser(), skip_rows=0)
+    gencodeRows = reader.fetch(f"chr{chrom}", start - 1, end + 1)
+    gene_list = []
+    for row in gencodeRows:
+        gene_list.append(row.gene_id)
+    gene_dict = {
+        str(geneid): str(gene_json.get(geneid, geneid)) for geneid in gene_list
     }
+
+    # gene_list = {  # FIXME: Confusing name (it's not a list)
+    #     str(geneid[0]).split(".")[0]: str(
+    #         gene_json.get(geneid[0].split(".")[0], "")
+    #     )
+    #     for geneid in geneid_list
+    # }
 
     return jsonify(
         {
@@ -157,7 +160,8 @@ def region_view():
             "symbol": symbol,
             "tissue_list": list(tissue_list),
             "tissues_per_study": TISSUES_PER_STUDY,
-            "gene_list": gene_list,
+            "gene_list": gene_dict,
+            # "gene_list": gene_list,
         }
     )
 
@@ -171,11 +175,12 @@ def variant_view(chrom: str, pos: int):
         nearest_genes = []
 
     # Query the best variant SQLite3 database to retrieve the top gene by PIP
+    pipIndexErrorFlag = False
     conn = sqlite3.connect(model.get_best_per_variant_lookup())
     with conn:
         try:
             (
-                pip,
+                _,
                 top_study,
                 top_tissue,
                 top_gene,
@@ -183,8 +188,8 @@ def variant_view(chrom: str, pos: int):
                 pos,
                 ref,
                 alt,
-                cs_index,
-                cs_size,
+                _,
+                _,
             ) = list(
                 conn.execute(
                     "SELECT * FROM sig WHERE chrom=? and pos=? ORDER BY pip DESC LIMIT 1;",
@@ -193,8 +198,14 @@ def variant_view(chrom: str, pos: int):
             )[
                 0
             ]
+        # Sometimes the variant is not present at all in the best variant database
+        # This is expected behavior, in this case we store valid empty responses
         except IndexError:
-            return abort(400)
+            top_study = "No_study"
+            top_tissue = "No_tissue"
+            top_gene = "No_gene"
+            pipIndexErrorFlag = True
+            # return abort(400)
 
     # Are the "nearest genes" nearby, or is the variant actually inside the gene?
     # These rules are based on the defined behavior of the genes locator
@@ -207,15 +218,23 @@ def variant_view(chrom: str, pos: int):
     gene_json = model.get_gene_names_conversion()
     gene_symbol = gene_json.get(top_gene, "Unknown_gene")
 
+    # Query rsid database for chrom, pos, ref, alt, rsid (we only keep the last 3)
+    (_, _, rref, ralt, rsid) = model.return_rsid(chrom, pos)
+
+    # If the variant is missing from our credible_sets database,
+    # use ref and alt from rsid database
+    if pipIndexErrorFlag:
+        ref = rref
+        alt = ralt
+
+    variant_id = f"{chrom}:{pos}_{ref}/{alt}"
+
     return jsonify(
         dict(
             chrom=chrom,
             pos=pos,
-            # ref=annotations.ref_allele,
-            # alt=annotations.alt_allele,
-            # variant_id=position_to_variant_id(
-            #     chrom, pos, annotations.ref_allele, annotations.alt_allele
-            # ),
+            ref=ref,
+            alt=alt,
             top_gene=top_gene,
             top_gene_symbol=gene_symbol,
             top_study=top_study,
@@ -223,5 +242,7 @@ def variant_view(chrom: str, pos: int):
             study_names=list(TISSUES_PER_STUDY.keys()),
             nearest_genes=nearest_genes,
             is_inside_gene=is_inside_gene,
+            rsid=rsid,
+            variant_id=variant_id,
         )
     )

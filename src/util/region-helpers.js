@@ -219,7 +219,7 @@ export function switchY_region(plot, yfield) {
             } else if (yfield === 'log_pvalue') { // Settings for using -log10(P-value) as the y-axis variable
                 delete panel.axes.y1.ticks;
                 panel.legend.orientation = 'vertical';
-                panel.axes.y1.label = '-log 10 p-value';
+                panel.axes.y1.label = '-log10 p-value';
                 significance_line_layout.offset = 7.301; // change dotted horizontal line to genomewide significant value 5e-8
                 significance_line_layout.style = {
                     stroke: '#D3D3D3',

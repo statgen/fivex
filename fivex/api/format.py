@@ -304,11 +304,7 @@ class VariantContainer:
     symbol: str
     system: str
 
-    # Additional optional args
-    # Old fields
-    # pip_cluster: ty.Optional[int] = None
-    # spip: ty.Optional[float] = None
-    # Updated fields from SuSie
+    # Additional optional args with updated fields from SuSie
     cs_index: ty.Optional[str] = None
     cs_size: ty.Optional[int] = None
     pip: ty.Optional[float] = None
@@ -316,6 +312,7 @@ class VariantContainer:
     # Computed properties, not passed as param to init
     variant_id: str = dc.field(init=False)  # chrom:pos_ref/alt
     samples: int = dc.field(init=False)
+    studytissue: str = dc.field(init=False)
 
     def __post_init__(self):
         # Add calculated fields
@@ -325,6 +322,7 @@ class VariantContainer:
         self.samples = self.an / 2
         # FIXME: why do we accept constructor arg if never used?
         self.build = "GRCh38"
+        self.studytissue = f"{self.study}-{self.tissue}"
 
     @property
     def pvalue(self):
@@ -543,7 +541,7 @@ class VariantParser:
 
         # Append gene symbol
         geneSymbol = self.gene_json.get(
-            fields[18].split(".")[0], "Unknown_Gene"
+            fields[18].split(".")[0], "Unknown_gene"
         )
 
         # Add tissue grouping and sample size from GTEx

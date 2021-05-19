@@ -83,9 +83,14 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
                                 '{{namespace[phewas]}}study', '{{namespace[phewas]}}molecular_trait_id',
+                                '{{namespace[phewas]}}studytissue',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
+                            // We changed category_order_field from tss_distance to tss_position
+                            // due to a recoding of tss_distance to incorporate direction as a sign
+                            // which caused it to sort incorrectly in single variant view,
+                            // when we choose "gene" as the x-axis grouping category
                             base.x_axis.category_order_field = 'phewas:tss_position';
                             base.y_axis.min_extent = [0, 8];
 
@@ -148,8 +153,10 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 'circle',
                             ];
 
+                            // added molecular_trait_id as Transcript information as a tooltip
+                            // TODO: only show this if using Txrevise data (datatype == 'txrev')
                             base.tooltip.html = `
-<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
+<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}&study={{{{namespace[phewas]}}study|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
 Variant: <strong>{{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}</strong><br>
 Study: <strong>{{{{namespace[phewas]}}study|htmlescape}}</strong><br>
 Gene ID: <strong>{{{{namespace[phewas]}}gene_id|htmlescape}}</strong><br>
@@ -246,12 +253,14 @@ export function groupByThing(layout, thing) {
         point_label_field = 'symbol';
     } else if (thing === 'symbol') {
     // label by gene name, but arrange those genes based on position
-        point_label_field = 'tissue';
+        point_label_field = 'studytissue';
         scatter_config.x_axis.category_order_field = 'phewas:tss_position';
     } else if (thing === 'system') {
         point_label_field = 'symbol';
     } else if (thing === 'study') {
-        point_label_field = 'system';
+        point_label_field = 'tissue';
+    } else if (thing === 'studytissue') {
+        point_label_field = 'symbol';
     } else {
         throw new Error('Unrecognized grouping field');
     }
@@ -305,7 +314,7 @@ export function switchY(plot, yfield) {
             },
             'circle',
         ];
-        plot.layout.panels[0].axes.y1.label = '-log 10 p-value';
+        plot.layout.panels[0].axes.y1.label = '-log10 p-value';
         plot.layout.panels[0].data_layers[1].offset = 7.301;
         plot.layout.panels[0].data_layers[1].style = {
             stroke: '#D3D3D3',
@@ -428,14 +437,14 @@ export const VARIANT_TABLE_BASE_COLUMNS = [
         headerFilter: true,
         formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
         formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
-            label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
+            // label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
             url: (cell) => {
                 const data = cell.getRow().getData();
-                const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}`;
+                const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}&study=${data.study}`;
                 return base;
             },
         }},
-    { title: 'Study', field: 'study' },
+    { title: 'Study', field: 'study', headerFilter: true },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     { title: 'System', field: 'system', headerFilter: true },
     {
@@ -447,8 +456,8 @@ export const VARIANT_TABLE_BASE_COLUMNS = [
     { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
     { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
     { title: 'PIP', field: 'pip', formatter: pip_fmt },
-    { title: 'CS label', field: 'cs_index' },
-    { title: 'CS size', field: 'cs_size' },
+    { title: 'CS Label', field: 'cs_index' },
+    { title: 'CS Size', field: 'cs_size' },
 ];
 
 export const REGION_TABLE_BASE_COLUMNS = [
@@ -468,9 +477,13 @@ export const REGION_TABLE_BASE_COLUMNS = [
             },
         },
     },
-    { title: 'Study', field: 'study' },
+    { title: 'Study', field: 'study', headerFilter: true },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
     { title: 'Gene', field: 'gene_id', headerFilter: true },
+    // We have temporarily removed log P-values from the table
+    // because appropriate P-value are not part of the credible_sets database
+    // from which we pull the data displayed for the table
+    // Possible future work: Add P-values back in by joining P-values from the raw data
     // {
     //     title: '-log<sub>10</sub>(p)',
     //     field: 'log_pvalue',

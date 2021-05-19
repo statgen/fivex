@@ -339,8 +339,8 @@ export default {
               v-model="group"
               :options="[
                 { value: 'study', text: 'Study' },
-                { value: 'tissue', text: 'Tissue' },
-                { value: 'system', text: 'Tissue system' },
+                { value: 'studytissue', text: 'Study & Tissue' },
+                { value: 'system', text: 'System' },
                 { value: 'symbol', text: 'Gene' }
               ]"
               name="group-options"
@@ -461,7 +461,7 @@ export default {
             <div class="card-body">
               <dl class="variant-info-middle">
                 <template v-if="api_data.top_gene !== null">
-                  <dt>Top gene</dt>
+                  <dt>Top gene (PIP)</dt>
                   <dd><i>{{ api_data.top_gene_symbol }} ({{ api_data.top_gene }})</i></dd>
                 </template>
                 <template v-if="api_data.top_tissue !== null">

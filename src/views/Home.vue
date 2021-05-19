@@ -37,7 +37,7 @@
             <router-link
               :to="{name: 'region',
                     query: {chrom: '2', start: 20501429, end: 21544073,
-                            tissue: 'esophagus_gastroesophageal_junction',
+                            tissue: 'esophagus_gej',
                             study: 'GTEx', gene_id: 'ENSG00000084674' }}"
             >chr2:20501429-21544073</router-link>
             &bull;
@@ -52,7 +52,7 @@
             <router-link
               :to="{name: 'region',
                     query: {chrom: '2', start: 20501429, end: 21544073,
-                            tissue: 'esophagus_gastroesophageal_junction',
+                            tissue: 'esophagus_gej',
                             study: 'GTEx', gene_id: 'ENSG00000084674' }}"
             ><i>APOB</i></router-link></b>
           <br>
