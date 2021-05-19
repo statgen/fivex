@@ -125,12 +125,6 @@ def region_view():
     if start and end:
         center = (end + start) // 2
 
-    # TODO: Replace this with gencode
-    # gene_list = model.get_gene_list_in_range(chrom, start, end)
-    # gene_dict = {
-    #     str(geneid): str(gene_json.get(geneid, "")) for geneid in gene_list
-    # }
-
     source = model.locate_gencode_data()
     reader = readers.TabixReader(source, parser=gencodeParser(), skip_rows=0)
     gencodeRows = reader.fetch(f"chr{chrom}", start - 1, end + 1)
@@ -140,13 +134,6 @@ def region_view():
     gene_dict = {
         str(geneid): str(gene_json.get(geneid, geneid)) for geneid in gene_list
     }
-
-    # gene_list = {  # FIXME: Confusing name (it's not a list)
-    #     str(geneid[0]).split(".")[0]: str(
-    #         gene_json.get(geneid[0].split(".")[0], "")
-    #     )
-    #     for geneid in geneid_list
-    # }
 
     return jsonify(
         {
@@ -161,7 +148,6 @@ def region_view():
             "tissue_list": list(tissue_list),
             "tissues_per_study": TISSUES_PER_STUDY,
             "gene_list": gene_dict,
-            # "gene_list": gene_list,
         }
     )
 

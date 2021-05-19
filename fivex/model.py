@@ -10,6 +10,7 @@ import sqlite3
 from flask import abort, current_app
 
 
+# Merged data split into 1Mbps chunks - only query this for single variant data
 def locate_data(chrom, startpos, datatype="ge"):
     start = math.floor(startpos / 1000000) * 1000000 + 1
     end = start + 999999
@@ -21,6 +22,7 @@ def locate_data(chrom, startpos, datatype="ge"):
     )
 
 
+# Study- and tissue-specific data - query this for region view
 def locate_study_tissue_data(study, tissue, datatype="ge"):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
@@ -31,12 +33,14 @@ def locate_study_tissue_data(study, tissue, datatype="ge"):
     )
 
 
+# Signed tss data: positive TSS = Plus strand, negative TSS = Minus strand
 def locate_tss_data():
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"], "gencode", "tss.json.gz",
     )
 
 
+# Sorted and filtered gencode data
 def locate_gencode_data():
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
@@ -45,6 +49,7 @@ def locate_gencode_data():
     )
 
 
+# A database that stores the point with the highest PIP at each variant
 def get_best_per_variant_lookup():
     """Get the path to an SQLite3 database file describing the best study,
     tissue, and gene for any given variant"""
@@ -55,6 +60,7 @@ def get_best_per_variant_lookup():
     )
 
 
+# Uses the database above to find the data point with highest PIP value
 def get_best_study_tissue_gene(
     chrom, start=None, end=None, study=None, tissue=None, gene_id=None
 ):
@@ -86,22 +92,6 @@ def get_best_study_tissue_gene(
             )[0]
             bestVar = (gene_id, chrom, pos, ref, alt, pip, study, tissue)
             return bestVar
-        except IndexError:
-            return abort(400)
-
-
-def get_gene_list_in_range(chrom, start, end):
-    conn = sqlite3.connect(get_best_per_variant_lookup())
-    with conn:
-        try:
-            cur = conn.cursor()
-            x = list(
-                cur.execute(
-                    "SELECT DISTINCT(gene_id) FROM sig WHERE chrom=? AND pos>=? AND pos<=?",
-                    (f"{chrom}", start, end),
-                )
-            )
-            return [gene_id[0].split(".")[0] for gene_id in x]
         except IndexError:
             return abort(400)
 
@@ -147,7 +137,9 @@ def get_credible_data_table(chrom, datatype="ge"):
     )
 
 
-def return_rsid(chrom, pos):  # , ref, alt):
+# Takes in chromosome and position, and returns (chrom, pos, ref, alt, rsid)
+# rsid.sqlite3.db is created by util/create.rsid.sqlite3.py
+def return_rsid(chrom, pos):
     rsid_db = os.path.join(
         current_app.config["FIVEX_DATA_DIR"], "rsid.sqlite3.db"
     )
@@ -155,7 +147,6 @@ def return_rsid(chrom, pos):  # , ref, alt):
     with conn:
         try:
             cursor = conn.cursor()
-            # return list(cursor.execute("SELECT * FROM rsidTable WHERE chrom=? AND pos=? AND ref=? AND alt=?", (f"{chrom}", pos, f"{ref}", f"{alt}"),))[0][4]
             return list(
                 cursor.execute(
                     "SELECT * FROM rsidTable WHERE chrom=? AND pos=?",

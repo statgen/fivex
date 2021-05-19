@@ -479,6 +479,7 @@ export const REGION_TABLE_BASE_COLUMNS = [
     },
     { title: 'Study', field: 'study', headerFilter: true },
     { title: 'Tissue', field: 'tissue', headerFilter: true },
+    // TODO: Convert these gene_ids to gene symbols for ease of reading
     { title: 'Gene', field: 'gene_id', headerFilter: true },
     // We have temporarily removed log P-values from the table
     // because appropriate P-value are not part of the credible_sets database
