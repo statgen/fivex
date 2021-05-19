@@ -56,6 +56,7 @@ def get_best_per_variant_lookup():
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
+        current_app.config["DATATYPE"],
         "pip.best.variant.summary.sorted.indexed.sqlite3.db",
     )
 
