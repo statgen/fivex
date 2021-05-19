@@ -4,8 +4,14 @@ import os
 import sqlite3
 import sys
 
+# Input arguments:
+# csdir: directory containing merged confidence interval data
+# datatype: type of data ("ge", "txrev", etc.) - in case of mixed data type in the source directory
+# outfile: output sqlite3 database file - default name should be:
+# pip.best.variant.summary.sorted.indexed.sqlite3.db
 csdir = sys.argv[1]
-outfile = sys.argv[2]
+datatype = sys.argv[2]
+outfile = sys.argv[3]
 
 # Sorting function for file names that start with chr*
 # Usage:
@@ -19,7 +25,8 @@ def chrnum(txt):
 
 
 filelist = sorted(
-    glob.glob(os.path.join(csdir, "chr*.ge.credible_set.tsv.gz")), key=chrnum
+    glob.glob(os.path.join(csdir, f"chr*.{datatype}.credible_set.tsv.gz")),
+    key=chrnum,
 )
 
 
