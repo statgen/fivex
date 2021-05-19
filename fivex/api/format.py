@@ -367,33 +367,43 @@ class CIAdder:
 
         # If the query is single variant, set end to (start + 1)
         # and use the trick from query_variants to get a single position
+        readFlag = True
         if end is None:
             reader.add_filter("position", start)
-            ciRows = reader.fetch(chrom, start - 1, start + 1)
+            try:
+                ciRows = reader.fetch(chrom, start - 1, start + 1)
+            except ValueError:
+                readFlag = False
         # If the query is regional, then filter for the gene of interest
         # and get the study-, tissue-, and gene-specific data from the entire region
         else:
             reader.add_filter("gene_id", gene_id)
-            ciRows = reader.fetch(chrom, start - 1, end + 1)
-        for row in ciRows:
-            key = ":".join(
-                [
-                    row.chromosome,
-                    str(row.position),
-                    row.ref_allele,
-                    row.alt_allele,
-                    row.study,
-                    row.tissue,
-                    row.gene_id,
-                ]
-            )
-            # Dictionary Format: ci_Dict[chrom:pos:ref:alt:study:tissue:gene_id] = (cs_index, cs_size, pip)
-            ci_data[key] = (row.cs_index, row.cs_size, row.pip)
-        self.ci_data = ci_data
+            try:
+                ciRows = reader.fetch(chrom, start - 1, end + 1)
+            except ValueError:
+                readFlag = False
+        if readFlag:
+            for row in ciRows:
+                key = ":".join(
+                    [
+                        row.chromosome,
+                        str(row.position),
+                        row.ref_allele,
+                        row.alt_allele,
+                        row.study,
+                        row.tissue,
+                        row.gene_id,
+                    ]
+                )
+                # Dictionary Format: ci_Dict[chrom:pos:ref:alt:study:tissue:gene_id] = (cs_index, cs_size, pip)
+                ci_data[key] = (row.cs_index, row.cs_size, row.pip)
+            self.ci_data = ci_data
+        else:
+            self.ci_data = {}
 
     def __call__(self, variant: VariantContainer) -> VariantContainer:
         default = ("-", 0, 0.0)
-        if self.ci_data is None:
+        if self.ci_data == {}:
             # cs_index is our new cluster (L1 or L2); we will repurpose spip with cs_size for the size of the cluster
             (cs_index, cs_size, pip) = default
         else:
