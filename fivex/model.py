@@ -50,13 +50,13 @@ def locate_gencode_data():
 
 
 # A database that stores the point with the highest PIP at each variant
-def get_best_per_variant_lookup():
+def get_best_per_variant_lookup(data_type='ge'):  # TODO: dedup datatype value usage. make enum with ge or txrev for e and sqtls
     """Get the path to an SQLite3 database file describing the best study,
     tissue, and gene for any given variant"""
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
-        current_app.config["DATATYPE"],
+        data_type,
         "pip.best.variant.summary.sorted.indexed.sqlite3.db",
     )
 

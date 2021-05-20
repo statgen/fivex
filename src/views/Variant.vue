@@ -52,6 +52,12 @@ export default {
                 is_inside_gene: null,
             },
 
+            // Params that control the route: at the moment there are two phewas views (one for eQTL and one for sQTLs). This may change over time,
+            // This is a parameter to a specific API endpoint used by this page.
+            // 'ge' = gene expression
+            // 'txrev' = Txrevise spliceQTL data
+            data_type: 'ge',
+
             // Params that control the view (user-selected options). These are serialized as query params to create persistent links.
             study: [], // List of all currently selected studies (may be none, or multiple; default to "show all")
             y_field: null,  // Field to show on plot y-axis
@@ -159,9 +165,20 @@ export default {
     },
     beforeRouteEnter(to, from, next) {
         // First navigation to route
-        getData(to.params.variant)
+        let {data_type} = to.params;
+        // Convert UI names (eqtl, sqtl) to Alan's notation (ge, txrev) used internally by all api endpoints and layouts.
+        //   This is a variable rename only influenced by the route initially loaded.
+        if (data_type === 'eqtl') {
+            data_type = 'ge';
+        } else if (data_type === 'sqtl') {
+            data_type = 'txrev';
+        } else {
+            throw new Error('Single-variant view supports only "eqtl" or "sqtl" options');
+        }
+        getData(to.params.variant, data_type)
             .then((data) => {
                 next((vm) => {
+                    vm.data_type = data_type;
                     vm.setQuery(to.query);
                     vm.setData(data);
                 });
@@ -220,11 +237,7 @@ export default {
                         y_field: this.y_field,
                     },
                 );
-                // Change the third parameter to select what kind of data to show
-                // 'ge' = gene expression
-                // 'txrev' = Txrevise spliceQTL data
-                // TODO: Make this value part of base FIVEX (as current_app.config(["DATATYPE"]))
-                this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos, 'ge');
+                this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos, this.data_type);
             }
 
             // If used in reset mode, set loading to true

@@ -69,7 +69,12 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     },
                     data_layers: [
                         ((() => {
-                            const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true });
+                            const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true,
+                                coalesce: {
+                                    // Prevent sQTL datasets from overwhelming the browser DOM, by only rendering nonoverlapping significant ones
+                                    max_points: 2000,
+                                    active: true,
+                                }});
                             base.fields = [
                                 '{{namespace[phewas]}}id', '{{namespace[phewas]}}log_pvalue',
                                 '{{namespace[phewas]}}gene_id', '{{namespace[phewas]}}tissue', '{{namespace[phewas]}}study',
@@ -473,7 +478,8 @@ export const REGION_TABLE_BASE_COLUMNS = [
         formatterParams: {
             url: (cell) => {
                 const data = cell.getRow().getData();
-                return `/variant/${data.chromosome}_${data.position}`;
+                // FIXME: Region pages only handle eqtls at present, so we hardcode a link to the eqtl version of the page
+                return `/variant/eqtl/${data.chromosome}_${data.position}`;
             },
         },
     },

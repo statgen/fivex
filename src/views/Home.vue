@@ -10,20 +10,20 @@
         <div class="text-center">
           Search for: <b>Variant by position:
             <router-link
-              :to="{name: 'variant', params: {variant: '1_109274968'}}"
+              :to="{name: 'variant', params: {data_type: 'eqtl', variant: '1_109274968'}}"
             >chr1:109274968</router-link>
             &bull;
             <router-link
-              :to="{name: 'variant', params: {variant: '2_21044589'}}"
+              :to="{name: 'variant', params: {data_type: 'eqtl', variant: '2_21044589'}}"
             >chr2:21044589</router-link>
             &bull;
             rsID:
             <router-link
-              :to="{name: 'variant', params: {variant: '1_109274968'}}"
+              :to="{name: 'variant', params: {data_type: 'eqtl', variant: '1_109274968'}}"
             >rs12740374</router-link>
             &bull;
             <router-link
-              :to="{name: 'variant', params: {variant: '2_21044589'}}"
+              :to="{name: 'variant', params: {data_type: 'eqtl', variant: '2_21044589'}}"
             >rs934197</router-link>
             <br>
             Region:

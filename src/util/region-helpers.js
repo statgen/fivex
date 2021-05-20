@@ -37,8 +37,9 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
     const geneid_short = gene_id.split('.')[0];
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
+    // FIXME: Right now, region pages are eqtl only; they don't show sQTLs. As such, the phewas page links hardcode to the eqtl view.
     newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')}
-        <a href='/variant/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
+        <a href='/variant/eqtl/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
         Study: <strong>{{{{namespace[assoc]}}study}}</strong> <br>
         Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>
         MAF: <strong>{{{{namespace[assoc]}}maf|twosigfigs}}</strong> <br>
