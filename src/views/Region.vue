@@ -561,7 +561,7 @@ export default {
       ref="eqtl-table"
       class="pt-md-3"
     >
-      <h2>Significant eQTLs in <i>{{ api_data.symbol }}</i></h2>
+      <h2>Significant eQTLs near <i>{{ api_data.symbol }}</i></h2>
       <tabulator-table
         :columns="table_base_columns"
         :ajax-u-r-l="gene_data_url"
