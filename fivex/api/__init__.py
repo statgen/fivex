@@ -26,6 +26,8 @@ def region_query(chrom, start, end, study, tissue):
     gene_id = request.args.get("gene_id", None)
     piponly = request.args.get("piponly", None)
     datatype = request.args.get("datatype", "ge")
+    if gene_id is not None:
+        gene_id = gene_id.split(".")[0]
 
     data = [
         res.to_dict()
@@ -60,6 +62,8 @@ def region_query_bestvar(chrom: str, start: int, end: int):
     Optionally, a gene_id can be specified as query param, in which it will get the best signal within that gene.
     """
     gene_id = request.args.get("gene_id", None)
+    if gene_id is not None:
+        gene_id = gene_id.split(".")[0]
     gene_json = model.get_gene_names_conversion()
     if chrom is not None and chrom[0:3] == "chr":
         chrom = chrom[3:]
@@ -73,7 +77,9 @@ def region_query_bestvar(chrom: str, start: int, end: int):
         pip,
         study,
         tissue,
-    ) = model.get_best_study_tissue_gene(chrom, start, end)
+    ) = model.get_best_study_tissue_gene(
+        chrom, start=start, end=end, gene_id=gene_id
+    )
 
     data = {
         "chrom": chrom,
