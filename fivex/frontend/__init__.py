@@ -162,14 +162,16 @@ def variant_view(chrom: str, pos: int):
     except (gene_exc.NoResultsFoundException, gene_exc.BadCoordinateException):
         nearest_genes = []
 
-    data_type = request.args.get('data_type', 'ge')
-    if data_type not in ['ge', 'txrev']:
+    data_type = request.args.get("data_type", "ge")
+    if data_type not in ["ge", "txrev"]:
         # eqtl or sqtls supported. TODO dedup with enum
         return abort(400)
 
     # Query the best variant SQLite3 database to retrieve the top gene by PIP
     pipIndexErrorFlag = False
-    conn = sqlite3.connect(model.get_best_per_variant_lookup(data_type=data_type))
+    conn = sqlite3.connect(
+        model.get_best_per_variant_lookup(data_type=data_type)
+    )
     with conn:
         try:
             (

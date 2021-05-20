@@ -1,7 +1,8 @@
 """Test the REST APIs"""
 
-from flask import url_for
 import pytest
+from flask import url_for
+
 
 #####
 # Smoke tests: ensure that each page of the app loads.
@@ -34,7 +35,9 @@ def test_loads_region_bestvar(client):
     assert content["data"]["symbol"] == "GSTM1"
 
 
-@pytest.mark.skip("Temporarily removed this functionality (specifying a gene) from our bestvar query")
+@pytest.mark.skip(
+    "Temporarily removed this functionality (specifying a gene) from our bestvar query"
+)
 def test_loads_region_bestvar_for_gene(client):
     """What is an example of the gene id altering the query for best variant in a region?"""
     url = url_for(
@@ -56,10 +59,17 @@ def test_loads_variant_eqtls_by_default(client):
 
 
 def test_loads_variant_sqtls_with_option(client):
-    url = url_for("api.variant_query", chrom="1", pos=109274968, data_type='txrev')
+    url = url_for(
+        "api.variant_query", chrom="1", pos=109274968, data_type="txrev"
+    )
     assert client.get(url).status_code == 200
 
 
 def test_variant_api_rejects_invalid_option(client):
-    url = url_for("api.variant_query", chrom="1", pos=109274968, data_type='somethingsomething')
+    url = url_for(
+        "api.variant_query",
+        chrom="1",
+        pos=109274968,
+        data_type="somethingsomething",
+    )
     assert client.get(url).status_code == 200
