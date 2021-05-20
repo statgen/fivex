@@ -57,12 +57,12 @@ def region_view():
         end = int(end)
 
     tissue = request.args.get("tissue", None)
-    # FIXME: Hardcoded default for now since GTEx has by far the most tissues, and makes a broader basis for comparison. Should we auto-choose best study?
-    #   In the near future, we should implement fetching data from the correct study
-    study = request.args.get("study", "GTEx")
+    #   If study is missing, we will fetch it from get_best_study_tissue_gene
+    study = request.args.get("study", None)
 
     # One of these params is needed (TODO: Pick one of these and resolve differences via omnisearch)
-    gene_id = request.args.get("gene_id", None)
+    # Always strip version numbers from ENSG#
+    gene_id = request.args.get("gene_id", None).split(".")[0]
     symbol = request.args.get("symbol", None)
 
     # If the request does not include a start or end position, then find the TSS and strand information,
