@@ -62,7 +62,9 @@ def region_view():
 
     # One of these params is needed (TODO: Pick one of these and resolve differences via omnisearch)
     # Always strip version numbers from ENSG#
-    gene_id = request.args.get("gene_id", None).split(".")[0]
+    gene_id = request.args.get("gene_id", None)
+    if gene_id is not None:
+        gene_id = gene_id.split(".")[0]
     symbol = request.args.get("symbol", None)
 
     # If the request does not include a start or end position, then find the TSS and strand information,
