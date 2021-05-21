@@ -22,7 +22,7 @@
     "bootstrap-vue": "^2.16.0",
     "core-js": "^3.6.5",
     "jquery": "^3.5.1",
-    "locuszoom": "~0.13.1",
+    "locuszoom": "~0.13.3",
     "tabulator-tables": "^4.7.2",
     "vue": "^2.6.12",
     "vue-gtag": "^1.10.0",

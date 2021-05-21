@@ -59,6 +59,26 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 input_size: 8,
                                 data_type: 'string',
                             },
+                            {
+                                type: 'filter_field',
+                                position: 'right',
+                                layer_name: 'phewaspvalues',
+                                field: 'phewas:pip',
+                                field_display_html: 'PIP',
+                                operator: '>',
+                                input_size: 4,
+                                data_type: 'number',
+                            },
+                            {
+                                type: 'filter_field',
+                                position: 'right',
+                                layer_name: 'phewaspvalues',
+                                field: 'phewas:log_pvalue',
+                                field_display_html: '-log<sub>10</sub> p',
+                                operator: '>',
+                                input_size: 4,
+                                data_type: 'number',
+                            },
                         ],
                     },
                     legend: {
@@ -72,7 +92,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true,
                                 coalesce: {
                                     // Prevent sQTL datasets from overwhelming the browser DOM, by only rendering nonoverlapping significant ones
-                                    max_points: 2000,
+                                    max_points: 1000,
                                     active: true,
                                 }});
                             base.fields = [
@@ -161,7 +181,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                             // added molecular_trait_id as Transcript information as a tooltip
                             // TODO: only show this if using Txrevise data (datatype == 'txrev')
                             base.tooltip.html = `
-<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}&study={{{{namespace[phewas]}}study|urlencode}}'>See region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
+<a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}&study={{{{namespace[phewas]}}study|urlencode}}'>See eQTL region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
 Variant: <strong>{{{{namespace[phewas]}}chromosome|htmlescape}}:{{{{namespace[phewas]}}position|htmlescape}} {{{{namespace[phewas]}}ref_allele|htmlescape}}/{{{{namespace[phewas]}}alt_allele|htmlescape}}</strong><br>
 Study: <strong>{{{{namespace[phewas]}}study|htmlescape}}</strong><br>
 Gene ID: <strong>{{{{namespace[phewas]}}gene_id|htmlescape}}</strong><br>
@@ -280,11 +300,13 @@ export function groupByThing(layout, thing) {
  * Plot + Layout mutation function: changes the field used for the y-axis.
  *
  * In the future parts of this could probably be computed to reduce amt of code
- * @param plot
+ * @param plot_layout
  * @param yfield
  */
-export function switchY(plot, yfield) {
-    const scatter_config = plot.layout.panels[0].data_layers[0];
+export function switchY(plot_layout, yfield) {
+    const phewas_panel = plot_layout.panels[0];
+    const scatter_config = phewas_panel.data_layers[0];
+    const signif_line_config = phewas_panel.data_layers[1];
     if (yfield === 'log_pvalue') {
         scatter_config.label.filters[0] = { field: 'phewas:log_pvalue', operator: '>=', value: 10 };
         scatter_config.legend = [
@@ -303,8 +325,8 @@ export function switchY(plot, yfield) {
             },
         ];
         delete scatter_config.y_axis.ceiling;
-        delete plot.layout.panels[0].axes.y1.ticks;
-        plot.panels.phewas.legend.hide();
+        delete phewas_panel.axes.y1.ticks;
+        phewas_panel.legend.hidden = true;
         scatter_config.y_axis.field = 'phewas:log_pvalue';
         scatter_config.y_axis.floor = 0;
         scatter_config.y_axis.lower_buffer = 0;
@@ -319,9 +341,9 @@ export function switchY(plot, yfield) {
             },
             'circle',
         ];
-        plot.layout.panels[0].axes.y1.label = '-log10 p-value';
-        plot.layout.panels[0].data_layers[1].offset = 7.301;
-        plot.layout.panels[0].data_layers[1].style = {
+        phewas_panel.axes.y1.label = '-log10 p-value';
+        signif_line_config.offset = 7.301;
+        signif_line_config.style = {
             stroke: '#D3D3D3',
             'stroke-width': '3px',
             'stroke-dasharray': '10px 10px',
@@ -346,11 +368,11 @@ export function switchY(plot, yfield) {
         delete scatter_config.y_axis.floor;
         delete scatter_config.y_axis.min_extent;
         delete scatter_config.y_axis.ceiling;
-        delete plot.layout.panels[0].axes.y1.ticks;
-        plot.panels.phewas.legend.hide();
+        delete phewas_panel.axes.y1.ticks;
+        phewas_panel.legend.hidden = true;
         scatter_config.y_axis.field = 'phewas:beta';
-        plot.layout.panels[0].axes.y1.label = 'Normalized Effect Size (NES)';
-        plot.layout.panels[0].data_layers[1].offset = 0;
+        phewas_panel.axes.y1.label = 'Normalized Effect Size (NES)';
+        signif_line_config.offset = 0;
         scatter_config.point_shape = [
             {
                 scale_function: 'effect_direction',
@@ -361,7 +383,7 @@ export function switchY(plot, yfield) {
             },
             'circle',
         ];
-        plot.layout.panels[0].data_layers[1].style = {
+        signif_line_config.style = {
             stroke: 'gray',
             'stroke-width': '1px',
             'stroke-dasharray': '10px 0px',
@@ -374,7 +396,7 @@ export function switchY(plot, yfield) {
             { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
             { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
         ];
-        plot.panels.phewas.legend.show();
+        phewas_panel.legend.hidden = false;
         scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
         scatter_config.y_axis.floor = -4.1;
         scatter_config.y_axis.ceiling = 0.2;
@@ -383,16 +405,25 @@ export function switchY(plot, yfield) {
             { scale_function: 'pip_cluster' },
             'circle',
         ];
-        plot.layout.panels[0].axes.y1.label = 'Posterior Inclusion Probability (PIP)';
-        plot.layout.panels[0].axes.y1.ticks = [
+        phewas_panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+        phewas_panel.axes.y1.ticks = [
             { position: 'left', text: '1', y: 0 },
             { position: 'left', text: '0.1', y: -1 },
             { position: 'left', text: '0.01', y: -2 },
             { position: 'left', text: '1e-3', y: -3 },
             { position: 'left', text: '≤1e-4', y: -4 },
         ];
-        plot.layout.panels[0].data_layers[1].offset = -1000;
+        signif_line_config.offset = -1000;
     }
+}
+
+/**
+ * Change how many labels are shown on the plot
+ * @param plot_layout
+ * @param {number} n The number of labels to be shown (max count, depending on other filters)
+ */
+export function setLabelCount(plot_layout, n) {
+    plot_layout.panels[0].data_layers[0].label.filters[1].value = n;
 }
 
 // Tabulator formatting helpers
@@ -445,8 +476,7 @@ export const VARIANT_TABLE_BASE_COLUMNS = [
             // label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
             url: (cell) => {
                 const data = cell.getRow().getData();
-                const base = `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}&study=${data.study}`;
-                return base;
+                return `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}&study=${data.study}`;
             },
         }},
     { title: 'Study', field: 'study', headerFilter: true },

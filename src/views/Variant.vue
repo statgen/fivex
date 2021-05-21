@@ -13,6 +13,7 @@ import {
     getPlotLayout,
     getPlotSources,
     groupByThing,
+    setLabelCount,
     switchY,
     VARIANT_TABLE_BASE_COLUMNS,
     tabulator_tooltip_maker,
@@ -61,7 +62,7 @@ export default {
             // Params that control the view (user-selected options). These are serialized as query params to create persistent links.
             study: [], // List of all currently selected studies (may be none, or multiple; default to "show all")
             y_field: null,  // Field to show on plot y-axis
-            group: null, // how to group results on plot x-axis
+            group_by: null, // how to group results on plot x-axis
             n_labels: null, // How many item labels to show
             tss_distance: null, // How far away can a variant be from the TSS for its nearest gene?
             tss_position: null, // actual chromosomal position of the TSS for that gene
@@ -90,40 +91,40 @@ export default {
         },
         query_params() {
             // Re-calculate the URL query string whenever dependent information changes.
-            const { group, n_labels, study, tss_distance, y_field } = this;
-            return $.param({ group, n_labels, study, tss_distance, y_field });
+            const { group_by, n_labels, study, tss_distance, y_field } = this;
+            return $.param({ group_by, n_labels, study, tss_distance, y_field });
         },
         all_options() {
             // Sometimes (eg pageload), we change multiple options, but only want to re-render LZ once
             // This can be done by watching a synthetic compound property.
             // The value doesn't matter, only that it is different every time this runs
             // eslint-disable-next-line no-unused-vars
-            const { group, n_labels, study, tss_distance, y_field } = this;
+            const { group_by, n_labels, study, tss_distance, y_field } = this;
             return Date.now();
         },
     },
     watch: {
-        group() {
+        group_by() {
             // Clear "same match" highlighting when re-rendering.
             if (!this.$refs.phewas_plot) {
                 return;
             }
             this.$nextTick(() => {
-                groupByThing(this.$refs.phewas_plot.plot.layout, this.group);
+                groupByThing(this.$refs.phewas_plot.plot.layout, this.group_by);
             });
         },
         y_field() {
             if (!this.$refs.phewas_plot) {
                 return;
             }
-            this.$nextTick(() => switchY(this.$refs.phewas_plot.plot, this.y_field));
+            this.$nextTick(() => switchY(this.$refs.phewas_plot.plot.layout, this.y_field));
         },
         n_labels() {
             if (!this.$refs.phewas_plot) {
                 return;
             }
             this.$nextTick(() => {
-                this.$refs.phewas_plot.plot.layout.panels[0].data_layers[0].label.filters[1].value = this.n_labels;
+                setLabelCount(this.$refs.phewas_plot.plot.layout, this.n_labels);
             });
         },
         all_options() {
@@ -136,7 +137,7 @@ export default {
             }
             this.$nextTick(() => {
                 // eslint-disable-next-line no-unused-vars
-                const { group, n_labels, study, tss_distance, y_field } = this;
+                const { group_by, n_labels, study, tss_distance, y_field } = this;
                 this.$refs.phewas_plot.callPlot((plot) =>
                     plot.applyState({
                         lz_match_value: null,
@@ -199,7 +200,7 @@ export default {
     methods: {
         setQuery(params = {}) {
             // Set initial display based on the URL query string, or defaults, as appropriate
-            const { group, n_labels, tss_distance, y_field } = params;
+            const { group_by, n_labels, tss_distance, y_field } = params;
 
             // Convert jquery $.param format to that used internally in this page
             //   Rename array params `key[]` -> `key`, and ensure that items are arrays, not single strings
@@ -209,7 +210,7 @@ export default {
             } else {
                 this.study = [];
             }
-            this.group = group || 'symbol';
+            this.group_by = group_by || 'symbol';
             this.n_labels = +n_labels || 5;
             this.tss_distance = +tss_distance || 200000;
             this.y_field = y_field || 'log_pvalue';
@@ -222,7 +223,7 @@ export default {
                     // One of our URL query params cannot be set until after the data is fetched: default to "show all studies"
                     this.study = api_data.study_names;
                 }
-                this.base_plot_layout = getPlotLayout(
+                const layout = getPlotLayout(
                     this.api_data.chrom,
                     this.api_data.pos,
                     {
@@ -237,6 +238,12 @@ export default {
                         y_field: this.y_field,
                     },
                 );
+                // Apply query param defaults to layout
+                groupByThing(layout, this.group_by);
+                switchY(layout, this.y_field);
+                setLabelCount(layout, this.n_labels);
+
+                this.base_plot_layout = layout;
                 this.base_plot_sources = getPlotSources(this.api_data.chrom, this.api_data.pos, this.data_type);
             }
 
@@ -349,7 +356,7 @@ export default {
         >
           <b-dropdown-form style="width: 180px;">
             <b-form-radio-group
-              v-model="group"
+              v-model="group_by"
               :options="[
                 { value: 'study', text: 'Study' },
                 { value: 'studytissue', text: 'Study & Tissue' },
