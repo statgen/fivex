@@ -11,24 +11,31 @@ from flask import abort, current_app
 
 
 # Merged data split into 1Mbps chunks - only query this for single variant data
-def locate_data(chrom, startpos, datatype="ge"):
+def locate_data(chrom: str, startpos: int, datatype: str = "ge"):
     start = math.floor(startpos / 1000000) * 1000000 + 1
     end = start + 999999
+
+    # FIXME: Inject strict validation in callers before this ever hits this function
+    chrom = os.path.basename(chrom)
+
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         f"ebi_{datatype}",
-        f"{chrom}",
+        chrom,
         f"all.EBI.{datatype}.data.chr{chrom}.{start}-{end}.tsv.gz",
     )
 
 
 # Study- and tissue-specific data - query this for region view
 def locate_study_tissue_data(study, tissue, datatype="ge"):
+    study = os.path.basename(study)
+    tissue = os.path.basename(tissue)
+
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "ebi_original",
-        f"{datatype}",
-        f"{study}",
+        datatype,
+        study,
         f"{study}_{datatype}_{tissue}.all.tsv.gz",
     )
 
@@ -50,9 +57,8 @@ def locate_gencode_data():
 
 
 # A database that stores the point with the highest PIP at each variant
-def get_best_per_variant_lookup(
-    data_type="ge",
-):  # TODO: dedup datatype value usage. make enum with ge or txrev for e and sqtls
+def get_best_per_variant_lookup(data_type: str = "ge",):
+    # TODO: dedup datatype value usage. make enum with ge or txrev for e and sqtls
     """Get the path to an SQLite3 database file describing the best study,
     tissue, and gene for any given variant"""
     return os.path.join(
@@ -105,33 +111,44 @@ def get_gene_names_conversion():
         os.path.join(
             current_app.config["FIVEX_DATA_DIR"], "gene.id.symbol.map.json.gz",
         ),
-        "rb",
+        "rt",
     ) as f:
-        return json.loads(f.read().decode("utf-8"))
+        return json.loads(f.read())
 
 
 # If requesting a single variant, then return the merged credible_sets file for a single chromosome
 # Otherwise, return the study-specific, tissue-specific file that contains genomewide information
 def get_credible_interval_path(chrom, study=None, tissue=None, datatype="ge"):
-    if (study, tissue) == (None, None):
+    # FIXME: Inject strict validation in callers before this ever hits this function
+    chrom = os.path.basename(chrom)
+
+    if not study and not tissue:
+        # Overall "best" information
         return os.path.join(
             current_app.config["FIVEX_DATA_DIR"],
             "credible_sets",
-            f"{datatype}",
+            datatype,
             f"chr{chrom}.{datatype}.credible_set.tsv.gz",
         )
     else:
+        # FIXME: Inject strict validation in callers before this ever hits this function
+        study = os.path.basename(study)
+        tissue = os.path.basename(tissue)
+
         return os.path.join(
             current_app.config["FIVEX_DATA_DIR"],
             "credible_sets",
-            f"{datatype}",
-            f"{study}",
+            datatype,
+            study,
             f"{study}.{tissue}_{datatype}.purity_filtered.sorted.txt.gz",
         )
 
 
 # Return the chromosome-specific filename for the merged credible sets data
 def get_credible_data_table(chrom, datatype="ge"):
+    # FIXME: Inject strict validation in callers before this ever hits this function
+    chrom = os.path.basename(chrom)
+
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
@@ -153,8 +170,9 @@ def return_rsid(chrom, pos):
             return list(
                 cursor.execute(
                     "SELECT * FROM rsidTable WHERE chrom=? AND pos=?",
-                    (f"{chrom}", pos),
+                    (chrom, pos),
                 )
             )[0]
         except ValueError:
-            return [f"{chrom}", pos, "N", "N", "Unknown"]
+            # TODO: Document schema of the database table and what these placeholder values mean
+            return [chrom, pos, "N", "N", "Unknown"]
