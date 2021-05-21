@@ -31,7 +31,20 @@ LocusZoom.TransformationFunctions.add('pip_yvalue', (x) => Math.max(Math.log10(x
 /**
  * Convert displayed pip, spip, or pip_cluster to missing '-' if value is 0
  */
-LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : '-'));
+// LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : '-'));
+
+LocusZoom.TransformationFunctions.add('pip_display', (x) => {
+    if (!x) {
+        return '-';
+    }
+    if (Math.abs(x) > 0.1) {
+        return x.toFixed(2);
+    }
+    if (Math.abs(x) >= 0.01) {
+        return x.toFixed(3);
+    }
+    return x.toExponential(1);
+});
 
 /**
  * Assign point shape based on PIP cluster designation. Since there are always just a few clusters, and cluster 1

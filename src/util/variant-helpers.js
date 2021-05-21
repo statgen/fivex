@@ -107,7 +107,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
-                                '{{namespace[phewas]}}study', '{{namespace[phewas]}}molecular_trait_id',
+                                '{{namespace[phewas]}}study', '{{namespace[phewas]}}transcript',
                                 '{{namespace[phewas]}}studytissue',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
@@ -178,7 +178,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 'circle',
                             ];
 
-                            // added molecular_trait_id as Transcript information as a tooltip
+                            // added molecular_trait_id as transcript information as a tooltip
                             // TODO: only show this if using Txrevise data (datatype == 'txrev')
                             base.tooltip.html = `
 <a href='/region/?position={{{{namespace[phewas]}}position|urlencode}}&chrom={{{{namespace[phewas]}}chromosome|urlencode}}&gene_id={{{{namespace[phewas]}}gene_id|urlencode}}&tissue={{{{namespace[phewas]}}tissue|urlencode}}&study={{{{namespace[phewas]}}study|urlencode}}'>See eQTL region plot for <i>{{{{namespace[phewas]}}symbol}}</i> x {{{{namespace[phewas]}}tissue}}</a><br>
@@ -195,7 +195,7 @@ System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
 PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
 Credible set label: <strong>{{{{namespace[phewas]}}cs_index}}</strong><br>
 Size of credible set: <strong>{{{{namespace[phewas]}}cs_size}}</strong><br>
-Transcript: <strong>{{{{namespace[phewas]}}molecular_trait_id}}<strong><br>
+{{#if {{namespace[phewas]}}transcript}}Transcript: <strong>{{{{namespace[phewas]}}transcript}}<strong><br>{{/if}}
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',

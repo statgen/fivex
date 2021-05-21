@@ -270,7 +270,7 @@ class VariantContainer:
     # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
     study: str
     tissue: str
-    molecular_trait_id: str
+    transcript: str
 
     chromosome: str
     position: int
@@ -289,11 +289,11 @@ class VariantContainer:
     ac: int
     an: int
 
-    r2: float
-    molecular_trait_object_id: str
+    r2: dc.InitVar[float]
+    molecular_trait_object_id: dc.InitVar[str]
 
     gene_id: str
-    median_tpm: float
+    median_tpm: dc.InitVar[float]
     rsid: str
     # end fields that are read from tabix index
 
@@ -314,7 +314,7 @@ class VariantContainer:
     samples: int = dc.field(init=False)
     studytissue: str = dc.field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self, a, b, c):
         # Add calculated fields
         self.variant_id = position_to_variant_id(
             self.chromosome, self.position, self.ref_allele, self.alt_allele
@@ -470,12 +470,13 @@ class CIParser:
 
 
 class VariantParser:
-    def __init__(self, tissue=None, study=None, pipDict=None):
+    def __init__(self, tissue=None, study=None, pipDict=None, datatype=None):
         # We only need to load the gene locator once per usage, not on every line parsed
         self.gene_json = model.get_gene_names_conversion()
         self.tissue = tissue
         self.study = study
         self.pipDict = pipDict
+        self.datatype = datatype
         with gzip.open(model.locate_tss_data(), "rb") as f:
             self.tss_dict = json.load(f)
 
@@ -524,6 +525,8 @@ class VariantParser:
         # 18: gene_id (ENSG#)
         # 19: median_tpm (float)
         # 20: rsid
+        if self.datatype == "ge":
+            fields[2] = None
         fields[4] = int(fields[4])  # pos
         fields[8] = int(fields[8])  # ma_samples
         fields[9] = float(fields[9])  # maf
@@ -602,7 +605,7 @@ def query_variants(
     reader = readers.TabixReader(
         # The new EBI data format has no header row for the merged files, but a header row for the original data
         source,
-        parser=VariantParser(tissue=tissue, study=study),
+        parser=VariantParser(tissue=tissue, study=study, datatype=datatype),
         skip_rows=rowstoskip,
     )
 
