@@ -590,6 +590,7 @@ def query_variants(
     study: str = None,
     tissue: str = None,
     gene_id: str = None,
+    transcript: str = None,
     piponly: bool = False,
     datatype: str = "ge",
 ) -> ty.Iterable[VariantContainer]:
@@ -637,15 +638,21 @@ def query_variants(
     reader.add_transform(ci_adder)
 
     if gene_id:
+        # The internal data storage no longer includes gene version (id.version)
+        # We will modify the input query accordingly to remove any version numbers
         if "." in gene_id:
-            reader.add_filter("gene_id", gene_id)
+            reader.add_filter("gene_id", gene_id.split(".")[0])
         else:
-            # The internal data storage includes gene version (id.version). But the user-driven query may not.
-            #   Ensure that the search works with how data is represented internally.
-            reader.add_filter("gene_id")
-            reader.add_filter(
-                lambda result: result.gene_id.split(".")[0] == gene_id
-            )
+            reader.add_filter("gene_id", gene_id)
+            # reader.add_filter(
+            #     lambda result: result.gene_id.split(".")[0] == gene_id
+            # )
+
+    if transcript:
+        if "." in transcript:
+            reader.add_filter("transcript", transcript.split(".")[0])
+        else:
+            reader.add_filter("transcript", transcript)
 
     if end is None:
         # Small hack: when asking for a single point, Pysam sometimes returns more data than expected for half-open

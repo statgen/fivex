@@ -24,6 +24,7 @@ def region_query(chrom, start, end, study, tissue):
     """
     # Study and tissue are now both required parameters
     gene_id = request.args.get("gene_id", None)
+    transcript = request.args.get("transcript", None)
     piponly = request.args.get("piponly", None)
     datatype = request.args.get("datatype", "ge")
     if gene_id is not None:
@@ -39,6 +40,7 @@ def region_query(chrom, start, end, study, tissue):
             study=study,
             tissue=tissue,
             gene_id=gene_id,
+            transcript=transcript,
             piponly=piponly,
             datatype=datatype,
         )
@@ -104,6 +106,7 @@ def variant_query(chrom: str, pos: int):
     """
     tissue = request.args.get("tissue", None)
     gene_id = request.args.get("gene_id", None)
+    transcript = request.args.get("transcript", None)
     datatype = request.args.get("datatype", "ge")
     study = request.args.get(
         "study", None
@@ -119,6 +122,7 @@ def variant_query(chrom: str, pos: int):
             tissue=tissue,
             study=study,
             gene_id=gene_id,
+            transcript=transcript,
             datatype=datatype,
         )
     ]
