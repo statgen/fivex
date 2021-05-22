@@ -270,7 +270,7 @@ class VariantContainer:
     # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
     study: str
     tissue: str
-    transcript: str
+    transcript_long: dc.InitVar[str]
 
     chromosome: str
     position: int
@@ -303,6 +303,7 @@ class VariantContainer:
     tss_position: int
     symbol: str
     system: str
+    transcript: str
 
     # Additional optional args with updated fields from SuSie
     cs_index: ty.Optional[str] = None
@@ -314,7 +315,7 @@ class VariantContainer:
     samples: int = dc.field(init=False)
     studytissue: str = dc.field(init=False)
 
-    def __post_init__(self, a, b, c):
+    def __post_init__(self, a, b, c, d):
         # Add calculated fields
         self.variant_id = position_to_variant_id(
             self.chromosome, self.position, self.ref_allele, self.alt_allele
@@ -563,8 +564,20 @@ class VariantParser:
 
         # Append system information
         tissueSystem = TISSUES_TO_SYSTEMS.get(tissuevar, "Unknown")
+        if fields[2] is not None:
+            (_, _, _, transcript) = fields[2].split(".")
+        else:
+            transcript = None
+
         fields.extend(
-            [build, tss_distance, tss_position, geneSymbol, tissueSystem]
+            [
+                build,
+                tss_distance,
+                tss_position,
+                geneSymbol,
+                tissueSystem,
+                transcript,
+            ]
         )
         return VariantContainer(*fields)
 
