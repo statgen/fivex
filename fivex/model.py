@@ -56,6 +56,15 @@ def locate_gencode_data():
     )
 
 
+# Sorted and filtered gencode transcripts data
+def locate_gencode_transcript_data():
+    return os.path.join(
+        current_app.config["FIVEX_DATA_DIR"],
+        "gencode",
+        "gencode.v30.annotation.gtf.transcripts.bed.gz",
+    )
+
+
 # A database that stores the point with the highest PIP at each variant
 def get_best_per_variant_lookup(data_type: str = "ge",):
     # TODO: dedup datatype value usage. make enum with ge or txrev for e and sqtls

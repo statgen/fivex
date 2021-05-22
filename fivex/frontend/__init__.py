@@ -11,7 +11,7 @@ from zorp import readers  # type: ignore
 
 from .. import model
 from ..api.format import TISSUES_PER_STUDY, TISSUES_TO_SYSTEMS
-from .format import gencodeParser
+from .format import gencodeParser, gencodeTranscriptParser
 
 gl = get_genelocator("GRCh38", gencode_version=32, coding_only=True)
 
@@ -240,4 +240,88 @@ def variant_view(chrom: str, pos: int):
             rsid=rsid,
             variant_id=variant_id,
         )
+    )
+
+
+# Duplicate code from the region API above -- separated into its own API call
+@views_blueprint.route(
+    "/gencode/genes/<string:chrom>/<int:start>-<int:end>/", methods=["GET"]
+)
+def get_genes_in_region(chrom: str, start: int, end: int):
+    """
+    Fetch the genes data for a region, and returns a dictionary of ENSG: Gene Symbols
+    Retrieves data from our gencode genes file
+    """
+    source = model.locate_gencode_data()
+    reader = readers.TabixReader(source, parser=gencodeParser(), skip_rows=0)
+    gencodeRows = reader.fetch(f"chr{chrom}", start - 1, end + 1)
+    gene_list = []
+    gene_json = model.get_gene_names_conversion()
+    for row in gencodeRows:
+        gene_list.append(row.gene_id)
+    gene_dict = {
+        str(geneid): str(gene_json.get(geneid, geneid)) for geneid in gene_list
+    }
+    return jsonify({"data": gene_dict})
+
+
+# Same concept as the above route, returning data for looking up transcripts
+@views_blueprint.route(
+    "/gencode/transcripts/<string:chrom>/<int:start>-<int:end>/",
+    methods=["GET"],
+)
+def get_transcripts_in_region(chrom: str, start: int, end: int):
+    """
+    Fetch the transcript data for a region
+    Retrieves data from our gencode transcripts file
+    """
+    gene_id = request.args.get("gene_id", None)
+    source = model.locate_gencode_transcript_data()
+    reader = readers.TabixReader(
+        source, parser=gencodeTranscriptParser(), skip_rows=0
+    )
+    gencodeRows = reader.fetch(f"chr{chrom}", start - 1, end + 1)
+    transcriptDict = dict()  # type: ignore
+    # If we decide that we want both ENSG:ENST and gene_symbol:transcript_symbol dictionaries
+    # Then we can return the extra information below (double dictionary)
+    # symbolDict = {}
+
+    # Variables in gencodeTranscriptContainer:
+    # chrom: str
+    # source: str
+    # element: str
+    # start: int
+    # end: int
+    # strand: str
+    # gene_id: str
+    # transcript_id: str
+    # datatype: str
+    # symbol: str
+    # transcript_type: str
+    # transcript_symbol: str
+
+    for row in gencodeRows:
+        if gene_id is None or gene_id == row.gene_id:
+            ## Extra information for double dictionary
+            # if row.gene_id not in transcriptDict:
+            #     transcriptDict[row.gene_id] = [row.transcript_id]
+            # else:
+            #     transcriptDict[row.gene_id].append(row.transcript_id)
+            # if row.symbol not in symbolDict:
+            #     symbolDict[row.symbol] = [row.transcript_symbol]
+            # else:
+            #     symbolDict[row.symbol].append(row.transcript_symbol)
+            if row.symbol not in transcriptDict:
+                transcriptDict[row.symbol] = [row.transcript_id]
+            else:
+                transcriptDict[row.symbol].append(row.transcript_id)
+
+    return jsonify(
+        {
+            "chrom": chrom,
+            "start": start,
+            "end": end,
+            "transcriptIDs": transcriptDict,
+            # "transcriptSymbols": symbolDict  # Extra information for double dictionary
+        }
     )
