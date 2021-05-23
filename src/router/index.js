@@ -54,7 +54,7 @@ const routes = [
     },
     {
         // data_type may be `eqtl` or `sqtl`. In the future, make this a prop or otherwise enumerable.
-        path: '/variant/:data_type/:variant/',
+        path: '/variant/:display_type/:variant/',
         name: 'variant',
         meta: { title: 'Variant' },
         // route level code-splitting

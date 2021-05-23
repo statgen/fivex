@@ -15,7 +15,7 @@ import {
     groupByThing,
     setLabelCount,
     switchY,
-    VARIANT_TABLE_BASE_COLUMNS,
+    get_variant_table_config,
     tabulator_tooltip_maker,
 } from '@/util/variant-helpers';
 
@@ -55,9 +55,10 @@ export default {
 
             // Params that control the route: at the moment there are two phewas views (one for eQTL and one for sQTLs). This may change over time,
             // This is a parameter to a specific API endpoint used by this page.
-            // 'ge' = gene expression
-            // 'txrev' = Txrevise spliceQTL data
+            // 'ge' = gene expression (/variant/eqtl/_)
+            // 'txrev' = Txrevise spliceQTL data (/variant/sqtl/_)
             data_type: 'ge',
+            display_type: 'eQTL', // Human readable description of the data type
 
             // Params that control the view (user-selected options). These are serialized as query params to create persistent links.
             study: [], // List of all currently selected studies (may be none, or multiple; default to "show all")
@@ -102,6 +103,9 @@ export default {
             const { group_by, n_labels, study, tss_distance, y_field } = this;
             return Date.now();
         },
+        table_config() {
+            return get_variant_table_config(this.data_type);
+        },
     },
     watch: {
         group_by() {
@@ -132,12 +136,13 @@ export default {
             //  load, as we sync the plot with query params)
             // A synthetic watcher lets us re-render the plot only once total, no matter how many options
             //  are changed. Not all the watched variables are *used*, but it triggers dependency tracking.
-            if (!this.$refs.phewas_plot) {
-                return;
-            }
             this.$nextTick(() => {
                 // eslint-disable-next-line no-unused-vars
                 const { group_by, n_labels, study, tss_distance, y_field } = this;
+
+                if (!this.$refs.phewas_plot) {
+                    return;
+                }
                 this.$refs.phewas_plot.callPlot((plot) =>
                     plot.applyState({
                         lz_match_value: null,
@@ -161,36 +166,59 @@ export default {
     },
     beforeCreate() {
         // Make some constants available to the Vue instance for use as props in rendering
-        this.table_base_columns = VARIANT_TABLE_BASE_COLUMNS;
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
     beforeRouteEnter(to, from, next) {
         // First navigation to route
-        let {data_type} = to.params;
+        let {display_type} = to.params;
+        let data_type;
         // Convert UI names (eqtl, sqtl) to Alan's notation (ge, txrev) used internally by all api endpoints and layouts.
         //   This is a variable rename only influenced by the route initially loaded.
-        if (data_type === 'eqtl') {
+        if (display_type === 'eqtl') {
             data_type = 'ge';
-        } else if (data_type === 'sqtl') {
+        } else if (display_type === 'sqtl') {
             data_type = 'txrev';
         } else {
             throw new Error('Single-variant view supports only "eqtl" or "sqtl" options');
         }
+        // For actual display on the page, we capitalize all but the first letter. This assumes we have eQTL and sQTL data, only.
+        display_type = `${display_type[0]}QTL`;
+
         getData(to.params.variant, data_type)
-            .then((data) => {
+            .then((api_data) => {
                 next((vm) => {
                     vm.data_type = data_type;
+                    vm.display_type = display_type;
                     vm.setQuery(to.query);
-                    vm.setData(data);
+                    vm.setData(api_data);
                 });
                 // FIXME: More granular error handling
             }).catch((err) => next({ name: 'error' }));
     },
     beforeRouteUpdate(to, from, next) {
         // When going from one variant page to another (component is reused, only variable part of route changes)
-        this.setData();
+        this.reset();
+
+        // First navigation to route FIXME: DEDUP route enter/update logic (validation of get data type)
+        let {display_type} = to.params;
+        let data_type;
+        // Convert UI names (eqtl, sqtl) to Alan's notation (ge, txrev) used internally by all api endpoints and layouts.
+        //   This is a variable rename only influenced by the route initially loaded.
+        if (display_type === 'eqtl') {
+            data_type = 'ge';
+        } else if (display_type === 'sqtl') {
+            data_type = 'txrev';
+        } else {
+            throw new Error('Single-variant view supports only "eqtl" or "sqtl" options');
+        }
+        // For actual display on the page, we capitalize all but the first letter. This assumes we have eQTL and sQTL data, only.
+        display_type = `${display_type[0]}QTL`;
+
 
         getData(to.params.variant).then((data) => {
+            this.display_type = display_type;
+            this.data_type = data_type;
+
             this.setQuery(to.query);
             this.setData(data);
             next();
@@ -264,7 +292,7 @@ export default {
             this.$refs.phewas_plot.callPlot((plot) =>
                 plot.subscribeToData(
                     [
-                        'phewas:log_pvalue', 'phewas:gene_id', 'phewas:tissue', 'phewas:system', 'phewas:study',
+                        'phewas:log_pvalue', 'phewas:gene_id', 'phewas:transcript', 'phewas:tissue', 'phewas:system', 'phewas:study',
                         'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
                         'phewas:cs_index', 'phewas:cs_size', 'phewas:chromosome', 'phewas:rsid',
                     ],
@@ -328,7 +356,7 @@ export default {
           size="sm"
           @click="goto('eqtl-table')"
         >
-          eQTL Table <span class="fas fa-level-down-alt" />
+          {{ display_type }} Table <span class="fas fa-level-down-alt" />
         </b-button>
         <b-navbar-nav class="ml-auto">
           <search-box class="searchbox" />
@@ -342,7 +370,18 @@ export default {
       <div class="col-sm-12">
         <h1>
           <strong>
-            cis-eQTLs associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
+            cis-{{ display_type }}s associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
+            (switch to
+            <router-link
+              :to="{name: 'variant', params: {display_type: data_type === 'txrev'? 'eqtl': 'sqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
+            >{{ display_type === 'eQTL' ? 'sQTL' : 'eQTL' }}s</router-link>)
+
+            <span v-if="data_type === 'ge'">
+
+            </span>
+            <span v-else></span>
+
+
           </strong>
         </h1>
       </div>
@@ -638,9 +677,10 @@ export default {
       ref="eqtl-table"
       class="pt-md-3"
     >
-      <h2>eQTLs</h2>
+      <h2>{{ display_type }}s</h2>
       <tabulator-table
-        :columns="table_base_columns"
+        v-if="table_config"
+        :columns="table_config"
         :table_data="table_data"
         :height="'600px'"
         :sort="table_sort"

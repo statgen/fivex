@@ -467,33 +467,45 @@ export function tabulator_tooltip_maker(cell) {
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
 }
 
-export const VARIANT_TABLE_BASE_COLUMNS = [
-    {   title: 'Gene',
-        field: 'symbol',
-        headerFilter: true,
-        formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
-        formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
-            // label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
-            url: (cell) => {
-                const data = cell.getRow().getData();
-                return `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}&study=${data.study}`;
+export function get_variant_table_config(data_type) {
+    const gene_cols = [
+        {
+            title: 'Gene',
+            field: 'symbol',
+            headerFilter: true,
+            formatter: 'link',  // Links from single variant view to a region view plot by using the chromosome, gene, and tissue
+            formatterParams: {  // FIX: display the label as italicized (will need to convert formatter to 'html' instead of 'link')
+                // label: (cell) => `${cell.getValue()} (${cell.getData().gene_id})`,
+                url: (cell) => {
+                    const data = cell.getRow().getData();
+                    return `/region?chrom=${data.chromosome}&gene_id=${data.gene_id}&tissue=${data.tissue}&study=${data.study}`;
+                },
             },
-        }},
-    { title: 'Study', field: 'study', headerFilter: true },
-    { title: 'Tissue', field: 'tissue', headerFilter: true },
-    { title: 'System', field: 'system', headerFilter: true },
-    {
-        title: '-log<sub>10</sub>(p)',
-        field: 'log_pvalue',
-        formatter: two_digit_fmt2,
-        sorter: 'number',
-    },
-    { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
-    { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
-    { title: 'PIP', field: 'pip', formatter: pip_fmt },
-    { title: 'CS Label', field: 'cs_index' },
-    { title: 'CS Size', field: 'cs_size' },
-];
+        },
+    ];
+
+    if (data_type === 'txrev') {
+        gene_cols.push({ title: 'Transcript', field: 'transcript', headerFilter: true });
+    }
+
+    const other_cols = [
+        { title: 'Study', field: 'study', headerFilter: true },
+        { title: 'Tissue', field: 'tissue', headerFilter: true },
+        { title: 'System', field: 'system', headerFilter: true },
+        {
+            title: '-log<sub>10</sub>(p)',
+            field: 'log_pvalue',
+            formatter: two_digit_fmt2,
+            sorter: 'number',
+        },
+        { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+        { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+        { title: 'PIP', field: 'pip', formatter: pip_fmt },
+        { title: 'CS Label', field: 'cs_index' },
+        { title: 'CS Size', field: 'cs_size' },
+    ];
+    return [...gene_cols, ...other_cols];
+}
 
 export const REGION_TABLE_BASE_COLUMNS = [
     {
