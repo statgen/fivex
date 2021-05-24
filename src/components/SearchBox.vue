@@ -181,7 +181,7 @@ export default {
                 .then((result) => {
                     const chrom = result.chrom.replace('chr', '');
                     if (result.type === 'variant') {
-                        return this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
+                        return this.$router.push({ name: 'variant', params: { display_type: 'eqtl', variant: `${chrom}_${result.start}` } });
                     }
                     if (result.type === 'range') {
                         const { start, end, gene_id, tissue, symbol } = result;
