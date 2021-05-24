@@ -12,7 +12,7 @@
 
           <p>
             Created by Alan Kwong, Mukai Wang, Peter VandeHaar, Andy Boughton, and Hyun Min Kang.
-            Source code can be found on <a href="https://github.com/statgen/fivex/">GitHub</a>.
+            <a href="https://github.com/statgen/fivex/">Source code</a> can be found on GitHub.
           </p>
         </dd>
       </div>

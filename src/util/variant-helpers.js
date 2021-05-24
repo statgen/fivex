@@ -109,7 +109,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}maf', '{{namespace[phewas]}}samples',
                                 '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
-                                '{{namespace[phewas]}}study', '{{namespace[phewas]}}transcript',
+                                '{{namespace[phewas]}}transcript',
                                 '{{namespace[phewas]}}studytissue', '{{namespace[phewas]}}txrevise_event',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
@@ -274,29 +274,36 @@ Size of credible set: <strong>{{{{namespace[phewas]}}cs_size}}</strong><br>
  * @param thing
  */
 export function groupByThing(layout, thing) {
-    let point_label_field;
+    let point_match_field;
+    let point_label_text;
     const scatter_config = layout.panels[0].data_layers[0];
     delete scatter_config.x_axis.category_order_field;
     if (thing === 'tissue') {
-        point_label_field = 'symbol';
+        point_match_field = 'symbol';
+        point_label_text = '{{phewas:study}} ({{phewas:symbol}})';
     } else if (thing === 'symbol') {
-    // label by gene name, but arrange those genes based on position
-        point_label_field = 'studytissue';
+        // label by gene name, but arrange those genes based on position
+        point_match_field = 'studytissue';
+        point_label_text = '{{phewas:study}}-{{phewas:tissue}}';
         scatter_config.x_axis.category_order_field = 'phewas:tss_position';
     } else if (thing === 'system') {
-        point_label_field = 'symbol';
+        point_match_field = 'symbol';
+        point_label_text = '{{phewas:study}}-{{phewas:tissue}} ({{phewas:symbol}})';
     } else if (thing === 'study') {
-        point_label_field = 'tissue';
+        point_match_field = 'tissue';
+        point_label_text = '{{phewas:tissue}} ({{phewas:symbol}})';
     } else if (thing === 'studytissue') {
-        point_label_field = 'symbol';
+        point_match_field = 'symbol';
+        point_label_text = '{{phewas:symbol}}';
     } else {
         throw new Error('Unrecognized grouping field');
     }
     scatter_config.x_axis.category_field = `phewas:${thing}`;
     scatter_config.color[2].field = `phewas:${thing}`;
-    scatter_config.label.text = `{{phewas:${point_label_field}}}`;
+
+    scatter_config.label.text = point_label_text;
     // eslint-disable-next-line no-multi-assign
-    scatter_config.match.send = scatter_config.match.receive = `phewas:${point_label_field}`;
+    scatter_config.match.send = scatter_config.match.receive = `phewas:${point_match_field}`;
 }
 
 /**

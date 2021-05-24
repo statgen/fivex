@@ -323,6 +323,7 @@ class VariantContainer:
         self.samples = self.an / 2
         # FIXME: why do we accept constructor arg if never used?
         self.build = "GRCh38"
+        # A synthetic field used on the front-end to group together points based on both study and tissue TODO Move to frontend only; this doesn't need to be in the API
         self.studytissue = f"{self.study}-{self.tissue}"
 
     @property
