@@ -91,6 +91,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     data_layers: [
                         ((() => {
                             const base = LocusZoom.Layouts.get('data_layer', 'phewas_pvalues', { unnamespaced: true,
+                                tooltip_positioning: 'horizontal',
                                 coalesce: {
                                     // Prevent sQTL datasets from overwhelming the browser DOM, by only rendering nonoverlapping significant ones
                                     max_points: 1000,
@@ -399,8 +400,9 @@ export function switchY(plot_layout, yfield) {
         ];
         phewas_panel.legend.hidden = false;
         scatter_config.y_axis.field = 'phewas:pip|pip_yvalue';
+        // Real data scale from this transform function is -4..0, so this provides a bit of padding around labels
         scatter_config.y_axis.floor = -4.1;
-        scatter_config.y_axis.ceiling = 0.2;
+        scatter_config.y_axis.ceiling = 0.5;
         scatter_config.y_axis.lower_buffer = 0;
         scatter_config.point_shape = [
             { scale_function: 'pip_cluster' },

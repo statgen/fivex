@@ -24,7 +24,8 @@ function retrieveBySuffix(point_data, field_suffix) {
 }
 
 /**
- * Convert Posterior incl probabilities to a (truncated) log scale for rendering
+ * Convert Posterior incl probabilities to a (truncated) log scale for rendering. The return values
+ *   of this scale are (-4..0), so that very small PIPs aren't allowed to dominate the axis scale
  */
 LocusZoom.TransformationFunctions.add('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
 

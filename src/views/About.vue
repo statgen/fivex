@@ -9,13 +9,13 @@
         </p>
 
         <p>
-          Created by Alan Kwong, Mukai Wang, Andy Boughton, Peter VandeHaar, and Hyun Min Kang.
+          Created by Alan Kwong, Mukai Wang, Peter VandeHaar, Andy Boughton, and Hyun Min Kang.
           Source code can be found on <a href="https://github.com/statgen/fivex/">GitHub</a>.
         </p>
 
         <p>
-          eQTL data was obtained from the GTEx Project, v8, with 49 tissues in up to 670 subjects
-          with both genotypes and expression data. All positions are relative to genome build GRCh38.
+          Gene expression (eQTL) and splicing (sQTL) data was harmonized and reprocessed by the EBI eQTL Catalogue. (see <a href="https://www.ebi.ac.uk/eqtl/Studies/">list of available studies</a> or <a href="https://www.ebi.ac.uk/eqtl/Data_access/">download the data</a>).
+          All positions are relative to genome build GRCh38.
         </p>
       </div>
     </div>
