@@ -41,7 +41,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                 const panel = LocusZoom.Layouts.get('panel', 'phewas', {
                     unnamespaced: true,
                     min_height: 450,
-                    height: 450,
+                    height: 500,
+                    margin: { bottom: 170 },
                     toolbar: {
                         widgets: [
                             {
