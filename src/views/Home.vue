@@ -1,10 +1,13 @@
 <template>
-  <div class="container d-flex">
-    <div class="row justify-content-center align-self-center">
+  <div class="container d-flex min-vh-100">
+    <div class="row justify-content-center align-self-center align-items-center">
       <div class="col-12">
         <h2 class="text-center">
           FIVEx: Visualization for Genotypes, Expressions, and Tissues
         </h2>
+        <h5 class="text-center">
+          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a href="https://ebi.ac.uk/eqtl/">EBI eQTL Catalogue</a>
+        </h5>
         <search-box />
         <br>
         <div class="text-center">
