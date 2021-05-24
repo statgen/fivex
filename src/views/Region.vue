@@ -140,11 +140,13 @@ export default {
             // This param might be set when the page first loads, but the associated function
             //   requires a reference to the plot. `nextTick` says "don't fire this watcher
             //   until after the plot has been created"
-            if (!this.assoc_plot) {
-                return;
-            }
-
-            this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
+            this.$nextTick(() => {
+                if (!this.assoc_plot) {
+                    return;
+                }
+                switchY_region(this.assoc_plot.layout, this.y_field);
+                this.assoc_plot.applyState();
+            });
         },
 
         query_params() {
@@ -244,12 +246,12 @@ export default {
                 const track_layouts = track_identifiers
                     .map(([study_name, tissue_name, gene_id]) => {
                         const gene_name = data.gene_list[gene_id];
-                        return getTrackLayout(gene_id, study_name, tissue_name, initialState, gene_name);
+                        return getTrackLayout(gene_id, study_name, tissue_name, initialState, gene_name, this.y_field);
                     }).flat();
 
                 // Anchor + extra tracks
                 const track_panels = [
-                    ...getTrackLayout(gene_id, study, tissue, initialState, symbol),
+                    ...getTrackLayout(gene_id, study, tissue, initialState, symbol, this.y_field),
                     ...track_layouts,
                 ];
                 this.base_plot_layout = getBasicLayout(initialState, track_panels);
@@ -296,7 +298,7 @@ export default {
             const key = `${study_name}$${tissue_name}$${gene_id}`;
 
             if (!this.extra_tracks.includes(key)) {
-                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, study_name, gene_symbol);
+                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, study_name, gene_symbol, this.y_field);
                 this.extra_tracks.push(key);
             }
         },
@@ -433,6 +435,7 @@ export default {
     <div class="row">
       <div class="col-sm-12">
         <lz-plot
+          ref="region_plot"
           :base_layout="base_plot_layout"
           :base_sources="base_plot_sources"
           :chr="chrom"

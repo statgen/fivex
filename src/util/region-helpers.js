@@ -24,15 +24,146 @@ export function getTrackSources(gene_id, study_name, tissue) {
     ];
 }
 
+
+/**
+ * Customize the layout of a single LocusZoom association panel so that it shows a particular thing on the y-axis
+ * @param panel_layout
+ * @param y_field log_pvalue, beta, or pip
+ * @private
+ */
+function _set_panel_yfield(y_field, panel_layout) {
+    // Updates to the panel: legend (orientation), axis labels, and ticks
+    // Update scatter plot: point shape, y-axis, and legend options
+    // Update line of significance: threshold
+
+    const scatter_layout = panel_layout.data_layers.find((d) => d.id === 'associationpvalues');
+    const assoc_y_options = scatter_layout.y_axis;
+    const significance_line_layout = panel_layout.data_layers.find((d) => d.id === 'significance');
+    if (y_field === 'beta') { // Settings for using beta as the y-axis variable
+        delete panel_layout.axes.y1.ticks;
+        panel_layout.legend.orientation = 'vertical';
+        panel_layout.axes.y1.label = 'Normalized Effect Size (NES)';
+        significance_line_layout.offset = 0; // Change dotted horizontal line to y=0
+        significance_line_layout.style = {
+            stroke: 'gray',
+            'stroke-width': '1px',
+            'stroke-dasharray': '10px 0px',
+        };
+        assoc_y_options.field = `${panel_layout.id}:beta`;
+        delete assoc_y_options.floor;
+        delete assoc_y_options.ceiling;
+        assoc_y_options.min_extent = [-1, 1];
+        // Note: changing the shapes for displayed points is conflicting with the reshaping by LD -- need to fix this later
+        scatter_layout.point_shape = [
+            {
+                scale_function: 'effect_direction',
+                parameters: {
+                    '+': 'triangle',
+                    '-': 'triangledown',
+                },
+            },
+            'circle',
+        ];
+        scatter_layout.legend = [
+            { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
+        ];
+        panel_layout.legend.hidden = true;
+    } else if (y_field === 'log_pvalue') { // Settings for using -log10(P-value) as the y-axis variable
+        delete panel_layout.axes.y1.ticks;
+        panel_layout.legend.orientation = 'vertical';
+        panel_layout.axes.y1.label = '-log10 p-value';
+        significance_line_layout.offset = 7.301; // change dotted horizontal line to genomewide significant value 5e-8
+        significance_line_layout.style = {
+            stroke: '#D3D3D3',
+            'stroke-width': '3px',
+            'stroke-dasharray': '10px 10px',
+        };
+        assoc_y_options.field = `${panel_layout.id}:log_pvalue`;
+        // Set minimum y value to zero when looking at -log10 p-values
+        assoc_y_options.floor = 0;
+        delete assoc_y_options.ceiling;
+        assoc_y_options.lower_buffer = 0;
+        scatter_layout.point_shape = [
+            {
+                scale_function: 'effect_direction',
+                parameters: {
+                    '+': 'triangle',
+                    '-': 'triangledown',
+                },
+            },
+            'circle',
+        ];
+        scatter_layout.legend = [
+            { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
+        ];
+        panel_layout.legend.hidden = true;
+    } else if (y_field === 'pip') {
+        panel_layout.legend.orientation = 'horizontal';
+        assoc_y_options.field = `${panel_layout.id}:pip|pip_yvalue`;
+        assoc_y_options.floor = -4.1;
+        assoc_y_options.ceiling = 0.2;
+        assoc_y_options.upper_buffer = 0.1;
+        panel_layout.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
+        panel_layout.axes.y1.ticks = [
+            { position: 'left', text: '1', y: 0 },
+            { position: 'left', text: '0.1', y: -1 },
+            { position: 'left', text: '0.01', y: -2 },
+            { position: 'left', text: '1e-3', y: -3 },
+            { position: 'left', text: '≤1e-4', y: -4 },
+
+        ];
+        // Modified from using pip_cluster as the shape
+        scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
+        scatter_layout.legend = [
+            { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
+            { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
+            { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
+            { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
+        ];
+        significance_line_layout.offset = -1000;
+        significance_line_layout.style = {
+            stroke: 'gray',
+            'stroke-width': '1px',
+            'stroke-dasharray': '10px 0px',
+        };
+        assoc_y_options.min_extent = [0, 1];
+        panel_layout.legend.hidden = false;
+    } else {
+        throw new Error('Unrecognized y_field option');
+    }
+    return panel_layout;
+}
+
+
 /**
  * Get the LocusZoom layout for a single track
  * @param {string} gene_id
+ * @param study_name The study name, as used in human-readable panel titles
  * @param {string} tissue
  * @param {object} state
  * @param {String} genesymbol
+ * @param {String} y_field The name of the field to use for y-axis display; same as used in interactive layout mutations
  * @returns {[*]}
  */
-export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
+export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol, y_field) {
     const symbol = genesymbol || gene_id;
     const geneid_short = gene_id.split('.')[0];
 
@@ -83,6 +214,9 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
         ],
     });
     layoutBase.axes.y1.label_offset = 36;
+
+    // For now, we'll apply user-modifications to the layout at the end in one big mutation instead of in the base layout
+    _set_panel_yfield(y_field, layoutBase);
     return [layoutBase];
 }
 
@@ -94,8 +228,6 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol) {
  */
 export function getBasicLayout(initial_state = {}, track_panels = []) {
     const newgenestooltip = LocusZoom.Layouts.get('data_layer', 'genes_filtered', { unnamespaced: true }).tooltip;
-    // FIXME: tooltip link does not work in principle (relies on a global variable and function isn't defined globally)
-    // newgenestooltip.html += `<br> <a onclick="addTrack('{{gene_id}}', false)" href="javascript:void(0);">Add this gene</a>`;
     const gene_track = LocusZoom.Layouts.get('data_layer', 'genes_filtered', {
         unnamespaced: true,
         tooltip: newgenestooltip,
@@ -163,136 +295,18 @@ function addPanels(plot, data_sources, panel_options, source_options) {
  * @param {string} study_name
  * @param {string} genesymbol
  */
-export function addTrack(plot, datasources, gene_id, tissue, study_name, genesymbol) {
-    const track_layout = getTrackLayout(gene_id, study_name, tissue, plot.state, genesymbol);
+export function addTrack(plot, datasources, gene_id, tissue, study_name, genesymbol, y_field) {
+    const track_layout = getTrackLayout(gene_id, study_name, tissue, plot.state, genesymbol, y_field);
     const track_sources = getTrackSources(gene_id, study_name, tissue);
     addPanels(plot, datasources, track_layout, track_sources);
 }
 
 /**
  * Switch the options used in displaying Y axis
- * @param {LocusZoom.Plot} plot
- * @param yfield Which field to use in plotting y-axis. Either 'log_pvalue', 'beta', or 'pip'
+ * @param y_field Which field to use in plotting y-axis. Either 'log_pvalue', 'beta', or 'pip'
+ * @param plot_layout
  */
-export function switchY_region(plot, yfield) {
-    // Iterate through all panels, including any added panels
-    Object.keys(plot.panels).forEach((panel_id) => {
-        const panel = plot.panels[panel_id].layout;
-        if (panel.data_layers.some((d) => d.id === 'associationpvalues') && panel.data_layers.some((d) => d.id === 'significance')) {
-            const scatter_layout = panel.data_layers.find((d) => d.id === 'associationpvalues');
-            const panel_base_y = scatter_layout.y_axis;
-            const significance_line_layout = panel.data_layers.find((d) => d.id === 'significance');
-            if (yfield === 'beta') { // Settings for using beta as the y-axis variable
-                delete panel.axes.y1.ticks;
-                panel.legend.orientation = 'vertical';
-                panel.axes.y1.label = 'Normalized Effect Size (NES)';
-                significance_line_layout.offset = 0; // Change dotted horizontal line to y=0
-                significance_line_layout.style = {
-                    stroke: 'gray',
-                    'stroke-width': '1px',
-                    'stroke-dasharray': '10px 0px',
-                };
-                panel_base_y.field = `${panel.id}:beta`;
-                delete panel_base_y.floor;
-                delete panel_base_y.ceiling;
-                panel_base_y.min_extent = [-1, 1];
-                // Note: changing the shapes for displayed points is conflicting with the reshaping by LD -- need to fix this later
-                scatter_layout.point_shape = [
-                    {
-                        scale_function: 'effect_direction',
-                        parameters: {
-                            '+': 'triangle',
-                            '-': 'triangledown',
-                        },
-                    },
-                    'circle',
-                ];
-                scatter_layout.legend = [
-                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
-                ];
-                plot.panels[panel_id].legend.hide();
-            } else if (yfield === 'log_pvalue') { // Settings for using -log10(P-value) as the y-axis variable
-                delete panel.axes.y1.ticks;
-                panel.legend.orientation = 'vertical';
-                panel.axes.y1.label = '-log10 p-value';
-                significance_line_layout.offset = 7.301; // change dotted horizontal line to genomewide significant value 5e-8
-                significance_line_layout.style = {
-                    stroke: '#D3D3D3',
-                    'stroke-width': '3px',
-                    'stroke-dasharray': '10px 10px',
-                };
-                panel_base_y.field = `${panel.id}:log_pvalue`;
-                // Set minimum y value to zero when looking at -log10 p-values
-                panel_base_y.floor = 0;
-                delete panel_base_y.ceiling;
-                panel_base_y.lower_buffer = 0;
-                scatter_layout.point_shape = [
-                    {
-                        scale_function: 'effect_direction',
-                        parameters: {
-                            '+': 'triangle',
-                            '-': 'triangledown',
-                        },
-                    },
-                    'circle',
-                ];
-                scatter_layout.legend = [
-                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
-                ];
-                plot.panels[panel_id].legend.hide();
-            } else if (yfield === 'pip') {
-                panel.legend.orientation = 'horizontal';
-                panel_base_y.field = `${panel.id}:pip|pip_yvalue`;
-                panel_base_y.floor = -4.1;
-                panel_base_y.ceiling = 0.2;
-                panel_base_y.upper_buffer = 0.1;
-                panel.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
-                panel.axes.y1.ticks = [
-                    { position: 'left', text: '1', y: 0 },
-                    { position: 'left', text: '0.1', y: -1 },
-                    { position: 'left', text: '0.01', y: -2 },
-                    { position: 'left', text: '1e-3', y: -3 },
-                    { position: 'left', text: '≤1e-4', y: -4 },
-
-                ];
-                // Modified from using pip_cluster as the shape
-                scatter_layout.point_shape = [{ scale_function: 'pip_cluster' }, 'circle'];
-                scatter_layout.legend = [
-                    { shape: 'cross', size: 40, label: 'Cluster 1', class: 'lz-data_layer-scatter' },
-                    { shape: 'square', size: 40, label: 'Cluster 2', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', size: 40, label: 'No cluster', class: 'lz-data_layer-scatter' },
-                    { shape: 'diamond', color: '#9632b8', size: 40, label: 'LD Ref Var', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#d43f3a', size: 40, label: '1.0 > r² ≥ 0.8', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#eea236', size: 40, label: '0.8 > r² ≥ 0.6', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#5cb85c', size: 40, label: '0.6 > r² ≥ 0.4', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#46b8da', size: 40, label: '0.4 > r² ≥ 0.2', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#357ebd', size: 40, label: '0.2 > r² ≥ 0.0', class: 'lz-data_layer-scatter' },
-                    { shape: 'circle', color: '#B8B8B8', size: 40, label: 'no r² data', class: 'lz-data_layer-scatter' },
-                ];
-                significance_line_layout.offset = -1000;
-                significance_line_layout.style = {
-                    stroke: 'gray',
-                    'stroke-width': '1px',
-                    'stroke-dasharray': '10px 0px',
-                };
-                panel_base_y.min_extent = [0, 1];
-                plot.panels[panel_id].legend.show();
-            } else {
-                throw new Error('Unrecognized yfield option');
-            }
-        }
-    });
-    plot.applyState();
+export function switchY_region(plot_layout, y_field) {
+    // Apply a layout mutation to all matching panels
+    LocusZoom.Layouts.mutate_attrs(plot_layout, '$..panels[?(@.tag === "association")]', _set_panel_yfield.bind(null, y_field));
 }
