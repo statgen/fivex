@@ -41,7 +41,6 @@
         </p>
 
         <h2>Glossary</h2>
-        <br>
         <dl>
           <dt>Normalized Effect Size (NES)</dt>
           <dd>

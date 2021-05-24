@@ -21,11 +21,7 @@
       <dt>Data source and format</dt>
       <dd>
         <p>
-          We present RNA-seq data aggregated, harmonized, and analyzed by the <a href="https://www.ebi.ac.uk/eqtl/">EBI eQTL Catalogue</a>.
-        </p>
-        <p>
-          More detailed information about contributing studies can be found <a href="https://www.ebi.ac.uk/eqtl/Studies/">here</a>.
-          Raw data can be downloaded <a href="https://www.ebi.ac.uk/eqtl/Data_access/">here</a>.
+          We present RNA-seq data aggregated, harmonized, and analyzed by the <a href="https://www.ebi.ac.uk/eqtl/">EBI eQTL Catalogue</a>. See their site for more <a href="https://www.ebi.ac.uk/eqtl/Studies/">details of contributing studies</a> or to <a href="https://www.ebi.ac.uk/eqtl/Data_access/">download raw data</a>.
         </p>
         <p>
           Genome positions use coordinates from human genome build GRCh38.
@@ -54,6 +50,7 @@
         </thead>
         <tbody>
           <tr>
+            <!-- TODO: The data ingest pipeline should incorporate study metadata so that we can populate this table by API instead of hardcoding -->
             <th scope="row">
               Alasoo_2018
             </th>
