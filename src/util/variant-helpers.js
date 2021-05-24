@@ -110,7 +110,7 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                                 '{{namespace[phewas]}}cs_index', '{{namespace[phewas]}}cs_size',
                                 '{{namespace[phewas]}}pip', '{{namespace[phewas]}}pip|pip_yvalue',
                                 '{{namespace[phewas]}}study', '{{namespace[phewas]}}transcript',
-                                '{{namespace[phewas]}}studytissue',
+                                '{{namespace[phewas]}}studytissue', '{{namespace[phewas]}}txrevise_event',
                             ];
                             base.x_axis.category_field = '{{namespace[phewas]}}symbol';
                             base.y_axis.field = '{{namespace[phewas]}}log_pvalue';
@@ -197,7 +197,8 @@ System: <strong>{{{{namespace[phewas]}}system|htmlescape}}</strong><br>
 PIP: <strong>{{{{namespace[phewas]}}pip|pip_display}}</strong><br>
 Credible set label: <strong>{{{{namespace[phewas]}}cs_index}}</strong><br>
 Size of credible set: <strong>{{{{namespace[phewas]}}cs_size}}</strong><br>
-{{#if {{namespace[phewas]}}transcript}}Transcript: <strong>{{{{namespace[phewas]}}transcript}}<strong><br>{{/if}}
+{{#if {{namespace[phewas]}}transcript}}Transcript: <strong>{{{{namespace[phewas]}}transcript}}</strong><br>{{/if}}
+{{#if {{namespace[phewas]}}txrevise_event}}Txrevise event: <strong>{{{{namespace[phewas]}}txrevise_event}}</strong><br>{{/if}}
 `;
                             base.match = {
                                 send: '{{namespace[phewas]}}tissue',
@@ -487,10 +488,6 @@ export function get_variant_table_config(data_type) {
         },
     ];
 
-    if (data_type === 'txrev') {
-        gene_cols.push({ title: 'Transcript', field: 'transcript', headerFilter: true });
-    }
-
     const other_cols = [
         { title: 'Study', field: 'study', headerFilter: true },
         { title: 'Tissue', field: 'tissue', headerFilter: true },
@@ -507,6 +504,10 @@ export function get_variant_table_config(data_type) {
         { title: 'CS Label', field: 'cs_index' },
         { title: 'CS Size', field: 'cs_size' },
     ];
+
+    if (data_type === 'txrev') {
+        other_cols.push({ title: 'Txrevise event', field: 'txrevise_event', headerFilter: true });
+    }
     return [...gene_cols, ...other_cols];
 }
 

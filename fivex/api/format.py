@@ -270,7 +270,7 @@ class VariantContainer:
     # Study and tissue are not present in study- and tissue-specific files -- these two fields are only present in merged files
     study: str
     tissue: str
-    transcript_long: dc.InitVar[str]
+    txrevise_event: str
 
     chromosome: str
     position: int
@@ -315,7 +315,7 @@ class VariantContainer:
     samples: int = dc.field(init=False)
     studytissue: str = dc.field(init=False)
 
-    def __post_init__(self, a, b, c, d):
+    def __post_init__(self, a, b, c):
         # Add calculated fields
         self.variant_id = position_to_variant_id(
             self.chromosome, self.position, self.ref_allele, self.alt_allele

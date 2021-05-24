@@ -293,7 +293,7 @@ export default {
                 plot.subscribeToData(
                     [
                         'phewas:log_pvalue', 'phewas:gene_id', 'phewas:transcript', 'phewas:tissue', 'phewas:system', 'phewas:study',
-                        'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip',
+                        'phewas:symbol', 'phewas:beta', 'phewas:stderr_beta', 'phewas:pip', 'phewas:txrevise_event',
                         'phewas:cs_index', 'phewas:cs_size', 'phewas:chromosome', 'phewas:rsid',
                     ],
                     (data) => {
@@ -371,23 +371,48 @@ export default {
         <h1>
           <strong>
             cis-{{ display_type }}s associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
-            (switch to
+            <!-- (switch to
             <router-link
               :to="{name: 'variant', params: {display_type: data_type === 'txrev'? 'eqtl': 'sqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
-            >{{ display_type === 'eQTL' ? 'sQTL' : 'eQTL' }}s</router-link>)
-
-            <span v-if="data_type === 'ge'">
-
-            </span>
-            <span v-else></span>
-
-
+            >{{ display_type === 'eQTL' ? 'sQTL' : 'eQTL' }}s</router-link>) -->
           </strong>
         </h1>
       </div>
     </div>
     <div class="row justify-content-start">
       <div class="col-sm-12">
+        <span v-if="data_type === 'ge'">
+          <router-link
+            :to="{name: 'variant', params: {display_type: 'sqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
+          >
+            <b-button
+              pill
+              variant="primary"
+              class="m-2"
+              size="sm"
+            >
+              <b>
+                Switch to sQTLs
+              </b>
+            </b-button>
+          </router-link>
+        </span>
+        <span v-else>
+          <router-link
+            :to="{name: 'variant', params: {display_type: 'eqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
+          >
+            <b-button
+              pill
+              variant="primary"
+              class="m-2"
+              size="sm"
+            >
+              <b>
+                Switch to eQTLs
+              </b>
+            </b-button>
+          </router-link>
+        </span>
         <b-dropdown
           text="X-Axis Group"
           class="mr-2"
