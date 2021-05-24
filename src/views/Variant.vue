@@ -371,48 +371,19 @@ export default {
         <h1>
           <strong>
             cis-{{ display_type }}s associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
-            <!-- (switch to
-            <router-link
-              :to="{name: 'variant', params: {display_type: data_type === 'txrev'? 'eqtl': 'sqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
-            >{{ display_type === 'eQTL' ? 'sQTL' : 'eQTL' }}s</router-link>) -->
           </strong>
         </h1>
       </div>
     </div>
     <div class="row justify-content-start">
       <div class="col-sm-12">
-        <span v-if="data_type === 'ge'">
-          <router-link
-            :to="{name: 'variant', params: {display_type: 'sqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
-          >
-            <b-button
-              pill
-              variant="primary"
-              class="m-2"
-              size="sm"
-            >
-              <b>
-                Switch to sQTLs
-              </b>
-            </b-button>
-          </router-link>
-        </span>
-        <span v-else>
-          <router-link
-            :to="{name: 'variant', params: {display_type: 'eqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
-          >
-            <b-button
-              pill
-              variant="primary"
-              class="m-2"
-              size="sm"
-            >
-              <b>
-                Switch to eQTLs
-              </b>
-            </b-button>
-          </router-link>
-        </span>
+        <router-link
+          class="btn btn-sm btn-primary m-2 rounded-pill"
+          :to="{name: 'variant', params: {display_type: display_type === 'eQTL' ? 'sqtl' : 'eqtl', variant: `${api_data.chrom}_${api_data.pos}`}}"
+        >
+          Switch to {{ display_type === 'eQTL' ? 'sQTL' : 'eQTL' }}s
+        </router-link>
+
         <b-dropdown
           text="X-Axis Group"
           class="mr-2"

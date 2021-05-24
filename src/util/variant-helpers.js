@@ -488,6 +488,18 @@ export function get_variant_table_config(data_type) {
         },
     ];
 
+    if (data_type === 'txrev') {
+        gene_cols.push({
+            title: 'Transcript',
+            field: 'transcript',
+            headerFilter: true,
+            formatter(cell) {
+                const data = cell.getRow().getData();
+                return `<span class="text-with-definition" title="${data.txrevise_event}">${data.transcript}</span>`;
+            },
+        });
+    }
+
     const other_cols = [
         { title: 'Study', field: 'study', headerFilter: true },
         { title: 'Tissue', field: 'tissue', headerFilter: true },
@@ -505,9 +517,6 @@ export function get_variant_table_config(data_type) {
         { title: 'CS Size', field: 'cs_size' },
     ];
 
-    if (data_type === 'txrev') {
-        other_cols.push({ title: 'Txrevise event', field: 'txrevise_event', headerFilter: true });
-    }
     return [...gene_cols, ...other_cols];
 }
 

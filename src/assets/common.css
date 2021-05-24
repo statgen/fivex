@@ -1,5 +1,7 @@
 .text-with-definition {
-    text-decoration: dotted underline;
+    text-decoration: underline dotted;
+    /* Note: new css attribute; not well supported in older browsers */
+    text-decoration-thickness: 1%;
 }
 
 .variant-information-grouped-card {
