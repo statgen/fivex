@@ -113,7 +113,7 @@ function _set_panel_yfield(y_field, panel_layout) {
         panel_layout.legend.orientation = 'horizontal';
         assoc_y_options.field = `${panel_layout.id}:pip|pip_yvalue`;
         assoc_y_options.floor = -4.1;
-        assoc_y_options.ceiling = 0.2;
+        assoc_y_options.ceiling = 0.9;  // Max log value is 0 (PIP=1); pad ceiling to ensure that legend appears above all points FIXME: redo legend
         assoc_y_options.upper_buffer = 0.1;
         panel_layout.axes.y1.label = 'Posterior Inclusion Probability (PIP)';
         panel_layout.axes.y1.ticks = [
@@ -169,7 +169,13 @@ export function getTrackLayout(gene_id, study_name, tissue, state, genesymbol, y
 
     const newscattertooltip = LocusZoom.Layouts.get('data_layer', 'association_pvalues', { unnamespaced: true }).tooltip;
     // FIXME: Right now, region pages are eqtl only; they don't show sQTLs. As such, the phewas page links hardcode to the eqtl view.
-    newscattertooltip.html = `${newscattertooltip.html.replace('Make LD Reference', 'Set LD Reference')}
+    newscattertooltip.html = `<strong>{{{{namespace[assoc]}}variant|htmlescape}}</strong><br>
+        P Value: <strong>{{{{namespace[assoc]}}log_pvalue|logtoscinotation|htmlescape}}</strong><br>
+        Ref. Allele: <strong>{{{{namespace[assoc]}}ref_allele|htmlescape}}</strong><br>
+        <a href="javascript:void(0);"
+        onclick="var data = this.parentNode.__data__;
+                 data.getDataLayer().makeLDReference(data);"
+                 >Set LD Reference</a><br>
         <a href='/variant/eqtl/{{{{namespace[assoc]}}chromosome|urlencode}}_{{{{namespace[assoc]}}position|urlencode}}/'>Go to single-variant view</a><br>
         Study: <strong>{{{{namespace[assoc]}}study}}</strong> <br>
         Gene: <strong><i>{{{{namespace[assoc]}}symbol}}</i></strong> <br>
