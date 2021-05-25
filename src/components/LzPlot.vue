@@ -110,23 +110,7 @@ export default {
          * @param plot
          */
         connectListeners(plot) {
-            Object.keys(plot.event_hooks)
-                .forEach((name) => plot.on(name, (event) => this.$emit(name, event)));
-
-            // Also create a synthetic event not part of LZ, that makes it a little nicer to work
-            //  with region data. (by returning what was actually displayed, not what was requested)
-            plot.on('state_changed', (event) => {
-                // An interesting quirk of region changing in LZ: event data provides
-                //  the state requested (input), not final start/end (output)
-                // The event we echo should use final plot.state as source of truth
-                const { chr, start, end } = plot.state;
-                const position_changed = Object.keys(event.data)
-                    .some((key) => ['chr', 'start', 'end'].includes(key));
-
-                if (position_changed) {
-                    this.$emit('region_changed', { chr, start, end });
-                }
-            });
+            plot.on('any_lz_event', (eventData) => this.$emit(eventData.event_name, eventData));
         },
 
         /**

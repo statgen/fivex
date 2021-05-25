@@ -42,7 +42,8 @@ export function getPlotLayout(chrom, pos, initialState = {}) {
                     unnamespaced: true,
                     min_height: 450,
                     height: 500,
-                    margin: { bottom: 170 },
+                    // The study-tissue labels are very long; allocate a LOT of margin space for axis tick marks
+                    margin: { top: 35, bottom: 170 },
                     toolbar: {
                         widgets: [
                             {

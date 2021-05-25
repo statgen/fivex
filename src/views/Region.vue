@@ -279,7 +279,8 @@ export default {
         /**
          * Update the page when the plot region is changed
          */
-        changePlotRegion({ chr, start, end }) {
+        changePlotRegion(lzEvent) {
+            const { chr, start, end } = lzEvent.data;
             this.chrom = chr;
             this.start = start;
             this.end = end;
@@ -368,7 +369,7 @@ export default {
       >
         <h1 style="margin-top: 1em;">
           <strong>Single-tissue eQTLs near
-            <i>{{ api_data.symbol }}</i> (chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})
+            <i>{{ api_data.symbol }}</i> <span class="text-muted"><small>(chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})</small></span>
           </strong>
         </h1>
       </div>

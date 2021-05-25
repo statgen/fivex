@@ -370,7 +370,7 @@ export default {
       <div class="col-sm-12">
         <h1>
           <strong>
-            cis-{{ display_type }}s associated with variant: {{ api_data.rsid }} ({{ api_data.variant_id }})
+            cis-{{ display_type }}s associated with variant: {{ api_data.rsid }} <span class="text-muted"><small>({{ api_data.variant_id }})</small></span>
           </strong>
         </h1>
       </div>
