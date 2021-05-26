@@ -623,17 +623,17 @@ export default {
                 aria-pressed="true"
                 title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative"
               >
-                MGI <span class="fa fa-external-link-alt" /></a>
+                MGI-PheWeb <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
-                :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/go?query=${ api_data.rsid }`"
+                :href="`https://pheweb.org/UKB-TOPMed/variant/${ api_data.chrom }-${ api_data.pos }-${ api_data.ref }-${ api_data.alt }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
                 aria-pressed="true"
-                title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software"
+                title="PheWeb summary association results between 57 million TOPMed-imputed variants and 1,400 electronic health record-derived phenotypes from the UK Biobank, with up to ~78k cases and ~409k controls"
               >
-                UKB-SAIGE <span class="fa fa-external-link-alt" /></a>
+                UKB-PheWeb <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
                 :href="`http://big.stats.ox.ac.uk/go?query=${ api_data.rsid }`"
@@ -643,7 +643,7 @@ export default {
                 aria-pressed="true"
                 title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software"
               >
-                UKB-Oxford BIG <span class="fa fa-external-link-alt" /></a>
+                UKB-Oxford <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
                 :href="`https://genetics.opentargets.org/variant/${ api_data.chrom }_${ api_data.pos }_${ api_data.ref }_${ api_data.alt }`"
@@ -653,7 +653,7 @@ export default {
                 aria-pressed="true"
                 title="Open Target Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits"
               >
-                Open Targets Genetics <span class="fa fa-external-link-alt" /></a>
+                Open Targets <span class="fa fa-external-link-alt" /></a>
               <a
                 v-b-tooltip.top
                 :href="`https://www.ebi.ac.uk/gwas/search?query=${ api_data.rsid }`"
@@ -664,6 +664,16 @@ export default {
                 title="The NHGRI-EBI Catalog of published genome-wide association studies, providing an updated and professionally curated database of published GWAS."
               >
                 GWAS Catalog <span class="fa fa-external-link-alt" /></a>
+              <a
+                v-b-tooptip.top
+                :href="`http://r3.finngen.fi/variant/${ api_data.chrom }-${ api_data.pos }-${ api_data.ref }-${ api_data.alt }`"
+                target="_blank"
+                class="btn btn-secondary btn-sm mr-1"
+                role="button"
+                aria-pressed="true"
+                title="Data freeze 3 of the FinnGen study, a public-private partnership with genetic association data for 2,803 disease endpoints from 135,638 individuals, with data from Finnish biobanks and digital health record data from Finnish health registries"
+              >
+                FinnGEN-PheWeb <span class="fa fa-external-lnik-alt" /></a>
             </template>
           </div>
         </div>
