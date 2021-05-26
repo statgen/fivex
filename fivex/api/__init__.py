@@ -144,10 +144,13 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
     Retrieves all data from the chromosome-specific merged credible_sets file
     """
     datatype = request.args.get("datatype", "ge")
+    gene_id = request.args.get("gene_id", None)
     source = model.get_credible_data_table(chrom, datatype)
     reader = readers.TabixReader(
         source=source, parser=CIParser(study=None, tissue=None), skip_rows=0,
     )
+    if gene_id is not None:
+        reader.add_filter("gene_id", gene_id)
     ciRows = reader.fetch(chrom, start - 1, end + 1)
     # We want to retrieve the following data to fill the columns of our table:
     # Variant (chr:pos_ref/alt), study, tissue, P-value, effect size, SD(effect size), PIP, cs_label, cs_size
