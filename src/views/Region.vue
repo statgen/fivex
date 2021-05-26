@@ -516,7 +516,7 @@ export default {
               aria-pressed="true"
               title="PheWeb summary association results between 57 million TOPMed-imputed variants and 1,400 electronic health record-derived phenotypes from the UK Biobank, with up to 78k cases and up to 407k controls"
             >
-              UKB-TOPMed <span class="fa fa-external-link-alt" /></a>
+              UKB-PheWeb <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
               :href="`http://big.stats.ox.ac.uk/gene/${api_data.symbol}`"
