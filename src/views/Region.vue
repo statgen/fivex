@@ -559,12 +559,12 @@ export default {
               GWAS Catalog <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooptip.top
-              :href="`http://r3.finngen.fi/gene/${api_data.symbol}`"
+              :href="`http://r5.finngen.fi/gene/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
               aria-pressed="true"
-              title="Data freeze 3 of the FinnGen study, a public-private partnership with genetic association data for 2,803 disease endpoints from 135,638 individuals, with data from Finnish biobanks and digital health record data from Finnish health registries"
+              title="Data freeze 5 of the FinnGen study, a public-private partnership with genetic association data for 2,803 disease endpoints from 218,792 individuals, with data from Finnish biobanks and digital health record data from Finnish health registries"
             >
               FinnGen-PheWeb <span class="fa fa-external-link-alt" /></a>
           </div>
