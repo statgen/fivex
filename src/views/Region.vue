@@ -558,7 +558,7 @@ export default {
             >
               GWAS Catalog <span class="fa fa-external-link-alt" /></a>
             <a
-              v-b-tooptip.top
+              v-b-tooltip.top
               :href="`http://r5.finngen.fi/gene/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
