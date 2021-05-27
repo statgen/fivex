@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery';
 import '@/lz-helpers';
-import { handleErrors } from '@/util/common';
+import {handleErrors, tabulator_tooltip_maker} from '@/util/common';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
@@ -14,10 +14,10 @@ import {
     getBasicSources,
     getTrackLayout,
     getTrackSources,
+    get_region_table_config,
     switchY_region,
 } from '@/util/region-helpers';
 
-import { REGION_TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
 import AddTrack from '@/components/AddTrack';
 
 /**
@@ -171,7 +171,7 @@ export default {
         this.assoc_sources = null;
 
         // Make some constants available to the Vue instance for use as props in rendering
-        this.table_base_columns = REGION_TABLE_BASE_COLUMNS;
+        this.table_base_columns = get_region_table_config();
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
 
@@ -581,6 +581,7 @@ export default {
         :ajax-u-r-l="gene_data_url"
         :height="'600px'"
         :sort="[{column:'pip', dir:'desc'},]"
+        :initial-header-filter="[{field: 'gene_id', value: api_data.gene_id }]"
         :tooltips="tabulator_tooltip_maker"
         tooltip-generation-mode="hover"
         :tooltips-header="true"

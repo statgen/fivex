@@ -1,6 +1,6 @@
 import LocusZoom from 'locuszoom';
 
-import { PORTALDEV_URL } from '@/util/common';
+import {pip_fmt, PORTALDEV_URL} from '@/util/common';
 
 // Currently default to gene expression data if no parameter is passed, otherwise use indicated datatype
 export function getPlotSources(chrom, pos, datatype = 'ge') {
@@ -451,34 +451,6 @@ function two_digit_fmt2(cell) {
     return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
 }
 
-function pip_fmt(cell) {
-    const x = cell.getValue();
-    if (x === 0) {
-        return '-';
-    }
-    return x.toPrecision(2);
-}
-
-// function pip_cluster_fmt(cell) {
-//     const x = cell.getValue();
-//     if (x === 0) {
-//         return '-';
-//     }
-//     return x.toFixed(0);
-// }
-
-export function tabulator_tooltip_maker(cell) {
-    // Only show tooltips when an ellipsis ('...') is hiding part of the data.
-    // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
-    // Unfortunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
-    // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
-    const e = cell.getElement();
-    if (e.clientWidth >= e.scrollWidth) {
-        return false; // all the text is shown, so there is no '...', so tooltip is unneeded
-    }
-    return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
-}
-
 export function get_variant_table_config(data_type) {
     const gene_cols = [
         {
@@ -527,42 +499,3 @@ export function get_variant_table_config(data_type) {
 
     return [...gene_cols, ...other_cols];
 }
-
-export const REGION_TABLE_BASE_COLUMNS = [
-    {
-        title: 'Variant', field: 'variant_id', formatter: 'link',
-        sorter(a, b, aRow, bRow, column, dir, sorterParams) {
-            // Sort by chromosome, then position
-            const a_data = aRow.getData();
-            const b_data = bRow.getData();
-            return (a_data.chromosome).localeCompare(b_data.chromosome, undefined, {numeric: true})
-                || a_data.position - b_data.position;
-        },
-        formatterParams: {
-            url: (cell) => {
-                const data = cell.getRow().getData();
-                // FIXME: Region pages only handle eqtls at present, so we hardcode a link to the eqtl version of the page
-                return `/variant/eqtl/${data.chromosome}_${data.position}`;
-            },
-        },
-    },
-    { title: 'Study', field: 'study', headerFilter: true },
-    { title: 'Tissue', field: 'tissue', headerFilter: true },
-    // TODO: Convert these gene_ids to gene symbols for ease of reading
-    { title: 'Gene', field: 'gene_id', headerFilter: true },
-    // We have temporarily removed log P-values from the table
-    // because appropriate P-value are not part of the credible_sets database
-    // from which we pull the data displayed for the table
-    // Possible future work: Add P-values back in by joining P-values from the raw data
-    // {
-    //     title: '-log<sub>10</sub>(p)',
-    //     field: 'log_pvalue',
-    //     formatter: two_digit_fmt2,
-    //     sorter: 'number',
-    // },
-    // { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
-    // { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
-    { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
-    { title: 'CS Label', field: 'cs_index' },
-    { title: 'CS Size', field: 'cs_size' },
-];

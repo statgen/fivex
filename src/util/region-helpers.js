@@ -1,5 +1,5 @@
 import LocusZoom from 'locuszoom';
-import { PORTALDEV_URL } from '@/util/common';
+import { PORTALDEV_URL, pip_fmt } from '@/util/common';
 
 const MAX_EXTENT = 1000000;
 
@@ -315,4 +315,46 @@ export function addTrack(plot, datasources, gene_id, tissue, study_name, genesym
 export function switchY_region(plot_layout, y_field) {
     // Apply a layout mutation to all matching panels
     LocusZoom.Layouts.mutate_attrs(plot_layout, '$..panels[?(@.tag === "association")]', _set_panel_yfield.bind(null, y_field));
+}
+
+
+export function get_region_table_config() {
+    return [
+        {
+            title: 'Variant', field: 'variant_id', formatter: 'link',
+            sorter(a, b, aRow, bRow, column, dir, sorterParams) {
+                // Sort by chromosome, then position
+                const a_data = aRow.getData();
+                const b_data = bRow.getData();
+                return (a_data.chromosome).localeCompare(b_data.chromosome, undefined, { numeric: true })
+                    || a_data.position - b_data.position;
+            },
+            formatterParams: {
+                url: (cell) => {
+                    const data = cell.getRow().getData();
+                    // FIXME: Region pages only handle eqtls at present, so we hardcode a link to the eqtl version of the page
+                    return `/variant/eqtl/${data.chromosome}_${data.position}`;
+                },
+            },
+        },
+        { title: 'Study', field: 'study', headerFilter: true },
+        { title: 'Tissue', field: 'tissue', headerFilter: true },
+        // TODO: Convert these gene_ids to gene symbols for ease of reading
+        { title: 'Gene', field: 'gene_id', headerFilter: true },
+        // We have temporarily removed log P-values from the table
+        // because appropriate P-value are not part of the credible_sets database
+        // from which we pull the data displayed for the table
+        // Possible future work: Add P-values back in by joining P-values from the raw data
+        // {
+        //     title: '-log<sub>10</sub>(p)',
+        //     field: 'log_pvalue',
+        //     formatter: two_digit_fmt2,
+        //     sorter: 'number',
+        // },
+        // { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+        // { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+        { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
+        { title: 'CS Label', field: 'cs_index' },
+        { title: 'CS Size', field: 'cs_size' },
+    ];
 }

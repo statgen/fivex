@@ -36,3 +36,22 @@ export function deNamespace(data, prefer) {
 }
 
 export { handleErrors, PORTALDEV_URL };
+
+export function pip_fmt(cell) {
+    const x = cell.getValue();
+    if (x === 0) {
+        return '-';
+    }
+    return x.toPrecision(2);
+}
+export function tabulator_tooltip_maker(cell) {
+    // Only show tabulator table tooltips when an ellipsis ('...') is hiding part of the data.
+    // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
+    // Unfortunately the ellipsis sometimes activates when it's not needed, hiding data while `clientWidth == scrollWidth`.
+    // Fortunately, these tooltips are just a convenience so it's fine if they fail to show.
+    const e = cell.getElement();
+    if (e.clientWidth >= e.scrollWidth) {
+        return false; // all the text is shown, so there is no '...', so tooltip is unneeded
+    }
+    return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
+}

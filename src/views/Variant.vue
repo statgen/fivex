@@ -4,7 +4,7 @@
  */
 import $ from 'jquery';
 import '@/lz-helpers';
-import { deNamespace, handleErrors } from '@/util/common';
+import {deNamespace, handleErrors, tabulator_tooltip_maker} from '@/util/common';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
@@ -16,7 +16,6 @@ import {
     setLabelCount,
     switchY,
     get_variant_table_config,
-    tabulator_tooltip_maker,
 } from '@/util/variant-helpers';
 
 function getData(variant) {
