@@ -1,5 +1,5 @@
 import LocusZoom from 'locuszoom';
-import { PORTALDEV_URL, pip_fmt } from '@/util/common';
+import { PORTALDEV_URL, pip_fmt, two_digit_fmt1, two_digit_fmt2 } from '@/util/common';
 
 const MAX_EXTENT = 1000000;
 
@@ -341,18 +341,14 @@ export function get_region_table_config() {
         { title: 'Tissue', field: 'tissue', headerFilter: true },
         // TODO: Convert these gene_ids to gene symbols for ease of reading
         { title: 'Gene', field: 'gene_id', headerFilter: true },
-        // We have temporarily removed log P-values from the table
-        // because appropriate P-value are not part of the credible_sets database
-        // from which we pull the data displayed for the table
-        // Possible future work: Add P-values back in by joining P-values from the raw data
-        // {
-        //     title: '-log<sub>10</sub>(p)',
-        //     field: 'log_pvalue',
-        //     formatter: two_digit_fmt2,
-        //     sorter: 'number',
-        // },
-        // { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
-        // { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
+        {
+            title: '-log<sub>10</sub>(p)',
+            field: 'log_pvalue',
+            formatter: two_digit_fmt2,
+            sorter: 'number',
+        },
+        { title: 'Effect Size', field: 'beta', formatter: two_digit_fmt1, sorter: 'number' },
+        { title: 'SE (Effect Size)', field: 'stderr_beta', formatter: two_digit_fmt1 },
         { title: 'PIP', field: 'pip', formatter: pip_fmt, sorter: 'number' },
         { title: 'CS Label', field: 'cs_index' },
         { title: 'CS Size', field: 'cs_size' },

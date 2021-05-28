@@ -664,7 +664,7 @@ export default {
               >
                 GWAS Catalog <span class="fa fa-external-link-alt" /></a>
               <a
-                v-b-tooptip.top
+                v-b-tooltip.top
                 :href="`http://r5.finngen.fi/variant/${ api_data.chrom }-${ api_data.pos }-${ api_data.ref }-${ api_data.alt }`"
                 target="_blank"
                 class="btn btn-secondary btn-sm mr-1"
@@ -672,7 +672,7 @@ export default {
                 aria-pressed="true"
                 title="Data freeze 5 of the FinnGen study, a public-private partnership with genetic association data for 2,803 disease endpoints from 218,792 individuals, with data from Finnish biobanks and digital health record data from Finnish health registries"
               >
-                FinnGEN-PheWeb <span class="fa fa-external-lnik-alt" /></a>
+                FinnGEN-PheWeb <span class="fa fa-external-link-alt" /></a>
             </template>
           </div>
         </div>

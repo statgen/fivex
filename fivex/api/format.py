@@ -48,7 +48,7 @@ TISSUES_TO_SYSTEMS = {
     "CD8_T-cell_naive": "Immune",
     "colon_sigmoid": "Colon",
     "colon_transverse": "Colon",
-    "esophagus_gastroesophageal_junction": "Esophagus",
+    "esophagus_gej": "Esophagus",
     "esophagus_mucosa": "Esophagus",
     "esophagus_muscularis": "Esophagus",
     "fat": "Adipose",
@@ -247,6 +247,25 @@ class CIContainer:
 
     posterior_sd: float
     cs_log10bf: float
+
+    # Extra fields after data joining
+    ma_samples: ty.Optional[int] = None
+    maf: ty.Optional[float] = None
+    log_pvalue: ty.Optional[float] = None
+    beta: ty.Optional[float] = None
+    stderr_beta: ty.Optional[float] = None
+
+    type: ty.Optional[str] = None
+    ac: ty.Optional[int] = None
+    an: ty.Optional[int] = None
+    # The r2 field may contain 'NA's -- see note in VariantContainers
+    r2: ty.Optional[float] = None
+    mol_trait_obj_id: ty.Optional[str] = None
+
+    gid: ty.Optional[str] = None
+    median_tpm: ty.Optional[float] = None
+    rsid: ty.Optional[str] = None
+
     variant_id: str = dc.field(init=False)
 
     def __post_init__(self):
@@ -254,6 +273,16 @@ class CIContainer:
         self.variant_id = position_to_variant_id(
             self.chromosome, self.position, self.ref_allele, self.alt_allele
         )
+
+    @property
+    def pvalue(self):
+        if self.log_pvalue is None:
+            return None
+        elif math.isinf(self.log_pvalue):
+            # This is an explicit design choice here, since we parse p=0 to infinity
+            return 0
+        else:
+            return 10 ** -self.log_pvalue
 
     def to_dict(self):
         return dc.asdict(self)
@@ -289,6 +318,8 @@ class VariantContainer:
     ac: int
     an: int
 
+    # r2: This field may contain 'NA's - we are not using this field at the moment;
+    # if we do we will need to parse those NAs
     r2: dc.InitVar[float]
     molecular_trait_object_id: dc.InitVar[str]
 
@@ -305,7 +336,7 @@ class VariantContainer:
     system: str
     transcript: str
 
-    # Additional optional args with updated fields from SuSie
+    # Additional optional args with updated fields from SuSiE
     cs_index: ty.Optional[str] = None
     cs_size: ty.Optional[int] = None
     pip: ty.Optional[float] = None
@@ -454,6 +485,20 @@ class CIParser:
         # posterior_mean: posterior effect size
         # posterior_sd: posterior standard deviation
         # cs_log10bf: log10 of the Bayes Factor for this credible set
+        ### Extra columns added by joining main QTL data ###
+        # ma_samples
+        # maf
+        # pvalue
+        # beta
+        # se
+        # type
+        # ac
+        # an
+        # r2
+        # mol_trait_obj_id
+        # gid
+        # median_tpm
+        # rsid
         fields: ty.List[ty.Any] = row.split("\t")
         if self.study and self.tissue:
             # Tissue-and-study-specific files have two fewer columns (study and tissue),
@@ -468,6 +513,17 @@ class CIParser:
         fields[16] = float(fields[16])  # posterior_mean
         fields[17] = float(fields[17])  # posteriof_sd
         fields[18] = float(fields[18])  # cs_log10bf
+        # Extra fields from joined file
+        if len(fields) > 19:
+            fields[19] = int(fields[19])  # ma_samples
+            fields[20] = float(fields[20])  # maf
+            fields[21] = float(fields[21])  # pvalue
+            fields[22] = float(fields[22])  # beta
+            fields[23] = float(fields[23])  # se
+            fields[25] = int(fields[25])  # ac
+            fields[26] = int(fields[26])  # an
+            fields[30] = float(fields[30])  # median_tpm
+
         return CIContainer(*fields)
 
 

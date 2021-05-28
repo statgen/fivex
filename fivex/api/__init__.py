@@ -35,7 +35,7 @@ def region_query(chrom, start, end, study, tissue):
         for res in query_variants(
             chrom=chrom,
             start=start,
-            rowstoskip=1,  # Region query uses the original EBi data files, which all have a header row
+            rowstoskip=1,  # Region query uses the original EBI data files, which all have a header row
             end=end,
             study=study,
             tissue=tissue,
@@ -189,6 +189,9 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
                 "pip": row.pip,
                 "cs_size": row.cs_size,
                 "variant_id": row.variant_id,
+                "log_pvalue": row.log_pvalue,
+                "beta": row.beta,
+                "stderr_beta": row.stderr_beta,
             }
         )
     results = {"data": data}

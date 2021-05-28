@@ -1,6 +1,6 @@
 import LocusZoom from 'locuszoom';
 
-import {pip_fmt, PORTALDEV_URL} from '@/util/common';
+import {pip_fmt, PORTALDEV_URL, two_digit_fmt1, two_digit_fmt2} from '@/util/common';
 
 // Currently default to gene expression data if no parameter is passed, otherwise use indicated datatype
 export function getPlotSources(chrom, pos, datatype = 'ge') {
@@ -436,19 +436,6 @@ export function switchY(plot_layout, yfield) {
  */
 export function setLabelCount(plot_layout, n) {
     plot_layout.panels[0].data_layers[0].label.filters[1].value = n;
-}
-
-// Tabulator formatting helpers
-function two_digit_fmt1(cell) {
-    const x = cell.getValue();
-    const d = -Math.floor(Math.log10(Math.abs(x)));
-    return (d < 6) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
-}
-
-function two_digit_fmt2(cell) {
-    const x = cell.getValue();
-    const d = -Math.floor(Math.log10(Math.abs(x)));
-    return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
 }
 
 export function get_variant_table_config(data_type) {

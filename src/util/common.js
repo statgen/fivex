@@ -44,6 +44,7 @@ export function pip_fmt(cell) {
     }
     return x.toPrecision(2);
 }
+
 export function tabulator_tooltip_maker(cell) {
     // Only show tabulator table tooltips when an ellipsis ('...') is hiding part of the data.
     // When `element.scrollWidth` is bigger than `element.clientWidth`, that means that data is hidden.
@@ -54,4 +55,17 @@ export function tabulator_tooltip_maker(cell) {
         return false; // all the text is shown, so there is no '...', so tooltip is unneeded
     }
     return e.innerText; // shows what's in the HTML (from `formatter`) instead of just `cell.getValue()`
+}
+
+// Tabulator formatting helpers
+export function two_digit_fmt1(cell) {
+    const x = cell.getValue();
+    const d = -Math.floor(Math.log10(Math.abs(x)));
+    return (d < 6) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
+}
+
+export function two_digit_fmt2(cell) {
+    const x = cell.getValue();
+    const d = -Math.floor(Math.log10(Math.abs(x)));
+    return (d < 4) ? x.toFixed(Math.max(d + 1, 2)) : x.toExponential(1);
 }
