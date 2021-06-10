@@ -55,7 +55,7 @@ function getOmniSearch(searchText) {
 //  with a resulting Promise with gene_id, symbol, and tissue, which we will use in exact
 //  range queries
 function getBestRange(chrom, start, end, gene_id = null) {
-    let bestURL = `/api/data/region/${chrom}/${start}-${end}/best/`;
+    let bestURL = `/api/data/best/region/${chrom}/${start}-${end}/`;
     if (gene_id !== null) {
         bestURL += `?gene_id=${gene_id}`;
     }
@@ -181,7 +181,7 @@ export default {
                 .then((result) => {
                     const chrom = result.chrom.replace('chr', '');
                     if (result.type === 'variant') {
-                        return this.$router.push({ name: 'variant', params: { variant: `${chrom}_${result.start}` } });
+                        return this.$router.push({ name: 'variant', params: { display_type: 'eqtl', variant: `${chrom}_${result.start}` } });
                     }
                     if (result.type === 'range') {
                         const { start, end, gene_id, tissue, symbol } = result;

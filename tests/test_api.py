@@ -1,5 +1,6 @@
 """Test the REST APIs"""
 
+import pytest
 from flask import url_for
 
 
@@ -9,9 +10,15 @@ from flask import url_for
 # and may need to be updated if the homepage examples change
 def test_loads_region(client):
     url = url_for(
-        "api.region_query", chrom="1", start=108774968, end=109774968
+        "api.region_query",
+        chrom="1",
+        start=108774968,
+        end=109774968,
+        study="GTEx",
+        tissue="adipose_subcutaneous",
     )
-    assert client.get(url).status_code == 200
+    response = client.get(url)
+    assert response.status_code == 200
 
 
 def test_loads_region_bestvar(client):
@@ -23,9 +30,14 @@ def test_loads_region_bestvar(client):
 
     assert response.status_code == 200
     content = response.get_json()
-    assert content["data"]["tissue"] == "Cells_Cultured_fibroblasts"
+    assert content["data"]["tissue"] == "thyroid"
+    assert content["data"]["study"] == "GTEx"
+    assert content["data"]["symbol"] == "GSTM1"
 
 
+@pytest.mark.skip(
+    "Temporarily removed this functionality (specifying a gene) from our bestvar query"
+)
 def test_loads_region_bestvar_for_gene(client):
     """What is an example of the gene id altering the query for best variant in a region?"""
     url = url_for(
@@ -41,6 +53,23 @@ def test_loads_region_bestvar_for_gene(client):
     assert content["data"]["tissue"] == "Liver"
 
 
-def test_loads_variant(client):
+def test_loads_variant_eqtls_by_default(client):
     url = url_for("api.variant_query", chrom="1", pos=109274968)
+    assert client.get(url).status_code == 200
+
+
+def test_loads_variant_sqtls_with_option(client):
+    url = url_for(
+        "api.variant_query", chrom="1", pos=109274968, data_type="txrev"
+    )
+    assert client.get(url).status_code == 200
+
+
+def test_variant_api_rejects_invalid_option(client):
+    url = url_for(
+        "api.variant_query",
+        chrom="1",
+        pos=109274968,
+        data_type="somethingsomething",
+    )
     assert client.get(url).status_code == 200

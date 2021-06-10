@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery';
 import '@/lz-helpers';
-import { handleErrors } from '@/util/common';
+import {handleErrors, tabulator_tooltip_maker} from '@/util/common';
 
 import LzPlot from '@/components/LzPlot.vue';
 import SearchBox from '@/components/SearchBox.vue';
@@ -14,10 +14,10 @@ import {
     getBasicSources,
     getTrackLayout,
     getTrackSources,
+    get_region_table_config,
     switchY_region,
 } from '@/util/region-helpers';
 
-import { REGION_TABLE_BASE_COLUMNS, tabulator_tooltip_maker } from '@/util/variant-helpers';
 import AddTrack from '@/components/AddTrack';
 
 /**
@@ -45,10 +45,25 @@ export default {
     },
     data() {
         return {
-            // Data from the api (describes the variant)
-            region_data: {},
+            // Data sent from the api when the page is first loaded (basic info needed for the view).
+            // The default values here will be overridden in almost any usage, but they exist to help define the expected contract between page and API.
+            // Some of these fields can be set by either the page query params ("what tracks should we show")
+            //  or else filled in by the API ("if nothing requested, show something interesting")
+            api_data: {
+                chrom: '',
+                start: null,
+                end: null,
+                center: null,
+                gene_id: '',
+                study: '',
+                tissue: '',
+                symbol: '',
+                tissue_list: [],
+                tissues_per_study: {},
+                gene_list: [],
+            },
 
-            // Data that controls the view (user-selected options)
+            // Data that controls the view (user-selected options that may change while in the page)
             chrom: null,
             start: null,
             end: null,
@@ -57,6 +72,7 @@ export default {
             y_field: null,
             gene_id: null,
             tissue: null,
+            study: null,
 
             extra_tracks: [],
 
@@ -78,9 +94,9 @@ export default {
 
         query_params() {
             // Re-calculate the URL query string whenever dependent information changes.
-            const { chrom, start, end, gene_id, tissue, y_field, extra_tracks } = this;
+            const { chrom, start, end, gene_id, tissue, study, y_field, extra_tracks } = this;
 
-            const options = { chrom, start, end, gene_id, tissue, y_field };
+            const options = { chrom, start, end, gene_id, tissue, study, y_field };
 
             if (extra_tracks.length) {
                 options.extra_tracks = extra_tracks;
@@ -99,8 +115,24 @@ export default {
             // with non-missing PIP values, i.e. only points that are found in the DAP-G database
             // const { chrom, start, end } = this;
             // return `/api/data/region/${chrom}/${start}-${end}/?piponly=True`;
-            const { gene_id } = this;
-            return `/api/data/gene/${gene_id}/`;
+            // const { gene_id } = this;
+            // return `/api/data/gene/${gene_id}/`;
+            const { chrom, start, end } = this;
+            return `/api/data/cs/${chrom}/${start}-${end}/`;
+        },
+
+        tissues_per_study() {
+            // Reformat the API tissues-per-study information to work with bootstrap-vue select boxes
+            const { tissues_per_study } = this.api_data;
+            // Backend sends { [study_name]: list_of_tissues }
+            const choices = [];
+            Object.entries(tissues_per_study).forEach(([study_name, tissue_list]) => {
+                choices.push({
+                    label: study_name,
+                    options: tissue_list.map((tissue_name) => ({text: tissue_name, value: {study_name, tissue_name}})),
+                });
+            });
+            return choices;
         },
     },
     watch: {
@@ -108,11 +140,13 @@ export default {
             // This param might be set when the page first loads, but the associated function
             //   requires a reference to the plot. `nextTick` says "don't fire this watcher
             //   until after the plot has been created"
-            if (!this.assoc_plot) {
-                return;
-            }
-
-            this.$nextTick(() => switchY_region(this.assoc_plot, this.y_field));
+            this.$nextTick(() => {
+                if (!this.assoc_plot) {
+                    return;
+                }
+                switchY_region(this.assoc_plot.layout, this.y_field);
+                this.assoc_plot.applyState();
+            });
         },
 
         query_params() {
@@ -128,32 +162,33 @@ export default {
     },
 
     beforeCreate() {
-    // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
-    // Preserve a reference to component widgets so that their methods can be accessed directly
-    //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
-    //  bypass these problems by assigning them as static properties instead of nested
-    //  observables.
+        // See: https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-before-navigation
+        // Preserve a reference to component widgets so that their methods can be accessed directly
+        //  Some- esp LZ plots- behave very oddly when wrapped as a nested observable; we can
+        //  bypass these problems by assigning them as static properties instead of nested
+        //  observables.
         this.assoc_plot = null;
         this.assoc_sources = null;
 
         // Make some constants available to the Vue instance for use as props in rendering
-        this.table_base_columns = REGION_TABLE_BASE_COLUMNS;
+        this.table_base_columns = get_region_table_config();
         this.tabulator_tooltip_maker = tabulator_tooltip_maker;
     },
 
     beforeRouteEnter(to, from, next) {
-    // Fires on first navigation to route (from another route)
+        // Fires on first navigation to route (from another route)
         getData(to.query)
             .then((data) => {
                 next((vm) => {
                     vm.setQuery(to.query);
                     vm.setData(data);
                 });
+                // FIXME: more nuanced errors
             }).catch(() => next({ name: 'error' }));
     },
 
     beforeRouteUpdate(to, from, next) {
-    // When going from one Region page to another (component is reused, only variable part of route changes)
+        // When going from one Region page to another (component is reused, only variable part of route changes)
 
         // Reset internal state (because we're reusing the same component)
         this.setQuery();
@@ -165,14 +200,15 @@ export default {
             this.setQuery(to.query);
             this.setData(data);
             next();
+            // FIXME: more nuanced errors
         }).catch(() => next({ name: 'error' }));
     },
     methods: {
-        changeAnchors(tissue, gene_id) {
+        changeAnchors(study, tissue, gene_id) {
             const { chrom, start, end } = this;
             this.$router.push({
                 name: 'region',
-                query: { chrom, start, end, gene_id, tissue },
+                query: { chrom, start, end, study, gene_id, tissue },
             });
         },
 
@@ -190,10 +226,10 @@ export default {
         },
         setData(data) {
             // Convert passed params to instance variables. Also create plot and do other reactive things.
-            this.region_data = data;
+            this.api_data = data;
 
             if (data) {
-                const { chrom: chr, start, end, gene_id, tissue, symbol } = data;
+                const { chrom: chr, start, end, gene_id, tissue, study, symbol } = data;
                 const { extra_tracks, y_field } = this;
                 const initialState = { chr, start, end, y_field };
                 this.chrom = chr;
@@ -201,35 +237,32 @@ export default {
                 this.end = end;
                 this.gene_id = gene_id;
                 this.tissue = tissue;
+                this.study = study;
 
                 // Create track layouts for the basic (anchor) track, plus any extra ones to be added to the plot
                 //  In the URL, extra tracks are serialized as `gene_id$tissue_name`
-                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [gene_id, tissue_name] pairs
-                const unique_genes = new Set(track_identifiers.map((item) => item[0]));
-                unique_genes.add(gene_id);
-                const unique_tissues = new Set(track_identifiers.map((item) => item[1]));
-                unique_tissues.add(tissue);
+                const track_identifiers = extra_tracks.map((item) => item.split('$'));  // list of [study_name, tissue_name, gene_id] triplets
 
                 const track_layouts = track_identifiers
-                    .map(([gene_id, tissue_name]) => {
+                    .map(([study_name, tissue_name, gene_id]) => {
                         const gene_name = data.gene_list[gene_id];
-                        return getTrackLayout(gene_id, tissue_name, initialState, gene_name);
+                        return getTrackLayout(gene_id, study_name, tissue_name, initialState, gene_name, this.y_field);
                     }).flat();
 
                 // Anchor + extra tracks
                 const track_panels = [
-                    ...getTrackLayout(gene_id, tissue, initialState, symbol),
+                    ...getTrackLayout(gene_id, study, tissue, initialState, symbol, this.y_field),
                     ...track_layouts,
                 ];
                 this.base_plot_layout = getBasicLayout(initialState, track_panels);
 
                 const extra_sources = track_identifiers
-                    .map(([gene_id, tissue_name]) => getTrackSources(gene_id, tissue_name))
+                    .map(([study_name, tissue_name, gene_id]) => getTrackSources(gene_id, study_name, tissue_name))
                     .flat();
 
                 // Create data sources for the basic (anchor) track, plus any extra ones to be added to the plot
                 const track_sources = [
-                    ...getTrackSources(gene_id, tissue), // Plot the anchor gene and tissue first
+                    ...getTrackSources(gene_id, study, tissue), // Plot the anchor gene and tissue first
                     ...extra_sources,
                 ];
 
@@ -246,7 +279,8 @@ export default {
         /**
          * Update the page when the plot region is changed
          */
-        changePlotRegion({ chr, start, end }) {
+        changePlotRegion(lzEvent) {
+            const { chr, start, end } = lzEvent.data;
             this.chrom = chr;
             this.start = start;
             this.end = end;
@@ -255,17 +289,17 @@ export default {
         /**
          * Add a new gene or tissue track to the plot, after the plot has been created
          */
-        addTrack(gene_id, tissue_name) {
+        addTrack(study_name, tissue_name, gene_id) {
             // FIXME: Known issue: "add tissue" mode has a bug where panel titles show gene id instead of name
             //   Root cause: anchor gene ID strips version IDs, so when tissue is added relative to anchor,
             //   Recommended fix: harmonize how we present gene IDs in the backend data store, rather than cleaning it up
             //   in many places throughout the app
-            const { gene_list } = this.region_data;
+            const { gene_list } = this.api_data;
             const gene_symbol = gene_list[gene_id];
-            const key = `${gene_id}$${tissue_name}`;
+            const key = `${study_name}$${tissue_name}$${gene_id}`;
 
             if (!this.extra_tracks.includes(key)) {
-                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, gene_symbol);
+                addTrack(this.assoc_plot, this.assoc_sources, gene_id, tissue_name, study_name, gene_symbol, this.y_field);
                 this.extra_tracks.push(key);
             }
         },
@@ -335,7 +369,7 @@ export default {
       >
         <h1 style="margin-top: 1em;">
           <strong>Single-tissue eQTLs near
-            <i>{{ region_data.symbol }}</i> (chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})
+            <i>{{ api_data.symbol }}</i> <span class="text-muted"><small>(chr{{ chrom }}:{{ start.toLocaleString() }}-{{ end.toLocaleString() }})</small></span>
           </strong>
         </h1>
       </div>
@@ -351,9 +385,10 @@ export default {
           <select-anchors
             class="px-3"
             :current_gene="gene_id"
+            :current_study="study"
             :current_tissue="tissue"
-            :gene_list="region_data.gene_list"
-            :tissue_list="region_data.tissue_list"
+            :gene_list="api_data.gene_list"
+            :tissues_per_study="tissues_per_study"
             @navigate="changeAnchors"
           />
         </b-dropdown>
@@ -366,10 +401,11 @@ export default {
         >
           <b-dropdown-form @submit.prevent>
             <add-track
-              :gene_list="region_data.gene_list"
-              :tissue_list="region_data.tissue_list"
-              :current_gene_symbol="region_data.symbol"
+              :gene_list="api_data.gene_list"
+              :tissues_per_study="tissues_per_study"
+              :current_gene_symbol="api_data.symbol"
               :current_gene_id="gene_id"
+              :current_study="study"
               :current_tissue="tissue"
               @add-track="addTrack"
             />
@@ -381,35 +417,17 @@ export default {
           class="m-2"
           size="sm"
         >
-          <b-dropdown-form style="width: 180px;">
-            <label>
-              <input
-                id="show-log-pvalue"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="log_pvalue"
-              > -log<sub>10</sub> P
-            </label>
-            <label>
-              <input
-                id="show-beta"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="beta"
-              > Effect size (NES)
-            </label>
-
-            <label>
-              <input
-                id="show-pip"
-                v-model="y_field"
-                type="radio"
-                name="y-options"
-                value="pip"
-              > PIP
-            </label>
+          <b-dropdown-form style="width: 200px;">
+            <b-radio-group
+              v-model="y_field"
+              name="y-options"
+              :options="[
+                { value: 'log_pvalue', html: '-log<sub>10</sub> P' },
+                { value: 'beta', text: 'Effect size (NES)' },
+                { value: 'pip', text: 'PIP (SuSiE)' }
+              ]"
+              stacked
+            />
           </b-dropdown-form>
         </b-dropdown>
       </div>
@@ -418,6 +436,7 @@ export default {
     <div class="row">
       <div class="col-sm-12">
         <lz-plot
+          ref="region_plot"
           :base_layout="base_plot_layout"
           :base_sources="base_plot_sources"
           :chr="chrom"
@@ -460,7 +479,7 @@ export default {
               BRAVO <span class="fa fa-external-link-alt" /> </a>
             <a
               v-b-tooltip.top.html
-              :href="`https://gtexportal.org/home/gene/${ region_data.symbol }`"
+              :href="`https://gtexportal.org/home/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -470,7 +489,7 @@ export default {
               GTEx Portal <span class="fa fa-external-link-alt" /> </a>
             <a
               v-b-tooltip.top
-              :href="`https://gnomad.broadinstitute.org/gene/${ region_data.symbol }?dataset=gnomad_r3`"
+              :href="`https://gnomad.broadinstitute.org/gene/${ api_data.symbol }?dataset=gnomad_r3`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -480,37 +499,37 @@ export default {
               gnomAD <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://pheweb.sph.umich.edu/gene/${ region_data.symbol }`"
+              :href="`http://pheweb.sph.umich.edu/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
               aria-pressed="true"
               title="PheWeb summary of association results from 1,448 electronic health record-derived phenotypes tested against up to ~6,000 cases and ~18,000 controls with genotyped and imputed samples from the Michigan Genomics Initiative"
             >
-              MGI <span class="fa fa-external-link-alt" /></a>
+              MGI-PheWeb <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://pheweb.sph.umich.edu/SAIGE-UKB/gene/${ region_data.symbol }`"
+              :href="`https://pheweb.org/UKB-TOPMed/gene/${ api_data.symbol }`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
               aria-pressed="true"
-              title="PheWeb summary of association results from the UK Biobank, with up to ~78k cases and ~409k controls, with binary outcomes analyzed with the SAIGE software"
+              title="PheWeb summary association results between 57 million TOPMed-imputed variants and 1,400 electronic health record-derived phenotypes from the UK Biobank, with up to 78k cases and up to 407k controls"
             >
-              UKB-SAIGE <span class="fa fa-external-link-alt" /></a>
+              UKB-PheWeb <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://big.stats.ox.ac.uk/gene/${region_data.symbol}`"
+              :href="`http://big.stats.ox.ac.uk/gene/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
               aria-pressed="true"
               title="Summary of 3,144 GWAS of Brain Imaging Derived Phenotypes (IDPs) in 9,707 participants from the UK Biobank, analyzed with the BGENIE software"
             >
-              UKB-Oxford BIG <span class="fa fa-external-link-alt" /></a>
+              UKB-Oxford <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${region_data.symbol}'}]`"
+              :href="`http://www.ebi.ac.uk/gxa/search?geneQuery=[{'value':'${api_data.symbol}'}]`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -530,7 +549,7 @@ export default {
               Open Target Genetics <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
-              :href="`https://www.ebi.ac.uk/gwas/genes/${region_data.symbol}`"
+              :href="`https://www.ebi.ac.uk/gwas/genes/${api_data.symbol}`"
               target="_blank"
               class="btn btn-secondary btn-sm mr-1"
               role="button"
@@ -538,6 +557,16 @@ export default {
               title="The NHGRI-EBI Catalog of published genome-wide association studies, providing an updated and professionally curated database of published GWAS."
             >
               GWAS Catalog <span class="fa fa-external-link-alt" /></a>
+            <a
+              v-b-tooltip.top
+              :href="`http://r5.finngen.fi/gene/${api_data.symbol}`"
+              target="_blank"
+              class="btn btn-secondary btn-sm mr-1"
+              role="button"
+              aria-pressed="true"
+              title="Data freeze 5 of the FinnGen study, a public-private partnership with genetic association data for 2,803 disease endpoints from 218,792 individuals, with data from Finnish biobanks and digital health record data from Finnish health registries"
+            >
+              FinnGen-PheWeb <span class="fa fa-external-link-alt" /></a>
           </div>
         </div>
       </div>
@@ -546,12 +575,13 @@ export default {
       ref="eqtl-table"
       class="pt-md-3"
     >
-      <h2>Significant eQTLs in <i>{{ region_data.symbol }}</i></h2>
+      <h2>Significant eQTLs near <i>{{ api_data.symbol }}</i></h2>
       <tabulator-table
         :columns="table_base_columns"
         :ajax-u-r-l="gene_data_url"
         :height="'600px'"
         :sort="[{column:'pip', dir:'desc'},]"
+        :initial-header-filter="[{field: 'gene_id', value: api_data.gene_id }]"
         :tooltips="tabulator_tooltip_maker"
         tooltip-generation-mode="hover"
         :tooltips-header="true"

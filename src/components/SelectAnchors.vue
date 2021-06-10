@@ -9,21 +9,28 @@ export default {
     name: 'SelectAnchors',
     props: {
         gene_list: { type: Object, default: () => ({}) },
-        tissue_list: { type: Array, default: () => [] },
+        tissues_per_study: { type: Array, default: () => [] },
         current_gene: { type: String, default: '' },
         current_tissue: { type: String, default: '' },
+        current_study: { type: String, default: '' },
     },
     data() {
         return {
             anchor_gene: this.current_gene,
-            anchor_tissue: this.current_tissue,
+            // The tissue selector represents two pieces of information (since each study has its own unique list of tissues)
+            anchor_tissue_and_study: {
+                study_name: this.current_study,
+                tissue_name: this.current_tissue,
+            },
         };
     },
     methods: {
         selectAnchor() {
-            // This just renders two selection boxes. Since navigating to a region requires additional
-            //  info, we emit the selected options and use them to trigger navigation
-            this.$emit('navigate', this.anchor_tissue, this.anchor_gene);
+            // Emit the selected options, which can be used by the parent page, eg, to control navigation
+            const { anchor_tissue_and_study, anchor_gene } = this;
+            const { tissue_name, study_name } = anchor_tissue_and_study;
+
+            this.$emit('navigate', study_name, tissue_name, anchor_gene);
         },
     },
 };
@@ -34,31 +41,25 @@ export default {
     <form @submit.prevent="selectAnchor">
       <div class="form-group">
         <label class="mr-2">Gene
-          <select
+          <b-form-select
             v-model="anchor_gene"
-            class="form-control"
-          >
-            <option
-              v-for="(a_symbol, a_geneid) in gene_list"
-              :key="a_geneid"
-              :value="a_geneid"
-            >{{ a_symbol }}</option>
-          </select>
+            :options="Object.entries(gene_list).map(([value, text]) => ({ value, text }))">
+            <template #first>
+              <b-form-select-option :value="null" disabled>Select gene:</b-form-select-option>
+            </template>
+          </b-form-select>
         </label>
       </div>
 
       <div class="form-group">
         <label class="mr-2">Tissue
-          <select
-            v-model="anchor_tissue"
-            class="form-control"
-          >
-            <option
-              v-for="a_tissue in tissue_list"
-              :key="a_tissue"
-              :value="a_tissue"
-            >{{ a_tissue }}</option>
-          </select>
+          <b-form-select
+            v-model="anchor_tissue_and_study"
+            :options="tissues_per_study">
+            <template #first>
+              <b-form-select-option :value="null" disabled>Select tissue:</b-form-select-option>
+            </template>
+          </b-form-select>
         </label>
       </div>
       <button

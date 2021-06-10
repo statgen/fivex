@@ -11,26 +11,27 @@ export default {
         current_gene_symbol: { type: String, default: '' },
         current_gene_id: { type: String, default: '' },
         current_tissue: { type: String, default: '' },
+        current_study: { type: String, default: '' },
 
         gene_list: { type: Object, default: () => ({}) },
-        tissue_list: { type: Array, default: () => [] },
+        tissues_per_study: { type: Array, default: () => [] },
     },
     data() {
         return {
             select_mode: MODES.GENE,
             selected_gene: null,
-            selected_tissue: null,
+            selected_tissue_and_study: null,
         };
     },
     computed: {
         is_valid() {
             // Determine whether form is valid (allowed to click "add to track" button)
-            const { select_mode, selected_gene, selected_tissue } = this;
+            const { select_mode, selected_gene, selected_tissue_and_study } = this;
             if ((select_mode === MODES.GENE) && !!selected_gene) {
                 return false;
-            } else if ((select_mode === MODES.TISSUE) && !!selected_tissue) {
+            } else if ((select_mode === MODES.TISSUE) && !!selected_tissue_and_study) {
                 return false;
-            } else if ((select_mode === MODES.BOTH) && !!selected_gene && !!selected_tissue) {
+            } else if ((select_mode === MODES.BOTH) && !!selected_gene && !!selected_tissue_and_study) {
                 return false;
             } else {
                 return true;
@@ -46,13 +47,15 @@ export default {
                 select_mode,
                 current_gene_id,
                 current_tissue,
+                current_study,
                 selected_gene,
-                selected_tissue,
+                selected_tissue_and_study,
             } = this;
             selected_gene = (select_mode !== MODES.TISSUE) ? selected_gene : current_gene_id;
-            selected_tissue = (select_mode !== MODES.GENE) ? selected_tissue : current_tissue;
-
-            this.$emit('add-track', selected_gene, selected_tissue);
+            selected_tissue_and_study = (select_mode !== MODES.GENE) ? selected_tissue_and_study : { tissue_name: current_tissue, study_name: current_study };
+            // Each "selected tissue" incorporates both tissue and study name
+            const { tissue_name, study_name } = selected_tissue_and_study;
+            this.$emit('add-track', study_name, tissue_name, selected_gene);
             this.$parent.hide();
         },
     },
@@ -86,12 +89,12 @@ export default {
       label="Tissue:"
     >
       <template v-if="select_mode === MODES.GENE">
-        <em>{{ current_tissue }}</em>
+        <em>{{ current_tissue }} ({{ current_study }})</em>
       </template>
       <template v-else>
         <b-form-select
-          v-model="selected_tissue"
-          :options="tissue_list"
+          v-model="selected_tissue_and_study"
+          :options="tissues_per_study"
         >
           <template #first>
             <b-form-select-option :value="null" disabled>Select one:</b-form-select-option>

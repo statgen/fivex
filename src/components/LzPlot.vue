@@ -63,6 +63,9 @@ export default {
         this.createLZ(this.base_layout, this.base_sources);
     },
     beforeDestroy() {
+        // Clean up plot and event listeners to prevent memory leaks
+        this.plot.destroy();
+        delete this.plot;
         delete window[this.plot_id];
     },
     methods: {
@@ -107,43 +110,34 @@ export default {
          * @param plot
          */
         connectListeners(plot) {
-            Object.keys(plot.event_hooks)
-                .forEach((name) => plot.on(name, (event) => this.$emit(name, event)));
-
-            // Also create a synthetic event not part of LZ, that makes it a little nicer to work
-            //  with region data. (by returning what was actually displayed, not what was requested)
-            plot.on('state_changed', (event) => {
-                // An interesting quirk of region changing in LZ: event data provides
-                //  the state requested (input), not final start/end (output)
-                // The event we echo should use final plot.state as source of truth
-                const { chr, start, end } = plot.state;
-                const position_changed = Object.keys(event.data)
-                    .some((key) => ['chr', 'start', 'end'].includes(key));
-
-                if (position_changed) {
-                    this.$emit('region_changed', { chr, start, end });
-                }
-            });
+            plot.on('any_lz_event', (eventData) => this.$emit(eventData.event_name, eventData));
         },
 
         /**
          * Proxy a method from the component to the LZ instance
          * This allows parent components to manipulate the LZ instance, via $refs, without
          *  leaking a reference to component internal dom elements
-         *
-         * We previously leaked a reference to the plot via events, but this was leaking memory
-         * on component cleanup
+
+         /**
+         * Proxy a method from the component to the LZ instance
+         * This allows parent components to manipulate the LZ instance, via $refs, without
+         *  leaking a reference to component internal dom elements
+         * @param {function} callback A callback that receives the plot object and acts upon it.
          */
-        callPlot(method_name, ...args) {
-            this.plot[method_name](...args);
+        callPlot(callback) {
+            // Consume return values with caution to avoid leaking internals
+            return callback(this.plot);
         },
+
         /**
          * Proxy a method from the component to the LZ datasources
          * This allows parent components to manipulate the LZ instance, via $refs, without leaking
          *  a reference to component internals
+         * @param {function} callback A callback that receives the datasources object and acts upon it.
          */
-        callSources(method_name, ...args) {
-            this.data_sources[method_name](...args);
+        callSources(callback) {
+            // Consume return values with caution to avoid leaking internals
+            return callback(this.data_sources);
         },
     },
 };

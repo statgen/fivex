@@ -14,6 +14,7 @@ export default {
         sort: { type: Array, default: () => [] },
         layout: { type: String, default: 'fitData' },
         layoutColumnsOnNewData: { type: Boolean, default: true },
+        initialHeaderFilter: { type: Array, default: null },
         pagination: { type: String, default: null },
         paginationSize: { type: Number,  default: null },
         placeholder: { type: String, default: 'No data available' },
@@ -81,6 +82,7 @@ export default {
         //   recursion issues in vue.
         // So far, other non-primitive values (like `data`) don't seem to be affected by this.
         const initialSort = JSON.parse(JSON.stringify(this.sort));
+        const initialHeaderFilter = JSON.parse(JSON.stringify(this.initialHeaderFilter));
 
         this.tabulator = new Tabulator(
             this.$refs.table,
@@ -89,6 +91,7 @@ export default {
                 data,
                 columns,
                 height,
+                initialHeaderFilter,
                 initialSort,
                 layout,
                 layoutColumnsOnNewData,

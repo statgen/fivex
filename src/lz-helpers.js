@@ -24,14 +24,28 @@ function retrieveBySuffix(point_data, field_suffix) {
 }
 
 /**
- * Convert Posterior incl probabilities to a (truncated) log scale for rendering
+ * Convert Posterior incl probabilities to a (truncated) log scale for rendering. The return values
+ *   of this scale are (-4..0), so that very small PIPs aren't allowed to dominate the axis scale
  */
 LocusZoom.TransformationFunctions.add('pip_yvalue', (x) => Math.max(Math.log10(x), -4));
 
 /**
  * Convert displayed pip, spip, or pip_cluster to missing '-' if value is 0
  */
-LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : '-'));
+// LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : '-'));
+
+LocusZoom.TransformationFunctions.add('pip_display', (x) => {
+    if (!x) {
+        return '-';
+    }
+    if (Math.abs(x) > 0.1) {
+        return x.toFixed(2);
+    }
+    if (Math.abs(x) >= 0.01) {
+        return x.toFixed(3);
+    }
+    return x.toExponential(1);
+});
 
 /**
  * Assign point shape based on PIP cluster designation. Since there are always just a few clusters, and cluster 1
@@ -39,18 +53,13 @@ LocusZoom.TransformationFunctions.add('pip_display', (x) => (x ? x.toString() : 
  */
 LocusZoom.ScaleFunctions.add('pip_cluster', (parameters, input) => {
     if (typeof input !== 'undefined') {
-        const pip_cluster = retrieveBySuffix(input, ':pip_cluster');
-        if (pip_cluster === 1) {
+        const pip_cluster = retrieveBySuffix(input, ':cs_index');
+        // Cluster names refer to SuSIE posterior probability clusters
+        if (pip_cluster === 'L1') {
             return 'cross';
         }
-        if (pip_cluster === 2) {
+        if (pip_cluster === 'L2') {
             return 'square';
-        }
-        if (pip_cluster === 3) {
-            return 'triangle';
-        }
-        if (pip_cluster >= 4) {
-            return 'triangledown';
         }
     }
     return null;
@@ -85,15 +94,22 @@ class PheWASFIVEx extends PheWASLZ {
         chain.header.maximum_tss_distance = state.maximum_tss_distance;
         chain.header.minimum_tss_distance = state.minimum_tss_distance;
         chain.header.y_field = state.y_field;
+        chain.header.fivex_studies = new Set(state.fivex_studies || []);
         return this.url;
     }
 
     annotateData(records, chain) {
-        const filtered = records
+        let filtered = records
             .filter((record) => (
                 record.tss_distance <= chain.header.maximum_tss_distance
               && record.tss_distance >= chain.header.minimum_tss_distance
             ));
+
+        const study_names = chain.header.fivex_studies;
+        if (chain.header.fivex_studies.size) {
+            filtered = filtered.filter((record) => study_names.has(record.study));
+        }
+
         // Add a synthetic field `top_value_rank`, where the best value for a given field gets rank 1.
         // This is used to show labels for only a few points with the strongest (y_field) value.
         // As this is a source designed to power functionality on one specific page, we can hardcode specific behavior
@@ -211,14 +227,13 @@ LocusZoom.TransformationFunctions.add('twosigfigs', (x) => {
 
 class AssocFIVEx extends AssociationLZ {
     getURL(state) {
-        const url = `${this.url}/${state.chr}/${state.start}-${state.end}/`;
+        const url = `${this.url}/${state.chr}/${state.start}-${state.end}/${this.params.study}/${this.params.tissue}/`;
         let params = {};
+        // TODO: Is there ever a case where a LZ panel data source is allowed to omit gene/tissue/study info? If not, add validation.
         if (this.params.gene_id) {
             params.gene_id = this.params.gene_id;
         }
-        if (this.params.tissue) {
-            params.tissue = this.params.tissue;
-        }
+
         params = $.param(params);
         return `${url}?${params}`;
     }
