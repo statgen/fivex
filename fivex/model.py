@@ -87,23 +87,23 @@ def get_best_study_tissue_gene(
         try:
             cursor = conn.cursor()
             sqlCommand = "SELECT * FROM sig WHERE chrom=?"
-            argsList = [f"{chrom}"]
+            argsList = [chrom]
             if start is not None:
                 if end is not None:
                     sqlCommand += " AND pos BETWEEN ? AND ?"
-                    argsList.extend([f"{start}", f"{end}"])
+                    argsList.extend([start, end])
                 else:
                     sqlCommand += " AND pos=?"
-                    argsList.append(f"{start}")
+                    argsList.append(start)
             if study is not None:
                 sqlCommand += " AND study=?"
-                argsList.append(f"{study}")
+                argsList.append(study)
             if tissue is not None:
                 sqlCommand += " AND tissue=?"
-                argsList.append(f"{tissue}")
+                argsList.append(tissue)
             if gene_id is not None:
                 sqlCommand += " AND gene_id=?"
-                argsList.append(f"{gene_id}")
+                argsList.append(gene_id)
             sqlCommand += " ORDER BY pip DESC LIMIT 1"
             (pip, study, tissue, gene_id, chrom, pos, ref, alt, _, _,) = list(
                 cursor.execute(sqlCommand, tuple(argsList),)
@@ -161,7 +161,7 @@ def get_credible_data_table(chrom, datatype="ge"):
     return os.path.join(
         current_app.config["FIVEX_DATA_DIR"],
         "credible_sets",
-        f"{datatype}",
+        datatype,
         f"chr{chrom}.{datatype}.credible_set.tsv.gz",
     )
 

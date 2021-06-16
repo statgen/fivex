@@ -92,9 +92,7 @@ def region_view():
     gene_json = model.get_gene_names_conversion()
 
     # If either gene_id or symbol is present, then fill in the other
-    if symbol is None and gene_id is not None:
-        symbol = gene_json.get(gene_id.split(".")[0], None)
-    elif symbol is not None and gene_id is None:
+    if symbol is not None and gene_id is None:
         gene_id = gene_json.get(symbol, None)
 
     # We will use get_best_study_tissue_gene(chrom, start, end) to directly query for a recommendation
@@ -130,6 +128,10 @@ def region_view():
     # If both start and end exist, calculate the center
     if start and end:
         center = (end + start) // 2
+
+    if symbol is None and gene_id is not None:
+        # After looking up best gene, fill in missing symbol. TODO: In future, this should be sourced from the SQL query, once the database file / credsets file contains both gene name and ID in one place
+        symbol = gene_json.get(gene_id.split(".")[0], None)
 
     source = model.locate_gencode_data()
     reader = readers.TabixReader(source, parser=gencodeParser(), skip_rows=0)
@@ -192,7 +194,7 @@ def variant_view(chrom: str, pos: int):
             ) = list(
                 conn.execute(
                     "SELECT * FROM sig WHERE chrom=? and pos=? ORDER BY pip DESC LIMIT 1;",
-                    (f"{chrom}", pos),
+                    (chrom, pos),
                 )
             )[
                 0

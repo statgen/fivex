@@ -32,16 +32,12 @@
             Region:
             <router-link
               :to="{name: 'region',
-                    query: {chrom: '1', start: 108774968, end: 109774968,
-                            study: 'GTEx', tissue: 'liver',
-                            gene_id: 'ENSG00000134243' }}"
+                    query: {chrom: '1', start: 108774968, end: 109774968 }}"
             >chr1:108774968-109774968</router-link>
             &bull;
             <router-link
               :to="{name: 'region',
-                    query: {chrom: '2', start: 20501429, end: 21544073,
-                            tissue: 'esophagus_gej',
-                            study: 'GTEx', gene_id: 'ENSG00000084674' }}"
+                    query: {chrom: '2', start: 20501429, end: 21544073 }}"
             >chr2:20501429-21544073</router-link>
             &bull;
             Gene:
