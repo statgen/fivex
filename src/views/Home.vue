@@ -6,7 +6,7 @@
           FIVEx: Visualization for Genotypes, Expressions, and Tissues
         </h2>
         <h5 class="text-center">
-          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a href="https://www.ebi.ac.uk/eqtl/" target="_blank">EBI eQTL Catalogue</a>
+          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a href="https://www.ebi.ac.uk/eqtl/" target="_blank" rel="noreferrer noopener">EBI eQTL Catalogue</a>
         </h5>
         <search-box />
         <br>
