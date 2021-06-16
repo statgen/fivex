@@ -1,26 +1,51 @@
 <template>
   <div>
     <form @submit.prevent="parseSearch">
-      <div class="input-group">
-        <input
-          v-model.trim="term"
-          autocomplete="off"
-          class="form-control"
-          type="text"
-          placeholder="Search for a variant, region, or gene: chr19:488506, rs10424907, or SHC2"
-          autofocus
-        >
-        <div class="input-group-append">
-          <button
-            class="btn btn-secondary input-group-text"
-            type="submit"
+      <div class="row">
+        <div class="input-group">
+          <input
+            v-model.trim="term"
+            autocomplete="off"
+            class="form-control"
+            type="text"
+            placeholder="Search for a variant, region, or gene: chr19:488506, rs10424907, or SHC2"
+            autofocus
           >
-            <span
-              class="fa fa-search"
-              aria-hidden="true"
-            />
-            <span class="sr-only">Search</span>
-          </button>
+          <div class="input-group-append">
+            <button
+              class="btn btn-secondary input-group-text"
+              type="submit"
+            >
+              <span
+                class="fa fa-search"
+                aria-hidden="true"
+              />
+              <span class="sr-only">Search</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-md-end">
+        <div class="form-check form-check-inline">
+          <label class="text-muted">
+            <input
+              v-model="data_type"
+              type="radio"
+              name="data_type"
+              value="eqtl"
+              class="form-check-input"
+            >
+            eQTL
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <label class="text-muted"><input
+            v-model="data_type"
+            type="radio"
+            name="data_type"
+            value="sqtl"
+            class="form-check-input"
+          >sQTL</label>
         </div>
       </div>
       <div
@@ -72,7 +97,7 @@ function getBestRange(chrom, start, end, gene_id = null) {
 function parseSearchText(text) {
     const searchText = text.trim();
     // Use regular expressions to match known patterns for single variant, range, and rs number
-    const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)/;
+    const chromposPattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)/; // FIXME: Important issue- the user can't request ref and alt via search box at all, and the URL for variant page has no way to ask for this information
     const rangePattern = /(chr)?([1-9][0-9]?|X|Y|MT):([1-9][0-9]*)-([1-9][0-9]*)/;
     const rsPattern = /(rs[1-9][0-9]*)/;
     const cMatch = searchText.match(chromposPattern);
@@ -157,6 +182,7 @@ export default {
     name: 'SearchBox',
     data() {
         return {
+            data_type: 'eqtl',
             term: '',
             message: '',
             message_class: '',
@@ -181,10 +207,13 @@ export default {
                 .then((result) => {
                     const chrom = result.chrom.replace('chr', '');
                     if (result.type === 'variant') {
-                        return this.$router.push({ name: 'variant', params: { display_type: 'eqtl', variant: `${chrom}_${result.start}` } });
+                        return this.$router.push({ name: 'variant', params: { display_type: this.data_type, variant: `${chrom}_${result.start}` } });
                     }
                     if (result.type === 'range') {
                         const { start, end, gene_id, tissue, symbol } = result;
+                        if (this.data_type !== 'eqtl') {
+                            throw new Error('Region queries are not yet available for sQTL data');
+                        }
                         return this.$router.push({
                             name: 'region',
                             query: {
