@@ -30,9 +30,9 @@ def test_loads_region_bestvar(client):
 
     assert response.status_code == 200
     content = response.get_json()
-    assert content["data"]["tissue"] == "thyroid"
-    assert content["data"]["study"] == "GTEx"
-    assert content["data"]["symbol"] == "GSTM1"
+    assert content["data"]["tissue"] == "adipose_naive"
+    assert content["data"]["study"] == "FUSION"
+    assert content["data"]["symbol"] == "AMIGO1"
 
 
 @pytest.mark.skip(
