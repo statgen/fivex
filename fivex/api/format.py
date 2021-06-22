@@ -251,7 +251,7 @@ class CIContainer:
     # Extra fields after data joining
     ma_samples: ty.Optional[int] = None
     maf: ty.Optional[float] = None
-    log_pvalue: ty.Optional[float] = None
+    pvalue: ty.Optional[float] = None
     beta: ty.Optional[float] = None
     stderr_beta: ty.Optional[float] = None
 
@@ -265,6 +265,7 @@ class CIContainer:
     gid: ty.Optional[str] = None
     median_tpm: ty.Optional[float] = None
     rsid: ty.Optional[str] = None
+    symbol: ty.Optional[str] = None
 
     variant_id: str = dc.field(init=False)
 
@@ -275,14 +276,14 @@ class CIContainer:
         )
 
     @property
-    def pvalue(self):
-        if self.log_pvalue is None:
+    def log_pvalue(self):
+        if self.pvalue is None:
             return None
-        elif math.isinf(self.log_pvalue):
+        elif self.pvalue == 0:
             # This is an explicit design choice here, since we parse p=0 to infinity
-            return 0
+            return math.inf
         else:
-            return 10 ** -self.log_pvalue
+            return -math.log10(self.pvalue)
 
     def to_dict(self):
         return dc.asdict(self)
@@ -499,6 +500,7 @@ class CIParser:
         # gid
         # median_tpm
         # rsid
+        # gene_symbol (short gene name, e.g. "SORT1")
         fields: ty.List[ty.Any] = row.split("\t")
         if self.study and self.tissue:
             # Tissue-and-study-specific files have two fewer columns (study and tissue),
@@ -523,7 +525,6 @@ class CIParser:
             fields[25] = int(fields[25])  # ac
             fields[26] = int(fields[26])  # an
             fields[30] = float(fields[30])  # median_tpm
-
         return CIContainer(*fields)
 
 

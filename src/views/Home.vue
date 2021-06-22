@@ -6,7 +6,10 @@
           FIVEx: Visualization for Genotypes, Expressions, and Tissues
         </h2>
         <h5 class="text-center">
-          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a href="https://www.ebi.ac.uk/eqtl/" target="_blank">EBI eQTL Catalogue</a>
+          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a
+            href="https://www.ebi.ac.uk/eqtl/"
+            target="_blank"
+          >EBI eQTL Catalogue</a>
         </h5>
         <search-box />
         <br>
@@ -17,8 +20,8 @@
             >chr1:109274968</router-link>
             &bull;
             <router-link
-              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21044589'}}"
-            >chr2:21044589</router-link>
+              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21042269'}}"
+            >chr2:21042269</router-link>
             &bull;
             rsID:
             <router-link
@@ -26,8 +29,8 @@
             >rs12740374</router-link>
             &bull;
             <router-link
-              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21044589'}}"
-            >rs934197</router-link>
+              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21042269'}}"
+            >rs661665</router-link>
             <br>
             Region:
             <router-link
@@ -51,7 +54,7 @@
             <router-link
               :to="{name: 'region',
                     query: {chrom: '2', start: 20501429, end: 21544073,
-                            tissue: 'esophagus_gej',
+                            tissue: 'heart_left_ventricle',
                             study: 'GTEx', gene_id: 'ENSG00000084674' }}"
             ><i>APOB</i></router-link></b>
           <br>

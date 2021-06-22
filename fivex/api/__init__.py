@@ -192,6 +192,7 @@ def region_data_for_region_table(chrom: str, start: int, end: int):
                 "log_pvalue": row.log_pvalue,
                 "beta": row.beta,
                 "stderr_beta": row.stderr_beta,
+                "symbol": row.symbol,
             }
         )
     results = {"data": data}

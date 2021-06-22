@@ -191,6 +191,7 @@ def variant_view(chrom: str, pos: int):
                 alt,
                 _,
                 _,
+                _,
             ) = list(
                 conn.execute(
                     "SELECT * FROM sig WHERE chrom=? and pos=? ORDER BY pip DESC LIMIT 1;",

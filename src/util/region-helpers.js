@@ -340,7 +340,8 @@ export function get_region_table_config() {
         { title: 'Study', field: 'study', headerFilter: true },
         { title: 'Tissue', field: 'tissue', headerFilter: true },
         // TODO: Convert these gene_ids to gene symbols for ease of reading
-        { title: 'Gene', field: 'gene_id', headerFilter: true },
+        { title: 'Gene name', field: 'symbol', headerFilter: true },
+        { title: 'Gene ID', field: 'gene_id', headerFilter: true },
         {
             title: '-log<sub>10</sub>(p)',
             field: 'log_pvalue',
