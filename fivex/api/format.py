@@ -251,7 +251,7 @@ class CIContainer:
     # Extra fields after data joining
     ma_samples: ty.Optional[int] = None
     maf: ty.Optional[float] = None
-    pvalue: ty.Optional[float] = None
+    log_pvalue: ty.Optional[float] = None
     beta: ty.Optional[float] = None
     stderr_beta: ty.Optional[float] = None
 
@@ -276,14 +276,14 @@ class CIContainer:
         )
 
     @property
-    def log_pvalue(self):
-        if self.pvalue is None:
+    def pvalue(self):
+        if self.log_pvalue is None:
             return None
-        elif self.pvalue == 0:
+        elif math.isinf(self.log_pvalue):
             # This is an explicit design choice here, since we parse p=0 to infinity
-            return math.inf
+            return 0
         else:
-            return -math.log10(self.pvalue)
+            return 10 ** -self.log_pvalue
 
     def to_dict(self):
         return dc.asdict(self)
@@ -519,7 +519,9 @@ class CIParser:
         if len(fields) > 19:
             fields[19] = int(fields[19])  # ma_samples
             fields[20] = float(fields[20])  # maf
-            fields[21] = float(fields[21])  # pvalue
+            fields[21] = parser_utils.parse_pval_to_log(
+                fields[21], is_neg_log=False
+            )  # pvalue
             fields[22] = float(fields[22])  # beta
             fields[23] = float(fields[23])  # se
             fields[25] = int(fields[25])  # ac
