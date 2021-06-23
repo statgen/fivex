@@ -265,6 +265,7 @@ class CIContainer:
     gid: ty.Optional[str] = None
     median_tpm: ty.Optional[float] = None
     rsid: ty.Optional[str] = None
+    symbol: ty.Optional[str] = None
 
     variant_id: str = dc.field(init=False)
 
@@ -499,6 +500,7 @@ class CIParser:
         # gid
         # median_tpm
         # rsid
+        # gene_symbol (short gene name, e.g. "SORT1")
         fields: ty.List[ty.Any] = row.split("\t")
         if self.study and self.tissue:
             # Tissue-and-study-specific files have two fewer columns (study and tissue),
@@ -517,13 +519,14 @@ class CIParser:
         if len(fields) > 19:
             fields[19] = int(fields[19])  # ma_samples
             fields[20] = float(fields[20])  # maf
-            fields[21] = float(fields[21])  # pvalue
+            fields[21] = parser_utils.parse_pval_to_log(
+                fields[21], is_neg_log=False
+            )  # pvalue
             fields[22] = float(fields[22])  # beta
             fields[23] = float(fields[23])  # se
             fields[25] = int(fields[25])  # ac
             fields[26] = int(fields[26])  # an
             fields[30] = float(fields[30])  # median_tpm
-
         return CIContainer(*fields)
 
 

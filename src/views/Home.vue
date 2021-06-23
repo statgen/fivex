@@ -6,7 +6,12 @@
           FIVEx: Visualization for Genotypes, Expressions, and Tissues
         </h2>
         <h5 class="text-center">
-          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the <a href="https://www.ebi.ac.uk/eqtl/" target="_blank" rel="noreferrer noopener">EBI eQTL Catalogue</a>
+          Currently hosting <b>eQTL</b> and <b>sQTL</b> data from <b>16 different studies</b> from the
+          <a
+            href="https://www.ebi.ac.uk/eqtl/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >EBI eQTL Catalogue</a>
         </h5>
         <search-box />
         <br>
@@ -16,18 +21,10 @@
               :to="{name: 'variant', params: {display_type: 'eqtl', variant: '1_109274968'}}"
             >chr1:109274968</router-link>
             &bull;
-            <router-link
-              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21044589'}}"
-            >chr2:21044589</router-link>
-            &bull;
             rsID:
             <router-link
               :to="{name: 'variant', params: {display_type: 'eqtl', variant: '1_109274968'}}"
             >rs12740374</router-link>
-            &bull;
-            <router-link
-              :to="{name: 'variant', params: {display_type: 'eqtl', variant: '2_21044589'}}"
-            >rs934197</router-link>
             <br>
             Region:
             <router-link
@@ -35,25 +32,13 @@
                     query: {chrom: '1', start: 108774968, end: 109774968 }}"
             >chr1:108774968-109774968</router-link>
             &bull;
-            <router-link
-              :to="{name: 'region',
-                    query: {chrom: '2', start: 20501429, end: 21544073 }}"
-            >chr2:20501429-21544073</router-link>
-            &bull;
             Gene:
             <router-link
               :to="{name: 'region',
                     query: {chrom: '1', start: 108774968, end: 109774968,
                             study: 'GTEx', tissue: 'liver',
                             gene_id: 'ENSG00000134243' }}"
-            ><i>SORT1</i></router-link>
-            &bull;
-            <router-link
-              :to="{name: 'region',
-                    query: {chrom: '2', start: 20501429, end: 21544073,
-                            tissue: 'esophagus_gej',
-                            study: 'GTEx', gene_id: 'ENSG00000084674' }}"
-            ><i>APOB</i></router-link></b>
+            ><i>SORT1</i></router-link></b>
           <br>
           First time?
           <router-link

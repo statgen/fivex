@@ -64,7 +64,10 @@ export default {
 
 <template>
   <div>
-    <b-form-radio-group :options="Object.values(MODES)" v-model="select_mode" />
+    <b-form-radio-group
+      v-model="select_mode"
+      :options="Object.values(MODES)"
+    />
     <hr>
 
     <b-form-group
@@ -79,7 +82,12 @@ export default {
           :options="Object.entries(gene_list).map(([value, text]) => ({ value, text }))"
         >
           <template #first>
-            <b-form-select-option :value="null" disabled>Select one:</b-form-select-option>
+            <b-form-select-option
+              :value="null"
+              disabled
+            >
+              Select one:
+            </b-form-select-option>
           </template>
         </b-form-select>
       </template>
@@ -97,7 +105,12 @@ export default {
           :options="tissues_per_study"
         >
           <template #first>
-            <b-form-select-option :value="null" disabled>Select one:</b-form-select-option>
+            <b-form-select-option
+              :value="null"
+              disabled
+            >
+              Select one:
+            </b-form-select-option>
           </template>
         </b-form-select>
       </template>
