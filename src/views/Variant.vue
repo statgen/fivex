@@ -650,7 +650,7 @@ export default {
                 class="btn btn-secondary btn-sm mr-1"
                 role="button"
                 aria-pressed="true"
-                title="Open Target Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits"
+                title="Open Targets Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits"
               >
                 Open Targets <span class="fa fa-external-link-alt" /></a>
               <a

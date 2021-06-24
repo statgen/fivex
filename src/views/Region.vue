@@ -544,9 +544,9 @@ export default {
               class="btn btn-secondary btn-sm mr-1"
               role="button"
               aria-pressed="true"
-              title="Open Target Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits"
+              title="Open Targets Genetics, a public-private partnership between Bristol Myers Squibb, GlaxoSmithKlein, Sanofi, and EMBL-EBI to allow browsing of genes, variants, and traits"
             >
-              Open Target Genetics <span class="fa fa-external-link-alt" /></a>
+              Open Targets Genetics <span class="fa fa-external-link-alt" /></a>
             <a
               v-b-tooltip.top
               :href="`https://www.ebi.ac.uk/gwas/genes/${api_data.symbol}`"
