@@ -26,6 +26,10 @@ FIVEx features two views of eQTL data:
 ---
 Supporting Data
 
+Note: all examples below use gene expression ("ge") data. The sQTL data
+generated with txrevise ("txrev") was processed the same way by replacing
+instances of "ge" in path and file names with "txrev".
+
 FIVEx's regional view uses data directly from the eQTL Catalogue.
 Study- and tissue-specific data need to be placed in the data directory,
 in the following location:
@@ -113,14 +117,16 @@ used in both single-variant and regional views.
 
 FIVEx's regional view uses credible sets data in sorted format.
 Single-variant view requires credible sets data to be combined across studies
-and tissues, sorted by chromosomal position.
+and tissues, sorted by chromosomal position. We then join p-values and other
+fields from the raw supporting data, along with short gene names, using a second
+script. This data will be used to support the tables at the bottom of the region
+view page.
 
-Since credible set files are smaller, we will combine the files into 
-chromosome-length chunks instead of 1 Mbps chunks. We will use the same script
-(util/merge.files.with.sorted.positions.py) to combine the credible sets data.
-
-To simplify this, we provide a script that generates commands to both sort and
-combine the data:
+For step 1, since credible set files are smaller, we will combine the files
+into chromosome-length chunks instead of 1 Mbps chunks. We will use the same
+script (util/merge.files.with.sorted.positions.py) to combine the credible
+sets data. To simplify this, we provide a script that generates commands to
+both sort and combine the data:
 
  util/generate.commands.to.merge.EBI.credible_sets.py
 
@@ -142,19 +148,108 @@ This will generate a command file that will perform the following tasks:
 
 This command file should be run from inside the util/ directory.
 
-The output files will be found in the following locations:
- 1. Sorted study- and tissue-specific files:
-  {outDir}/credible_sets/{study}/{study}.{tissue}_ge.purity_filtered.sorted.txt.gz
- 2. Combined chromosome-specific files:
-  {outDir}/credible_sets/chr{chrom}.ge.credible_set.tsv.gz
+The output files will be found in the following location:
+ 1. Sorted study- and tissue-specific files (final):
+  {outDir}/credible_sets/ge/{study}/{study}.{tissue}_ge.purity_filtered.sorted.txt.gz
+ 2. Combined chromosome-specific files (intermediate):
+  {outDir}/credible_sets/ge/temp/chr{chrom}.ge.credible_set.tsv.gz
 
-If you prefer to manually process the files, you will need to do the following:
+For step 2, we will use join-spot-cred-marginal-add-genenames.py to join fields
+from the raw data with the intermediate combined chromosome-specific files to
+create the final joined files.
 
-1. For each raw credible_sets data file, sort it by chromosome and position, then
-   bgzip and tabix the results. You must retain a header line for this file.
-2. Combine the sorted credible_sets files into chromosome-specific chunks,
-   prepend study and tissue as data columns, then bgzip and tabix the results.
-   These files do not have a header line.
-3. Place the resulting files at the following locations:
-    a. Sorted study- and tissue-specific files: {DATA_DIR}/credible_sets/{STUDY}/
-    b. Combined chromosome-specific chunks: {DATA_DIR}/credible_sets/
+An example command for joining data into a credible sets file:
+python3 join-spot-cred-marginal-add-genenames.py -a all.EBI.ge.data.chr1.1000001-2000000.tsv.gz -c chr1.ge.credible_set.tsv.gz -o ge.credible_set.joined.chr1.1000001-2000000.tsv.gz -r 1:1000001-2000000
+
+-a: source raw data file containing the target data range
+-c: source credible sets file
+-o: target output joined credible sets file
+-r: range, used by tabix to retrieve the desired region; usually corresponds to the range of the file specified by -a
+
+The final joined, chromosome-long credible sets files should be placed here:
+ {outDir}/credible_sets/ge/chr{chrom}.ge.credible_set.tsv.gz
+
+---
+Description of file formats
+
+Note: {datatype} is currently either ge (for gene expression eQTL files)
+or txrev (for txrevise sQTL files)
+All files ending with .gz were compressed with bgzip and indexed with tabix
+
+Raw Data:
+  Study-specific Raw Data:
+    Data file: data/ebi_original/{datatype}/{study}/{study}_{datatype}_{tissue}.all.tsv.gz
+    File format: bgzipped and tabixed files, tab-separated data columns
+      Column contents can be found in the definition for VariantParser, but without
+      the study and tissue columns (because the file is study- and tissue-specific).
+  Merged Raw Data:
+    Data file: data/ebi_{datatype}/{chromosome}/all.EBI.{datatype}.data.chr{chrom}.{start}-{end}.tsv.gz
+    File format: bgzipped and tabixed files, tab-separated data columns
+      Column contents can be found in the definition for VariantParser, with study
+      and tissue as the first two columns.
+
+Credible Sets Data:
+  Study-specific data:
+    Data file: data/credible_sets/{datatype}/{study}/{study}.{tissue}_{datatype}.purity_filtered.sorted.txt.gz
+    Note: contains a header line starting with "#"
+    File format: bgzipped and tabixed files, tab-separated data columns
+                 first sorted by chromosome, then by position.
+      Column contents: phenotype_id, variant_id, chr, pos, ref, alt, cs_id,
+         cs_index, finemapped_region, pip, z, cs_min_r2, cs_avg_r2, cs_size,
+         posterior_mean, posterior_sd, cs_log10bf
+  Joined and merged data:
+    Data file: data/credible_sets/{datatype}/chr{chrom}.{datatype}.credible_set.tsv.gz
+    File format: bgzipped and tabixed files, tab-separated data columns
+    Column contents: begins with columns for study and tissue, then the same
+      columns as study-specific data, then extra columns joined from raw data
+      (can be found in the definition of CIParser):
+      ma_samples, maf, pvalue, beta, se, type, ac, an, r2, mol_trait_obj_id,
+      gid (geneID), median_tpm, rsid, gene_symbol (e.g. "SORT1")
+
+Supporting database files:
+  data/gene.id.symbol.map.json.gz
+  File format: a JSON file containing two-way mappings between common gene
+               names and Ensembl GeneIDs.
+
+  Note: Currently, when Ensembl GeneIDs are used as the key, it does not
+  contain version numbers; when common gene names are used as the key, the
+  target GeneID values do contain version numbers. Since none of EBI's genes
+  contain version numbers, the version numbers can safely be removed.
+
+  data/rsid.sqlite3.db
+  File format: sqlite3 database containing a single table "rsidTable"
+    data columns within the table are:
+    chrom (TEXT), pos (INTEGER), ref (TEXT), alt (TEXT), rsid (TEXT)
+   Indexed on both (chrom, pos) and (rsid)
+   Intended for rsid lookup using chrom and pos
+
+  data/credible_sets/{datatype}/pip.best.variant.summary.sorted.indexed.sqlite3.db
+  File format: sqlite3 database containing a single table "sig"
+    data columns within the table are:
+    pip (REAL), study (TEXT), tissue (TEXT), gene_id (TEXT), chrom (TEXT),
+    pos (INTEGER), ref (TEXT), alt (TEXT), cs_index (TEXT), cs_size (INTEGER)
+  Indexed on (chrom, pos), (study, tissue), and (gene_id)
+  Contains the "best" data point at each variant by a simple heuristic:
+  (1) has the strongest PIP signal, and (2) if there is a tie, the point with
+  the most significant P-value
+
+  data/gencode/gencode.v30.annotation.gtf.genes.bed.gz
+  data/gencode/gencode.v30.annotation.gtf.transcripts.bed.gz
+  File format: bgzipped and tabixed subsets of raw gencode files
+  The third column indicates the data type of each line:
+  - The "genes" file contains "gene" as the 3rd field
+  - The "transcripts" file contains "transcript" as the 3rd field
+  Column values for genes file:
+    chrom, data_source, information_category,
+    start, end, strand (+ or -), geneID, gene_type, gene_name
+  Column values for transcripts file:
+    chrom, data_source, information_category,
+    start, end, strand, gene_id, transcript_id, gene_type, gene_name,
+    transcript_type, transcript_name
+
+data/gencode/tss.json.gz
+File format: a JSON file mapping both geneIDs and gene names to transcription
+start site positions. Positive values for positions indicate a forward
+transcription direction (+ strand), while negative values indicate a backwards
+transcription direction (- strand). This information is used to calculate
+the distance between a variant and the TSS of surrounding genes.
