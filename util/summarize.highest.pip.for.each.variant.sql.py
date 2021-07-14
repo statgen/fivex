@@ -120,14 +120,14 @@ with conn:
                 currentList = parseline(line)
                 # If chr:pos:ref:alt is the same as the current point, compare and update best point if needed
                 if bestList[4:8] == currentList[4:8]:
-                    # If the PIP is higher as the current maximum value, use the new point
+                    # If the current PIP is higher than the best PIP value so far, then use the new point
                     if bestList[0] < currentList[0]:
                         bestList = currentList
-                    # If the PIP ties the current maximum, compare P-values as a tie-break
+                    # If the PIP ties the best so far, compare P-values as a tie-break and choose the more significant one
                     elif bestList[0] == currentList[0]:
-                        if bestList[10] < currentList[10]:
+                        if bestList[10] > currentList[10]:
                             bestList = currentList
-                # If chr:pos:ref:alt is different, store the current best point and set the new variant
+                # If chr:pos:ref:alt is different, store the best value for the previous variant and set the new variant as the current one
                 else:
                     cursor.execute(
                         "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?,?)",
