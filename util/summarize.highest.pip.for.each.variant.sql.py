@@ -6,6 +6,7 @@ import sys
 
 # Input arguments:
 # csdir: directory containing merged confidence interval data
+#  Note: we will now use confidence interval data which has been joined with the raw QTL points data to add p-values
 # datatype: type of data ("ge", "txrev", etc.) - in case of mixed data type in the source directory
 # outfile: output sqlite3 database file - default name should be:
 # pip.best.variant.summary.sorted.indexed.sqlite3.db
@@ -52,7 +53,22 @@ def parseline(line):
             posterior_mean,
             posterior_sd,
             cs_log10bf,
-        ) = (line.decode("utf-8").rstrip("\n").split())
+            # additional data joined in from full QTL files
+            ma_samples,
+            maf,
+            pvalue,
+            beta,
+            se,
+            vtype,
+            ac,
+            an,
+            r2,
+            mol_trait_obj_id,
+            gid,
+            median_tpm,
+            rsid,
+            genesymbol,
+        ) = line.rstrip("\n").split()
         return [
             float(pip),
             study,
@@ -64,6 +80,8 @@ def parseline(line):
             alt,
             cs_index,
             int(cs_size),
+            # additional data joined in from full QTL files
+            float(pvalue),
         ]
     except ValueError:
         return [
@@ -77,6 +95,7 @@ def parseline(line):
             "NO_ALT",
             "L0",
             0,
+            1.0,
         ]
 
 
@@ -89,25 +108,36 @@ with conn:
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS sig")
     cursor.execute(
-        "CREATE TABLE sig (pip REAL, study TEXT, tissue TEXT, gene_id TEXT, chrom TEXT, pos INTEGER, ref TEXT, alt TEXT, cs_index TEXT, cs_size INTEGER)"
+        "CREATE TABLE sig (pip REAL, study TEXT, tissue TEXT, gene_id TEXT, chrom TEXT, pos INTEGER, ref TEXT, alt TEXT, cs_index TEXT, cs_size INTEGER, pvalue REAL)"
     )
     for infile in filelist:
-        with gzip.open(infile) as f:
+        with gzip.open(infile, "rt") as f:
+            # Parse the first line and use it as the current best data point
             line = f.readline()
             bestList = parseline(line)
+            # Parse subsequent lines and compare PIPs, and if there is a tie, P-values
             for line in f:
                 currentList = parseline(line)
+                # If chr:pos:ref:alt is the same as the current point, compare and update best point if needed
                 if bestList[4:8] == currentList[4:8]:
-                    if bestList[0] > currentList[0]:
+                    # If the PIP is higher as the current maximum value, use the new point
+                    if bestList[0] < currentList[0]:
                         bestList = currentList
+                    # If the PIP ties the current maximum, compare P-values as a tie-break
+                    elif bestList[0] == currentList[0]:
+                        if bestList[10] < currentList[10]:
+                            bestList = currentList
+                # If chr:pos:ref:alt is different, store the current best point and set the new variant
                 else:
                     cursor.execute(
-                        "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                         tuple(bestList),
                     )
                     bestList = currentList
+            # End of file - store the final best variant
             cursor.execute(
-                "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?)", tuple(bestList)
+                "INSERT INTO sig VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                tuple(bestList),
             )
     cursor.execute("CREATE INDEX idx_chrom_pos ON sig (chrom, pos)")
     cursor.execute("CREATE INDEX idx_study_tissue ON sig(study, tissue)")
